@@ -1,3 +1,5 @@
+import '@/core/config/env'
+
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
