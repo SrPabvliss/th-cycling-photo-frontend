@@ -37,3 +37,8 @@ __screenshots__/
 
 # Vite
 *.timestamp-*-*.mjs
+
+# Claude Code - Research cache (local only)
+.claude/ledger/research/*
+!.claude/ledger/research/README.md
+.claude/settings.local.json
