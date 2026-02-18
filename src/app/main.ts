@@ -1,3 +1,5 @@
+import '@/assets/styles/base.css'
+import '@/core/theme/theme-vars.css'
 import '@/core/config/env'
 
 import { createApp } from 'vue'

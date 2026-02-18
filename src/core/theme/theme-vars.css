@@ -1,0 +1,16 @@
+/* CSS custom properties mirrored from titan-tv-theme.ts palette */
+/* Keep in sync with the exported TS constants */
+:root {
+  --tt-primary: #105080;
+  --tt-primary-dark: #005080;
+  --tt-primary-light: #406090;
+  --tt-neutral-dark: #1a1f2c;
+  --tt-neutral-mid: #808080;
+  --tt-neutral-light: #c0c0c0;
+  --tt-background: #f5f5f7;
+  --tt-surface: #ffffff;
+  --tt-sidebar-accent: #141821;
+  --tt-success: #22c55e;
+  --tt-warning: #f59e0b;
+  --tt-error: #ef4444;
+}
