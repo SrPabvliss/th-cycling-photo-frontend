@@ -1,37 +1,27 @@
 <script setup lang="ts">
-import { h } from 'vue'
-import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { NIcon, NLayout, NLayoutContent, NLayoutSider, NMenu } from 'naive-ui'
-import type { MenuOption } from 'naive-ui'
+import { ref } from 'vue'
+import { NLayout, NLayoutContent, NLayoutSider } from 'naive-ui'
 
-const router = useRouter()
-const route = useRoute()
+import { BACKGROUND, NEUTRAL_DARK } from '@/core/theme/titan-tv-theme'
+import AppSidebar from './AppSidebar.vue'
 
-function renderIcon(icon: string) {
-  return () => h(NIcon, null, { default: () => h('span', icon) })
-}
-
-const menuOptions: MenuOption[] = [
-  {
-    label: () => h(RouterLink, { to: '/events' }, { default: () => 'Events' }),
-    key: '/events',
-    icon: renderIcon('📷'),
-  },
-]
-
-function handleMenuUpdate(key: string) {
-  router.push(key)
-}
+const collapsed = ref(false)
 </script>
 
 <template>
   <NLayout has-sider style="height: 100vh">
-    <NLayoutSider bordered :width="220" content-style="padding: 8px 0;">
-      <div style="padding: 16px 24px; font-weight: 700; font-size: 18px">Cycling Photos</div>
-      <NMenu :options="menuOptions" :value="route.path" @update:value="handleMenuUpdate" />
+    <NLayoutSider
+      bordered
+      :collapsed="collapsed"
+      :collapsed-width="64"
+      :width="260"
+      :native-scrollbar="false"
+      :style="{ backgroundColor: NEUTRAL_DARK }"
+    >
+      <AppSidebar :collapsed="collapsed" />
     </NLayoutSider>
     <NLayout>
-      <NLayoutContent content-style="padding: 24px;">
+      <NLayoutContent :native-scrollbar="false" :content-style="`background-color: ${BACKGROUND};`">
         <RouterView />
       </NLayoutContent>
     </NLayout>

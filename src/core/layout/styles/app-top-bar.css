@@ -1,0 +1,40 @@
+.topbar {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  background-color: var(--tt-surface);
+  border-bottom: 1px solid var(--tt-neutral-light);
+  flex-shrink: 0;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.topbar-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--tt-neutral-dark);
+  margin: 0;
+  line-height: 1;
+}
+
+.topbar-separator {
+  margin: 0 12px;
+  color: var(--tt-neutral-light);
+  font-size: 16px;
+}
+
+.topbar-subtitle {
+  font-size: 14px;
+  color: var(--tt-neutral-mid);
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
