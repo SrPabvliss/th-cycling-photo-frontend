@@ -1,18 +1,95 @@
 <script setup lang="ts">
-import { NButton } from 'naive-ui'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { NButton, NGrid, NGridItem, NResult } from 'naive-ui'
 
 import AppTopBar from '@/core/layout/AppTopBar.vue'
+import { useEventsListQuery } from '../../composables/queries/use-events-list'
+import { EVENT_ROUTE_NAMES } from '../../routes'
+import type { IEventListItem } from '../../types/responses/event-list.response'
+import EventListStatCards from '../components/EventListStatCards/EventListStatCards.vue'
+import EventFilterBar from '../components/EventFilterBar/EventFilterBar.vue'
+import EventCard from '../components/EventCard/EventCard.vue'
+import EventCardSkeleton from '../components/EventCardSkeleton/EventCardSkeleton.vue'
+import NewEventCard from '../components/NewEventCard/NewEventCard.vue'
+
+const router = useRouter()
+const page = ref(1)
+
+const EVENTS_PER_PAGE = 5
+const { data, isPending, isError, refetch } = useEventsListQuery(page, EVENTS_PER_PAGE)
+
+function handleView(id: IEventListItem['id']) {
+  router.push({ name: EVENT_ROUTE_NAMES.DETAIL, params: { id } })
+}
+
+function handleCreate() {
+  router.push({ name: EVENT_ROUTE_NAMES.CREATE })
+}
 </script>
 
 <template>
-  <div>
+  <div class="page-view">
     <AppTopBar title="Gestión de Eventos" subtitle="Listado general de competencias">
       <template #actions>
-        <NButton type="primary"> + Nuevo Evento </NButton>
+        <NButton type="primary" @click="handleCreate">+ Nuevo Evento</NButton>
       </template>
     </AppTopBar>
-    <div style="padding: 24px">
-      <p>Event list will be implemented in a future ticket.</p>
+
+    <div class="page-view__content list-content">
+      <EventListStatCards :total-events="data?.pagination?.total" />
+      <EventFilterBar
+        :page="page"
+        :page-count="data?.pagination?.totalPages ?? 0"
+        @update:page="(p: number) => (page = p)"
+      />
+
+      <!-- Error -->
+      <div v-if="isError" class="error-container">
+        <NResult
+          status="error"
+          title="Error al cargar eventos"
+          description="No se pudo obtener la lista de eventos."
+        >
+          <template #footer>
+            <NButton @click="refetch()">Reintentar</NButton>
+          </template>
+        </NResult>
+      </div>
+
+      <!-- Grid: loading + content -->
+      <template v-else>
+        <NGrid :cols="3" :x-gap="24" :y-gap="16">
+          <NGridItem>
+            <NewEventCard @click="handleCreate" />
+          </NGridItem>
+          <template v-if="isPending">
+            <NGridItem v-for="i in EVENTS_PER_PAGE" :key="i">
+              <EventCardSkeleton />
+            </NGridItem>
+          </template>
+          <template v-else-if="data">
+            <NGridItem v-for="event in data.items" :key="event.id">
+              <EventCard :event="event" @view="handleView" />
+            </NGridItem>
+          </template>
+        </NGrid>
+      </template>
     </div>
   </div>
 </template>
+
+<style scoped>
+.list-content {
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+.error-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>

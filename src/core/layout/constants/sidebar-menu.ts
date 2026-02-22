@@ -2,7 +2,9 @@ import { h } from 'vue'
 import { RouterLink } from 'vue-router'
 import { NIcon } from 'naive-ui'
 import type { MenuOption, MenuGroupOption } from 'naive-ui'
-import { PieChart, Calendar, Images, Bicycle, Pricetags, People, Settings } from '@vicons/ionicons5'
+import { PieChart, Calendar, Images } from '@vicons/ionicons5'
+
+import { EVENTS_PATH } from '@/features/events/routes'
 
 function renderIcon(icon: Parameters<typeof h>[0]) {
   return () => h(NIcon, null, { default: () => h(icon) })
@@ -20,8 +22,8 @@ export const sidebarMenuOptions: (MenuOption | MenuGroupOption)[] = [
         icon: renderIcon(PieChart),
       },
       {
-        label: () => h(RouterLink, { to: '/events' }, { default: () => 'Eventos' }),
-        key: '/events',
+        label: () => h(RouterLink, { to: EVENTS_PATH }, { default: () => 'Eventos' }),
+        key: EVENTS_PATH,
         icon: renderIcon(Calendar),
       },
       {
@@ -31,38 +33,38 @@ export const sidebarMenuOptions: (MenuOption | MenuGroupOption)[] = [
       },
     ],
   },
-  {
-    type: 'group',
-    label: 'Gestión AI',
-    key: 'gestion-ai',
-    children: [
-      {
-        label: 'Ciclistas',
-        key: '/cyclists',
-        icon: renderIcon(Bicycle),
-      },
-      {
-        label: 'Clasificación',
-        key: '/classification',
-        icon: renderIcon(Pricetags),
-      },
-    ],
-  },
-  {
-    type: 'group',
-    label: 'Sistema',
-    key: 'sistema',
-    children: [
-      {
-        label: 'Usuarios',
-        key: '/users',
-        icon: renderIcon(People),
-      },
-      {
-        label: 'Configuración',
-        key: '/settings',
-        icon: renderIcon(Settings),
-      },
-    ],
-  },
+  // {
+  //   type: 'group',
+  //   label: 'Gestión AI',
+  //   key: 'gestion-ai',
+  //   children: [
+  //     {
+  //       label: 'Ciclistas',
+  //       key: '/cyclists',
+  //       icon: renderIcon(Bicycle),
+  //     },
+  //     {
+  //       label: 'Clasificación',
+  //       key: '/classification',
+  //       icon: renderIcon(Pricetags),
+  //     },
+  //   ],
+  // },
+  // {
+  //   type: 'group',
+  //   label: 'Sistema',
+  //   key: 'sistema',
+  //   children: [
+  //     {
+  //       label: 'Usuarios',
+  //       key: '/users',
+  //       icon: renderIcon(People),
+  //     },
+  //     {
+  //       label: 'Configuración',
+  //       key: '/settings',
+  //       icon: renderIcon(Settings),
+  //     },
+  //   ],
+  // },
 ]

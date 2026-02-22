@@ -7,12 +7,18 @@ settings:
 importers:
   .:
     dependencies:
+      '@tanstack/vue-form':
+        specifier: ^1.28.3
+        version: 1.28.3(vue@3.5.28(typescript@5.9.3))
       '@tanstack/vue-query':
         specifier: ^5.92.9
         version: 5.92.9(vue@3.5.28(typescript@5.9.3))
       axios:
         specifier: ^1.13.5
         version: 1.13.5
+      date-fns:
+        specifier: ^4.1.0
+        version: 4.1.0
       naive-ui:
         specifier: ^2.43.2
         version: 2.43.2(vue@3.5.28(typescript@5.9.3))
@@ -1133,6 +1139,19 @@ packages:
         integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==,
       }
 
+  '@tanstack/devtools-event-client@0.4.0':
+    resolution:
+      {
+        integrity: sha512-RPfGuk2bDZgcu9bAJodvO2lnZeHuz4/71HjZ0bGb/SPg8+lyTA+RLSKQvo7fSmPSi8/vcH3aKQ8EM9ywf1olaw==,
+      }
+    engines: { node: '>=18' }
+
+  '@tanstack/form-core@1.28.3':
+    resolution:
+      {
+        integrity: sha512-DBhnu1d5VfACAYOAZJO8tsEUHjWczZMJY8v/YrtAJNWpwvL/3ogDuz8e6yUB2m/iVTNq6K8yrnVN2nrX0/BX/w==,
+      }
+
   '@tanstack/match-sorter-utils@8.19.4':
     resolution:
       {
@@ -1140,11 +1159,32 @@ packages:
       }
     engines: { node: '>=12' }
 
+  '@tanstack/pacer-lite@0.1.1':
+    resolution:
+      {
+        integrity: sha512-y/xtNPNt/YeyoVxE/JCx+T7yjEzpezmbb+toK8DDD1P4m7Kzs5YR956+7OKexG3f8aXgC3rLZl7b1V+yNUSy5w==,
+      }
+    engines: { node: '>=18' }
+
   '@tanstack/query-core@5.90.20':
     resolution:
       {
         integrity: sha512-OMD2HLpNouXEfZJWcKeVKUgQ5n+n3A2JFmBaScpNDUqSrQSjiveC7dKMe53uJUg1nDG16ttFPz2xfilz6i2uVg==,
       }
+
+  '@tanstack/store@0.8.1':
+    resolution:
+      {
+        integrity: sha512-PtOisLjUZPz5VyPRSCGjNOlwTvabdTBQ2K80DpVL1chGVr35WRxfeavAPdNq6pm/t7F8GhoR2qtmkkqtCEtHYw==,
+      }
+
+  '@tanstack/vue-form@1.28.3':
+    resolution:
+      {
+        integrity: sha512-WHs9oBmMLvp5RIqa33mSLYgEM9nbG6UlwXEXWyG8S25gn8gOgcaLpPoE7kvqlT+nyPbZhPAjJXBsn7Uzsd8xvA==,
+      }
+    peerDependencies:
+      vue: ^3.4.0
 
   '@tanstack/vue-query@5.92.9':
     resolution:
@@ -1154,6 +1194,18 @@ packages:
     peerDependencies:
       '@vue/composition-api': ^1.1.2
       vue: ^2.6.0 || ^3.3.0
+    peerDependenciesMeta:
+      '@vue/composition-api':
+        optional: true
+
+  '@tanstack/vue-store@0.8.1':
+    resolution:
+      {
+        integrity: sha512-37rNptEo86+2Jm2kTLvgVtboRRwHkksjxCKCrdl73eeZIU0jU34ZMP/ayd5+bCCo6epdbrqcb13gjUBSGp4Blg==,
+      }
+    peerDependencies:
+      '@vue/composition-api': ^1.2.1
+      vue: ^2.5.0 || ^3.0.0
     peerDependenciesMeta:
       '@vue/composition-api':
         optional: true
@@ -4696,17 +4748,43 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
+  '@tanstack/devtools-event-client@0.4.0': {}
+
+  '@tanstack/form-core@1.28.3':
+    dependencies:
+      '@tanstack/devtools-event-client': 0.4.0
+      '@tanstack/pacer-lite': 0.1.1
+      '@tanstack/store': 0.8.1
+
   '@tanstack/match-sorter-utils@8.19.4':
     dependencies:
       remove-accents: 0.5.0
 
+  '@tanstack/pacer-lite@0.1.1': {}
+
   '@tanstack/query-core@5.90.20': {}
+
+  '@tanstack/store@0.8.1': {}
+
+  '@tanstack/vue-form@1.28.3(vue@3.5.28(typescript@5.9.3))':
+    dependencies:
+      '@tanstack/form-core': 1.28.3
+      '@tanstack/vue-store': 0.8.1(vue@3.5.28(typescript@5.9.3))
+      vue: 3.5.28(typescript@5.9.3)
+    transitivePeerDependencies:
+      - '@vue/composition-api'
 
   '@tanstack/vue-query@5.92.9(vue@3.5.28(typescript@5.9.3))':
     dependencies:
       '@tanstack/match-sorter-utils': 8.19.4
       '@tanstack/query-core': 5.90.20
       '@vue/devtools-api': 6.6.4
+      vue: 3.5.28(typescript@5.9.3)
+      vue-demi: 0.14.10(vue@3.5.28(typescript@5.9.3))
+
+  '@tanstack/vue-store@0.8.1(vue@3.5.28(typescript@5.9.3))':
+    dependencies:
+      '@tanstack/store': 0.8.1
       vue: 3.5.28(typescript@5.9.3)
       vue-demi: 0.14.10(vue@3.5.28(typescript@5.9.3))
 

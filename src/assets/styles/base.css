@@ -9,6 +9,7 @@
 html,
 body {
   height: 100%;
+  overflow: hidden;
   font-family:
     Inter,
     -apple-system,
@@ -26,4 +27,18 @@ body {
 
 #app {
   height: 100%;
+}
+
+/* Page layout: AppTopBar fixed + scrollable content */
+.page-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.page-view__content {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
 }

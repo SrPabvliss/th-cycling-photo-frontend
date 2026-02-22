@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { NLayout, NLayoutContent, NLayoutSider } from 'naive-ui'
+import { NLayout, NLayoutSider } from 'naive-ui'
 
-import { BACKGROUND, NEUTRAL_DARK } from '@/core/theme/titan-tv-theme'
+import { NEUTRAL_DARK } from '@/core/theme/titan-tv-theme'
 import AppSidebar from './AppSidebar.vue'
 
 const collapsed = ref(false)
@@ -20,10 +20,17 @@ const collapsed = ref(false)
     >
       <AppSidebar :collapsed="collapsed" />
     </NLayoutSider>
-    <NLayout>
-      <NLayoutContent :native-scrollbar="false" :content-style="`background-color: ${BACKGROUND};`">
-        <RouterView />
-      </NLayoutContent>
-    </NLayout>
+    <div class="main-content">
+      <RouterView />
+    </div>
   </NLayout>
 </template>
+
+<style scoped>
+.main-content {
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--tt-background);
+}
+</style>
