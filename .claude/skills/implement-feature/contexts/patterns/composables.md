@@ -119,6 +119,97 @@ function handleSubmit(formData: IEventFormData) {
 }
 ```
 
+## Form Data Flow
+
+Forms follow a 3-phase mapping pipeline with explicit null coercion:
+
+```
+API (IEventDetail) → Form (IEventFormData) → Request (ICreateEventRequest)
+   Date object          timestamp number          ISO string "yyyy-MM-dd"
+   null                 ''  (empty string)        null
+   "  padded  "         "  padded  "              "padded" (trimmed)
+```
+
+### Form Types
+
+UI-friendly types — timestamps for NDatePicker, empty strings for NInput:
+
+```typescript
+// types/event-form.types.ts
+export interface IEventFormData {
+  name: string
+  date: number | null // NDatePicker works with timestamps
+  location: string // empty string, NOT null (NInput needs string)
+}
+```
+
+### Form Mapper (Domain ↔ Form ↔ Request)
+
+```typescript
+// mappers/event-form.mapper.ts
+
+// Domain → Form (for edit views: pre-populate form from API data)
+export function toEventFormData(event: IEventDetail): IEventFormData {
+  return {
+    name: event.name,
+    date: event.date.getTime(), // Date → timestamp
+    location: event.location ?? '', // null → empty string
+  }
+}
+
+// Form → Request (submit: clean up for backend)
+export function toCreateEventRequest(form: IEventFormData): ICreateEventRequest {
+  return {
+    name: form.name.trim(),
+    date: format(new Date(form.date!), 'yyyy-MM-dd'), // timestamp → ISO
+    location: form.location?.trim() || null, // empty/whitespace → null
+  }
+}
+```
+
+**Null coercion rule:** optional string fields use `?.trim() || null` — converts empty strings and whitespace-only back to `null` for the backend.
+
+### Form Utils (`shared/utils/form.utils.ts`)
+
+Bridge TanStack Form ↔ Naive UI:
+
+```typescript
+// Binds field value + events to any Naive UI input component
+// Usage: <NInput v-bind="fieldInput(field)" />
+export function fieldInput(field: AnyFieldApi) {
+  return {
+    value: field.state.value,
+    'onUpdate:value': field.handleChange,
+    onBlur: field.handleBlur,
+  }
+}
+
+// Binds validation status + feedback to NFormItem
+// Usage: <NFormItem v-bind="fieldStatus(field)" />
+export function fieldStatus(field: AnyFieldApi) {
+  const { isTouched, isValid, errors } = field.state.meta
+  return {
+    validationStatus: isTouched && !isValid ? ('error' as const) : undefined,
+    feedback: isTouched ? getFieldErrors(errors) : undefined,
+  }
+}
+```
+
+### View → Form → Mutation Wiring
+
+The **view** owns the mapping, not the form component:
+
+```typescript
+// EventCreateView.vue
+const { mutate, isPending } = useCreateEvent()
+
+function handleSubmit(formData: IEventFormData) {
+  mutate(toCreateEventRequest(formData)) // view maps form → request
+}
+
+// <EventForm :is-submitting="isPending" @submit="handleSubmit" />
+```
+
 ## Query Keys (Factory Functions)
 
 ```typescript

@@ -211,6 +211,66 @@ Key view patterns:
 - **Content area as flex column** — enables error centering
 - **`refetch()`** for retry buttons
 
+## Form Component
+
+Props in (`initialData`, `isSubmitting`), emits out (`submit`, `cancel`). No API calls, no mappers.
+
+```vue
+<script setup lang="ts">
+import { useForm } from '@tanstack/vue-form'
+import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
+import { EVENT_FORM_DEFAULTS, eventFormSchema } from '../../../constants/event-form.schema'
+import type { IEventFormData } from '../../../types/event-form.types'
+
+const props = defineProps<{
+  isSubmitting: boolean
+  initialData?: IEventFormData // for edit: pre-populated by view via toEventFormData()
+  submitLabel?: string
+}>()
+
+const emit = defineEmits<{
+  submit: [data: IEventFormData] // raw form data — view handles mapping to request
+  cancel: []
+}>()
+
+const form = useForm({
+  defaultValues: props.initialData ?? EVENT_FORM_DEFAULTS,
+  onSubmit: async ({ value }) => emit('submit', value),
+})
+</script>
+```
+
+### Field Binding Pattern
+
+```vue
+<form.Field
+  name="name"
+  :validators="{ onBlur: eventFormSchema.shape.name, onSubmit: eventFormSchema.shape.name }"
+>
+  <template v-slot="{ field }">
+    <NFormItem label="Nombre" required v-bind="fieldStatus(field)">
+      <NInput placeholder="..." v-bind="fieldInput(field)" />
+    </NFormItem>
+  </template>
+</form.Field>
+```
+
+- **`fieldStatus(field)`** → `validationStatus` + `feedback` for NFormItem
+- **`fieldInput(field)`** → `value` + `onUpdate:value` + `onBlur` for NInput/NDatePicker
+- **Validators per field** from Zod schema shape (`eventFormSchema.shape.name`)
+
+### Submit Button with canSubmit
+
+```vue
+<form.Subscribe>
+  <template v-slot="{ canSubmit }">
+    <NButton type="primary" attr-type="submit" :loading="isSubmitting" :disabled="!canSubmit">
+      {{ submitLabel ?? 'Crear Evento' }}
+    </NButton>
+  </template>
+</form.Subscribe>
+```
+
 ## Shared UI Types
 
 Types shared across multiple components within a feature go at the feature root:
