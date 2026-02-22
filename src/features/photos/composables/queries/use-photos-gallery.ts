@@ -15,7 +15,9 @@ export function usePhotosGalleryQuery(
   limit = 20,
 ) {
   return useQuery({
-    queryKey: computed(() => PHOTO_QUERY_KEYS.listByEvent(eventId.value, page.value, status.value)),
+    queryKey: computed(() =>
+      PHOTO_QUERY_KEYS.listByEvent(eventId.value, page.value, status.value, limit),
+    ),
     queryFn: async () => {
       const hasStatusFilter = !!status.value
 
