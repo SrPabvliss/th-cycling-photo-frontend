@@ -1,0 +1,11 @@
+.form-hint {
+  font-size: 12px;
+  color: var(--tt-neutral-mid);
+  font-weight: 400;
+}
+
+.form-footer {
+  padding: 16px 32px;
+  background-color: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+}
