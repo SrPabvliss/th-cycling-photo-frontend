@@ -1,0 +1,48 @@
+.file-list {
+  border: 1px solid var(--tt-neutral-light);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.file-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  gap: 12px;
+}
+
+.file-list__item + .file-list__item {
+  border-top: 1px solid var(--tt-neutral-light);
+}
+
+.file-list__icon {
+  width: 36px;
+  height: 36px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tt-neutral-mid);
+  flex-shrink: 0;
+}
+
+.file-list__info {
+  min-width: 0;
+}
+
+.file-list__name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0a0a0a;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-list__size {
+  font-size: 12px;
+  color: var(--tt-neutral-mid);
+}

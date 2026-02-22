@@ -4,6 +4,7 @@ import { NButton, NFlex, NIcon, NTag } from 'naive-ui'
 import { CreateOutline, CloudUploadOutline } from '@vicons/ionicons5'
 
 import { formatDate, formatRelativeTime } from '@/shared/utils/date.utils'
+import { PHOTO_ROUTE_NAMES } from '@/features/photos/routes'
 import { EVENT_ROUTE_NAMES } from '../../../routes'
 import { EVENT_STATUS_CONFIG } from '../../../constants/status-config'
 import type { IEventDetail } from '../../../types/responses/event-detail.response'
@@ -34,7 +35,10 @@ const router = useRouter()
         <template #icon><NIcon :component="CreateOutline" /></template>
         Editar evento
       </NButton>
-      <NButton type="primary" disabled>
+      <NButton
+        type="primary"
+        @click="router.push({ name: PHOTO_ROUTE_NAMES.UPLOAD, params: { eventId } })"
+      >
         <template #icon><NIcon :component="CloudUploadOutline" /></template>
         Subir fotos
       </NButton>
