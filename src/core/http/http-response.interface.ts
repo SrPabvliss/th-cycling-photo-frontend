@@ -3,6 +3,7 @@ export interface IApiMeta {
   timestamp: string
   message?: string
   path?: string
+  pagination?: IApiPagination
 }
 
 export interface IApiPagination {

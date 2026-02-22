@@ -6,7 +6,7 @@ export const PRIMARY_LIGHT = '#406090'
 export const NEUTRAL_DARK = '#1A1F2C'
 export const SIDEBAR_ACCENT = '#141821'
 export const NEUTRAL_MID = '#808080'
-export const NEUTRAL_LIGHT = '#C0C0C0'
+export const NEUTRAL_LIGHT = '#D4D4D8'
 export const BACKGROUND = '#F5F5F7'
 export const SURFACE = '#FFFFFF'
 export const SUCCESS = '#22C55E'
@@ -64,11 +64,17 @@ export const titanTvTheme: GlobalThemeOverrides = {
     borderRadius: '12px',
     paddingMedium: '20px',
     borderColor: NEUTRAL_LIGHT,
+    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+    titleFontWeight: '600',
+    titleFontSizeMedium: '15px',
+    titleTextColor: '#0A0A0A',
   },
 
   Tag: {
     borderRadius: '6px',
     heightMedium: '28px',
+    heightSmall: '22px',
+    fontSizeSmall: '12px',
   },
 
   Input: {
