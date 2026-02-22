@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { NButton, NCard, NEmpty, NFlex, NResult } from 'naive-ui'
+import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { NButton, NCard, NEmpty, NFlex, NGrid, NGridItem, NResult } from 'naive-ui'
 
 import AppTopBar from '@/core/layout/AppTopBar.vue'
+import { PHOTO_ROUTE_NAMES } from '@/features/photos/routes'
+import { usePhotosGalleryQuery } from '@/features/photos/composables/queries/use-photos-gallery'
+import PhotoCard from '@/features/photos/presentation/components/PhotoCard/PhotoCard.vue'
 import { useEventDetailQuery } from '../../composables/queries/use-event-detail'
 import { detailBreadcrumbs } from '../../constants/event-breadcrumbs'
 import type { IEventDetail } from '../../types/responses/event-detail.response'
@@ -13,11 +16,27 @@ import EventDetailSkeleton from '../components/EventDetailSkeleton/EventDetailSk
 import EventInfoCard from '../components/EventInfoCard/EventInfoCard.vue'
 
 const route = useRoute()
+const router = useRouter()
 const id = computed(() => route.params.id as IEventDetail['id'])
 
 const { data: event, isPending, isError, refetch } = useEventDetailQuery(id)
 
+const recentPhotosPage = ref(1)
+const recentPhotosStatus = ref(null)
+const RECENT_PHOTOS_LIMIT = 4
+
+const { data: recentPhotos } = usePhotosGalleryQuery(
+  id,
+  recentPhotosPage,
+  recentPhotosStatus,
+  RECENT_PHOTOS_LIMIT,
+)
+
 const breadcrumbs = computed(() => detailBreadcrumbs(event.value?.name ?? 'Cargando...'))
+
+function handlePhotoClick(photoId: string) {
+  router.push({ name: PHOTO_ROUTE_NAMES.DETAIL, params: { id: photoId } })
+}
 </script>
 
 <template>
@@ -47,7 +66,33 @@ const breadcrumbs = computed(() => detailBreadcrumbs(event.value?.name ?? 'Carga
             <EventStatCards :event="event" />
 
             <NCard title="Fotos Recientes" size="small">
+              <template #header-extra>
+                <NButton
+                  text
+                  type="primary"
+                  size="small"
+                  @click="
+                    router.push({
+                      name: PHOTO_ROUTE_NAMES.GALLERY,
+                      params: { eventId: id },
+                    })
+                  "
+                >
+                  Ver todas
+                </NButton>
+              </template>
+              <NGrid
+                v-if="recentPhotos && recentPhotos.items.length > 0"
+                :cols="4"
+                :x-gap="12"
+                :y-gap="12"
+              >
+                <NGridItem v-for="photo in recentPhotos.items" :key="photo.id">
+                  <PhotoCard :photo="photo" @click="handlePhotoClick" />
+                </NGridItem>
+              </NGrid>
               <NEmpty
+                v-else
                 description="Las fotos aparecerán aquí cuando se suban al evento"
                 style="padding: 48px 0"
               />
