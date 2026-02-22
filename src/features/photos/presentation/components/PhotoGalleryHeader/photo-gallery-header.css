@@ -1,0 +1,12 @@
+.gallery-header__title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0a0a0a;
+  margin: 0;
+}
+
+.gallery-header__subtitle {
+  font-size: 13px;
+  color: var(--tt-neutral-mid);
+  margin: 0;
+}
