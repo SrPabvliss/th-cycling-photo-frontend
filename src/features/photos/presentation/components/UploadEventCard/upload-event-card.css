@@ -1,0 +1,10 @@
+.upload-event__name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0a0a0a;
+}
+
+.upload-event__meta {
+  font-size: 12px;
+  color: var(--tt-neutral-mid);
+}
