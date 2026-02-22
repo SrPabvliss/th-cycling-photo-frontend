@@ -15,6 +15,6 @@ export const API_ROUTES = {
     BY_EVENT: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos`,
     DETAIL: (id: string) => `${PHOTOS_BASE}/${id}`,
     SEARCH: `${PHOTOS_BASE}/search`,
-    UPLOAD: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/upload`,
+    UPLOAD: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos`,
   },
 } as const
