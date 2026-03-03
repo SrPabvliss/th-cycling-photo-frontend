@@ -16,5 +16,7 @@ export const API_ROUTES = {
     DETAIL: (id: string) => `${PHOTOS_BASE}/${id}`,
     SEARCH: `${PHOTOS_BASE}/search`,
     UPLOAD: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos`,
+    PRESIGNED_URL: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/presigned-url`,
+    CONFIRM_BATCH: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/confirm-batch`,
   },
 } as const
