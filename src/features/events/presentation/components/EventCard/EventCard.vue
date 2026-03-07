@@ -1,30 +1,18 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { NButton, NFlex, NIcon, NProgress, NTag } from 'naive-ui'
-import {
-  LocationOutline,
-  CalendarOutline,
-  CameraOutline,
-  ImageOutline,
-  CloudUploadOutline,
-} from '@vicons/ionicons5'
+import { NButton, NFlex, NIcon, NTag } from 'naive-ui'
+import { LocationOutline, CalendarOutline, CameraOutline, ImageOutline } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
-import { calculateProgress } from '@/shared/utils/progress.utils'
 import { EVENT_STATUS_CONFIG } from '../../../constants/status-config'
 import type { IEventListItem } from '../../../types/responses/event-list.response'
 
-const props = defineProps<{
+defineProps<{
   event: IEventListItem
 }>()
 
 const emit = defineEmits<{
   view: [id: IEventListItem['id']]
 }>()
-
-const progress = computed(() =>
-  calculateProgress(props.event.processedPhotos, props.event.totalPhotos),
-)
 </script>
 
 <template>
@@ -47,7 +35,6 @@ const progress = computed(() =>
       <!-- Status badge -->
       <div class="event-card__badge">
         <NTag :type="EVENT_STATUS_CONFIG[event.status].type" size="small" round>
-          <span v-if="event.status === 'processing'" class="badge-dot" />
           {{ EVENT_STATUS_CONFIG[event.status].label }}
         </NTag>
       </div>
@@ -81,35 +68,7 @@ const progress = computed(() =>
 
       <!-- Footer -->
       <div class="event-card__footer">
-        <!-- Draft -->
-        <template v-if="event.status === 'draft'">
-          <NButton type="primary" block @click.stop>
-            <template #icon><NIcon :component="CloudUploadOutline" :size="14" /></template>
-            Subir Fotos
-          </NButton>
-        </template>
-
-        <!-- Processing / Uploading -->
-        <template v-else-if="event.status === 'processing' || event.status === 'uploading'">
-          <NFlex justify="space-between" align="center" style="margin-bottom: 6px">
-            <span class="event-card__progress-label">Progreso</span>
-            <span class="event-card__progress-value">{{ progress }}%</span>
-          </NFlex>
-          <NProgress
-            type="line"
-            :percentage="progress"
-            :height="6"
-            :show-indicator="false"
-            status="warning"
-            style="margin-bottom: 16px"
-          />
-          <NButton block @click.stop="emit('view', event.id)"> Ver detalle </NButton>
-        </template>
-
-        <!-- Completed -->
-        <template v-else-if="event.status === 'completed'">
-          <NButton block @click.stop="emit('view', event.id)"> Ver detalle </NButton>
-        </template>
+        <NButton block @click.stop="emit('view', event.id)"> Ver detalle </NButton>
       </div>
     </div>
   </article>

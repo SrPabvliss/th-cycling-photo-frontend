@@ -6,10 +6,8 @@ export interface IStatusConfig {
 }
 
 export const EVENT_STATUS_CONFIG: Record<EventStatus, IStatusConfig> = {
-  draft: { label: 'Borrador', type: 'default' },
-  uploading: { label: 'Subiendo', type: 'info' },
-  processing: { label: 'Procesando', type: 'warning' },
-  completed: { label: 'Completado', type: 'success' },
+  active: { label: 'Activo', type: 'success' },
+  archived: { label: 'Archivado', type: 'default' },
 }
 
 export interface IFilterTab {
@@ -20,7 +18,6 @@ export interface IFilterTab {
 
 export const EVENT_FILTER_TABS: IFilterTab[] = [
   { label: 'Todos', status: null, enabled: true },
-  { label: 'Completados', status: 'completed', enabled: false },
-  { label: 'Procesando', status: 'processing', enabled: false },
-  { label: 'Borradores', status: 'draft', enabled: false },
+  { label: 'Activos', status: 'active', enabled: true },
+  { label: 'Archivados', status: 'archived', enabled: true },
 ]

@@ -1,4 +1,4 @@
-export type EventStatus = 'draft' | 'uploading' | 'processing' | 'completed'
+export type EventStatus = 'active' | 'archived'
 
 /** API projection from GET /events — already camelCase from backend */
 export interface IApiEventListItem {
