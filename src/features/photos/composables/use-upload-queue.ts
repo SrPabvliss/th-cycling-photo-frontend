@@ -76,39 +76,50 @@ export function useUploadQueue(eventId: Ref<string>) {
   // --- Upload with retry ---
 
   async function uploadWithRetry(item: IUploadItem): Promise<void> {
-    await pRetry(
-      async () => {
-        try {
-          await uploadSingleFile(item)
-        } catch (error) {
-          const classification = classifyUploadError(error)
+    try {
+      await pRetry(
+        async () => {
+          try {
+            await uploadSingleFile(item)
+          } catch (error) {
+            const classification = classifyUploadError(error)
 
-          if (classification === 'permanent') {
-            store.updateItem(item.id, { error: getUploadErrorMessage(error) })
-            throw new AbortError(getUploadErrorMessage(error))
+            if (classification === 'permanent') {
+              store.updateItem(item.id, { error: getUploadErrorMessage(error) })
+              throw new AbortError(getUploadErrorMessage(error))
+            }
+
+            if (classification === 'refresh-url') {
+              presignedUrlCache.invalidate(item.fileName)
+            }
+
+            // uploading → failed (onFailedAttempt handles retrying → queued)
+            store.transitionStatus(item.id, 'failed')
+            throw error
           }
-
-          if (classification === 'refresh-url') {
-            presignedUrlCache.invalidate(item.fileName)
-          }
-
-          // uploading → failed → retrying → queued
-          // (next attempt's uploadSingleFile will do queued → uploading)
-          store.transitionStatus(item.id, 'failed')
-          store.transitionStatus(item.id, 'retrying')
-          store.transitionStatus(item.id, 'queued')
-
-          throw error
-        }
-      },
-      {
-        retries: RETRY_COUNT,
-        factor: 2,
-        minTimeout: 1_000,
-        maxTimeout: 30_000,
-        randomize: true,
-      },
-    )
+        },
+        {
+          retries: RETRY_COUNT,
+          factor: 2,
+          minTimeout: 1_000,
+          maxTimeout: 30_000,
+          randomize: true,
+          onFailedAttempt: (error) => {
+            // Only cycle to queued if p-retry will retry again
+            // (on last failure, item stays in 'failed' state)
+            if (error.retriesLeft > 0) {
+              store.transitionStatus(item.id, 'retrying')
+              store.transitionStatus(item.id, 'queued')
+            }
+          },
+        },
+      )
+    } catch (error) {
+      // All retries exhausted or AbortError — item is already in 'failed'
+      if (!(error instanceof AbortError)) {
+        store.updateItem(item.id, { error: getUploadErrorMessage(error) })
+      }
+    }
   }
 
   // --- Batch confirm ---
@@ -151,8 +162,11 @@ export function useUploadQueue(eventId: Ref<string>) {
     }
 
     queue.onIdle().then(async () => {
-      await flushConfirmBatch()
-      queryClient.invalidateQueries({ queryKey: PHOTO_QUERY_KEYS.all() })
+      try {
+        await flushConfirmBatch()
+      } finally {
+        queryClient.invalidateQueries({ queryKey: PHOTO_QUERY_KEYS.all() })
+      }
     })
   }
 

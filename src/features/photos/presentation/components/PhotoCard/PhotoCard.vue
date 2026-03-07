@@ -18,7 +18,13 @@ const emit = defineEmits<{
 <template>
   <article class="photo-card" @click="emit('click', props.photo.id)">
     <div class="photo-card__cover">
-      <img :src="props.photo.thumbnailUrl" :alt="props.photo.filename" class="photo-card__image" />
+      <img
+        :src="props.photo.thumbnailUrl"
+        :alt="props.photo.filename"
+        class="photo-card__image"
+        loading="lazy"
+        decoding="async"
+      />
       <div class="photo-card__badge">
         <NTag :type="PHOTO_STATUS_CONFIG[props.photo.status].type" size="small" round>
           {{ PHOTO_STATUS_CONFIG[props.photo.status].label }}

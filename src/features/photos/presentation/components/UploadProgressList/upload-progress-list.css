@@ -1,0 +1,14 @@
+.progress-list {
+  border: 1px solid var(--tt-neutral-light);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.progress-list__scroll {
+  max-height: 400px;
+}
+
+.progress-list__empty {
+  padding: 32px;
+  text-align: center;
+}

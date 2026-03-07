@@ -1,0 +1,44 @@
+.upload-summary {
+  background: #fff;
+  border: 1px solid var(--tt-neutral-light);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.upload-summary__main {
+  margin-bottom: 4px;
+}
+
+.upload-summary__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0a0a0a;
+  margin: 0 0 2px;
+}
+
+.upload-summary__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.upload-summary__icon--success {
+  background: #e8f8ef;
+  color: var(--tt-success);
+}
+
+.upload-summary__icon--error {
+  background: #fde8e8;
+  color: #d03050;
+}
+
+.upload-summary__failures {
+  margin-top: 12px;
+  padding: 12px;
+  background: #fef2f2;
+  border-radius: 8px;
+}

@@ -14,8 +14,14 @@ defineProps<{
   disabled?: boolean
 }>()
 
+export interface IRejectionSummary {
+  invalidType: number
+  tooLarge: number
+}
+
 const emit = defineEmits<{
   'files-selected': [files: File[]]
+  'files-rejected': [summary: IRejectionSummary]
 }>()
 
 const isDragging = ref(false)
@@ -23,11 +29,24 @@ const fileInput = ref<HTMLInputElement>()
 
 function validateFiles(fileList: FileList): File[] {
   const valid: File[] = []
+  const rejected: IRejectionSummary = { invalidType: 0, tooLarge: 0 }
+
   for (const file of fileList) {
-    if (!(ACCEPTED_MIME_TYPES as readonly string[]).includes(file.type)) continue
-    if (file.size > MAX_FILE_SIZE) continue
+    if (!(ACCEPTED_MIME_TYPES as readonly string[]).includes(file.type)) {
+      rejected.invalidType++
+      continue
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      rejected.tooLarge++
+      continue
+    }
     valid.push(file)
   }
+
+  if (rejected.invalidType > 0 || rejected.tooLarge > 0) {
+    emit('files-rejected', rejected)
+  }
+
   return valid
 }
 
