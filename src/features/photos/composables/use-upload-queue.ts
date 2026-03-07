@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/vue-query'
 import PQueue from 'p-queue'
 import pRetry, { AbortError } from 'p-retry'
-import { computed, onUnmounted, type Ref, watch } from 'vue'
+import { computed, onUnmounted, ref, type Ref, watch } from 'vue'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
@@ -38,6 +38,10 @@ export function useUploadQueue(eventId: Ref<string>) {
 
   const _pendingConfirm: IUploadItem[] = []
 
+  // --- Duplicate tracking ---
+
+  const autoConfirmedCount = ref(0)
+
   // --- Computed ---
 
   const isActive = computed(
@@ -49,12 +53,19 @@ export function useUploadQueue(eventId: Ref<string>) {
   async function uploadSingleFile(item: IUploadItem): Promise<void> {
     store.transitionStatus(item.id, 'uploading')
 
+    const result = await presignedUrlCache.fetch(item.fileName, item._file.type)
+
+    // Duplicate: auto-confirm without uploading to B2
+    if (result.isDuplicate) {
+      store.transitionStatus(item.id, 'confirmed')
+      autoConfirmedCount.value++
+      return
+    }
+
     const abortController = new AbortController()
     store.setAbortController(item.id, abortController)
 
-    const { url, objectKey } = await presignedUrlCache.fetch(item.fileName, item._file.type)
-
-    await b2UploadClient.put(url, item._file, {
+    await b2UploadClient.put(result.url, item._file, {
       headers: { 'Content-Type': item._file.type },
       signal: abortController.signal,
       onUploadProgress: (e) => {
@@ -64,7 +75,7 @@ export function useUploadQueue(eventId: Ref<string>) {
       },
     })
 
-    store.updateItem(item.id, { objectKey })
+    store.updateItem(item.id, { objectKey: result.objectKey })
     store.transitionStatus(item.id, 'uploaded')
 
     _pendingConfirm.push(store.uploads.get(item.id)!)
@@ -137,14 +148,21 @@ export function useUploadQueue(eventId: Ref<string>) {
       })),
     }
 
-    const response = await httpClient.post<IApiConfirmBatch>(
-      API_ROUTES.PHOTOS.CONFIRM_BATCH(eventId.value),
-      body,
-    )
+    try {
+      const response = await httpClient.post<IApiConfirmBatch>(
+        API_ROUTES.PHOTOS.CONFIRM_BATCH(eventId.value),
+        body,
+      )
 
-    if (response.data.confirmed > 0) {
+      if (response.data.confirmed > 0) {
+        for (const item of batch) {
+          store.transitionStatus(item.id, 'confirmed')
+        }
+      }
+    } catch {
       for (const item of batch) {
-        store.transitionStatus(item.id, 'confirmed')
+        store.updateItem(item.id, { error: 'Error al confirmar la foto' })
+        store.transitionStatus(item.id, 'failed')
       }
     }
   }
@@ -182,6 +200,7 @@ export function useUploadQueue(eventId: Ref<string>) {
     queue.clear()
     store.clear()
     _pendingConfirm.length = 0
+    autoConfirmedCount.value = 0
   }
 
   // --- Connectivity → queue pause/resume ---
@@ -215,6 +234,7 @@ export function useUploadQueue(eventId: Ref<string>) {
   return {
     isActive,
     isOnline,
+    autoConfirmedCount,
     startUpload,
     pauseUpload,
     resumeUpload,

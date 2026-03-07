@@ -2,11 +2,15 @@
 import { NButton, NFlex, NIcon, NText } from 'naive-ui'
 import { CheckmarkCircleOutline, AlertCircleOutline } from '@vicons/ionicons5'
 
-defineProps<{
-  confirmedCount: number
-  failedCount: number
-  totalCount: number
-}>()
+withDefaults(
+  defineProps<{
+    confirmedCount: number
+    failedCount: number
+    totalCount: number
+    autoConfirmedCount?: number
+  }>(),
+  { autoConfirmedCount: 0 },
+)
 
 const emit = defineEmits<{
   'go-to-gallery': []
@@ -23,12 +27,22 @@ const emit = defineEmits<{
       </div>
       <div>
         <p class="upload-summary__title">Carga completada</p>
-        <NText depth="3" style="font-size: 13px">
-          {{ confirmedCount }} de {{ totalCount }} foto{{ totalCount !== 1 ? 's' : '' }} subida{{
-            totalCount !== 1 ? 's' : ''
-          }}
-          correctamente
-        </NText>
+        <div>
+          <NText depth="3" style="font-size: 13px">
+            {{ confirmedCount }} de {{ totalCount }} foto{{ totalCount !== 1 ? 's' : '' }} subida{{
+              totalCount !== 1 ? 's' : ''
+            }}
+            correctamente
+          </NText>
+          <NText
+            v-if="autoConfirmedCount > 0"
+            depth="3"
+            style="font-size: 12px; display: block; margin-top: 2px"
+          >
+            ({{ autoConfirmedCount }} ya
+            {{ autoConfirmedCount !== 1 ? 'existían' : 'existía' }} previamente)
+          </NText>
+        </div>
       </div>
     </NFlex>
 

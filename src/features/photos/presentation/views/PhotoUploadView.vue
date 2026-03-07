@@ -1,18 +1,15 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NCard, NFlex, NResult, useMessage } from 'naive-ui'
+import { NButton, NCard, NFlex, NResult } from 'naive-ui'
 
 import AppTopBar from '@/core/layout/AppTopBar.vue'
 import { useEventDetailQuery } from '@/features/events/composables/queries/use-event-detail'
-import { useUploadQueue } from '../../composables/use-upload-queue'
-import { useUploadStore } from '../../stores/upload.store'
+import { useUploadOrchestration } from '../../composables/use-upload-orchestration'
 import { uploadBreadcrumbs } from '../../constants/photo-breadcrumbs'
-import { MAX_FILES, MAX_FILE_SIZE } from '../../constants/upload.constants'
+import { MAX_FILES } from '../../constants/upload.constants'
 import { PHOTO_ROUTE_NAMES } from '../../routes'
-import { formatFileSize } from '@/shared/utils/format.utils'
 import UploadDropzone from '../components/UploadDropzone/UploadDropzone.vue'
-import type { IRejectionSummary } from '../components/UploadDropzone/UploadDropzone.vue'
 import UploadEventCard from '../components/UploadEventCard/UploadEventCard.vue'
 import UploadControls from '../components/UploadControls/UploadControls.vue'
 import UploadProgressList from '../components/UploadProgressList/UploadProgressList.vue'
@@ -20,11 +17,8 @@ import UploadSummary from '../components/UploadSummary/UploadSummary.vue'
 
 const route = useRoute()
 const router = useRouter()
-const message = useMessage()
 
 const eventId = computed(() => route.params.eventId as string)
-const selectedFiles = ref<File[]>([])
-const isManuallyPaused = ref(false)
 
 const {
   data: event,
@@ -32,68 +26,31 @@ const {
   isError: isEventError,
 } = useEventDetailQuery(eventId)
 
-const store = useUploadStore()
-const { isActive, isOnline, startUpload, pauseUpload, resumeUpload, cancelUpload } =
-  useUploadQueue(eventId)
+const {
+  store,
+  selectedFiles,
+  isManuallyPaused,
+  isComplete,
+  canAddFiles,
+  isActive,
+  isOnline,
+  autoConfirmedCount,
+  handleFilesSelected,
+  handleFilesRejected,
+  handleStartUpload,
+  handlePause,
+  handleResume,
+  handleCancel,
+  handleRemoveItem,
+  handleNewUpload,
+} = useUploadOrchestration(eventId)
 
 const breadcrumbs = computed(() =>
   uploadBreadcrumbs(eventId.value, event.value?.name ?? 'Cargando...'),
 )
 
-const isComplete = computed(() => {
-  const c = store.counts
-  return c.total > 0 && c.confirmed + c.failed === c.total
-})
-
-const canAddFiles = computed(() => selectedFiles.value.length + store.counts.total < MAX_FILES)
-
-function handleFilesSelected(files: File[]) {
-  const remaining = MAX_FILES - selectedFiles.value.length - store.counts.total
-  selectedFiles.value = [...selectedFiles.value, ...files.slice(0, remaining)]
-}
-
-function handleFilesRejected(summary: IRejectionSummary) {
-  const parts: string[] = []
-  if (summary.tooLarge > 0) {
-    parts.push(`${summary.tooLarge} exceden ${formatFileSize(MAX_FILE_SIZE)}`)
-  }
-  if (summary.invalidType > 0) {
-    parts.push(`${summary.invalidType} con formato no soportado`)
-  }
-  message.warning(`Archivos descartados: ${parts.join(', ')}`, { duration: 5000 })
-}
-
-function handleStartUpload() {
-  if (selectedFiles.value.length === 0) return
-  startUpload(selectedFiles.value)
-  selectedFiles.value = []
-}
-
-function handlePause() {
-  isManuallyPaused.value = true
-  pauseUpload()
-}
-
-function handleResume() {
-  isManuallyPaused.value = false
-  resumeUpload()
-}
-
-function handleCancel() {
-  isManuallyPaused.value = false
-  cancelUpload()
-}
-
-function handleRemoveItem(id: string) {
-  store.removeItem(id)
-}
-
 function handleGoToGallery() {
   router.push({ name: PHOTO_ROUTE_NAMES.GALLERY, params: { eventId: eventId.value } })
-}
-
-function handleNewUpload() {
-  store.clear()
 }
 </script>
 
@@ -119,6 +76,7 @@ function handleNewUpload() {
           :confirmed-count="store.counts.confirmed"
           :failed-count="store.counts.failed"
           :total-count="store.counts.total"
+          :auto-confirmed-count="autoConfirmedCount"
           style="margin-top: 24px"
           @go-to-gallery="handleGoToGallery"
           @new-upload="handleNewUpload"

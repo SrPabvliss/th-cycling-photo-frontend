@@ -1,15 +1,11 @@
-import type { IApiPresignedUrl } from '../types/responses/presigned-url.response'
-
-export interface IPresignedUrl {
-  url: string
-  objectKey: string
-  expiresIn: number
-}
+import type { IApiPresignedUrl, IPresignedUrl } from '../types/responses/presigned-url.response'
 
 export function toPresignedUrl(api: IApiPresignedUrl): IPresignedUrl {
+  if (api.isDuplicate) return { isDuplicate: true }
   return {
-    url: api.url,
-    objectKey: api.objectKey,
-    expiresIn: api.expiresIn,
+    isDuplicate: false,
+    url: api.url!,
+    objectKey: api.objectKey!,
+    expiresIn: api.expiresIn!,
   }
 }

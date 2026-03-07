@@ -15,8 +15,8 @@ export type UploadStatus =
 const VALID_TRANSITIONS: Record<UploadStatus, UploadStatus[]> = {
   pending: ['queued'],
   queued: ['uploading'],
-  uploading: ['uploaded', 'failed'],
-  uploaded: ['confirmed'],
+  uploading: ['uploaded', 'failed', 'confirmed'],
+  uploaded: ['confirmed', 'failed'],
   failed: ['retrying'],
   retrying: ['queued'],
   confirmed: [],
