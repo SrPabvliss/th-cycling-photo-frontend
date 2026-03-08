@@ -1,57 +1,53 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton, NCard, NFlex, NResult } from 'naive-ui'
 
 import AppTopBar from '@/core/layout/AppTopBar.vue'
 import { useEventDetailQuery } from '@/features/events/composables/queries/use-event-detail'
-import { useUploadPhotos } from '../../composables/mutations/use-upload-photos'
+import { useUploadOrchestration } from '../../composables/use-upload-orchestration'
 import { uploadBreadcrumbs } from '../../constants/photo-breadcrumbs'
 import { MAX_FILES } from '../../constants/upload.constants'
 import { PHOTO_ROUTE_NAMES } from '../../routes'
 import UploadDropzone from '../components/UploadDropzone/UploadDropzone.vue'
-import UploadFileList from '../components/UploadFileList/UploadFileList.vue'
-import UploadProgressBar from '../components/UploadProgressBar/UploadProgressBar.vue'
 import UploadEventCard from '../components/UploadEventCard/UploadEventCard.vue'
+import UploadControls from '../components/UploadControls/UploadControls.vue'
+import UploadProgressList from '../components/UploadProgressList/UploadProgressList.vue'
+import UploadSummary from '../components/UploadSummary/UploadSummary.vue'
 
 const route = useRoute()
 const router = useRouter()
 
 const eventId = computed(() => route.params.eventId as string)
-const selectedFiles = ref<File[]>([])
 
 const {
   data: event,
   isPending: isEventPending,
   isError: isEventError,
 } = useEventDetailQuery(eventId)
+
 const {
-  mutate,
-  isPending: isUploading,
-  isSuccess,
-  data: uploadedData,
-  uploadProgress,
-} = useUploadPhotos()
+  store,
+  selectedFiles,
+  isManuallyPaused,
+  isComplete,
+  canAddFiles,
+  isActive,
+  isOnline,
+  autoConfirmedCount,
+  handleFilesSelected,
+  handleFilesRejected,
+  handleStartUpload,
+  handlePause,
+  handleResume,
+  handleCancel,
+  handleRemoveItem,
+  handleNewUpload,
+} = useUploadOrchestration(eventId)
 
 const breadcrumbs = computed(() =>
   uploadBreadcrumbs(eventId.value, event.value?.name ?? 'Cargando...'),
 )
-
-const canUpload = computed(() => selectedFiles.value.length > 0 && !isUploading.value)
-
-function handleFilesSelected(files: File[]) {
-  const remaining = MAX_FILES - selectedFiles.value.length
-  selectedFiles.value = [...selectedFiles.value, ...files.slice(0, remaining)]
-}
-
-function handleRemoveFile(index: number) {
-  selectedFiles.value = selectedFiles.value.filter((_, i) => i !== index)
-}
-
-function handleUpload() {
-  if (!canUpload.value) return
-  mutate({ eventId: eventId.value, files: selectedFiles.value })
-}
 
 function handleGoToGallery() {
   router.push({ name: PHOTO_ROUTE_NAMES.GALLERY, params: { eventId: eventId.value } })
@@ -74,7 +70,47 @@ function handleGoToGallery() {
       <template v-else-if="!isEventPending && event">
         <UploadEventCard :event="event" />
 
-        <NCard style="margin-top: 24px">
+        <!-- Completion summary -->
+        <UploadSummary
+          v-if="isComplete"
+          :confirmed-count="store.counts.confirmed"
+          :failed-count="store.counts.failed"
+          :total-count="store.counts.total"
+          :auto-confirmed-count="autoConfirmedCount"
+          style="margin-top: 24px"
+          @go-to-gallery="handleGoToGallery"
+          @new-upload="handleNewUpload"
+        />
+
+        <!-- Active upload -->
+        <NCard v-else-if="isActive || store.counts.total > 0" style="margin-top: 24px">
+          <template #header>
+            <div>
+              <div class="upload-header__title">Subiendo fotos</div>
+              <p class="upload-header__subtitle">
+                {{ store.counts.confirmed + store.counts.uploaded }} de
+                {{ store.counts.total }} completadas
+              </p>
+            </div>
+          </template>
+
+          <NFlex vertical :size="16">
+            <UploadControls
+              :total-progress="store.totalProgress"
+              :counts="store.counts"
+              :is-paused="isManuallyPaused"
+              :is-online="isOnline"
+              @pause="handlePause"
+              @resume="handleResume"
+              @cancel="handleCancel"
+            />
+
+            <UploadProgressList :items="store.items" @remove-item="handleRemoveItem" />
+          </NFlex>
+        </NCard>
+
+        <!-- File selection (idle state) -->
+        <NCard v-else style="margin-top: 24px">
           <template #header>
             <div>
               <div class="upload-header__title">Seleccionar fotos</div>
@@ -84,48 +120,25 @@ function handleGoToGallery() {
             </div>
           </template>
 
-          <!-- Post-upload success -->
-          <template v-if="isSuccess">
-            <UploadProgressBar
-              :progress="100"
-              :is-complete="true"
-              :uploaded-count="uploadedData?.length ?? 0"
+          <NFlex vertical :size="16">
+            <UploadDropzone
+              :disabled="!canAddFiles"
+              @files-selected="handleFilesSelected"
+              @files-rejected="handleFilesRejected"
             />
-            <NFlex justify="end" style="margin-top: 16px">
-              <NButton @click="handleGoToGallery">Ver Galería</NButton>
-            </NFlex>
-          </template>
 
-          <!-- During upload -->
-          <template v-else-if="isUploading">
-            <UploadProgressBar
-              :progress="uploadProgress"
-              :is-complete="false"
-              :uploaded-count="0"
-            />
-          </template>
-
-          <!-- Pre-upload: file selection -->
-          <template v-else>
-            <NFlex vertical :size="16">
-              <UploadDropzone
-                :disabled="selectedFiles.length >= MAX_FILES"
-                @files-selected="handleFilesSelected"
-              />
-
-              <UploadFileList
-                :files="selectedFiles"
-                :is-uploading="isUploading"
-                @remove-file="handleRemoveFile"
-              />
-            </NFlex>
-
-            <NFlex v-if="selectedFiles.length > 0" justify="end" style="margin-top: 16px">
-              <NButton type="primary" :disabled="!canUpload" @click="handleUpload">
+            <NFlex v-if="selectedFiles.length > 0" justify="space-between" align="center">
+              <span class="selected-count">
+                {{ selectedFiles.length }}
+                archivo{{ selectedFiles.length !== 1 ? 's' : '' }} seleccionado{{
+                  selectedFiles.length !== 1 ? 's' : ''
+                }}
+              </span>
+              <NButton type="primary" @click="handleStartUpload">
                 Subir {{ selectedFiles.length }} foto{{ selectedFiles.length !== 1 ? 's' : '' }}
               </NButton>
             </NFlex>
-          </template>
+          </NFlex>
         </NCard>
       </template>
     </div>
@@ -156,5 +169,11 @@ function handleGoToGallery() {
   font-size: 13px;
   color: var(--tt-neutral-mid);
   margin: 4px 0 0;
+}
+
+.selected-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tt-neutral-mid);
 }
 </style>

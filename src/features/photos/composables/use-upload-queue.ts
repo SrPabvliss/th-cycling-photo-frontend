@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/vue-query'
 import PQueue from 'p-queue'
 import pRetry, { AbortError } from 'p-retry'
-import { computed, onUnmounted, type Ref, watch } from 'vue'
+import { computed, onUnmounted, ref, type Ref, watch } from 'vue'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
@@ -38,6 +38,10 @@ export function useUploadQueue(eventId: Ref<string>) {
 
   const _pendingConfirm: IUploadItem[] = []
 
+  // --- Duplicate tracking ---
+
+  const autoConfirmedCount = ref(0)
+
   // --- Computed ---
 
   const isActive = computed(
@@ -49,12 +53,19 @@ export function useUploadQueue(eventId: Ref<string>) {
   async function uploadSingleFile(item: IUploadItem): Promise<void> {
     store.transitionStatus(item.id, 'uploading')
 
+    const result = await presignedUrlCache.fetch(item.fileName, item._file.type)
+
+    // Duplicate: auto-confirm without uploading to B2
+    if (result.isDuplicate) {
+      store.transitionStatus(item.id, 'confirmed')
+      autoConfirmedCount.value++
+      return
+    }
+
     const abortController = new AbortController()
     store.setAbortController(item.id, abortController)
 
-    const { url, objectKey } = await presignedUrlCache.fetch(item.fileName, item._file.type)
-
-    await b2UploadClient.put(url, item._file, {
+    await b2UploadClient.put(result.url, item._file, {
       headers: { 'Content-Type': item._file.type },
       signal: abortController.signal,
       onUploadProgress: (e) => {
@@ -64,7 +75,7 @@ export function useUploadQueue(eventId: Ref<string>) {
       },
     })
 
-    store.updateItem(item.id, { objectKey })
+    store.updateItem(item.id, { objectKey: result.objectKey })
     store.transitionStatus(item.id, 'uploaded')
 
     _pendingConfirm.push(store.uploads.get(item.id)!)
@@ -76,39 +87,50 @@ export function useUploadQueue(eventId: Ref<string>) {
   // --- Upload with retry ---
 
   async function uploadWithRetry(item: IUploadItem): Promise<void> {
-    await pRetry(
-      async () => {
-        try {
-          await uploadSingleFile(item)
-        } catch (error) {
-          const classification = classifyUploadError(error)
+    try {
+      await pRetry(
+        async () => {
+          try {
+            await uploadSingleFile(item)
+          } catch (error) {
+            const classification = classifyUploadError(error)
 
-          if (classification === 'permanent') {
-            store.updateItem(item.id, { error: getUploadErrorMessage(error) })
-            throw new AbortError(getUploadErrorMessage(error))
+            if (classification === 'permanent') {
+              store.updateItem(item.id, { error: getUploadErrorMessage(error) })
+              throw new AbortError(getUploadErrorMessage(error))
+            }
+
+            if (classification === 'refresh-url') {
+              presignedUrlCache.invalidate(item.fileName)
+            }
+
+            // uploading → failed (onFailedAttempt handles retrying → queued)
+            store.transitionStatus(item.id, 'failed')
+            throw error
           }
-
-          if (classification === 'refresh-url') {
-            presignedUrlCache.invalidate(item.fileName)
-          }
-
-          // uploading → failed → retrying → queued
-          // (next attempt's uploadSingleFile will do queued → uploading)
-          store.transitionStatus(item.id, 'failed')
-          store.transitionStatus(item.id, 'retrying')
-          store.transitionStatus(item.id, 'queued')
-
-          throw error
-        }
-      },
-      {
-        retries: RETRY_COUNT,
-        factor: 2,
-        minTimeout: 1_000,
-        maxTimeout: 30_000,
-        randomize: true,
-      },
-    )
+        },
+        {
+          retries: RETRY_COUNT,
+          factor: 2,
+          minTimeout: 1_000,
+          maxTimeout: 30_000,
+          randomize: true,
+          onFailedAttempt: (error) => {
+            // Only cycle to queued if p-retry will retry again
+            // (on last failure, item stays in 'failed' state)
+            if (error.retriesLeft > 0) {
+              store.transitionStatus(item.id, 'retrying')
+              store.transitionStatus(item.id, 'queued')
+            }
+          },
+        },
+      )
+    } catch (error) {
+      // All retries exhausted or AbortError — item is already in 'failed'
+      if (!(error instanceof AbortError)) {
+        store.updateItem(item.id, { error: getUploadErrorMessage(error) })
+      }
+    }
   }
 
   // --- Batch confirm ---
@@ -126,14 +148,21 @@ export function useUploadQueue(eventId: Ref<string>) {
       })),
     }
 
-    const response = await httpClient.post<IApiConfirmBatch>(
-      API_ROUTES.PHOTOS.CONFIRM_BATCH(eventId.value),
-      body,
-    )
+    try {
+      const response = await httpClient.post<IApiConfirmBatch>(
+        API_ROUTES.PHOTOS.CONFIRM_BATCH(eventId.value),
+        body,
+      )
 
-    if (response.data.confirmed > 0) {
+      if (response.data.confirmed > 0) {
+        for (const item of batch) {
+          store.transitionStatus(item.id, 'confirmed')
+        }
+      }
+    } catch {
       for (const item of batch) {
-        store.transitionStatus(item.id, 'confirmed')
+        store.updateItem(item.id, { error: 'Error al confirmar la foto' })
+        store.transitionStatus(item.id, 'failed')
       }
     }
   }
@@ -151,8 +180,11 @@ export function useUploadQueue(eventId: Ref<string>) {
     }
 
     queue.onIdle().then(async () => {
-      await flushConfirmBatch()
-      queryClient.invalidateQueries({ queryKey: PHOTO_QUERY_KEYS.all() })
+      try {
+        await flushConfirmBatch()
+      } finally {
+        queryClient.invalidateQueries({ queryKey: PHOTO_QUERY_KEYS.all() })
+      }
     })
   }
 
@@ -168,6 +200,7 @@ export function useUploadQueue(eventId: Ref<string>) {
     queue.clear()
     store.clear()
     _pendingConfirm.length = 0
+    autoConfirmedCount.value = 0
   }
 
   // --- Connectivity → queue pause/resume ---
@@ -201,6 +234,7 @@ export function useUploadQueue(eventId: Ref<string>) {
   return {
     isActive,
     isOnline,
+    autoConfirmedCount,
     startUpload,
     pauseUpload,
     resumeUpload,

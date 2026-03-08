@@ -1,0 +1,25 @@
+.upload-controls {
+  background: #fff;
+  border: 1px solid var(--tt-neutral-light);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.upload-controls__percent {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--tt-primary);
+}
+
+.upload-controls__counts {
+  font-size: 12px;
+  color: var(--tt-neutral-mid);
+}
+
+.upload-controls__count--success {
+  color: var(--tt-success);
+}
+
+.upload-controls__count--error {
+  color: #d03050;
+}
