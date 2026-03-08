@@ -5,7 +5,11 @@ import type { IApiSuccessResponse } from '../http-response.interface'
 
 export function registerSuccessInterceptor(axios: AxiosInstance): void {
   axios.interceptors.response.use((response) => {
-    const method = (response.config as InternalAxiosRequestConfig).method?.toUpperCase()
+    const config = response.config as InternalAxiosRequestConfig & { silent?: boolean }
+
+    if (config.silent) return response
+
+    const method = config.method?.toUpperCase()
     const isNonGet = method && method !== 'GET'
 
     if (isNonGet) {

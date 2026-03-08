@@ -6,7 +6,16 @@ import type { AnyFieldApi } from '@tanstack/vue-form'
  * into a single string suitable for NFormItem's :feedback prop.
  */
 export function getFieldErrors(errors: unknown[]): string | undefined {
-  const messages = errors.filter(Boolean).flat()
+  const messages = [
+    ...new Set(
+      errors
+        .filter(Boolean)
+        .flat()
+        .map((e) =>
+          typeof e === 'string' ? e : ((e as { message?: string }).message ?? String(e)),
+        ),
+    ),
+  ]
   return messages.length > 0 ? messages.join(', ') : undefined
 }
 

@@ -5,11 +5,13 @@ import type { IApiErrorResponse } from '../http-response.interface'
 
 export function registerErrorInterceptor(axios: AxiosInstance): void {
   axios.interceptors.response.use(undefined, (error: AxiosError<IApiErrorResponse>) => {
-    const apiError = error.response?.data?.error
+    const config = error.config as (typeof error.config & { silent?: boolean }) | undefined
 
-    const errorMessage = apiError?.message ?? error.message ?? 'An unexpected error occurred'
-
-    message.error(errorMessage)
+    if (!config?.silent) {
+      const apiError = error.response?.data?.error
+      const errorMessage = apiError?.message ?? error.message ?? 'An unexpected error occurred'
+      message.error(errorMessage)
+    }
 
     return Promise.reject(error)
   })
