@@ -8,4 +8,5 @@ export interface IStatCard {
   label: string
   value: string | number
   description?: string
+  tooltip?: string
 }

@@ -4,7 +4,9 @@ import { useRouter } from 'vue-router'
 import { NButton, NGrid, NGridItem, NResult } from 'naive-ui'
 
 import AppTopBar from '@/core/layout/AppTopBar.vue'
+import { PHOTO_ROUTE_NAMES } from '@/features/photos/routes'
 import { useEventsListQuery } from '../../composables/queries/use-events-list'
+import { useEventsStatsQuery } from '../../composables/queries/use-events-stats'
 import { EVENT_ROUTE_NAMES } from '../../routes'
 import type { IEventListItem } from '../../types/responses/event-list.response'
 import EventListStatCards from '../components/EventListStatCards/EventListStatCards.vue'
@@ -18,9 +20,14 @@ const page = ref(1)
 
 const EVENTS_PER_PAGE = 5
 const { data, isPending, isError, refetch } = useEventsListQuery(page, EVENTS_PER_PAGE)
+const { data: stats } = useEventsStatsQuery()
 
 function handleView(id: IEventListItem['id']) {
   router.push({ name: EVENT_ROUTE_NAMES.DETAIL, params: { id } })
+}
+
+function handleUpload(eventId: IEventListItem['id']) {
+  router.push({ name: PHOTO_ROUTE_NAMES.UPLOAD, params: { eventId } })
 }
 
 function handleCreate() {
@@ -37,7 +44,7 @@ function handleCreate() {
     </AppTopBar>
 
     <div class="page-view__content list-content">
-      <EventListStatCards :total-events="data?.pagination?.total" />
+      <EventListStatCards :stats="stats" />
       <EventFilterBar
         :page="page"
         :page-count="data?.pagination?.totalPages ?? 0"
@@ -70,7 +77,7 @@ function handleCreate() {
           </template>
           <template v-else-if="data">
             <NGridItem v-for="event in data.items" :key="event.id">
-              <EventCard :event="event" @view="handleView" />
+              <EventCard :event="event" @view="handleView" @upload="handleUpload" />
             </NGridItem>
           </template>
         </NGrid>
