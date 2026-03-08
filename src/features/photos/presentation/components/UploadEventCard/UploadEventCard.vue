@@ -32,7 +32,7 @@ defineProps<{
           </NFlex>
           <NFlex :size="4" align="center">
             <NIcon :component="CameraOutline" :size="13" />
-            <span>{{ event.totalPhotos }} fotos</span>
+            <span>{{ event.photoCount }} fotos</span>
           </NFlex>
         </NFlex>
       </div>

@@ -26,7 +26,7 @@ const router = useRouter()
         </NTag>
       </NFlex>
       <p class="gallery-header__subtitle">
-        {{ formatDate(event.date) }} · {{ event.totalPhotos }} fotos
+        {{ formatDate(event.date) }} · {{ event.photoCount }} fotos
       </p>
     </div>
     <NButton
