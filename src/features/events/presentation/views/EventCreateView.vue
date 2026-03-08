@@ -1,22 +1,62 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+import { useQueryClient } from '@tanstack/vue-query'
 import { useRouter } from 'vue-router'
 import { NCard, NTag } from 'naive-ui'
 
+import { API_ROUTES } from '@/core/api/api-routes'
+import { httpClient } from '@/core/http/axios-client'
+import { b2UploadClient } from '@/core/http/b2-upload-client'
 import AppTopBar from '@/core/layout/AppTopBar.vue'
 import { useCreateEvent } from '../../composables/mutations/use-create-event'
+import { EVENT_QUERY_KEYS } from '../../constants/query-keys'
 import { createBreadcrumbs } from '../../constants/event-breadcrumbs'
 import { EVENT_ROUTE_NAMES } from '../../routes'
 import { toCreateEventRequest } from '../../mappers/event-form.mapper'
 import type { IEventFormData } from '../../types/event-form.types'
+import type { IApiCoverPresignedUrl } from '../../types/responses/cover-presigned-url.response'
 import EventForm from '../components/EventForm/EventForm.vue'
 
 const router = useRouter()
-const { mutate, isPending } = useCreateEvent()
+const queryClient = useQueryClient()
+const isSubmitting = ref(false)
+
+const { mutateAsync: createEvent } = useCreateEvent()
 
 const breadcrumbs = createBreadcrumbs()
 
-function handleSubmit(formData: IEventFormData) {
-  mutate(toCreateEventRequest(formData))
+async function uploadCoverImage(eventId: string, file: File): Promise<void> {
+  const { data: presigned } = await httpClient.post<IApiCoverPresignedUrl>(
+    API_ROUTES.EVENTS.COVER_PRESIGNED_URL(eventId),
+    { fileName: file.name, contentType: file.type },
+    { silent: true },
+  )
+
+  await b2UploadClient.put(presigned.url, file, {
+    headers: { 'Content-Type': file.type },
+  })
+
+  await httpClient.post(
+    API_ROUTES.EVENTS.COVER_CONFIRM(eventId),
+    { storageKey: presigned.objectKey },
+    { silent: true },
+  )
+}
+
+async function handleSubmit(formData: IEventFormData, coverFile?: File) {
+  isSubmitting.value = true
+  try {
+    const { id } = await createEvent(toCreateEventRequest(formData))
+
+    if (coverFile) {
+      await uploadCoverImage(id, coverFile)
+      queryClient.invalidateQueries({ queryKey: EVENT_QUERY_KEYS.all() })
+    }
+
+    router.push({ name: EVENT_ROUTE_NAMES.LIST })
+  } finally {
+    isSubmitting.value = false
+  }
 }
 </script>
 
@@ -40,7 +80,7 @@ function handleSubmit(formData: IEventFormData) {
         </template>
 
         <EventForm
-          :is-submitting="isPending"
+          :is-submitting="isSubmitting"
           @submit="handleSubmit"
           @cancel="router.push({ name: EVENT_ROUTE_NAMES.LIST })"
         />

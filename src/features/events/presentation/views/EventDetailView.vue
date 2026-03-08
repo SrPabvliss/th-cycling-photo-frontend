@@ -13,6 +13,7 @@ import type { IEventDetail } from '../../types/responses/event-detail.response'
 import EventDetailHeader from '../components/EventDetailHeader/EventDetailHeader.vue'
 import EventStatCards from '../components/EventStatCards/EventStatCards.vue'
 import EventDetailSkeleton from '../components/EventDetailSkeleton/EventDetailSkeleton.vue'
+import EventCoverCard from '../components/EventCoverCard/EventCoverCard.vue'
 import EventInfoCard from '../components/EventInfoCard/EventInfoCard.vue'
 
 const route = useRoute()
@@ -100,6 +101,7 @@ function handlePhotoClick(photoId: string) {
           </NFlex>
 
           <NFlex vertical :size="24">
+            <EventCoverCard :event="event" :event-id="id" />
             <EventInfoCard :event="event" />
           </NFlex>
         </div>
