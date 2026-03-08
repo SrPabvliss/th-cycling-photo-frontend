@@ -1,4 +1,5 @@
 import type {
+  CoverImageSource,
   EventStatus,
   IApiEventListItem,
   IEventListItem,
@@ -11,9 +12,13 @@ export function toEventListItem(api: IApiEventListItem): IEventListItem {
     name: api.name,
     date: parseDateOnly(api.date),
     location: api.location,
+    provinceName: api.provinceName,
+    cantonName: api.cantonName,
+    coverImageUrl: api.coverImageUrl,
+    coverImageSource: api.coverImageSource as CoverImageSource | null,
     status: api.status as EventStatus,
-    totalPhotos: api.totalPhotos,
-    processedPhotos: api.processedPhotos,
+    photoCount: api.photoCount,
+    totalFileSize: api.totalFileSize,
   }
 }
 
