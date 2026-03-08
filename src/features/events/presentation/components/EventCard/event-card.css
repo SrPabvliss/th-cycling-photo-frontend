@@ -44,6 +44,12 @@
   color: var(--tt-neutral-mid);
 }
 
+.event-card__cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* --- Badge --- */
 .event-card__badge {
   position: absolute;

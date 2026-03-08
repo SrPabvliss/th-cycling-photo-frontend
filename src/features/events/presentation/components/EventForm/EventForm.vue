@@ -1,29 +1,84 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue'
 import { useForm } from '@tanstack/vue-form'
-import { NButton, NDatePicker, NFlex, NFormItem, NGrid, NGridItem, NIcon, NInput } from 'naive-ui'
-import { ArrowForward } from '@vicons/ionicons5'
+import {
+  NButton,
+  NDatePicker,
+  NFlex,
+  NFormItem,
+  NGrid,
+  NGridItem,
+  NIcon,
+  NInput,
+  NSelect,
+} from 'naive-ui'
+import { ArrowForward, CameraOutline, CloseCircleOutline, ImageOutline } from '@vicons/ionicons5'
 
 import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
+import { useProvincesQuery } from '@/features/locations/composables/queries/use-provinces'
+import { useCantonsQuery } from '@/features/locations/composables/queries/use-cantons'
 import { EVENT_FORM_DEFAULTS, eventFormSchema } from '../../../constants/event-form.schema'
 import type { IEventFormData } from '../../../types/event-form.types'
+
+const ACCEPTED_COVER_TYPES = 'image/jpeg,image/png,image/webp'
 
 const props = defineProps<{
   isSubmitting: boolean
   initialData?: IEventFormData
   submitLabel?: string
+  hideCoverUpload?: boolean
 }>()
 
 const emit = defineEmits<{
-  submit: [data: IEventFormData]
+  submit: [data: IEventFormData, coverFile?: File]
   cancel: []
 }>()
 
 const form = useForm({
   defaultValues: props.initialData ?? EVENT_FORM_DEFAULTS,
   onSubmit: async ({ value }) => {
-    emit('submit', value)
+    emit('submit', value, coverFile.value ?? undefined)
   },
 })
+
+// --- Cover image ---
+
+const coverFile = ref<File | null>(null)
+const coverPreview = ref<string | null>(null)
+const coverInput = ref<HTMLInputElement | null>(null)
+
+function triggerCoverInput() {
+  coverInput.value?.click()
+}
+
+function handleCoverChange(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  coverFile.value = file
+  coverPreview.value = URL.createObjectURL(file)
+  if (coverInput.value) coverInput.value.value = ''
+}
+
+function removeCover() {
+  if (coverPreview.value) URL.revokeObjectURL(coverPreview.value)
+  coverFile.value = null
+  coverPreview.value = null
+}
+
+// --- Location cascading ---
+
+const selectedProvinceId = ref<number | null>(props.initialData?.provinceId ?? null)
+
+const { data: provinces, isPending: isLoadingProvinces } = useProvincesQuery()
+const { data: cantons, isFetching: isLoadingCantons } = useCantonsQuery(selectedProvinceId)
+
+const provinceOptions = computed(
+  () => provinces.value?.map((p) => ({ label: p.name, value: p.id })) ?? [],
+)
+
+const cantonOptions = computed(
+  () => cantons.value?.map((c) => ({ label: c.name, value: c.id })) ?? [],
+)
 </script>
 
 <template>
@@ -61,11 +116,39 @@ const form = useForm({
               </template>
             </form.Field>
 
-            <form.Field name="location">
+            <form.Field name="provinceId">
               <template v-slot="{ field }">
-                <NFormItem label="Ubicación">
-                  <NInput
-                    placeholder="Ej. Baños de Agua Santa, Tungurahua"
+                <NFormItem label="Provincia">
+                  <NSelect
+                    placeholder="Seleccionar provincia"
+                    :options="provinceOptions"
+                    :loading="isLoadingProvinces"
+                    :value="field.state.value"
+                    filterable
+                    clearable
+                    @update:value="
+                      (val: number | null) => {
+                        field.handleChange(val)
+                        selectedProvinceId = val
+                        form.setFieldValue('cantonId', null)
+                      }
+                    "
+                    @blur="field.handleBlur"
+                  />
+                </NFormItem>
+              </template>
+            </form.Field>
+
+            <form.Field name="cantonId">
+              <template v-slot="{ field }">
+                <NFormItem label="Cantón">
+                  <NSelect
+                    placeholder="Seleccionar cantón"
+                    :options="cantonOptions"
+                    :loading="isLoadingCantons"
+                    :disabled="!selectedProvinceId"
+                    filterable
+                    clearable
                     v-bind="fieldInput(field)"
                   />
                 </NFormItem>
@@ -94,6 +177,37 @@ const form = useForm({
                 </NFormItem>
               </template>
             </form.Field>
+
+            <!-- Cover image picker -->
+            <NFormItem v-if="!hideCoverUpload" label="Imagen de portada">
+              <template #label-extra>
+                <span class="form-hint">
+                  Si no se selecciona, se asignará automáticamente la primera foto subida.
+                </span>
+              </template>
+              <div v-if="coverPreview" class="cover-preview">
+                <img :src="coverPreview" alt="Preview" class="cover-preview__image" />
+                <NButton circle size="tiny" class="cover-preview__remove" @click="removeCover">
+                  <template #icon><NIcon :component="CloseCircleOutline" /></template>
+                </NButton>
+              </div>
+              <div v-else class="cover-upload-area" @click="triggerCoverInput">
+                <NFlex vertical align="center" :size="4">
+                  <NIcon :component="ImageOutline" :size="28" color="var(--tt-neutral-light)" />
+                  <span class="cover-upload-area__text">
+                    <NIcon :component="CameraOutline" :size="14" />
+                    Seleccionar imagen
+                  </span>
+                </NFlex>
+              </div>
+              <input
+                ref="coverInput"
+                type="file"
+                :accept="ACCEPTED_COVER_TYPES"
+                style="display: none"
+                @change="handleCoverChange"
+              />
+            </NFormItem>
           </NFlex>
         </NGridItem>
       </NGrid>

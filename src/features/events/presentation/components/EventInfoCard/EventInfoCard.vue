@@ -1,13 +1,17 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { NCard, NFlex, NIcon } from 'naive-ui'
 import { CalendarOutline, LocationOutline } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
+import { formatLocation } from '@/shared/utils/location.utils'
 import type { IEventDetail } from '../../../types/responses/event-detail.response'
 
-defineProps<{
+const props = defineProps<{
   event: IEventDetail
 }>()
+
+const displayLocation = computed(() => formatLocation(props.event) ?? 'Sin ubicación')
 </script>
 
 <template>
@@ -34,7 +38,7 @@ defineProps<{
         </div>
         <div>
           <p class="info-item__label">Ubicación</p>
-          <p class="info-item__value">{{ event.location ?? 'Sin ubicación' }}</p>
+          <p class="info-item__value">{{ displayLocation }}</p>
         </div>
       </NFlex>
     </NFlex>
