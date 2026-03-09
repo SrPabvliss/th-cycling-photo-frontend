@@ -1,25 +1,44 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { NButton, NFlex, NIcon, NTag } from 'naive-ui'
-import { LocationOutline, CalendarOutline, CameraOutline, ImageOutline } from '@vicons/ionicons5'
+import {
+  LocationOutline,
+  CalendarOutline,
+  CameraOutline,
+  CloudUploadOutline,
+  ImageOutline,
+} from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
+import { formatFileSize } from '@/shared/utils/format.utils'
+import { formatLocation } from '@/shared/utils/location.utils'
 import { EVENT_STATUS_CONFIG } from '../../../constants/status-config'
 import type { IEventListItem } from '../../../types/responses/event-list.response'
 
-defineProps<{
+const props = defineProps<{
   event: IEventListItem
 }>()
 
 const emit = defineEmits<{
   view: [id: IEventListItem['id']]
+  upload: [id: IEventListItem['id']]
 }>()
+
+const displayLocation = computed(() => formatLocation(props.event))
 </script>
 
 <template>
   <article class="event-card" @click="emit('view', event.id)">
     <!-- Cover -->
     <div class="event-card__cover">
+      <img
+        v-if="event.coverImageUrl"
+        :src="event.coverImageUrl"
+        :alt="event.name"
+        class="event-card__cover-image"
+      />
       <NFlex
+        v-else
         vertical
         align="center"
         justify="center"
@@ -39,10 +58,10 @@ const emit = defineEmits<{
         </NTag>
       </div>
 
-      <!-- Photo count overlay -->
-      <div v-if="event.totalPhotos > 0" class="event-card__overlay">
+      <!-- Photo count + size overlay -->
+      <div v-if="event.photoCount > 0" class="event-card__overlay">
         <NIcon :component="CameraOutline" :size="14" />
-        <span>{{ event.totalPhotos }} fotos</span>
+        <span>{{ event.photoCount }} fotos &middot; {{ formatFileSize(event.totalFileSize) }}</span>
       </div>
     </div>
 
@@ -53,12 +72,12 @@ const emit = defineEmits<{
       </div>
 
       <div class="event-card__meta-row">
-        <NFlex v-if="event.location" :size="6" align="center" class="event-card__meta">
+        <NFlex v-if="displayLocation" :size="6" align="center" class="event-card__meta">
           <NIcon :component="LocationOutline" :size="14" />
-          <span>{{ event.location }}</span>
+          <span>{{ displayLocation }}</span>
         </NFlex>
 
-        <span v-if="event.location" class="event-card__meta-divider" />
+        <span v-if="displayLocation" class="event-card__meta-divider" />
 
         <NFlex :size="6" align="center" class="event-card__meta">
           <NIcon :component="CalendarOutline" :size="14" />
@@ -68,7 +87,16 @@ const emit = defineEmits<{
 
       <!-- Footer -->
       <div class="event-card__footer">
-        <NButton block @click.stop="emit('view', event.id)"> Ver detalle </NButton>
+        <NButton
+          v-if="event.photoCount === 0"
+          block
+          type="primary"
+          @click.stop="emit('upload', event.id)"
+        >
+          <template #icon><NIcon :component="CloudUploadOutline" /></template>
+          Subir Fotos
+        </NButton>
+        <NButton v-else block @click.stop="emit('view', event.id)"> Ver Detalle </NButton>
       </div>
     </div>
   </article>

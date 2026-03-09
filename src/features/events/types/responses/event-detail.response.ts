@@ -1,4 +1,4 @@
-import type { EventStatus } from './event-list.response'
+import type { CoverImageSource, EventStatus } from './event-list.response'
 
 /** API projection from GET /events/:id — already camelCase from backend */
 export interface IApiEventDetail {
@@ -6,9 +6,15 @@ export interface IApiEventDetail {
   name: string
   date: string
   location: string | null
+  provinceName: string | null
+  cantonName: string | null
+  provinceId: number | null
+  cantonId: number | null
+  coverImageUrl: string | null
+  coverImageSource: CoverImageSource | null
   status: string
-  totalPhotos: number
-  processedPhotos: number
+  photoCount: number
+  totalFileSize: number
   createdAt: string
   updatedAt: string
 }
@@ -19,9 +25,15 @@ export interface IEventDetail {
   name: string
   date: Date
   location: string | null
+  provinceName: string | null
+  cantonName: string | null
+  provinceId: number | null
+  cantonId: number | null
+  coverImageUrl: string | null
+  coverImageSource: CoverImageSource | null
   status: EventStatus
-  totalPhotos: number
-  processedPhotos: number
+  photoCount: number
+  totalFileSize: number
   createdAt: Date
   updatedAt: Date
 }

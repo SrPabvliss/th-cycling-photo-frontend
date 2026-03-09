@@ -9,3 +9,47 @@
   background-color: #f9fafb;
   border-top: 1px solid #e5e7eb;
 }
+
+.cover-upload-area {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 2px dashed #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.cover-upload-area:hover {
+  border-color: var(--n-color-target);
+}
+
+.cover-upload-area__text {
+  font-size: 13px;
+  color: var(--tt-neutral-mid);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cover-preview {
+  width: 100%;
+  position: relative;
+}
+
+.cover-preview__image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.cover-preview__remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: white !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}

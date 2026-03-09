@@ -68,6 +68,7 @@ function handleSubmit(formData: IEventFormData) {
           :initial-data="initialData"
           :is-submitting="isUpdating"
           submit-label="Guardar Cambios"
+          hide-cover-upload
           @submit="handleSubmit"
           @cancel="router.push({ name: EVENT_ROUTE_NAMES.DETAIL, params: { id: id } })"
         />

@@ -31,6 +31,7 @@ export function usePresignedUrlCache(eventId: Ref<string>) {
         const response = await httpClient.post<IApiPresignedUrl>(
           API_ROUTES.PHOTOS.PRESIGNED_URL(eventId.value),
           body,
+          { silent: true },
         )
         return response.data
       },

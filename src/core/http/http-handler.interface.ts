@@ -5,6 +5,8 @@ export interface IHttpRequestConfig {
   headers?: Record<string, string>
   signal?: AbortSignal
   onUploadProgress?: (event: { loaded: number; total?: number }) => void
+  /** Suppress automatic success/error toasts for this request */
+  silent?: boolean
 }
 
 export interface IHttpHandler {
