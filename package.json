@@ -22,6 +22,7 @@
     "@tanstack/vue-query": "^5.92.9",
     "axios": "^1.13.5",
     "date-fns": "^4.1.0",
+    "jszip": "^3.10.1",
     "naive-ui": "^2.43.2",
     "p-queue": "^9.1.0",
     "p-retry": "^7.1.1",

@@ -7,4 +7,6 @@ export const PHOTO_QUERY_KEYS = {
   detail: (id: string) => [API_ROUTES.PHOTOS.BASE, 'detail', id] as const,
   presignedUrl: (eventId: string, fileName: string) =>
     [API_ROUTES.PHOTOS.BASE, 'presigned-url', eventId, fileName] as const,
+  downloadUrl: (id: string, type: string) =>
+    [API_ROUTES.PHOTOS.BASE, 'download', id, type] as const,
 } as const

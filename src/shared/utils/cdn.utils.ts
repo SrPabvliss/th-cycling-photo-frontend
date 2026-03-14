@@ -28,6 +28,14 @@ export const IMAGE_VARIANTS = {
     fit: 'scale-down',
     onerror: 'redirect',
   },
+  /** Classification workspace (~1400px main panel) */
+  workspace: {
+    width: 1400,
+    quality: 90,
+    format: 'auto',
+    fit: 'scale-down',
+    onerror: 'redirect',
+  },
 } as const satisfies Record<string, IImageTransformOptions>
 
 export type ImageVariant = keyof typeof IMAGE_VARIANTS

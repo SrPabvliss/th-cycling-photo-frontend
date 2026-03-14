@@ -11,6 +11,8 @@ const props = defineProps<{
   event: IEventDetail
 }>()
 
+const unclassifiedCount = computed(() => props.event.photoCount - props.event.classifiedCount)
+
 const stats = computed<IStatCard[]>(() => [
   {
     icon: Camera,
@@ -30,15 +32,15 @@ const stats = computed<IStatCard[]>(() => [
     icon: ImagesOutline,
     color: 'amber',
     label: 'Clasificadas',
-    value: '—',
-    description: 'Disponible próximamente',
+    value: props.event.classifiedCount,
+    description: `${props.event.photoCount > 0 ? Math.round((props.event.classifiedCount / props.event.photoCount) * 100) : 0}% del total`,
   },
   {
     icon: AlertCircleOutline,
     color: 'gray',
     label: 'Sin clasificar',
-    value: '—',
-    description: 'Disponible próximamente',
+    value: unclassifiedCount.value,
+    description: 'Pendientes de revisión',
   },
 ])
 </script>

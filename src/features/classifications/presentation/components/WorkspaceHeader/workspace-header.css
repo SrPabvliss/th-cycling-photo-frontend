@@ -1,0 +1,32 @@
+.workspace-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--n-border-color, #e0e0e0);
+  background: #fff;
+}
+
+.workspace-header__back {
+  flex-shrink: 0;
+}
+
+.workspace-header__breadcrumbs {
+  flex: 0 0 auto;
+}
+
+.workspace-header__classified {
+  margin-left: auto;
+}
+
+.workspace-header__classified-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tt-neutral-mid, #666);
+  white-space: nowrap;
+}
+
+.workspace-header__progress {
+  flex: 0 0 auto;
+  width: 200px;
+}

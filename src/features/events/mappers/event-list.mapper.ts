@@ -18,6 +18,7 @@ export function toEventListItem(api: IApiEventListItem): IEventListItem {
     coverImageSource: api.coverImageSource as CoverImageSource | null,
     status: api.status as EventStatus,
     photoCount: api.photoCount,
+    classifiedCount: api.classifiedCount,
     totalFileSize: api.totalFileSize,
   }
 }
