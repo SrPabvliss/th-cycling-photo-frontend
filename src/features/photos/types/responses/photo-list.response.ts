@@ -10,6 +10,7 @@ export interface IApiPhotoListItem {
   width: number | null
   height: number | null
   uploadedAt: string
+  classifiedAt: string | null
 }
 
 /** Frontend domain type with resolved CDN URL and typed status */
@@ -22,4 +23,5 @@ export interface IPhotoListItem {
   width: number | null
   height: number | null
   uploadedAt: Date
+  classifiedAt: Date | null
 }

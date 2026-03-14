@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 import AppLayout from '@/core/layout/AppLayout.vue'
+import { classificationRoutes } from '@/features/classifications/routes'
 import { eventRoutes, EVENTS_PATH } from '@/features/events/routes'
 import { photoRoutes } from '@/features/photos/routes'
 
@@ -19,6 +20,7 @@ const router = createRouter({
         ...photoRoutes,
       ],
     },
+    ...classificationRoutes,
   ],
 })
 

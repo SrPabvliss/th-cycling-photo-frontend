@@ -16,6 +16,7 @@ export function toPhotoListItem(api: IApiPhotoListItem): IPhotoListItem {
     width: api.width,
     height: api.height,
     uploadedAt: new Date(api.uploadedAt),
+    classifiedAt: api.classifiedAt ? new Date(api.classifiedAt) : null,
   }
 }
 

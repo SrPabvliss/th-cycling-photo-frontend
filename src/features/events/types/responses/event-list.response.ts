@@ -14,6 +14,7 @@ export interface IApiEventListItem {
   coverImageSource: CoverImageSource | null
   status: string
   photoCount: number
+  classifiedCount: number
   totalFileSize: number
 }
 
@@ -29,5 +30,6 @@ export interface IEventListItem {
   coverImageSource: CoverImageSource | null
   status: EventStatus
   photoCount: number
+  classifiedCount: number
   totalFileSize: number
 }

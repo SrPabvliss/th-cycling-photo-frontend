@@ -14,6 +14,7 @@ export interface IApiEventDetail {
   coverImageSource: CoverImageSource | null
   status: string
   photoCount: number
+  classifiedCount: number
   totalFileSize: number
   createdAt: string
   updatedAt: string
@@ -33,6 +34,7 @@ export interface IEventDetail {
   coverImageSource: CoverImageSource | null
   status: EventStatus
   photoCount: number
+  classifiedCount: number
   totalFileSize: number
   createdAt: Date
   updatedAt: Date

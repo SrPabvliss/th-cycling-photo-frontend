@@ -1,6 +1,7 @@
 const EVENTS_BASE = '/events'
 const PHOTOS_BASE = '/photos'
 const LOCATIONS_BASE = '/locations'
+const CYCLISTS_BASE = '/cyclists'
 
 export const API_ROUTES = {
   EVENTS: {
@@ -23,6 +24,19 @@ export const API_ROUTES = {
     UPLOAD: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos`,
     PRESIGNED_URL: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/presigned-url`,
     CONFIRM_BATCH: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/confirm-batch`,
+    RETOUCHED_PRESIGNED_URL: (id: string) => `${PHOTOS_BASE}/${id}/retouched/presigned-url`,
+    RETOUCHED_CONFIRM: (id: string) => `${PHOTOS_BASE}/${id}/retouched/confirm`,
+    DOWNLOAD: (id: string) => `${PHOTOS_BASE}/${id}/download`,
+    CLASSIFY: (photoId: string) => `${PHOTOS_BASE}/${photoId}/classify`,
+    CYCLISTS_BY_PHOTO: (photoId: string) => `${PHOTOS_BASE}/${photoId}/cyclists`,
+    RESUME_POINT: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/resume-point`,
+    DOWNLOAD_MANIFEST: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/download-manifest`,
+  },
+  CLASSIFICATIONS: {
+    BASE: CYCLISTS_BASE,
+    CYCLIST_DETAIL: (id: string) => `${CYCLISTS_BASE}/${id}`,
+    UPDATE_CYCLIST: (id: string) => `${CYCLISTS_BASE}/${id}`,
+    DELETE_CYCLIST: (id: string) => `${CYCLISTS_BASE}/${id}`,
   },
   LOCATIONS: {
     BASE: LOCATIONS_BASE,
