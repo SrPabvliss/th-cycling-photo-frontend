@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { NFlex, NIcon, NTag } from 'naive-ui'
-import { CalendarOutline } from '@vicons/ionicons5'
+import { CalendarOutline, CheckmarkCircle } from '@vicons/ionicons5'
 
 import { formatRelativeTime } from '@/shared/utils/date.utils'
 import { PHOTO_STATUS_CONFIG } from '../../../constants/status-config'
@@ -24,11 +24,15 @@ const emit = defineEmits<{
         class="photo-card__image"
         loading="lazy"
         decoding="async"
+        @load="($event.target as HTMLImageElement).dataset.loaded = 'true'"
       />
       <div class="photo-card__badge">
         <NTag :type="PHOTO_STATUS_CONFIG[props.photo.status].type" size="small" round>
           {{ PHOTO_STATUS_CONFIG[props.photo.status].label }}
         </NTag>
+      </div>
+      <div v-if="props.photo.classifiedAt" class="photo-card__classified-badge">
+        <NIcon :component="CheckmarkCircle" :size="20" color="#18a058" />
       </div>
     </div>
 

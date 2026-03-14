@@ -36,6 +36,9 @@ const displayLocation = computed(() => formatLocation(props.event))
         :src="event.coverImageUrl"
         :alt="event.name"
         class="event-card__cover-image"
+        loading="lazy"
+        decoding="async"
+        @load="($event.target as HTMLImageElement).dataset.loaded = 'true'"
       />
       <NFlex
         v-else
