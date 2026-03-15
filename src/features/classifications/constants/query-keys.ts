@@ -7,4 +7,6 @@ export const CLASSIFICATION_QUERY_KEYS = {
   cyclistDetail: (id: string) => [API_ROUTES.CLASSIFICATIONS.BASE, 'detail', id] as const,
   workspacePhotos: (eventId: string, page: number, classified?: boolean) =>
     [API_ROUTES.CLASSIFICATIONS.BASE, 'workspace-photos', eventId, { page, classified }] as const,
+  similarPhotos: (photoId: string) =>
+    [API_ROUTES.CLASSIFICATIONS.BASE, 'similar', photoId] as const,
 } as const

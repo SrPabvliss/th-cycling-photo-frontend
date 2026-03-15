@@ -19,6 +19,7 @@ const props = defineProps<{
   photo: IPhotoDetail
   hasNext: boolean
   hasPrev: boolean
+  previewStorageKey?: string | null
 }>()
 
 defineEmits<{
@@ -92,6 +93,7 @@ async function handleFileSelected(event: Event) {
 }
 
 const workspaceImageUrl = (storageKey: string) => getTransformedPhotoUrl(storageKey, 'workspace')
+const displayStorageKey = computed(() => props.previewStorageKey ?? props.photo.storageKey)
 </script>
 
 <template>
@@ -107,15 +109,15 @@ const workspaceImageUrl = (storageKey: string) => getTransformedPhotoUrl(storage
       @mouseleave="handleMouseUp"
     >
       <ImageComparisonSlider
-        v-if="showComparison && photo.retouchedImageUrl"
+        v-if="showComparison && photo.retouchedImageUrl && !previewStorageKey"
         :original-src="workspaceImageUrl(photo.storageKey)"
         :retouched-src="photo.retouchedImageUrl"
         :alt="photo.filename"
       />
       <img
         v-else
-        :key="photo.id"
-        :src="workspaceImageUrl(photo.storageKey)"
+        :key="displayStorageKey"
+        :src="workspaceImageUrl(displayStorageKey)"
         :alt="photo.filename"
         class="workspace-photo-panel__image"
         :class="{ 'workspace-photo-panel__image--no-transition': isPanning }"

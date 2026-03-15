@@ -28,6 +28,8 @@ export const API_ROUTES = {
     RETOUCHED_CONFIRM: (id: string) => `${PHOTOS_BASE}/${id}/retouched/confirm`,
     DOWNLOAD: (id: string) => `${PHOTOS_BASE}/${id}/download`,
     CLASSIFY: (photoId: string) => `${PHOTOS_BASE}/${photoId}/classify`,
+    SIMILAR: (photoId: string) => `${PHOTOS_BASE}/${photoId}/similar`,
+    BULK_CLASSIFY: `${PHOTOS_BASE}/bulk-classify`,
     CYCLISTS_BY_PHOTO: (photoId: string) => `${PHOTOS_BASE}/${photoId}/cyclists`,
     RESUME_POINT: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/resume-point`,
     DOWNLOAD_MANIFEST: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/download-manifest`,
