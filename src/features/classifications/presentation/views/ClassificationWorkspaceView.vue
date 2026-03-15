@@ -7,6 +7,11 @@ import WorkspaceHeader from '../components/WorkspaceHeader/WorkspaceHeader.vue'
 import WorkspacePhotoPanel from '../components/WorkspacePhotoPanel/WorkspacePhotoPanel.vue'
 import CyclistList from '../components/CyclistList/CyclistList.vue'
 import PhotoActions from '../components/PhotoActions/PhotoActions.vue'
+import WorkingGroupGallery from '../components/WorkingGroupGallery/WorkingGroupGallery.vue'
+import SimilarPhotosPanel from '../components/SimilarPhotosPanel/SimilarPhotosPanel.vue'
+import PhotoPreviewModal from '../components/PhotoPreviewModal/PhotoPreviewModal.vue'
+import LabelConflictModal from '../components/LabelConflictModal/LabelConflictModal.vue'
+import BulkClassifyForm from '../components/BulkClassifyForm/BulkClassifyForm.vue'
 
 const {
   eventId,
@@ -23,6 +28,16 @@ const {
   breadcrumbs,
   goNext,
   goPrev,
+  workingGroup,
+  labelConflict,
+  previewStorageKey,
+  previewModalPhoto,
+  showPreviewModal,
+  handlePreviewSimilar,
+  handlePreviewAdd,
+  handleAddToGroup,
+  handleBulkClassifyDone,
+  handleBulkClassifyCancel,
 } = useClassificationWorkspace()
 </script>
 
@@ -66,12 +81,39 @@ const {
     </div>
 
     <div v-else class="workspace__body">
+      <!-- Left Panel: Working Group + Similar Photos -->
+      <div class="workspace__left-panel">
+        <WorkingGroupGallery
+          v-if="photo"
+          :current-photo="{
+            id: currentPhotoId,
+            storageKey: photo.storageKey,
+            filename: photo.filename,
+          }"
+          :group-photos="workingGroup.groupPhotos.value"
+          :preview-photo-id="workingGroup.previewPhotoId.value"
+          @preview="workingGroup.setPreview"
+          @remove="workingGroup.removeFromGroup"
+        />
+
+        <div class="workspace__left-divider" />
+
+        <SimilarPhotosPanel
+          :photo-id="currentPhotoId"
+          :group-photo-ids="workingGroup.allPhotoIds.value"
+          @add="handleAddToGroup"
+          @preview="handlePreviewSimilar"
+        />
+      </div>
+
+      <!-- Center: Photo Panel -->
       <div class="workspace__photo">
         <WorkspacePhotoPanel
           v-if="photo"
           :photo="photo"
           :has-next="hasNext"
           :has-prev="hasPrev"
+          :preview-storage-key="previewStorageKey"
           @next="goNext"
           @prev="goPrev"
         />
@@ -80,6 +122,7 @@ const {
         </div>
       </div>
 
+      <!-- Right Sidebar -->
       <div class="workspace__sidebar">
         <div class="workspace__filter">
           <NIcon :component="FunnelOutline" :size="14" />
@@ -87,19 +130,59 @@ const {
           <NSwitch v-model:value="showOnlyUnclassified" size="small" />
         </div>
 
-        <CyclistList :photo-id="currentPhotoId" />
+        <template v-if="workingGroup.hasGroup.value">
+          <BulkClassifyForm
+            :photo-ids="workingGroup.allPhotoIds.value"
+            :event-id="eventId"
+            :initial-labels="labelConflict.inheritedLabels.value"
+            @done="handleBulkClassifyDone"
+            @cancel="handleBulkClassifyCancel"
+          />
+        </template>
 
-        <PhotoActions
-          v-if="photo"
-          :photo-id="currentPhotoId"
-          :event-id="eventId"
-          :is-classified="!!photo.classifiedAt"
-          :has-next="hasNext"
-          :cyclist-count="photo.detectedCyclists.length"
-          @next="goNext"
-        />
+        <template v-else>
+          <CyclistList :photo-id="currentPhotoId" />
+
+          <PhotoActions
+            v-if="photo"
+            :photo-id="currentPhotoId"
+            :event-id="eventId"
+            :is-classified="!!photo.classifiedAt"
+            :has-next="hasNext"
+            :cyclist-count="photo.detectedCyclists.length"
+            :group-size="workingGroup.groupSize.value"
+            @next="goNext"
+          />
+        </template>
       </div>
     </div>
+
+    <!-- Modals -->
+    <PhotoPreviewModal
+      v-model:show="showPreviewModal"
+      :photo="previewModalPhoto"
+      @add="handlePreviewAdd"
+      @close="showPreviewModal = false"
+    />
+
+    <LabelConflictModal
+      :show="labelConflict.showInheritModal.value"
+      mode="inherit"
+      :incoming-labels="labelConflict.incomingLabels.value"
+      :existing-labels="null"
+      :photo-filename="labelConflict.pendingPhoto.value?.filename"
+      @update:show="labelConflict.showInheritModal.value = $event"
+      @inherit="(accept) => labelConflict.resolveInherit(accept, workingGroup.addToGroup)"
+    />
+
+    <LabelConflictModal
+      :show="labelConflict.showConflictModal.value"
+      mode="conflict"
+      :incoming-labels="labelConflict.incomingLabels.value"
+      :existing-labels="labelConflict.existingLabels.value"
+      @update:show="labelConflict.showConflictModal.value = $event"
+      @conflict="(winner) => labelConflict.resolveConflict(winner, workingGroup.addToGroup)"
+    />
   </div>
 </template>
 

@@ -10,6 +10,7 @@ const props = defineProps<{
   isClassified: boolean
   hasNext: boolean
   cyclistCount: number
+  groupSize?: number
 }>()
 
 const emit = defineEmits<{
@@ -44,19 +45,21 @@ function handleSkip() {
 
 <template>
   <div class="photo-actions">
-    <NButton
-      type="primary"
-      :loading="classifyMutation.isPending.value"
-      :disabled="cyclistCount === 0 && !isClassified"
-      @click="handleClassifyAndAdvance"
-    >
-      <template #icon><NIcon :component="CheckmarkCircleOutline" /></template>
-      {{ isClassified ? 'Avanzar' : 'Clasificar y avanzar' }}
-    </NButton>
-    <NButton v-if="hasNext && !isClassified" quaternary size="small" @click="handleSkip">
-      <template #icon><NIcon :component="ArrowForwardOutline" /></template>
-      Solo avanzar
-    </NButton>
+    <template v-if="!groupSize || groupSize <= 1">
+      <NButton
+        type="primary"
+        :loading="classifyMutation.isPending.value"
+        :disabled="cyclistCount === 0 && !isClassified"
+        @click="handleClassifyAndAdvance"
+      >
+        <template #icon><NIcon :component="CheckmarkCircleOutline" /></template>
+        {{ isClassified ? 'Avanzar' : 'Clasificar y avanzar' }}
+      </NButton>
+      <NButton v-if="hasNext && !isClassified" quaternary size="small" @click="handleSkip">
+        <template #icon><NIcon :component="ArrowForwardOutline" /></template>
+        Solo avanzar
+      </NButton>
+    </template>
   </div>
 </template>
 

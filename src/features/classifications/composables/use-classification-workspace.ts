@@ -4,10 +4,13 @@ import { useMessage } from 'naive-ui'
 
 import { useEventDetailQuery } from '@/features/events/composables/queries/use-event-detail'
 import { usePhotoDetailQuery } from '@/features/photos/composables/queries/use-photo-detail'
+import type { ISimilarPhoto } from '../types/responses/similar-photo.response'
 import { classifyBreadcrumbs } from '../constants/classification-breadcrumbs'
 import { useWorkspaceNavigation } from './use-workspace-navigation'
 import { useKeyboardNavigation } from './use-keyboard-navigation'
 import { useClassifyPhoto } from './mutations/use-classify-photo'
+import { useWorkingGroup } from './use-working-group'
+import { useLabelConflict } from './use-label-conflict'
 
 export function useClassificationWorkspace() {
   const route = useRoute()
@@ -43,11 +46,64 @@ export function useClassificationWorkspace() {
   const currentPhotoIdRef = computed(() => currentPhotoId.value ?? '')
   const { data: photo, isPending: isPhotoPending } = usePhotoDetailQuery(currentPhotoIdRef)
 
-  // Classify mutation
+  // Working group
+  const workingGroup = useWorkingGroup(computed(() => currentPhotoId.value ?? null))
+
+  // Label conflict
+  const labelConflict = useLabelConflict()
+
+  // Preview: resolve storageKey for previewed photo
+  const previewStorageKey = computed(() => {
+    if (!workingGroup.previewPhotoId.value) return null
+    const found = workingGroup.groupPhotos.value.find(
+      (p) => p.id === workingGroup.previewPhotoId.value,
+    )
+    return found?.storageKey ?? null
+  })
+
+  // Handlers
+  function handleAddToGroup(similarPhoto: ISimilarPhoto) {
+    const currentLabels = labelConflict.inheritedLabels.value
+    labelConflict.handleAddWithConflictCheck(similarPhoto, currentLabels, workingGroup.addToGroup)
+  }
+
+  function handleBulkClassifyDone() {
+    workingGroup.clearGroup()
+    labelConflict.clearInheritedLabels()
+    if (hasNext.value) goNext()
+  }
+
+  function handleBulkClassifyCancel() {
+    workingGroup.clearGroup()
+    labelConflict.clearInheritedLabels()
+  }
+
+  // Preview modal state
+  const previewModalPhoto = ref<ISimilarPhoto | null>(null)
+  const showPreviewModal = computed({
+    get: () => previewModalPhoto.value !== null,
+    set: (v: boolean) => {
+      if (!v) previewModalPhoto.value = null
+    },
+  })
+
+  function handlePreviewSimilar(photo: ISimilarPhoto) {
+    previewModalPhoto.value = photo
+  }
+
+  function handlePreviewAdd() {
+    if (previewModalPhoto.value) {
+      handleAddToGroup(previewModalPhoto.value)
+    }
+    previewModalPhoto.value = null
+  }
+
+  // Classify mutation (single photo flow)
   const classifyMutation = useClassifyPhoto()
 
   function classifyAndAdvance() {
     if (!photo.value || !currentPhotoId.value) return
+    if (workingGroup.hasGroup.value) return // bulk mode handles this
 
     if (photo.value.classifiedAt) {
       if (hasNext.value) goNext()
@@ -108,5 +164,19 @@ export function useClassificationWorkspace() {
     breadcrumbs,
     goNext,
     goPrev,
+    // Working group
+    workingGroup,
+    // Label conflict
+    labelConflict,
+    // Preview
+    previewStorageKey,
+    previewModalPhoto,
+    showPreviewModal,
+    handlePreviewSimilar,
+    handlePreviewAdd,
+    // Handlers
+    handleAddToGroup,
+    handleBulkClassifyDone,
+    handleBulkClassifyCancel,
   }
 }
