@@ -1,0 +1,39 @@
+.public-footer {
+  border-top: 1px solid #e5e7eb;
+  background: #fff;
+  padding: 24px 32px;
+}
+
+.public-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.public-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.public-footer-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1f2c;
+}
+
+.public-footer-quote {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+  max-width: 480px;
+  text-align: center;
+}
+
+.public-footer-copy {
+  margin: 0;
+  font-size: 13px;
+  color: #9ca3af;
+}
