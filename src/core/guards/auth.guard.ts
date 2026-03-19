@@ -5,6 +5,7 @@ import { httpClient } from '@/core/http/axios-client'
 import { toCurrentUser } from '@/features/auth/mappers/current-user.mapper'
 import { useAuthStore } from '@/features/auth/stores/auth.store'
 import type { IApiCurrentUser } from '@/features/auth/types/responses/current-user.response'
+import { EVENTS_PATH } from '@/features/events/routes'
 
 let isHydrated = false
 
@@ -27,11 +28,11 @@ export function registerAuthGuard(router: Router): void {
       }
     }
 
-    // Allow public routes (login page)
+    // Allow public routes (landing, login, error pages)
     if (to.meta.public) {
-      // Redirect authenticated users away from login
+      // Authenticated users shouldn't see the login page — send them to dashboard
       if (authStore.isAuthenticated && to.path === '/login') {
-        return '/'
+        return EVENTS_PATH
       }
       return true
     }

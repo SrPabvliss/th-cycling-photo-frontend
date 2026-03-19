@@ -1,126 +1,132 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { NForm, NFormItem, NInput, NButton, NCard, NAvatar } from 'naive-ui'
-import type { FormInst } from 'naive-ui'
+import { useForm } from '@tanstack/vue-form'
+import { NFormItem, NInput, NButton, NCard, NCheckbox, NIcon } from 'naive-ui'
+import { MailOutline, LockClosedOutline } from '@vicons/ionicons5'
 
-import { PRIMARY } from '@/core/theme/titan-tv-theme'
+import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
+import { EVENTS_PATH } from '@/features/events/routes'
+import PublicLayout from '@/core/layout/public/PublicLayout.vue'
+import TitanLogo from '@/core/layout/public/TitanLogo.vue'
 import { useAuth } from '../../composables/use-auth'
-import type { ILoginRequest } from '../../types/requests/login.request'
+import { LOGIN_FORM_DEFAULTS, loginFormSchema } from '../../constants/login-form.schema'
 
 const router = useRouter()
 const route = useRoute()
 const { login, isLoggingIn } = useAuth()
 
-const formRef = ref<FormInst | null>(null)
-const form = ref<ILoginRequest>({
-  email: '',
-  password: '',
+const rememberMe = ref(false)
+
+const form = useForm({
+  defaultValues: LOGIN_FORM_DEFAULTS,
+  onSubmit: async ({ value }) => {
+    try {
+      await login(value)
+      const redirect = (route.query.redirect as string) || EVENTS_PATH
+      router.push(redirect)
+    } catch {
+      // Error toast is shown by error interceptor
+      // Form preserves email field value
+    }
+  },
 })
-
-const rules = {
-  email: [
-    { required: true, message: 'El email es requerido' },
-    { type: 'email' as const, message: 'Ingresa un email valido' },
-  ],
-  password: [{ required: true, message: 'La contrasena es requerida' }],
-}
-
-async function handleSubmit(e: Event) {
-  e.preventDefault()
-
-  try {
-    await formRef.value?.validate()
-  } catch {
-    return
-  }
-
-  try {
-    await login(form.value)
-    const redirect = (route.query.redirect as string) || '/'
-    router.push(redirect)
-  } catch {
-    // Error toast is shown by error interceptor
-  }
-}
 </script>
 
 <template>
-  <div class="login-page">
-    <NCard class="login-card">
-      <div class="login-header">
-        <NAvatar
-          :size="48"
-          :color="PRIMARY"
-          style="font-weight: 700; font-size: 20px; border-radius: 12px"
+  <PublicLayout>
+    <div class="login-page">
+      <NCard class="login-card">
+        <div class="login-header">
+          <TitanLogo :size="56" />
+          <h1 class="login-title">Bienvenido de nuevo</h1>
+          <p class="login-subtitle">Acceso interno para administradores y clasificadores.</p>
+        </div>
+
+        <form
+          @submit="
+            (e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              form.handleSubmit()
+            }
+          "
         >
-          T
-        </NAvatar>
-        <h1 class="login-title">TITAN TV</h1>
-        <p class="login-subtitle">Inicia sesion para continuar</p>
-      </div>
+          <form.Field
+            name="email"
+            :validators="{
+              onBlur: loginFormSchema.shape.email,
+              onSubmit: loginFormSchema.shape.email,
+            }"
+          >
+            <template v-slot="{ field }">
+              <NFormItem label="Correo electronico" required v-bind="fieldStatus(field)">
+                <NInput placeholder="correo@titantv.com" v-bind="fieldInput(field)">
+                  <template #prefix>
+                    <NIcon :component="MailOutline" color="#9CA3AF" />
+                  </template>
+                </NInput>
+              </NFormItem>
+            </template>
+          </form.Field>
 
-      <NForm ref="formRef" :model="form" :rules="rules" @submit="handleSubmit">
-        <NFormItem label="Email" path="email">
-          <NInput v-model:value="form.email" placeholder="correo@ejemplo.com" />
-        </NFormItem>
+          <form.Field
+            name="password"
+            :validators="{
+              onBlur: loginFormSchema.shape.password,
+              onSubmit: loginFormSchema.shape.password,
+            }"
+          >
+            <template v-slot="{ field }">
+              <NFormItem required v-bind="fieldStatus(field)">
+                <template #label>
+                  <div class="login-password-label">
+                    <span>Contrasena</span>
+                    <a href="#" class="login-forgot" @click.prevent>Olvidaste tu contrasena?</a>
+                  </div>
+                </template>
+                <NInput
+                  type="password"
+                  show-password-on="click"
+                  placeholder="••••••••"
+                  :value="field.state.value"
+                  @update:value="field.handleChange"
+                  @blur="field.handleBlur"
+                  @keydown.enter="form.handleSubmit()"
+                >
+                  <template #prefix>
+                    <NIcon :component="LockClosedOutline" color="#9CA3AF" />
+                  </template>
+                </NInput>
+              </NFormItem>
+            </template>
+          </form.Field>
 
-        <NFormItem label="Contrasena" path="password">
-          <NInput
-            v-model:value="form.password"
-            type="password"
-            show-password-on="click"
-            placeholder="Tu contrasena"
-            @keydown.enter="handleSubmit"
-          />
-        </NFormItem>
+          <NCheckbox v-model:checked="rememberMe" class="login-remember">
+            Recordarme por 30 dias
+          </NCheckbox>
 
-        <NButton
-          type="primary"
-          block
-          :loading="isLoggingIn"
-          attr-type="submit"
-          @click="handleSubmit"
-        >
-          Iniciar sesion
-        </NButton>
-      </NForm>
-    </NCard>
-  </div>
+          <form.Subscribe>
+            <template v-slot="{ canSubmit }">
+              <NButton
+                type="primary"
+                block
+                size="large"
+                :loading="isLoggingIn"
+                :disabled="!canSubmit"
+                attr-type="submit"
+                class="login-submit"
+              >
+                Iniciar sesion
+              </NButton>
+            </template>
+          </form.Subscribe>
+        </form>
+
+        <p class="login-disclaimer">Area protegida. El acceso no autorizado esta prohibido.</p>
+      </NCard>
+    </div>
+  </PublicLayout>
 </template>
 
-<style scoped>
-.login-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background-color: var(--tt-background, #f5f5f5);
-}
-
-.login-card {
-  width: 100%;
-  max-width: 400px;
-}
-
-.login-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-
-.login-title {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--tt-text-primary, #333);
-}
-
-.login-subtitle {
-  margin: 0;
-  font-size: 14px;
-  color: var(--tt-text-secondary, #666);
-}
-</style>
+<style scoped src="./styles/login-view.css" />
