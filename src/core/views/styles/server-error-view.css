@@ -1,0 +1,38 @@
+.error-detail {
+  width: 100%;
+  max-width: 560px;
+  margin-bottom: 24px;
+  background: #1a1f2c;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.error-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.error-detail-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.error-detail-trace {
+  margin: 0;
+  padding: 12px;
+  font-size: 12px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+  color: #ef4444;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+  text-align: left;
+}
