@@ -16,6 +16,7 @@ class AxiosClient implements IHttpHandler {
   private constructor() {
     this.axios = axios.create({
       baseURL: env.VITE_API_BASE_URL,
+      withCredentials: true,
     })
 
     registerAuthInterceptor(this.axios)
