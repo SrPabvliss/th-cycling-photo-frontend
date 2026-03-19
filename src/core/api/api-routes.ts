@@ -1,9 +1,17 @@
+const AUTH_BASE = '/auth'
 const EVENTS_BASE = '/events'
 const PHOTOS_BASE = '/photos'
 const LOCATIONS_BASE = '/locations'
 const CYCLISTS_BASE = '/cyclists'
 
 export const API_ROUTES = {
+  AUTH: {
+    BASE: AUTH_BASE,
+    LOGIN: `${AUTH_BASE}/login`,
+    REFRESH: `${AUTH_BASE}/refresh`,
+    LOGOUT: `${AUTH_BASE}/logout`,
+    ME: `${AUTH_BASE}/me`,
+  },
   EVENTS: {
     BASE: EVENTS_BASE,
     GET_ALL: EVENTS_BASE,
