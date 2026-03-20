@@ -9,5 +9,6 @@ export const classificationRoutes: RouteRecordRaw[] = [
     path: '/events/:eventId/classify',
     name: CLASSIFICATION_ROUTE_NAMES.WORKSPACE,
     component: () => import('./presentation/views/ClassificationWorkspaceView.vue'),
+    meta: { requiresAuth: true, roles: ['admin', 'classifier'] },
   },
 ]
