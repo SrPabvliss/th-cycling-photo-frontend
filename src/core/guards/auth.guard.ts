@@ -14,7 +14,6 @@ export function registerAuthGuard(router: Router): void {
     const authStore = useAuthStore()
 
     // Hydrate session once on app load
-    // Flow: GET /me → 401 → interceptor refreshes token (cookie) → retries → success
     if (!isHydrated) {
       isHydrated = true
       try {
@@ -24,22 +23,27 @@ export function registerAuthGuard(router: Router): void {
         const user = toCurrentUser(response.data)
         authStore.setSession(authStore.accessToken!, user)
       } catch {
-        // No valid session — user will need to log in
+        // No valid session
       }
     }
 
-    // Allow public routes (landing, login, error pages)
+    // Public routes — no auth required
     if (to.meta.public) {
-      // Authenticated users shouldn't see the login page — send them to dashboard
       if (authStore.isAuthenticated && to.path === '/login') {
         return EVENTS_PATH
       }
       return true
     }
 
-    // Protect private routes
+    // Auth required — redirect to login if not authenticated
     if (!authStore.isAuthenticated) {
       return { path: '/login', query: { redirect: to.fullPath } }
+    }
+
+    // Role check — redirect to access-denied if role not allowed
+    const allowedRoles = to.meta.roles as string[] | undefined
+    if (allowedRoles && !allowedRoles.includes(authStore.currentUser!.role)) {
+      return '/access-denied'
     }
 
     return true

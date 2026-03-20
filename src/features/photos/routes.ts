@@ -13,15 +13,18 @@ export const photoRoutes: RouteRecordRaw[] = [
     path: 'events/:eventId/photos',
     name: PHOTO_ROUTE_NAMES.GALLERY,
     component: () => import('./presentation/views/PhotoGalleryView.vue'),
+    meta: { requiresAuth: true, roles: ['admin'] },
   },
   {
     path: 'events/:eventId/photos/upload',
     name: PHOTO_ROUTE_NAMES.UPLOAD,
     component: () => import('./presentation/views/PhotoUploadView.vue'),
+    meta: { requiresAuth: true, roles: ['admin'] },
   },
   {
     path: 'photos/:id',
     name: PHOTO_ROUTE_NAMES.DETAIL,
     component: () => import('./presentation/views/PhotoDetailView.vue'),
+    meta: { requiresAuth: true, roles: ['admin'] },
   },
 ]
