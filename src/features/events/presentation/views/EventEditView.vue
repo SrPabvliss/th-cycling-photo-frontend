@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NCard, NResult, NTag } from 'naive-ui'
+import { NButton, NCard, NResult } from 'naive-ui'
 
-import AppTopBar from '@/core/layout/AppTopBar.vue'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { useEventDetailQuery } from '../../composables/queries/use-event-detail'
-import { editBreadcrumbs } from '../../constants/event-breadcrumbs'
 import { EVENT_ROUTE_NAMES } from '../../routes'
 import { useUpdateEvent } from '../../composables/mutations/use-update-event'
 import { toEventFormData, toUpdateEventRequest } from '../../mappers/event-form.mapper'
@@ -21,8 +20,6 @@ const id = computed(() => route.params.id as IEventDetail['id'])
 const { data: event, isPending, isError, refetch } = useEventDetailQuery(id)
 const { mutate, isPending: isUpdating } = useUpdateEvent(id.value)
 
-const breadcrumbs = computed(() => editBreadcrumbs(id.value, event.value?.name ?? 'Cargando...'))
-
 const initialData = computed<IEventFormData | undefined>(() => {
   if (!event.value) return undefined
   return toEventFormData(event.value)
@@ -35,13 +32,8 @@ function handleSubmit(formData: IEventFormData) {
 
 <template>
   <div class="page-view">
-    <AppTopBar title="Editar Evento" :breadcrumbs="breadcrumbs">
-      <template #badge>
-        <NTag size="small" round>Editando</NTag>
-      </template>
-    </AppTopBar>
-
     <div class="page-view__content form-content">
+      <PageHeader title="Editar Evento" :back-to="'/events/' + id" />
       <EventFormSkeleton v-if="isPending" />
 
       <div v-else-if="isError" class="error-container">
@@ -66,9 +58,9 @@ function handleSubmit(formData: IEventFormData) {
 
         <EventForm
           :initial-data="initialData"
+          :existing-cover-url="event.coverImageUrl"
           :is-submitting="isUpdating"
           submit-label="Guardar Cambios"
-          hide-cover-upload
           @submit="handleSubmit"
           @cancel="router.push({ name: EVENT_ROUTE_NAMES.DETAIL, params: { id: id } })"
         />

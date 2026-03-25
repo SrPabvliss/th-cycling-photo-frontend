@@ -27,6 +27,7 @@ const props = defineProps<{
   initialData?: IEventFormData
   submitLabel?: string
   hideCoverUpload?: boolean
+  existingCoverUrl?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -44,7 +45,7 @@ const form = useForm({
 // --- Cover image ---
 
 const coverFile = ref<File | null>(null)
-const coverPreview = ref<string | null>(null)
+const coverPreview = ref<string | null>(props.existingCoverUrl ?? null)
 const coverInput = ref<HTMLInputElement | null>(null)
 
 function triggerCoverInput() {
@@ -93,124 +94,148 @@ const cantonOptions = computed(
   >
     <!-- Form Body -->
     <div style="padding: 32px">
-      <NGrid :cols="2" :x-gap="32">
-        <NGridItem>
-          <NFlex vertical :size="8">
-            <form.Field
-              name="name"
-              :validators="{
-                onBlur: eventFormSchema.shape.name,
-                onSubmit: eventFormSchema.shape.name,
-              }"
-            >
-              <template v-slot="{ field }">
-                <NFormItem label="Nombre del evento" required v-bind="fieldStatus(field)">
-                  <NInput
-                    placeholder="Ej. Copa Nacional Downhill 2026"
-                    v-bind="fieldInput(field)"
-                  />
-                  <template #label-extra>
-                    <span class="form-hint">Nombre oficial que aparecerá en los reportes.</span>
-                  </template>
-                </NFormItem>
-              </template>
-            </form.Field>
+      <div class="form-layout">
+        <!-- Left column: form fields -->
+        <NFlex vertical :size="8">
+          <form.Field
+            name="name"
+            :validators="{
+              onBlur: eventFormSchema.shape.name,
+              onSubmit: eventFormSchema.shape.name,
+            }"
+          >
+            <template v-slot="{ field }">
+              <NFormItem label="Nombre del evento" required v-bind="fieldStatus(field)">
+                <NInput placeholder="Ej. Copa Nacional Downhill 2026" v-bind="fieldInput(field)" />
+                <template #label-extra>
+                  <span class="form-hint">Nombre oficial que aparecerá en los reportes.</span>
+                </template>
+              </NFormItem>
+            </template>
+          </form.Field>
 
-            <form.Field name="provinceId">
-              <template v-slot="{ field }">
-                <NFormItem label="Provincia">
-                  <NSelect
-                    placeholder="Seleccionar provincia"
-                    :options="provinceOptions"
-                    :loading="isLoadingProvinces"
-                    :value="field.state.value"
-                    filterable
-                    clearable
-                    @update:value="
-                      (val: number | null) => {
-                        field.handleChange(val)
-                        selectedProvinceId = val
-                        form.setFieldValue('cantonId', null)
-                      }
-                    "
-                    @blur="field.handleBlur"
-                  />
-                </NFormItem>
-              </template>
-            </form.Field>
+          <form.Field
+            name="date"
+            :validators="{
+              onBlur: eventFormSchema.shape.date,
+              onSubmit: eventFormSchema.shape.date,
+            }"
+          >
+            <template v-slot="{ field }">
+              <NFormItem label="Fecha" required v-bind="fieldStatus(field)">
+                <NDatePicker
+                  type="date"
+                  placeholder="Seleccionar fecha"
+                  style="width: 100%"
+                  v-bind="fieldInput(field)"
+                />
+              </NFormItem>
+            </template>
+          </form.Field>
 
-            <form.Field name="cantonId">
-              <template v-slot="{ field }">
-                <NFormItem label="Cantón">
-                  <NSelect
-                    placeholder="Seleccionar cantón"
-                    :options="cantonOptions"
-                    :loading="isLoadingCantons"
-                    :disabled="!selectedProvinceId"
-                    filterable
-                    clearable
-                    v-bind="fieldInput(field)"
-                  />
-                </NFormItem>
-              </template>
-            </form.Field>
-          </NFlex>
-        </NGridItem>
+          <NGrid :cols="2" :x-gap="16">
+            <NGridItem>
+              <form.Field name="provinceId">
+                <template v-slot="{ field }">
+                  <NFormItem label="Provincia">
+                    <NSelect
+                      placeholder="Seleccionar provincia"
+                      :options="provinceOptions"
+                      :loading="isLoadingProvinces"
+                      :value="field.state.value"
+                      filterable
+                      clearable
+                      @update:value="
+                        (val: number | null) => {
+                          field.handleChange(val)
+                          selectedProvinceId = val
+                          form.setFieldValue('cantonId', null)
+                        }
+                      "
+                      @blur="field.handleBlur"
+                    />
+                  </NFormItem>
+                </template>
+              </form.Field>
+            </NGridItem>
+            <NGridItem>
+              <form.Field name="cantonId">
+                <template v-slot="{ field }">
+                  <NFormItem label="Cantón">
+                    <NSelect
+                      placeholder="Seleccionar cantón"
+                      :options="cantonOptions"
+                      :loading="isLoadingCantons"
+                      :disabled="!selectedProvinceId"
+                      filterable
+                      clearable
+                      v-bind="fieldInput(field)"
+                    />
+                  </NFormItem>
+                </template>
+              </form.Field>
+            </NGridItem>
+          </NGrid>
 
-        <NGridItem>
-          <NFlex vertical :size="8">
-            <form.Field
-              name="date"
-              :validators="{
-                onBlur: eventFormSchema.shape.date,
-                onSubmit: eventFormSchema.shape.date,
-              }"
-            >
-              <template v-slot="{ field }">
-                <NFormItem label="Fecha" required v-bind="fieldStatus(field)">
-                  <NDatePicker
-                    type="date"
-                    placeholder="Seleccionar fecha"
-                    style="width: 100%"
-                    v-bind="fieldInput(field)"
-                  />
-                </NFormItem>
-              </template>
-            </form.Field>
+          <form.Field name="description">
+            <template v-slot="{ field }">
+              <NFormItem label="Descripción">
+                <NInput
+                  type="textarea"
+                  placeholder="Descripción opcional del evento"
+                  :rows="3"
+                  :maxlength="1000"
+                  show-count
+                  v-bind="fieldInput(field)"
+                />
+              </NFormItem>
+            </template>
+          </form.Field>
+        </NFlex>
 
-            <!-- Cover image picker -->
-            <NFormItem v-if="!hideCoverUpload" label="Imagen de portada">
-              <template #label-extra>
-                <span class="form-hint">
-                  Si no se selecciona, se asignará automáticamente la primera foto subida.
+        <!-- Right column: cover image -->
+        <NFlex v-if="!hideCoverUpload" vertical :size="16">
+          <NFormItem label="Imagen de portada">
+            <template #label-extra>
+              <span class="form-hint">
+                Si no se selecciona, se asignará automáticamente la primera foto subida.
+              </span>
+            </template>
+            <div v-if="coverPreview" class="cover-preview">
+              <img :src="coverPreview" alt="Preview" class="cover-preview__image" />
+              <NButton circle size="tiny" class="cover-preview__remove" @click="removeCover">
+                <template #icon><NIcon :component="CloseCircleOutline" /></template>
+              </NButton>
+            </div>
+            <div v-else class="cover-upload-area" @click="triggerCoverInput">
+              <NFlex vertical align="center" :size="4">
+                <NIcon :component="ImageOutline" :size="28" color="var(--tt-neutral-light)" />
+                <span class="cover-upload-area__text">
+                  <NIcon :component="CameraOutline" :size="14" />
+                  Seleccionar imagen
                 </span>
-              </template>
-              <div v-if="coverPreview" class="cover-preview">
-                <img :src="coverPreview" alt="Preview" class="cover-preview__image" />
-                <NButton circle size="tiny" class="cover-preview__remove" @click="removeCover">
-                  <template #icon><NIcon :component="CloseCircleOutline" /></template>
-                </NButton>
-              </div>
-              <div v-else class="cover-upload-area" @click="triggerCoverInput">
-                <NFlex vertical align="center" :size="4">
-                  <NIcon :component="ImageOutline" :size="28" color="var(--tt-neutral-light)" />
-                  <span class="cover-upload-area__text">
-                    <NIcon :component="CameraOutline" :size="14" />
-                    Seleccionar imagen
-                  </span>
-                </NFlex>
-              </div>
-              <input
-                ref="coverInput"
-                type="file"
-                :accept="ACCEPTED_COVER_TYPES"
-                style="display: none"
-                @change="handleCoverChange"
-              />
-            </NFormItem>
-          </NFlex>
-        </NGridItem>
-      </NGrid>
+              </NFlex>
+            </div>
+            <input
+              ref="coverInput"
+              type="file"
+              :accept="ACCEPTED_COVER_TYPES"
+              style="display: none"
+              @change="handleCoverChange"
+            />
+          </NFormItem>
+
+          <div class="cover-requirements">
+            <p class="cover-requirements__title">Requisitos de imagen</p>
+            <ul class="cover-requirements__list">
+              <li>Mínimo 1280 x 720px</li>
+              <li>Relación 16:9 recomendada</li>
+              <li>Tamaño máximo: 5MB</li>
+              <li>Formatos: JPG, PNG, WEBP</li>
+            </ul>
+          </div>
+        </NFlex>
+      </div>
     </div>
 
     <!-- Form Footer -->
