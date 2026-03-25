@@ -6,6 +6,7 @@ export function toEventDetail(api: IApiEventDetail): IEventDetail {
   return {
     id: api.id,
     name: api.name,
+    description: api.description,
     date: parseDateOnly(api.date),
     location: api.location,
     provinceName: api.provinceName,

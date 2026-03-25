@@ -1,6 +1,7 @@
 const AUTH_BASE = '/auth'
 const EVENTS_BASE = '/events'
 const PHOTOS_BASE = '/photos'
+const PREVIEW_LINKS_BASE = '/preview-links'
 const LOCATIONS_BASE = '/locations'
 const CYCLISTS_BASE = '/cyclists'
 
@@ -47,6 +48,11 @@ export const API_ROUTES = {
     CYCLIST_DETAIL: (id: string) => `${CYCLISTS_BASE}/${id}`,
     UPDATE_CYCLIST: (id: string) => `${CYCLISTS_BASE}/${id}`,
     DELETE_CYCLIST: (id: string) => `${CYCLISTS_BASE}/${id}`,
+  },
+  PREVIEW_LINKS: {
+    BASE: PREVIEW_LINKS_BASE,
+    BY_EVENT: (eventId: string) => `${EVENTS_BASE}/${eventId}/preview-links`,
+    CREATE: (eventId: string) => `${EVENTS_BASE}/${eventId}/preview-links`,
   },
   LOCATIONS: {
     BASE: LOCATIONS_BASE,

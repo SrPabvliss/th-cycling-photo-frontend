@@ -6,6 +6,7 @@ export type CoverImageSource = 'manual' | 'auto'
 export interface IApiEventListItem {
   id: string
   name: string
+  description: string | null
   date: string
   location: string | null
   provinceName: string | null
@@ -22,6 +23,7 @@ export interface IApiEventListItem {
 export interface IEventListItem {
   id: string
   name: string
+  description: string | null
   date: Date
   location: string | null
   provinceName: string | null
