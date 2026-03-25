@@ -4,11 +4,18 @@
   overflow: hidden;
   border: 1px solid var(--tt-neutral-light);
   cursor: pointer;
-  transition: box-shadow 0.2s;
+  transition:
+    box-shadow 0.2s,
+    border-color 0.2s;
 }
 
 .photo-card:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.photo-card--selected {
+  border-color: var(--n-color-target);
+  box-shadow: 0 0 0 2px rgba(24, 160, 88, 0.2);
 }
 
 .photo-card__cover {
@@ -30,6 +37,33 @@
 
 .photo-card__image[data-loaded='true'] {
   opacity: 1;
+}
+
+.photo-card__checkbox {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.photo-card__checkbox:hover {
+  border-color: white;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.photo-card__checkbox--checked {
+  background: var(--n-color-target);
+  border-color: var(--n-color-target);
 }
 
 .photo-card__badge {

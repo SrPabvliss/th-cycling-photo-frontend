@@ -1,27 +1,47 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { NButton, NEmpty, NGrid, NGridItem, NResult } from 'naive-ui'
+import { computed, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import {
+  NButton,
+  NCheckbox,
+  NEmpty,
+  NFlex,
+  NGrid,
+  NGridItem,
+  NIcon,
+  NPagination,
+  NResult,
+} from 'naive-ui'
+import { CloseOutline } from '@vicons/ionicons5'
 
-import AppTopBar from '@/core/layout/AppTopBar.vue'
 import { useEventDetailQuery } from '@/features/events/composables/queries/use-event-detail'
-import { usePhotosGalleryQuery } from '../../composables/queries/use-photos-gallery'
-import { galleryBreadcrumbs } from '../../constants/photo-breadcrumbs'
+import { usePhotoSelectionStore } from '@/features/preview-links/stores/photo-selection.store'
+import { usePhotosSearchQuery } from '../../composables/queries/use-photos-search'
+import { useGalleryFilters } from '../../composables/use-gallery-filters'
+import { usePhotoSelection } from '../../composables/use-photo-selection'
 import { PHOTO_ROUTE_NAMES } from '../../routes'
-import type { PhotoStatus } from '../../types/responses/photo-list.response'
-import PhotoGalleryHeader from '../components/PhotoGalleryHeader/PhotoGalleryHeader.vue'
-import PhotoFilterBar from '../components/PhotoFilterBar/PhotoFilterBar.vue'
 import PhotoCard from '../components/PhotoCard/PhotoCard.vue'
+import PhotoGalleryHeader from '../components/PhotoGalleryHeader/PhotoGalleryHeader.vue'
 import PhotoGallerySkeleton from '../components/PhotoGallerySkeleton/PhotoGallerySkeleton.vue'
+import GalleryFilterSidebar from '../components/GalleryFilterSidebar/GalleryFilterSidebar.vue'
+import PhotoSelectionBar from '../components/PhotoSelectionBar/PhotoSelectionBar.vue'
 
-const route = useRoute()
 const router = useRouter()
+const selectionStore = usePhotoSelectionStore()
 
-const eventId = computed(() => route.params.eventId as string)
-const page = ref(1)
-const status = ref<PhotoStatus | null>(null)
+const eventId = computed(() => router.currentRoute.value.params.eventId as string)
+const PHOTOS_PER_PAGE = 8
 
-const PHOTOS_PER_PAGE = 20
+const {
+  page,
+  activeStatus,
+  plateNumber,
+  helmetColors,
+  clothingColors,
+  bikeColors,
+  filters,
+  hasActiveFilters,
+} = useGalleryFilters(() => eventId.value)
 
 const { data: event } = useEventDetailQuery(eventId)
 const {
@@ -29,26 +49,39 @@ const {
   isPending,
   isError,
   refetch,
-} = usePhotosGalleryQuery(eventId, page, status, PHOTOS_PER_PAGE)
+} = usePhotosSearchQuery(filters, page, PHOTOS_PER_PAGE)
 
-const breadcrumbs = computed(() =>
-  galleryBreadcrumbs(eventId.value, event.value?.name ?? 'Cargando...'),
-)
+const pageCount = computed(() => photosData.value?.pagination?.totalPages ?? 0)
+const totalResults = computed(() => photosData.value?.pagination?.total ?? 0)
+const items = computed(() => photosData.value?.items)
 
-function handleStatusChange(newStatus: PhotoStatus | null) {
-  status.value = newStatus
-  page.value = 1
-}
+const {
+  visiblePhotoIds,
+  allVisibleSelected,
+  showSelectAllBanner,
+  isSelectingAll,
+  handlePhotoSelect,
+  toggleSelectAllVisible,
+  selectAllMatchingResults,
+} = usePhotoSelection(items, totalResults, filters)
 
 function handlePhotoClick(id: string) {
   router.push({ name: PHOTO_ROUTE_NAMES.DETAIL, params: { id } })
 }
+
+function handleGeneratePreview() {
+  router.push({ name: 'preview-links-create', params: { eventId: eventId.value } })
+}
+
+onUnmounted(() => {
+  if (!router.currentRoute.value.name?.toString().startsWith('preview-links')) {
+    selectionStore.exitSelectionMode()
+  }
+})
 </script>
 
 <template>
   <div class="page-view">
-    <AppTopBar title="Galería de Fotos" :breadcrumbs="breadcrumbs" />
-
     <div class="page-view__content gallery-content">
       <PhotoGallerySkeleton v-if="isPending && !photosData" />
 
@@ -58,49 +91,126 @@ function handlePhotoClick(id: string) {
           title="Error al cargar fotos"
           description="No se pudo obtener la galería de fotos."
         >
-          <template #footer>
-            <NButton @click="refetch()">Reintentar</NButton>
-          </template>
+          <template #footer><NButton @click="refetch()">Reintentar</NButton></template>
         </NResult>
       </div>
 
       <template v-else-if="event">
-        <PhotoGalleryHeader :event="event" :event-id="eventId" />
+        <PhotoGalleryHeader :event="event" :event-id="eventId" :back-to="'/events/' + eventId">
+          <template #extra-actions>
+            <NButton
+              v-if="!selectionStore.isSelectionMode"
+              @click="selectionStore.enterSelectionMode()"
+            >
+              Seleccionar fotos
+            </NButton>
+            <NButton v-else type="error" ghost @click="selectionStore.exitSelectionMode()">
+              <template #icon><NIcon :component="CloseOutline" /></template>
+              Cancelar selección
+            </NButton>
+          </template>
+        </PhotoGalleryHeader>
 
-        <PhotoFilterBar
-          :page="page"
-          :page-count="photosData?.pagination?.totalPages ?? 0"
-          :active-status="status"
-          @update:page="(p: number) => (page = p)"
-          @update:status="handleStatusChange"
-        />
+        <div class="gallery-layout">
+          <GalleryFilterSidebar
+            :active-status="activeStatus"
+            :plate-number="plateNumber"
+            :helmet-colors="helmetColors"
+            :clothing-colors="clothingColors"
+            :bike-colors="bikeColors"
+            :has-active-filters="hasActiveFilters"
+            @update:plate-number="plateNumber = $event"
+            @update:active-status="
+              (s) => {
+                activeStatus = s
+                page = 1
+              }
+            "
+            @update:helmet-colors="helmetColors = $event"
+            @update:clothing-colors="clothingColors = $event"
+            @update:bike-colors="bikeColors = $event"
+            @clear-filters="
+              () => {
+                plateNumber = ''
+                helmetColors = []
+                clothingColors = []
+                bikeColors = []
+                activeStatus = null
+                page = 1
+              }
+            "
+          />
 
-        <div v-if="photosData && photosData.items.length === 0" class="empty-container">
-          <NEmpty description="No hay fotos en este evento" />
+          <div class="gallery-main">
+            <div class="gallery-toolbar">
+              <NFlex :size="12" align="center">
+                <NCheckbox
+                  v-if="selectionStore.isSelectionMode && photosData && photosData.items.length > 0"
+                  :checked="allVisibleSelected"
+                  @update:checked="toggleSelectAllVisible"
+                >
+                  Seleccionar todo
+                </NCheckbox>
+                <span v-if="selectionStore.hasSelection" class="selection-count">
+                  {{ selectionStore.selectedCount }} foto{{
+                    selectionStore.selectedCount !== 1 ? 's' : ''
+                  }}
+                  seleccionada{{ selectionStore.selectedCount !== 1 ? 's' : '' }}
+                </span>
+                <span v-if="!selectionStore.hasSelection" class="pagination-info">
+                  {{ totalResults }} foto{{ totalResults !== 1 ? 's' : '' }}
+                </span>
+              </NFlex>
+
+              <NPagination
+                v-if="pageCount > 1"
+                :page="page"
+                :page-count="pageCount"
+                size="small"
+                :page-slot="7"
+                @update:page="(p: number) => (page = p)"
+              />
+            </div>
+
+            <div v-if="showSelectAllBanner" class="select-all-banner">
+              Las {{ visiblePhotoIds.length }} fotos de esta página están seleccionadas.
+              <button
+                class="select-all-banner__action"
+                :disabled="isSelectingAll"
+                @click="selectAllMatchingResults"
+              >
+                {{
+                  isSelectingAll
+                    ? 'Seleccionando...'
+                    : `Seleccionar las ${totalResults} fotos que coinciden con el filtro`
+                }}
+              </button>
+            </div>
+
+            <div class="gallery-scroll">
+              <div v-if="photosData && photosData.items.length === 0" class="empty-container">
+                <NEmpty description="No hay fotos que coincidan con los filtros" />
+              </div>
+
+              <NGrid v-else :cols="4" :x-gap="12" :y-gap="12">
+                <NGridItem v-for="photo in photosData?.items" :key="photo.id">
+                  <PhotoCard
+                    :photo="photo"
+                    :selectable="selectionStore.isSelectionMode"
+                    :selected="selectionStore.isSelected(photo.id)"
+                    @click="handlePhotoClick"
+                    @select="handlePhotoSelect"
+                  />
+                </NGridItem>
+              </NGrid>
+            </div>
+          </div>
         </div>
-
-        <NGrid v-else :cols="4" :x-gap="16" :y-gap="16">
-          <NGridItem v-for="photo in photosData?.items" :key="photo.id">
-            <PhotoCard :photo="photo" @click="handlePhotoClick" />
-          </NGridItem>
-        </NGrid>
       </template>
     </div>
+
+    <PhotoSelectionBar @generate-preview="handleGeneratePreview" />
   </div>
 </template>
 
-<style scoped>
-.gallery-content {
-  padding: 24px 32px;
-  display: flex;
-  flex-direction: column;
-}
-
-.error-container,
-.empty-container {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-</style>
+<style scoped src="./photo-gallery-view.css" />

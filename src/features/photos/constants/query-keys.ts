@@ -9,4 +9,6 @@ export const PHOTO_QUERY_KEYS = {
     [API_ROUTES.PHOTOS.BASE, 'presigned-url', eventId, fileName] as const,
   downloadUrl: (id: string, type: string) =>
     [API_ROUTES.PHOTOS.BASE, 'download', id, type] as const,
+  search: (filters: Record<string, unknown>) =>
+    [API_ROUTES.PHOTOS.BASE, 'search', filters] as const,
 } as const
