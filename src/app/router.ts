@@ -8,6 +8,7 @@ import { classificationRoutes } from '@/features/classifications/routes'
 import { eventRoutes } from '@/features/events/routes'
 import { landingRoutes } from '@/features/landing/routes'
 import { photoRoutes } from '@/features/photos/routes'
+import { previewLinkRoutes } from '@/features/preview-links/routes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -18,7 +19,7 @@ const router = createRouter({
     {
       path: '/',
       component: AppLayout,
-      children: [...eventRoutes, ...photoRoutes],
+      children: [...eventRoutes, ...photoRoutes, ...previewLinkRoutes],
     },
     ...classificationRoutes,
     {

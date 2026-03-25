@@ -1,20 +1,21 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NCard, NEmpty, NFlex, NGrid, NGridItem, NResult } from 'naive-ui'
+import { NButton, NCard, NEmpty, NFlex, NGrid, NGridItem, NIcon, NResult } from 'naive-ui'
+import { PersonOutline, TimeOutline } from '@vicons/ionicons5'
 
-import AppTopBar from '@/core/layout/AppTopBar.vue'
 import { PHOTO_ROUTE_NAMES } from '@/features/photos/routes'
 import { usePhotosGalleryQuery } from '@/features/photos/composables/queries/use-photos-gallery'
 import PhotoCard from '@/features/photos/presentation/components/PhotoCard/PhotoCard.vue'
 import { useEventDetailQuery } from '../../composables/queries/use-event-detail'
-import { detailBreadcrumbs } from '../../constants/event-breadcrumbs'
 import type { IEventDetail } from '../../types/responses/event-detail.response'
 import EventDetailHeader from '../components/EventDetailHeader/EventDetailHeader.vue'
 import EventStatCards from '../components/EventStatCards/EventStatCards.vue'
 import EventDetailSkeleton from '../components/EventDetailSkeleton/EventDetailSkeleton.vue'
 import EventCoverCard from '../components/EventCoverCard/EventCoverCard.vue'
 import EventInfoCard from '../components/EventInfoCard/EventInfoCard.vue'
+import EventQuickSearch from '../components/EventQuickSearch/EventQuickSearch.vue'
+import EventQuickActions from '../components/EventQuickActions/EventQuickActions.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -33,17 +34,17 @@ const { data: recentPhotos } = usePhotosGalleryQuery(
   RECENT_PHOTOS_LIMIT,
 )
 
-const breadcrumbs = computed(() => detailBreadcrumbs(event.value?.name ?? 'Cargando...'))
-
 function handlePhotoClick(photoId: string) {
   router.push({ name: PHOTO_ROUTE_NAMES.DETAIL, params: { id: photoId } })
+}
+
+function navigateToGallery() {
+  router.push({ name: PHOTO_ROUTE_NAMES.GALLERY, params: { eventId: id.value } })
 }
 </script>
 
 <template>
   <div class="page-view">
-    <AppTopBar title="Detalle de Evento" :breadcrumbs="breadcrumbs" />
-
     <div class="page-view__content detail-content">
       <EventDetailSkeleton v-if="isPending" />
 
@@ -53,9 +54,7 @@ function handlePhotoClick(photoId: string) {
           title="Error al cargar evento"
           description="No se pudo obtener el detalle del evento."
         >
-          <template #footer>
-            <NButton @click="refetch()">Reintentar</NButton>
-          </template>
+          <template #footer><NButton @click="refetch()">Reintentar</NButton></template>
         </NResult>
       </div>
 
@@ -64,23 +63,14 @@ function handlePhotoClick(photoId: string) {
 
         <div class="dashboard-grid">
           <NFlex vertical :size="24">
+            <EventQuickSearch :event-id="id" />
             <EventStatCards :event="event" />
 
             <NCard title="Fotos Recientes" size="small">
               <template #header-extra>
-                <NButton
-                  text
-                  type="primary"
-                  size="small"
-                  @click="
-                    router.push({
-                      name: PHOTO_ROUTE_NAMES.GALLERY,
-                      params: { eventId: id },
-                    })
-                  "
+                <NButton text type="primary" size="small" @click="navigateToGallery"
+                  >Ver todas</NButton
                 >
-                  Ver todas
-                </NButton>
               </template>
               <NGrid
                 v-if="recentPhotos && recentPhotos.items.length > 0"
@@ -98,11 +88,33 @@ function handlePhotoClick(photoId: string) {
                 style="padding: 48px 0"
               />
             </NCard>
+
+            <NCard title="Actividad Reciente" size="small">
+              <NFlex vertical align="center" :size="8" style="padding: 32px 0">
+                <NIcon :component="TimeOutline" :size="28" color="var(--tt-neutral-light)" />
+                <span class="placeholder-text">Próximamente</span>
+              </NFlex>
+            </NCard>
           </NFlex>
 
           <NFlex vertical :size="24">
+            <EventQuickActions
+              :event-id="id"
+              :event-name="event.name"
+              :photo-count="event.photoCount"
+            />
             <EventCoverCard :event="event" :event-id="id" />
             <EventInfoCard :event="event" />
+
+            <NCard size="small">
+              <template #header>
+                <div style="font-size: 14px; font-weight: 600">Clasificador Asignado</div>
+              </template>
+              <NFlex vertical align="center" :size="8" style="padding: 16px 0">
+                <NIcon :component="PersonOutline" :size="28" color="var(--tt-neutral-light)" />
+                <span class="placeholder-text">Próximamente</span>
+              </NFlex>
+            </NCard>
           </NFlex>
         </div>
       </template>
@@ -110,23 +122,4 @@ function handlePhotoClick(photoId: string) {
   </div>
 </template>
 
-<style scoped>
-.detail-content {
-  padding: 24px 32px;
-  display: flex;
-  flex-direction: column;
-}
-
-.error-container {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 32px;
-}
-</style>
+<style scoped src="./event-detail-view.css" />
