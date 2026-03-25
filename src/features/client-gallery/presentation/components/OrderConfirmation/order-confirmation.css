@@ -1,0 +1,143 @@
+.state-page {
+  background: linear-gradient(180deg, #f8f9fa 0%, #f0f1f3 100%);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.state-page__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 64px 32px 40px;
+  text-align: center;
+  flex: 1;
+  justify-content: center;
+}
+
+.state-page__hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+.state-page__code {
+  font-size: 160px;
+  font-weight: 800;
+  color: rgba(0, 0, 0, 0.05);
+  line-height: 1;
+  user-select: none;
+}
+
+.state-page__icon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+}
+
+.state-page__icon--success {
+  background: #18a058;
+  box-shadow: 0 8px 32px rgba(24, 160, 88, 0.3);
+}
+
+.state-page__title {
+  margin: 0 0 16px;
+  font-size: 36px;
+  font-weight: 700;
+  color: #1a1f2c;
+}
+
+.state-page__description {
+  margin: 0 0 32px;
+  font-size: 16px;
+  color: #6b7280;
+  max-width: 500px;
+  line-height: 1.6;
+}
+
+.state-page__actions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.state-page__cards {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.state-page__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 20px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  width: 200px;
+}
+
+.state-page__card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #f0f6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.state-page__card-icon--green {
+  background: #f0fdf4;
+}
+
+.state-page__card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1f2c;
+  margin: 0 0 4px;
+}
+
+.state-page__card-desc {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.state-page__mountain {
+  height: 80px;
+  background:
+    linear-gradient(135deg, transparent 40%, #e5e7eb 40%, #e5e7eb 42%, transparent 42%),
+    linear-gradient(-135deg, transparent 40%, #e5e7eb 40%, #e5e7eb 42%, transparent 42%);
+  background-size: 100% 100%;
+}
+
+@media (max-width: 640px) {
+  .state-page__title {
+    font-size: 28px;
+  }
+
+  .state-page__code {
+    font-size: 100px;
+  }
+
+  .state-page__cards {
+    flex-direction: column;
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .state-page__card {
+    width: 100%;
+  }
+}
