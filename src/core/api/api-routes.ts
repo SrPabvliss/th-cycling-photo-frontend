@@ -1,3 +1,4 @@
+const PREVIEW_PUBLIC_BASE = '/preview'
 const AUTH_BASE = '/auth'
 const EVENTS_BASE = '/events'
 const PHOTOS_BASE = '/photos'
@@ -53,6 +54,12 @@ export const API_ROUTES = {
     BASE: PREVIEW_LINKS_BASE,
     BY_EVENT: (eventId: string) => `${EVENTS_BASE}/${eventId}/preview-links`,
     CREATE: (eventId: string) => `${EVENTS_BASE}/${eventId}/preview-links`,
+  },
+  PREVIEW_PUBLIC: {
+    BASE: PREVIEW_PUBLIC_BASE,
+    GET_BY_TOKEN: (token: string) => `${PREVIEW_PUBLIC_BASE}/${token}`,
+    CUSTOMER_LOOKUP: (token: string) => `${PREVIEW_PUBLIC_BASE}/${token}/customer`,
+    CREATE_ORDER: (token: string) => `${PREVIEW_PUBLIC_BASE}/${token}/orders`,
   },
   LOCATIONS: {
     BASE: LOCATIONS_BASE,

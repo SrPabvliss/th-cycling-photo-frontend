@@ -1,0 +1,171 @@
+/* ===== Contact Form Page ===== */
+.cf {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Back bar */
+.cf-back-bar {
+  padding: 12px 2rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cf-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.cf-back-link:hover {
+  color: #1a1f2c;
+}
+
+.cf-breadcrumb-sep {
+  color: #d1d5db;
+  font-size: 12px;
+}
+
+.cf-breadcrumb-cur {
+  font-size: 12px;
+  color: #1a1f2c;
+  font-weight: 500;
+}
+
+/* Main grid */
+.cf-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  max-width: 1060px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 3rem;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+/* ===== Form column ===== */
+.cf-form-col {
+  background: #fff;
+  border-radius: 16px;
+  padding: 36px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.cf-form-heading {
+  margin-bottom: 28px;
+}
+
+.cf-form-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #1a1f2c;
+  margin: 0 0 8px;
+  line-height: 1.1;
+}
+
+.cf-form-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+  max-width: 420px;
+}
+
+/* WhatsApp step */
+.cf-whatsapp-step {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cf-phone-prefix {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 15px;
+  color: #374151;
+  min-width: 90px;
+}
+
+.cf-phone-preview {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.cf-phone-preview strong {
+  color: #105080;
+}
+
+.cf-form-hint {
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+/* Form grid (2-column for name fields) */
+.cf-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 16px;
+}
+
+.cf-field--full {
+  grid-column: 1 / -1;
+}
+
+/* CTA section */
+.cf-cta {
+  margin-top: 8px;
+}
+
+.cf-cta-note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #6b7280;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 768px) {
+  .cf-grid {
+    grid-template-columns: 1fr;
+    padding: 1.5rem 1rem 2rem;
+    gap: 1.5rem;
+  }
+
+  .cf-grid > :first-child {
+    order: 2;
+  }
+
+  .cf-form-col {
+    order: 1;
+    padding: 24px;
+  }
+
+  .cf-form-title {
+    font-size: 24px;
+  }
+
+  .cf-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cf-back-bar {
+    padding: 12px 1rem;
+  }
+}
