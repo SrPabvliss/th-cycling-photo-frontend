@@ -4,6 +4,7 @@ import type { CoverImageSource, EventStatus } from './event-list.response'
 export interface IApiEventDetail {
   id: string
   name: string
+  description: string | null
   date: string
   location: string | null
   provinceName: string | null
@@ -24,6 +25,7 @@ export interface IApiEventDetail {
 export interface IEventDetail {
   id: string
   name: string
+  description: string | null
   date: Date
   location: string | null
   provinceName: string | null

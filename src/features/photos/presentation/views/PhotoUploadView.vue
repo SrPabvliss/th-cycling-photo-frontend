@@ -3,12 +3,11 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton, NCard, NFlex, NResult } from 'naive-ui'
 
-import AppTopBar from '@/core/layout/AppTopBar.vue'
 import { useEventDetailQuery } from '@/features/events/composables/queries/use-event-detail'
 import { useUploadOrchestration } from '../../composables/use-upload-orchestration'
-import { uploadBreadcrumbs } from '../../constants/photo-breadcrumbs'
 import { MAX_FILES } from '../../constants/upload.constants'
 import { PHOTO_ROUTE_NAMES } from '../../routes'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import UploadDropzone from '../components/UploadDropzone/UploadDropzone.vue'
 import UploadEventCard from '../components/UploadEventCard/UploadEventCard.vue'
 import UploadControls from '../components/UploadControls/UploadControls.vue'
@@ -45,10 +44,6 @@ const {
   handleNewUpload,
 } = useUploadOrchestration(eventId)
 
-const breadcrumbs = computed(() =>
-  uploadBreadcrumbs(eventId.value, event.value?.name ?? 'Cargando...'),
-)
-
 function handleGoToGallery() {
   router.push({ name: PHOTO_ROUTE_NAMES.GALLERY, params: { eventId: eventId.value } })
 }
@@ -56,9 +51,8 @@ function handleGoToGallery() {
 
 <template>
   <div class="page-view">
-    <AppTopBar title="Subir Fotos" :breadcrumbs="breadcrumbs" />
-
     <div class="page-view__content upload-content">
+      <PageHeader title="Subir Fotos" :back-to="'/events/' + eventId" />
       <div v-if="isEventError" class="error-container">
         <NResult
           status="error"

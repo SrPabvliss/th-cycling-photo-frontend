@@ -3,8 +3,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { NButton, NGrid, NGridItem, NResult } from 'naive-ui'
 
-import AppTopBar from '@/core/layout/AppTopBar.vue'
 import { PHOTO_ROUTE_NAMES } from '@/features/photos/routes'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { useEventsListQuery } from '../../composables/queries/use-events-list'
 import { useEventsStatsQuery } from '../../composables/queries/use-events-stats'
 import { EVENT_ROUTE_NAMES } from '../../routes'
@@ -37,13 +37,8 @@ function handleCreate() {
 
 <template>
   <div class="page-view">
-    <AppTopBar title="Gestión de Eventos" subtitle="Listado general de competencias">
-      <template #actions>
-        <NButton type="primary" @click="handleCreate">+ Nuevo Evento</NButton>
-      </template>
-    </AppTopBar>
-
     <div class="page-view__content list-content">
+      <PageHeader title="Gestión de Eventos" subtitle="Listado general de competencias" />
       <EventListStatCards :stats="stats" />
       <EventFilterBar
         :page="page"
@@ -86,17 +81,4 @@ function handleCreate() {
   </div>
 </template>
 
-<style scoped>
-.list-content {
-  padding: 24px 32px;
-  display: flex;
-  flex-direction: column;
-}
-
-.error-container {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-</style>
+<style scoped src="./event-list-view.css" />

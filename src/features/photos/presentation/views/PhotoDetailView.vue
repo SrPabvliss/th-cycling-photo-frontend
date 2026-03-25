@@ -4,12 +4,10 @@ import { useRoute } from 'vue-router'
 import { NButton, NCard, NFlex, NIcon, NResult, NTag } from 'naive-ui'
 import { CalendarOutline, ImageOutline, ResizeOutline } from '@vicons/ionicons5'
 
-import AppTopBar from '@/core/layout/AppTopBar.vue'
 import { formatRelativeTime } from '@/shared/utils/date.utils'
 import { formatFileSize } from '@/shared/utils/format.utils'
-import { useEventDetailQuery } from '@/features/events/composables/queries/use-event-detail'
+import PageHeader from '@/shared/components/PageHeader.vue'
 import { usePhotoDetailQuery } from '../../composables/queries/use-photo-detail'
-import { detailBreadcrumbs } from '../../constants/photo-breadcrumbs'
 import { PHOTO_STATUS_CONFIG } from '../../constants/status-config'
 
 const route = useRoute()
@@ -18,22 +16,15 @@ const id = computed(() => route.params.id as string)
 const { data: photo, isPending, isError, refetch } = usePhotoDetailQuery(id)
 
 const eventId = computed(() => photo.value?.eventId ?? '')
-const { data: event } = useEventDetailQuery(eventId)
-
-const breadcrumbs = computed(() =>
-  detailBreadcrumbs(
-    eventId.value,
-    event.value?.name ?? 'Cargando...',
-    photo.value?.filename ?? 'Cargando...',
-  ),
-)
 </script>
 
 <template>
   <div class="page-view">
-    <AppTopBar title="Detalle de Foto" :breadcrumbs="breadcrumbs" />
-
     <div class="page-view__content detail-content">
+      <PageHeader
+        :title="photo?.filename ?? 'Detalle de Foto'"
+        :back-to="'/events/' + eventId + '/photos'"
+      />
       <!-- Loading -->
       <div v-if="isPending" class="detail-loading">
         <NCard>
