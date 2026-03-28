@@ -1,0 +1,26 @@
+.dv-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+}
+
+.dv-loading__text {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.dv-actions {
+  display: flex;
+  justify-content: center;
+  padding: 0 28px 20px;
+}
+
+@media (max-width: 640px) {
+  .dv-actions {
+    padding: 0 16px 16px;
+  }
+}
