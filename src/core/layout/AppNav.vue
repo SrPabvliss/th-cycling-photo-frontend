@@ -6,6 +6,7 @@ import { LogOutOutline } from '@vicons/ionicons5'
 
 import { useAuth } from '@/features/auth/composables/use-auth'
 import { EVENTS_PATH } from '@/features/events/routes'
+import { ORDERS_PATH } from '@/features/orders/routes'
 import TitanLogo from './public/TitanLogo.vue'
 
 const router = useRouter()
@@ -27,6 +28,11 @@ async function handleLogout() {
       <TitanLogo :size="28" />
       <span class="app-nav-title">Titan TV</span>
     </div>
+
+    <nav class="app-nav-links">
+      <router-link :to="EVENTS_PATH" class="app-nav-link">Eventos</router-link>
+      <router-link :to="ORDERS_PATH" class="app-nav-link">Pedidos</router-link>
+    </nav>
 
     <div id="page-actions" class="app-nav-center" />
 
