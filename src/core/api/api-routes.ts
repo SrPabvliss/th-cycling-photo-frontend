@@ -4,6 +4,7 @@ const EVENTS_BASE = '/events'
 const PHOTOS_BASE = '/photos'
 const PREVIEW_LINKS_BASE = '/preview-links'
 const ORDERS_BASE = '/orders'
+const DELIVERY_PUBLIC_BASE = '/delivery'
 const LOCATIONS_BASE = '/locations'
 const CYCLISTS_BASE = '/cyclists'
 
@@ -71,6 +72,10 @@ export const API_ROUTES = {
     CANCEL: (id: string) => `${ORDERS_BASE}/${id}/cancel`,
     SEND_DELIVERY: (id: string) => `${ORDERS_BASE}/${id}/send-delivery`,
     REGENERATE_DELIVERY: (id: string) => `${ORDERS_BASE}/${id}/regenerate-delivery`,
+  },
+  DELIVERY_PUBLIC: {
+    BASE: DELIVERY_PUBLIC_BASE,
+    GET_BY_TOKEN: (token: string) => `${DELIVERY_PUBLIC_BASE}/${token}`,
   },
   LOCATIONS: {
     BASE: LOCATIONS_BASE,
