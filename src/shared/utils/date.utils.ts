@@ -25,3 +25,12 @@ export function formatDate(date: Date): string {
 export function formatRelativeTime(date: Date): string {
   return formatDistanceToNow(date, { locale: es, addSuffix: true })
 }
+
+/**
+ * Checks if a date is within the last N hours (default 24).
+ */
+export function isRecent(date: Date, hours = 24): boolean {
+  const threshold = new Date()
+  threshold.setHours(threshold.getHours() - hours)
+  return date > threshold
+}

@@ -3,6 +3,7 @@ const AUTH_BASE = '/auth'
 const EVENTS_BASE = '/events'
 const PHOTOS_BASE = '/photos'
 const PREVIEW_LINKS_BASE = '/preview-links'
+const ORDERS_BASE = '/orders'
 const LOCATIONS_BASE = '/locations'
 const CYCLISTS_BASE = '/cyclists'
 
@@ -60,6 +61,16 @@ export const API_ROUTES = {
     GET_BY_TOKEN: (token: string) => `${PREVIEW_PUBLIC_BASE}/${token}`,
     CUSTOMER_LOOKUP: (token: string) => `${PREVIEW_PUBLIC_BASE}/${token}/customer`,
     CREATE_ORDER: (token: string) => `${PREVIEW_PUBLIC_BASE}/${token}/orders`,
+  },
+  ORDERS: {
+    BASE: ORDERS_BASE,
+    GET_ALL: ORDERS_BASE,
+    GET_BY_ID: (id: string) => `${ORDERS_BASE}/${id}`,
+    STATS: `${ORDERS_BASE}/stats`,
+    CONFIRM_PAYMENT: (id: string) => `${ORDERS_BASE}/${id}/confirm-payment`,
+    CANCEL: (id: string) => `${ORDERS_BASE}/${id}/cancel`,
+    SEND_DELIVERY: (id: string) => `${ORDERS_BASE}/${id}/send-delivery`,
+    REGENERATE_DELIVERY: (id: string) => `${ORDERS_BASE}/${id}/regenerate-delivery`,
   },
   LOCATIONS: {
     BASE: LOCATIONS_BASE,

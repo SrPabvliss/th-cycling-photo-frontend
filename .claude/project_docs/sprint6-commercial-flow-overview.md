@@ -1,6 +1,7 @@
 # Sprint 6: Commercial Flow — Frontend Overview
 
 > Summary for Claude Code. Full ADRs in claude.ai project knowledge (ADR-004, ADR-005).
+> **Updated:** TTV-90 — order state transitions separated (confirm payment ≠ send delivery)
 
 ## What This Sprint Adds
 
@@ -26,6 +27,35 @@ These routes are standalone (like login, 404) — declared outside AppLayout in 
 | `/admin/orders`    | Orders Management            | admin |
 | `/admin/customers` | Customers List               | admin |
 | Preview builder    | Accessible from event detail | admin |
+
+## Order State Machine (⚠️ IMPORTANT — updated by TTV-90)
+
+Orders have TWO separate admin actions, NOT automatic transitions:
+
+```
+pending ──[confirm-payment]──→ paid ──[send-delivery]──→ delivered
+pending ──[cancel]──→ cancelled
+```
+
+- `paid` is a REAL persisted state (admin confirmed payment but hasn't sent photos yet)
+- DeliveryLink is generated ONLY on send-delivery, NOT on confirm-payment
+
+### Frontend actions by order status
+
+| Status    | Actions available                                                      |
+| --------- | ---------------------------------------------------------------------- |
+| pending   | "Confirmar pago" + "Contactar WhatsApp" (plantilla cobro) + "Cancelar" |
+| paid      | "Enviar fotos" (generates delivery link) + "Contactar WhatsApp"        |
+| delivered | "Reenviar WhatsApp" (plantilla entrega) + "Regenerar link" (si expiró) |
+| cancelled | Sin acciones, solo vista                                               |
+
+### Order endpoints
+
+```
+PATCH /orders/:id/confirm-payment   → pending → paid
+PATCH /orders/:id/send-delivery     → paid → delivered (generates DeliveryLink)
+PATCH /orders/:id/cancel            → pending → cancelled
+```
 
 ## Watermarked Photo URLs
 
@@ -60,6 +90,7 @@ const socket = io('https://api.domain.com/notifications', {
 socket.on('preview:viewed', (payload) => { ... });
 socket.on('order:created', (payload) => { ... });
 socket.on('order:paid', (payload) => { ... });
+socket.on('order:delivered', (payload) => { ... }); // NEW — added with TTV-90
 ```
 
 Disconnect on logout. Auto-reconnect on connection loss.

@@ -1,0 +1,52 @@
+.dl-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dl-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dl-card__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1f2c;
+}
+
+.dl-card__url-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dl-card__url {
+  flex: 1;
+  background: #f3f4f6;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dl-card__meta {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.dl-card__expired-msg {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
