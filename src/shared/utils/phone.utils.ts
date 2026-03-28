@@ -1,11 +1,12 @@
 export const COUNTRY_CODE = '+593'
 
 /**
- * Strips non-digit characters and removes leading 0.
- * "0991234567" → "991234567", "99 123 4567" → "991234567"
+ * Strips non-digit characters, removes country code prefix (593) and leading 0.
+ * "+593984198999" → "984198999", "0991234567" → "991234567", "99 123 4567" → "991234567"
  */
 export function cleanPhoneDigits(raw: string): string {
   const digits = raw.replace(/\D/g, '')
+  if (digits.startsWith('593') && digits.length > 9) return digits.slice(3)
   return digits.startsWith('0') ? digits.slice(1) : digits
 }
 
