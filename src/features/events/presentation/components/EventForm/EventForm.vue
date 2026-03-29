@@ -12,61 +12,49 @@ import {
   NInput,
   NSelect,
 } from 'naive-ui'
-import { ArrowForward, CameraOutline, CloseCircleOutline, ImageOutline } from '@vicons/ionicons5'
+import { ArrowForward } from '@vicons/ionicons5'
 
 import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
 import { useProvincesQuery } from '@/features/locations/composables/queries/use-provinces'
 import { useCantonsQuery } from '@/features/locations/composables/queries/use-cantons'
+import { useLocalAssetPreviews } from '@/features/event-assets/composables/use-local-asset-previews'
+import type { EventAssetType } from '@/features/event-assets/types/asset-type'
+import type { IEventAsset } from '@/features/event-assets/types/responses/event-asset.response'
+import AssetUploadZone from '@/features/event-assets/presentation/components/AssetUploadZone/AssetUploadZone.vue'
 import { EVENT_FORM_DEFAULTS, eventFormSchema } from '../../../constants/event-form.schema'
 import type { IEventFormData } from '../../../types/event-form.types'
-
-const ACCEPTED_COVER_TYPES = 'image/jpeg,image/png,image/webp'
 
 const props = defineProps<{
   isSubmitting: boolean
   initialData?: IEventFormData
   submitLabel?: string
-  hideCoverUpload?: boolean
-  existingCoverUrl?: string | null
+  hideAssetUpload?: boolean
+  existingAssets?: IEventAsset[]
 }>()
 
 const emit = defineEmits<{
-  submit: [data: IEventFormData, coverFile?: File]
+  submit: [
+    data: IEventFormData,
+    assetFiles?: Map<EventAssetType, File>,
+    assetRemovals?: EventAssetType[],
+  ]
   cancel: []
 }>()
 
 const form = useForm({
   defaultValues: props.initialData ?? EVENT_FORM_DEFAULTS,
   onSubmit: async ({ value }) => {
-    emit('submit', value, coverFile.value ?? undefined)
+    const removals = assetPreviews.getPendingRemovals()
+    emit(
+      'submit',
+      value,
+      assetPreviews.getPendingFiles(),
+      removals.length > 0 ? removals : undefined,
+    )
   },
 })
 
-// --- Cover image ---
-
-const coverFile = ref<File | null>(null)
-const coverPreview = ref<string | null>(props.existingCoverUrl ?? null)
-const coverInput = ref<HTMLInputElement | null>(null)
-
-function triggerCoverInput() {
-  coverInput.value?.click()
-}
-
-function handleCoverChange(e: Event) {
-  const file = (e.target as HTMLInputElement).files?.[0]
-  if (!file) return
-  coverFile.value = file
-  coverPreview.value = URL.createObjectURL(file)
-  if (coverInput.value) coverInput.value.value = ''
-}
-
-function removeCover() {
-  if (coverPreview.value) URL.revokeObjectURL(coverPreview.value)
-  coverFile.value = null
-  coverPreview.value = null
-}
-
-// --- Location cascading ---
+const assetPreviews = useLocalAssetPreviews(() => props.existingAssets)
 
 const selectedProvinceId = ref<number | null>(props.initialData?.provinceId ?? null)
 
@@ -84,6 +72,7 @@ const cantonOptions = computed(
 
 <template>
   <form
+    class="event-form"
     @submit="
       (e) => {
         e.preventDefault()
@@ -92,10 +81,14 @@ const cantonOptions = computed(
       }
     "
   >
-    <!-- Form Body -->
-    <div style="padding: 32px">
-      <div class="form-layout">
-        <!-- Left column: form fields -->
+    <!-- Left panel: form fields -->
+    <div class="event-form__fields">
+      <div class="form-section">
+        <div class="form-section__title">Información general</div>
+        <p class="form-section__desc">
+          Datos principales que identifican el evento en la plataforma.
+        </p>
+
         <NFlex vertical :size="8">
           <form.Field
             name="name"
@@ -176,70 +169,68 @@ const cantonOptions = computed(
               </form.Field>
             </NGridItem>
           </NGrid>
-
-          <form.Field name="description">
-            <template v-slot="{ field }">
-              <NFormItem label="Descripción">
-                <NInput
-                  type="textarea"
-                  placeholder="Descripción opcional del evento"
-                  :rows="3"
-                  :maxlength="1000"
-                  show-count
-                  v-bind="fieldInput(field)"
-                />
-              </NFormItem>
-            </template>
-          </form.Field>
         </NFlex>
+      </div>
 
-        <!-- Right column: cover image -->
-        <NFlex v-if="!hideCoverUpload" vertical :size="16">
-          <NFormItem label="Imagen de portada">
-            <template #label-extra>
-              <span class="form-hint">
-                Si no se selecciona, se asignará automáticamente la primera foto subida.
-              </span>
-            </template>
-            <div v-if="coverPreview" class="cover-preview">
-              <img :src="coverPreview" alt="Preview" class="cover-preview__image" />
-              <NButton circle size="tiny" class="cover-preview__remove" @click="removeCover">
-                <template #icon><NIcon :component="CloseCircleOutline" /></template>
-              </NButton>
-            </div>
-            <div v-else class="cover-upload-area" @click="triggerCoverInput">
-              <NFlex vertical align="center" :size="4">
-                <NIcon :component="ImageOutline" :size="28" color="var(--tt-neutral-light)" />
-                <span class="cover-upload-area__text">
-                  <NIcon :component="CameraOutline" :size="14" />
-                  Seleccionar imagen
-                </span>
-              </NFlex>
-            </div>
-            <input
-              ref="coverInput"
-              type="file"
-              :accept="ACCEPTED_COVER_TYPES"
-              style="display: none"
-              @change="handleCoverChange"
-            />
-          </NFormItem>
+      <div class="form-section">
+        <div class="form-section__title">Descripción</div>
+        <p class="form-section__desc">
+          Contexto adicional sobre el evento. Aparece en la página pública.
+        </p>
 
-          <div class="cover-requirements">
-            <p class="cover-requirements__title">Requisitos de imagen</p>
-            <ul class="cover-requirements__list">
-              <li>Mínimo 1280 x 720px</li>
-              <li>Relación 16:9 recomendada</li>
-              <li>Tamaño máximo: 5MB</li>
-              <li>Formatos: JPG, PNG, WEBP</li>
-            </ul>
-          </div>
-        </NFlex>
+        <form.Field name="description">
+          <template v-slot="{ field }">
+            <NFormItem label="Descripción">
+              <NInput
+                type="textarea"
+                placeholder="Descripción opcional del evento"
+                :rows="4"
+                :maxlength="1000"
+                show-count
+                v-bind="fieldInput(field)"
+              />
+            </NFormItem>
+          </template>
+        </form.Field>
       </div>
     </div>
 
-    <!-- Form Footer -->
-    <NFlex justify="end" align="center" :size="12" class="form-footer">
+    <!-- Right panel: assets -->
+    <div v-if="!hideAssetUpload" class="event-form__assets">
+      <div class="assets-grid">
+        <AssetUploadZone
+          asset-type="cover_image"
+          :current-url="assetPreviews.getAssetUrl('cover_image')"
+          @upload="(file) => assetPreviews.addFile('cover_image', file)"
+          @remove="assetPreviews.removeFile('cover_image')"
+        />
+
+        <AssetUploadZone
+          asset-type="hero_image"
+          :current-url="assetPreviews.getAssetUrl('hero_image')"
+          @upload="(file) => assetPreviews.addFile('hero_image', file)"
+          @remove="assetPreviews.removeFile('hero_image')"
+        />
+
+        <div class="assets-pair">
+          <AssetUploadZone
+            asset-type="event_logo"
+            :current-url="assetPreviews.getAssetUrl('event_logo')"
+            @upload="(file) => assetPreviews.addFile('event_logo', file)"
+            @remove="assetPreviews.removeFile('event_logo')"
+          />
+          <AssetUploadZone
+            asset-type="poster"
+            :current-url="assetPreviews.getAssetUrl('poster')"
+            @upload="(file) => assetPreviews.addFile('poster', file)"
+            @remove="assetPreviews.removeFile('poster')"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="event-form__footer">
       <NButton @click="emit('cancel')">Cancelar</NButton>
       <form.Subscribe>
         <template v-slot="{ canSubmit }">
@@ -254,7 +245,7 @@ const cantonOptions = computed(
           </NButton>
         </template>
       </form.Subscribe>
-    </NFlex>
+    </div>
   </form>
 </template>
 

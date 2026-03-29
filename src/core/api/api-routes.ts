@@ -25,9 +25,14 @@ export const API_ROUTES = {
     UPDATE: (id: string) => `${EVENTS_BASE}/${id}`,
     DELETE: (id: string) => `${EVENTS_BASE}/${id}`,
     STATS: `${EVENTS_BASE}/stats`,
-    COVER_PRESIGNED_URL: (id: string) => `${EVENTS_BASE}/${id}/cover/presigned-url`,
-    COVER_CONFIRM: (id: string) => `${EVENTS_BASE}/${id}/cover/confirm`,
-    COVER_REMOVE: (id: string) => `${EVENTS_BASE}/${id}/cover`,
+    ASSETS: {
+      GET_ALL: (id: string) => `${EVENTS_BASE}/${id}/assets`,
+      PRESIGNED_URL: (id: string, assetType: string) =>
+        `${EVENTS_BASE}/${id}/assets/${assetType}/presigned-url`,
+      CONFIRM: (id: string, assetType: string) =>
+        `${EVENTS_BASE}/${id}/assets/${assetType}/confirm`,
+      DELETE: (id: string, assetType: string) => `${EVENTS_BASE}/${id}/assets/${assetType}`,
+    },
   },
   PHOTOS: {
     BASE: PHOTOS_BASE,
