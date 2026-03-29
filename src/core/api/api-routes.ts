@@ -5,6 +5,7 @@ const PHOTOS_BASE = '/photos'
 const PREVIEW_LINKS_BASE = '/preview-links'
 const ORDERS_BASE = '/orders'
 const DELIVERY_PUBLIC_BASE = '/delivery'
+const NOTIFICATIONS_BASE = '/notifications'
 const LOCATIONS_BASE = '/locations'
 const CYCLISTS_BASE = '/cyclists'
 
@@ -76,6 +77,13 @@ export const API_ROUTES = {
   DELIVERY_PUBLIC: {
     BASE: DELIVERY_PUBLIC_BASE,
     GET_BY_TOKEN: (token: string) => `${DELIVERY_PUBLIC_BASE}/${token}`,
+  },
+  NOTIFICATIONS: {
+    BASE: NOTIFICATIONS_BASE,
+    GET_ALL: NOTIFICATIONS_BASE,
+    UNREAD_COUNT: `${NOTIFICATIONS_BASE}/unread-count`,
+    MARK_AS_READ: (id: string) => `${NOTIFICATIONS_BASE}/${id}/read`,
+    MARK_ALL_READ: `${NOTIFICATIONS_BASE}/read-all`,
   },
   LOCATIONS: {
     BASE: LOCATIONS_BASE,
