@@ -14,6 +14,7 @@ export interface IApiEventDetail {
   coverImageUrl: string | null
   coverImageSource: CoverImageSource | null
   status: string
+  isFeatured: boolean
   photoCount: number
   classifiedCount: number
   totalFileSize: number
@@ -35,6 +36,7 @@ export interface IEventDetail {
   coverImageUrl: string | null
   coverImageSource: CoverImageSource | null
   status: EventStatus
+  isFeatured: boolean
   photoCount: number
   classifiedCount: number
   totalFileSize: number

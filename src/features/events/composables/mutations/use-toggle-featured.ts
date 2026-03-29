@@ -1,0 +1,17 @@
+import { useMutation, useQueryClient } from '@tanstack/vue-query'
+
+import { API_ROUTES } from '@/core/api/api-routes'
+import { httpClient } from '@/core/http/axios-client'
+import { EVENT_QUERY_KEYS } from '../../constants/query-keys'
+
+export function useToggleFeatured(eventId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (isFeatured: boolean) =>
+      httpClient.patch(API_ROUTES.EVENTS.FEATURED(eventId), { isFeatured }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: EVENT_QUERY_KEYS.all() })
+    },
+  })
+}
