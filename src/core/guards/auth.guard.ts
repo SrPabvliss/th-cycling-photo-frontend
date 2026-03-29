@@ -13,7 +13,16 @@ export function registerAuthGuard(router: Router): void {
   router.beforeEach(async (to) => {
     const authStore = useAuthStore()
 
-    // Hydrate session once on app load
+    // Public routes — no auth required, skip hydration
+    if (to.meta.public) {
+      if (!isHydrated) isHydrated = true
+      if (authStore.isAuthenticated && to.path === '/login') {
+        return EVENTS_PATH
+      }
+      return true
+    }
+
+    // Hydrate session once on app load (only for protected routes)
     if (!isHydrated) {
       isHydrated = true
       try {
@@ -25,14 +34,6 @@ export function registerAuthGuard(router: Router): void {
       } catch {
         // No valid session
       }
-    }
-
-    // Public routes — no auth required
-    if (to.meta.public) {
-      if (authStore.isAuthenticated && to.path === '/login') {
-        return EVENTS_PATH
-      }
-      return true
     }
 
     // Auth required — redirect to login if not authenticated

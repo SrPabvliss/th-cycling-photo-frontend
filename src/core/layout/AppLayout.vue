@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { useNotificationSocket } from '@/features/notifications/composables/use-notification-socket'
 import AppNav from './AppNav.vue'
+
+useNotificationSocket()
 </script>
 
 <template>

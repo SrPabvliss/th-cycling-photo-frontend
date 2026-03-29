@@ -7,6 +7,7 @@ import { LogOutOutline } from '@vicons/ionicons5'
 import { useAuth } from '@/features/auth/composables/use-auth'
 import { EVENTS_PATH } from '@/features/events/routes'
 import { ORDERS_PATH } from '@/features/orders/routes'
+import NotificationBell from '@/features/notifications/presentation/components/NotificationBell/NotificationBell.vue'
 import TitanLogo from './public/TitanLogo.vue'
 
 const router = useRouter()
@@ -37,6 +38,7 @@ async function handleLogout() {
     <div id="page-actions" class="app-nav-center" />
 
     <div v-if="currentUser" class="app-nav-right">
+      <NotificationBell />
       <div class="app-nav-user">
         <NAvatar :size="32" round>{{ userInitials }}</NAvatar>
         <div class="app-nav-user-info">
