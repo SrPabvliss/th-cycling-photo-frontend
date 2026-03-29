@@ -3,8 +3,8 @@ import { ref } from 'vue'
 import { NButton, NCard, NFlex, NIcon, NSpin } from 'naive-ui'
 import { CameraOutline, TrashOutline, ImageOutline } from '@vicons/ionicons5'
 
-import { useUploadCover } from '../../../composables/mutations/use-upload-cover'
-import { useRemoveCover } from '../../../composables/mutations/use-remove-cover'
+import { useUploadAsset } from '@/features/event-assets/composables/mutations/use-upload-asset'
+import { useRemoveAsset } from '@/features/event-assets/composables/mutations/use-remove-asset'
 import type { IEventDetail } from '../../../types/responses/event-detail.response'
 
 const ACCEPTED_TYPES = 'image/jpeg,image/png,image/webp'
@@ -16,8 +16,8 @@ const props = defineProps<{
 
 const fileInput = ref<HTMLInputElement | null>(null)
 
-const { mutate: uploadCover, isPending: isUploading } = useUploadCover(props.eventId)
-const { mutate: removeCover, isPending: isRemoving } = useRemoveCover(props.eventId)
+const { mutate: uploadAsset, isPending: isUploading } = useUploadAsset(props.eventId)
+const { mutate: removeAsset, isPending: isRemoving } = useRemoveAsset(props.eventId)
 
 function triggerFileInput() {
   fileInput.value?.click()
@@ -26,8 +26,7 @@ function triggerFileInput() {
 function handleFileChange(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
-  uploadCover(file)
-  // Reset input so the same file can be re-selected
+  uploadAsset({ file, assetType: 'cover_image' })
   if (fileInput.value) fileInput.value.value = ''
 }
 </script>
@@ -74,7 +73,7 @@ function handleFileChange(e: Event) {
         size="small"
         :loading="isRemoving"
         :disabled="isUploading"
-        @click="removeCover()"
+        @click="removeAsset('cover_image')"
       >
         <template #icon><NIcon :component="TrashOutline" /></template>
         Eliminar

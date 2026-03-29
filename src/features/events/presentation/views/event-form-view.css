@@ -1,9 +1,24 @@
-.form-content {
-  padding: 24px 32px;
-  max-width: 900px;
+.event-form-view {
+  display: flex;
+  flex-direction: column;
+}
+
+.event-form-container {
+  max-width: 1120px;
+  width: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  padding-top: 16px;
+}
+
+.event-form-container :deep(.page-header) {
+  margin-bottom: 8px;
+}
+
+.event-form-container > :last-child {
+  flex: 1;
 }
 
 .error-container {
@@ -11,16 +26,4 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.form-header__title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #0a0a0a;
-}
-
-.form-header__subtitle {
-  font-size: 13px;
-  color: var(--tt-neutral-mid);
-  margin: 4px 0 0;
 }

@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NCard, NResult } from 'naive-ui'
+import { NButton, NResult } from 'naive-ui'
 
 import PageHeader from '@/shared/components/PageHeader.vue'
+import { useEventAssetsQuery } from '@/features/event-assets/composables/queries/use-event-assets'
+import { useUploadAssetsBatch } from '@/features/event-assets/composables/mutations/use-upload-assets-batch'
+import { useRemoveAssetsBatch } from '@/features/event-assets/composables/mutations/use-remove-assets-batch'
+import type { EventAssetType } from '@/features/event-assets/types/asset-type'
 import { useEventDetailQuery } from '../../composables/queries/use-event-detail'
 import { EVENT_ROUTE_NAMES } from '../../routes'
 import { useUpdateEvent } from '../../composables/mutations/use-update-event'
@@ -18,53 +22,66 @@ const router = useRouter()
 const id = computed(() => route.params.id as IEventDetail['id'])
 
 const { data: event, isPending, isError, refetch } = useEventDetailQuery(id)
-const { mutate, isPending: isUpdating } = useUpdateEvent(id.value)
+const { data: assets } = useEventAssetsQuery(id)
+const { mutateAsync: updateEvent, isPending: isUpdating } = useUpdateEvent(id.value)
+const { mutateAsync: uploadAssetsBatch } = useUploadAssetsBatch()
+const { mutateAsync: removeAssetsBatch } = useRemoveAssetsBatch()
 
 const initialData = computed<IEventFormData | undefined>(() => {
   if (!event.value) return undefined
   return toEventFormData(event.value)
 })
 
-function handleSubmit(formData: IEventFormData) {
-  mutate(toUpdateEventRequest(formData))
+async function handleSubmit(
+  formData: IEventFormData,
+  assetFiles?: Map<EventAssetType, File>,
+  assetRemovals?: EventAssetType[],
+) {
+  await updateEvent(toUpdateEventRequest(formData))
+
+  const promises: Promise<unknown>[] = []
+
+  if (assetRemovals && assetRemovals.length > 0) {
+    promises.push(removeAssetsBatch({ eventId: id.value, assetTypes: assetRemovals }))
+  }
+
+  if (assetFiles && assetFiles.size > 0) {
+    promises.push(uploadAssetsBatch({ eventId: id.value, assetFiles }))
+  }
+
+  await Promise.all(promises)
 }
 </script>
 
 <template>
   <div class="page-view">
-    <div class="page-view__content form-content">
-      <PageHeader title="Editar Evento" :back-to="'/events/' + id" />
-      <EventFormSkeleton v-if="isPending" />
+    <div class="page-view__content event-form-view">
+      <div class="event-form-container">
+        <PageHeader title="Editar Evento" :back-to="'/events/' + id" />
+        <EventFormSkeleton v-if="isPending" />
 
-      <div v-else-if="isError" class="error-container">
-        <NResult
-          status="error"
-          title="Error al cargar evento"
-          description="No se pudo obtener el detalle del evento para editar."
-        >
-          <template #footer>
-            <NButton @click="refetch()">Reintentar</NButton>
-          </template>
-        </NResult>
-      </div>
-
-      <NCard v-else-if="event && initialData">
-        <template #header>
-          <div>
-            <div class="form-header__title">Información del Evento</div>
-            <p class="form-header__subtitle">Modifique los datos del evento según sea necesario.</p>
-          </div>
-        </template>
+        <div v-else-if="isError" class="error-container">
+          <NResult
+            status="error"
+            title="Error al cargar evento"
+            description="No se pudo obtener el detalle del evento para editar."
+          >
+            <template #footer>
+              <NButton @click="refetch()">Reintentar</NButton>
+            </template>
+          </NResult>
+        </div>
 
         <EventForm
+          v-else-if="event && initialData"
           :initial-data="initialData"
-          :existing-cover-url="event.coverImageUrl"
+          :existing-assets="assets"
           :is-submitting="isUpdating"
           submit-label="Guardar Cambios"
           @submit="handleSubmit"
           @cancel="router.push({ name: EVENT_ROUTE_NAMES.DETAIL, params: { id: id } })"
         />
-      </NCard>
+      </div>
     </div>
   </div>
 </template>
