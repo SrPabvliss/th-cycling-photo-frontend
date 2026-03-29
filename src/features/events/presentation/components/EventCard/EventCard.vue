@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { NButton, NFlex, NIcon, NTag } from 'naive-ui'
+import { NButton, NFlex, NIcon } from 'naive-ui'
 import {
   LocationOutline,
   CalendarOutline,
   CameraOutline,
   CloudUploadOutline,
   ImageOutline,
+  Star,
 } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
@@ -28,7 +29,11 @@ const displayLocation = computed(() => formatLocation(props.event))
 </script>
 
 <template>
-  <article class="event-card" @click="emit('view', event.id)">
+  <article
+    class="event-card"
+    :class="{ 'event-card--featured': event.isFeatured }"
+    @click="emit('view', event.id)"
+  >
     <!-- Cover -->
     <div class="event-card__cover">
       <img
@@ -55,10 +60,14 @@ const displayLocation = computed(() => formatLocation(props.event))
       </NFlex>
 
       <!-- Status badge -->
-      <div class="event-card__badge">
-        <NTag :type="EVENT_STATUS_CONFIG[event.status].type" size="small" round>
-          {{ EVENT_STATUS_CONFIG[event.status].label }}
-        </NTag>
+      <div class="event-card__badge" :class="`event-card__badge--${event.status}`">
+        {{ EVENT_STATUS_CONFIG[event.status].label }}
+      </div>
+
+      <!-- Featured badge -->
+      <div v-if="event.isFeatured" class="event-card__featured-badge">
+        <NIcon :component="Star" :size="12" />
+        Destacado
       </div>
 
       <!-- Photo count + size overlay -->

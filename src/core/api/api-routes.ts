@@ -1,3 +1,4 @@
+const PUBLIC_EVENTS_BASE = '/public/events'
 const PREVIEW_PUBLIC_BASE = '/preview'
 const AUTH_BASE = '/auth'
 const EVENTS_BASE = '/events'
@@ -25,6 +26,7 @@ export const API_ROUTES = {
     UPDATE: (id: string) => `${EVENTS_BASE}/${id}`,
     DELETE: (id: string) => `${EVENTS_BASE}/${id}`,
     STATS: `${EVENTS_BASE}/stats`,
+    FEATURED: (id: string) => `${EVENTS_BASE}/${id}/featured`,
     ASSETS: {
       GET_ALL: (id: string) => `${EVENTS_BASE}/${id}/assets`,
       PRESIGNED_URL: (id: string, assetType: string) =>
@@ -62,6 +64,11 @@ export const API_ROUTES = {
     BASE: PREVIEW_LINKS_BASE,
     BY_EVENT: (eventId: string) => `${EVENTS_BASE}/${eventId}/preview-links`,
     CREATE: (eventId: string) => `${EVENTS_BASE}/${eventId}/preview-links`,
+  },
+  PUBLIC_EVENTS: {
+    BASE: PUBLIC_EVENTS_BASE,
+    GET_ALL: PUBLIC_EVENTS_BASE,
+    GET_BY_ID: (id: string) => `${PUBLIC_EVENTS_BASE}/${id}`,
   },
   PREVIEW_PUBLIC: {
     BASE: PREVIEW_PUBLIC_BASE,

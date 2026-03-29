@@ -14,6 +14,20 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
+/* --- Featured variant --- */
+.event-card--featured {
+  border: 2px solid #d4a017;
+  box-shadow:
+    0 0 0 1px rgba(212, 160, 23, 0.3),
+    0 2px 10px rgba(212, 160, 23, 0.18);
+}
+
+.event-card--featured:hover {
+  box-shadow:
+    0 0 0 1px rgba(212, 160, 23, 0.4),
+    0 4px 18px rgba(212, 160, 23, 0.3);
+}
+
 /* --- Cover --- */
 .event-card__cover {
   height: 155px;
@@ -63,6 +77,37 @@
   position: absolute;
   top: 12px;
   right: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(30, 30, 30, 0.8);
+  backdrop-filter: blur(4px);
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.event-card__badge--active {
+  color: #6ee7a0;
+}
+
+.event-card__badge--archived {
+  color: #a0a0a0;
+}
+
+.event-card__featured-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(30, 27, 20, 0.85);
+  color: #f0c040;
+  font-size: 11px;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
 }
 
 .badge-dot {

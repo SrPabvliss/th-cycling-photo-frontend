@@ -16,6 +16,7 @@ export function toEventDetail(api: IApiEventDetail): IEventDetail {
     coverImageUrl: api.coverImageUrl,
     coverImageSource: api.coverImageSource as CoverImageSource | null,
     status: api.status as EventStatus,
+    isFeatured: api.isFeatured,
     photoCount: api.photoCount,
     classifiedCount: api.classifiedCount,
     totalFileSize: api.totalFileSize,

@@ -1,20 +1,22 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { NButton, NFlex, NIcon, NTag } from 'naive-ui'
-import { ArrowBack, CreateOutline, CloudUploadOutline } from '@vicons/ionicons5'
+import { ArrowBack, CreateOutline, CloudUploadOutline, StarOutline, Star } from '@vicons/ionicons5'
 
 import { formatDate, formatRelativeTime } from '@/shared/utils/date.utils'
 import { PHOTO_ROUTE_NAMES } from '@/features/photos/routes'
 import { EVENT_ROUTE_NAMES } from '../../../routes'
 import { EVENT_STATUS_CONFIG } from '../../../constants/status-config'
+import { useToggleFeatured } from '../../../composables/mutations/use-toggle-featured'
 import type { IEventDetail } from '../../../types/responses/event-detail.response'
 
-defineProps<{
+const props = defineProps<{
   event: IEventDetail
   eventId: string
 }>()
 
 const router = useRouter()
+const { mutate: toggleFeatured, isPending: isToggling } = useToggleFeatured(props.eventId)
 </script>
 
 <template>
@@ -29,6 +31,7 @@ const router = useRouter()
           <NTag :type="EVENT_STATUS_CONFIG[event.status].type" size="small" round>
             {{ EVENT_STATUS_CONFIG[event.status].label }}
           </NTag>
+          <NTag v-if="event.isFeatured" type="warning" size="small" round> Destacado </NTag>
         </NFlex>
         <p class="event-header__subtitle">
           {{ formatDate(event.date) }} · Actualizado {{ formatRelativeTime(event.updatedAt) }}
@@ -36,6 +39,17 @@ const router = useRouter()
       </div>
     </NFlex>
     <NFlex :size="10">
+      <NButton
+        :type="event.isFeatured ? 'warning' : 'default'"
+        :ghost="event.isFeatured"
+        :loading="isToggling"
+        @click="toggleFeatured(!event.isFeatured)"
+      >
+        <template #icon>
+          <NIcon :component="event.isFeatured ? Star : StarOutline" />
+        </template>
+        {{ event.isFeatured ? 'Quitar destacado' : 'Destacar' }}
+      </NButton>
       <NButton @click="router.push({ name: EVENT_ROUTE_NAMES.EDIT, params: { id: eventId } })">
         <template #icon><NIcon :component="CreateOutline" /></template>
         Editar evento
