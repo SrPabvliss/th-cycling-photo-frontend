@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { NButton, NCard, NFlex, NIcon, NSpin } from 'naive-ui'
+import { NButton, NFlex, NIcon, NSpin } from 'naive-ui'
+
+import CollapsibleCard from '@/shared/components/CollapsibleCard.vue'
 import { CameraOutline, TrashOutline, ImageOutline } from '@vicons/ionicons5'
 
 import { useUploadAsset } from '@/features/event-assets/composables/mutations/use-upload-asset'
@@ -32,18 +34,11 @@ function handleFileChange(e: Event) {
 </script>
 
 <template>
-  <NCard :segmented="{ content: true }">
-    <template #header>
-      <div>
-        <div class="cover-card__title">Imagen de Portada</div>
-        <p class="cover-card__subtitle">
-          {{
-            event.coverImageSource === 'auto' ? 'Asignada automáticamente' : 'Portada del evento'
-          }}
-        </p>
-      </div>
-    </template>
-
+  <CollapsibleCard
+    title="Imagen de Portada"
+    subtitle="Portada visible en la galería pública"
+    :default-expanded="false"
+  >
     <div class="cover-card__preview">
       <NSpin :show="isUploading || isRemoving">
         <div v-if="event.coverImageUrl" class="cover-card__image-wrapper">
@@ -87,7 +82,7 @@ function handleFileChange(e: Event) {
       style="display: none"
       @change="handleFileChange"
     />
-  </NCard>
+  </CollapsibleCard>
 </template>
 
 <style scoped src="./event-cover-card.css"></style>

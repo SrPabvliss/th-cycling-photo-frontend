@@ -11,8 +11,9 @@ import {
   NIcon,
   NInput,
   NSelect,
+  NSwitch,
 } from 'naive-ui'
-import { ArrowForward } from '@vicons/ionicons5'
+import { ArrowForward, StarOutline } from '@vicons/ionicons5'
 
 import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
 import { useProvincesQuery } from '@/features/locations/composables/queries/use-provinces'
@@ -21,8 +22,17 @@ import { useLocalAssetPreviews } from '@/features/event-assets/composables/use-l
 import type { EventAssetType } from '@/features/event-assets/types/asset-type'
 import type { IEventAsset } from '@/features/event-assets/types/responses/event-asset.response'
 import AssetUploadZone from '@/features/event-assets/presentation/components/AssetUploadZone/AssetUploadZone.vue'
+import EventCategoryPicker from '@/features/photo-categories/presentation/components/EventCategoryPicker/EventCategoryPicker.vue'
+import { useCreatePhotoCategory } from '@/features/photo-categories/composables/mutations/use-create-photo-category'
 import { EVENT_FORM_DEFAULTS, eventFormSchema } from '../../../constants/event-form.schema'
 import type { IEventFormData } from '../../../types/event-form.types'
+
+export interface IEventFormExtra {
+  assetFiles?: Map<EventAssetType, File>
+  assetRemovals?: EventAssetType[]
+  categoryIds?: string[]
+  isFeatured?: boolean
+}
 
 const props = defineProps<{
   isSubmitting: boolean
@@ -30,14 +40,12 @@ const props = defineProps<{
   submitLabel?: string
   hideAssetUpload?: boolean
   existingAssets?: IEventAsset[]
+  initialFeatured?: boolean
+  initialCategoryIds?: string[]
 }>()
 
 const emit = defineEmits<{
-  submit: [
-    data: IEventFormData,
-    assetFiles?: Map<EventAssetType, File>,
-    assetRemovals?: EventAssetType[],
-  ]
+  submit: [data: IEventFormData, extra: IEventFormExtra]
   cancel: []
 }>()
 
@@ -45,16 +53,25 @@ const form = useForm({
   defaultValues: props.initialData ?? EVENT_FORM_DEFAULTS,
   onSubmit: async ({ value }) => {
     const removals = assetPreviews.getPendingRemovals()
-    emit(
-      'submit',
-      value,
-      assetPreviews.getPendingFiles(),
-      removals.length > 0 ? removals : undefined,
-    )
+    emit('submit', value, {
+      assetFiles: assetPreviews.getPendingFiles(),
+      assetRemovals: removals.length > 0 ? removals : undefined,
+      categoryIds: selectedCategoryIds.value.length > 0 ? selectedCategoryIds.value : undefined,
+      isFeatured: isFeatured.value || undefined,
+    })
   },
 })
 
 const assetPreviews = useLocalAssetPreviews(() => props.existingAssets)
+const selectedCategoryIds = ref<string[]>(props.initialCategoryIds ?? [])
+const isFeatured = ref(props.initialFeatured ?? false)
+
+const { mutateAsync: createCategory } = useCreatePhotoCategory()
+
+async function handleCreateNewCategory(name: string) {
+  const { data } = await createCategory(name)
+  selectedCategoryIds.value = [...selectedCategoryIds.value, data.id]
+}
 
 const selectedProvinceId = ref<number | null>(props.initialData?.provinceId ?? null)
 
@@ -83,100 +100,86 @@ const cantonOptions = computed(
   >
     <!-- Left panel: form fields -->
     <div class="event-form__fields">
-      <div class="form-section">
-        <div class="form-section__title">Información general</div>
-        <p class="form-section__desc">
-          Datos principales que identifican el evento en la plataforma.
-        </p>
+      <NFlex vertical :size="8">
+        <form.Field
+          name="name"
+          :validators="{
+            onBlur: eventFormSchema.shape.name,
+            onSubmit: eventFormSchema.shape.name,
+          }"
+        >
+          <template v-slot="{ field }">
+            <NFormItem label="Nombre del evento" required v-bind="fieldStatus(field)">
+              <NInput placeholder="Ej. Copa Nacional Downhill 2026" v-bind="fieldInput(field)" />
+              <template #label-extra>
+                <span class="form-hint">Nombre oficial que aparecerá en los reportes.</span>
+              </template>
+            </NFormItem>
+          </template>
+        </form.Field>
 
-        <NFlex vertical :size="8">
-          <form.Field
-            name="name"
-            :validators="{
-              onBlur: eventFormSchema.shape.name,
-              onSubmit: eventFormSchema.shape.name,
-            }"
-          >
-            <template v-slot="{ field }">
-              <NFormItem label="Nombre del evento" required v-bind="fieldStatus(field)">
-                <NInput placeholder="Ej. Copa Nacional Downhill 2026" v-bind="fieldInput(field)" />
-                <template #label-extra>
-                  <span class="form-hint">Nombre oficial que aparecerá en los reportes.</span>
-                </template>
-              </NFormItem>
-            </template>
-          </form.Field>
+        <form.Field
+          name="date"
+          :validators="{
+            onBlur: eventFormSchema.shape.date,
+            onSubmit: eventFormSchema.shape.date,
+          }"
+        >
+          <template v-slot="{ field }">
+            <NFormItem label="Fecha" required v-bind="fieldStatus(field)">
+              <NDatePicker
+                type="date"
+                placeholder="Seleccionar fecha"
+                style="width: 100%"
+                v-bind="fieldInput(field)"
+              />
+            </NFormItem>
+          </template>
+        </form.Field>
 
-          <form.Field
-            name="date"
-            :validators="{
-              onBlur: eventFormSchema.shape.date,
-              onSubmit: eventFormSchema.shape.date,
-            }"
-          >
-            <template v-slot="{ field }">
-              <NFormItem label="Fecha" required v-bind="fieldStatus(field)">
-                <NDatePicker
-                  type="date"
-                  placeholder="Seleccionar fecha"
-                  style="width: 100%"
-                  v-bind="fieldInput(field)"
-                />
-              </NFormItem>
-            </template>
-          </form.Field>
-
-          <NGrid :cols="2" :x-gap="16">
-            <NGridItem>
-              <form.Field name="provinceId">
-                <template v-slot="{ field }">
-                  <NFormItem label="Provincia">
-                    <NSelect
-                      placeholder="Seleccionar provincia"
-                      :options="provinceOptions"
-                      :loading="isLoadingProvinces"
-                      :value="field.state.value"
-                      filterable
-                      clearable
-                      @update:value="
-                        (val: number | null) => {
-                          field.handleChange(val)
-                          selectedProvinceId = val
-                          form.setFieldValue('cantonId', null)
-                        }
-                      "
-                      @blur="field.handleBlur"
-                    />
-                  </NFormItem>
-                </template>
-              </form.Field>
-            </NGridItem>
-            <NGridItem>
-              <form.Field name="cantonId">
-                <template v-slot="{ field }">
-                  <NFormItem label="Cantón">
-                    <NSelect
-                      placeholder="Seleccionar cantón"
-                      :options="cantonOptions"
-                      :loading="isLoadingCantons"
-                      :disabled="!selectedProvinceId"
-                      filterable
-                      clearable
-                      v-bind="fieldInput(field)"
-                    />
-                  </NFormItem>
-                </template>
-              </form.Field>
-            </NGridItem>
-          </NGrid>
-        </NFlex>
-      </div>
-
-      <div class="form-section">
-        <div class="form-section__title">Descripción</div>
-        <p class="form-section__desc">
-          Contexto adicional sobre el evento. Aparece en la página pública.
-        </p>
+        <NGrid :cols="2" :x-gap="16">
+          <NGridItem>
+            <form.Field name="provinceId">
+              <template v-slot="{ field }">
+                <NFormItem label="Provincia">
+                  <NSelect
+                    placeholder="Seleccionar provincia"
+                    :options="provinceOptions"
+                    :loading="isLoadingProvinces"
+                    :value="field.state.value"
+                    filterable
+                    clearable
+                    @update:value="
+                      (val: number | null) => {
+                        field.handleChange(val)
+                        selectedProvinceId = val
+                        form.setFieldValue('cantonId', null)
+                      }
+                    "
+                    @blur="field.handleBlur"
+                  />
+                </NFormItem>
+              </template>
+            </form.Field>
+          </NGridItem>
+          <NGridItem>
+            <form.Field name="cantonId">
+              <template v-slot="{ field }">
+                <NFormItem label="Cantón">
+                  <NSelect
+                    placeholder="Seleccionar cantón"
+                    :options="cantonOptions"
+                    :loading="isLoadingCantons"
+                    :disabled="!selectedProvinceId"
+                    filterable
+                    clearable
+                    v-bind="fieldInput(field)"
+                  />
+                </NFormItem>
+              </template>
+            </form.Field>
+          </NGridItem>
+        </NGrid>
 
         <form.Field name="description">
           <template v-slot="{ field }">
@@ -184,7 +187,7 @@ const cantonOptions = computed(
               <NInput
                 type="textarea"
                 placeholder="Descripción opcional del evento"
-                :rows="4"
+                :rows="3"
                 :maxlength="1000"
                 show-count
                 v-bind="fieldInput(field)"
@@ -192,7 +195,30 @@ const cantonOptions = computed(
             </NFormItem>
           </template>
         </form.Field>
-      </div>
+      </NFlex>
+
+      <div class="form-divider" />
+
+      <NFlex vertical :size="16">
+        <EventCategoryPicker
+          :selected-ids="selectedCategoryIds"
+          @update:selected-ids="selectedCategoryIds = $event"
+          @create-new="handleCreateNewCategory"
+        />
+
+        <NFlex align="center" justify="space-between" class="featured-toggle">
+          <div>
+            <NFlex align="center" :size="6">
+              <NIcon :component="StarOutline" :size="16" color="var(--tt-neutral-mid)" />
+              <span class="featured-toggle__label">Marcar como destacado</span>
+            </NFlex>
+            <p class="featured-toggle__hint">
+              Se mostrará como evento principal en la galería. Solo uno puede estar destacado.
+            </p>
+          </div>
+          <NSwitch v-model:value="isFeatured" />
+        </NFlex>
+      </NFlex>
     </div>
 
     <!-- Right panel: assets -->
