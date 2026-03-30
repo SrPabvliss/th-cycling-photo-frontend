@@ -8,6 +8,7 @@ import { httpClient } from '@/core/http/axios-client'
 import { b2UploadClient } from '@/core/http/b2-upload-client'
 import { useConnectivityMonitor } from '@/shared/composables/use-connectivity-monitor'
 import { EVENT_QUERY_KEYS } from '@/features/events/constants/query-keys'
+import { PHOTO_CATEGORY_QUERY_KEYS } from '@/features/photo-categories/constants/query-keys'
 import { PHOTO_QUERY_KEYS } from '../constants/query-keys'
 import { useUploadStore } from '../stores/upload.store'
 import type { IConfirmPhotoBatchRequest } from '../types/requests/confirm-photo-batch.request'
@@ -38,6 +39,10 @@ export function useUploadQueue(eventId: Ref<string>) {
   // --- Batch confirm accumulator ---
 
   const _pendingConfirm: IUploadItem[] = []
+
+  // --- Photo category for batch ---
+
+  const photoCategoryId = ref<string | null>(null)
 
   // --- Duplicate tracking ---
 
@@ -147,6 +152,7 @@ export function useUploadQueue(eventId: Ref<string>) {
         objectKey: item.objectKey!,
         contentType: item._file.type,
       })),
+      ...(photoCategoryId.value ? { photoCategoryId: photoCategoryId.value } : {}),
     }
 
     try {
@@ -187,6 +193,11 @@ export function useUploadQueue(eventId: Ref<string>) {
       } finally {
         queryClient.invalidateQueries({ queryKey: PHOTO_QUERY_KEYS.all() })
         queryClient.invalidateQueries({ queryKey: EVENT_QUERY_KEYS.all() })
+        if (photoCategoryId.value) {
+          queryClient.invalidateQueries({
+            queryKey: PHOTO_CATEGORY_QUERY_KEYS.byEvent(eventId.value),
+          })
+        }
       }
     })
   }
@@ -238,6 +249,7 @@ export function useUploadQueue(eventId: Ref<string>) {
     isActive,
     isOnline,
     autoConfirmedCount,
+    photoCategoryId,
     startUpload,
     pauseUpload,
     resumeUpload,

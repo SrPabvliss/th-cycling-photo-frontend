@@ -15,6 +15,7 @@ export interface IPhotoSearchFilters {
   helmetColor?: string | null
   clothingColor?: string | null
   bikeColor?: string | null
+  photoCategoryId?: string | null
 }
 
 export function usePhotosSearchQuery(
@@ -42,7 +43,7 @@ export function usePhotosSearchQuery(
         limit,
       }
 
-      // Use /photos/search when advanced filters are active, otherwise event-scoped endpoint
+      // Use /photos/search when advanced classification filters are active
       if (hasAdvancedFilters.value || f.status) {
         params.eventId = f.eventId
         if (f.plateNumber) params.plateNumber = f.plateNumber
@@ -60,7 +61,9 @@ export function usePhotosSearchQuery(
         }
       }
 
-      // Default: simple event-scoped listing
+      // Default: event-scoped listing (supports photoCategoryId filter)
+      if (f.photoCategoryId) params.photoCategoryId = f.photoCategoryId
+
       const response = await httpClient.get<IApiPhotoListItem[]>(
         API_ROUTES.PHOTOS.BY_EVENT(f.eventId),
         { params },

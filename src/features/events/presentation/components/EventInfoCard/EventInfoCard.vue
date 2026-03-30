@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { NCard, NFlex, NIcon } from 'naive-ui'
+import { NFlex, NIcon } from 'naive-ui'
+
+import CollapsibleCard from '@/shared/components/CollapsibleCard.vue'
 import { CalendarOutline, LocationOutline } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
@@ -15,13 +17,7 @@ const displayLocation = computed(() => formatLocation(props.event) ?? 'Sin ubica
 </script>
 
 <template>
-  <NCard :segmented="{ content: true }">
-    <template #header>
-      <div>
-        <div class="info-card__title">Información del Evento</div>
-        <p class="info-card__subtitle">Detalles generales de la competencia</p>
-      </div>
-    </template>
+  <CollapsibleCard title="Información del Evento" subtitle="Fecha, ubicación y detalles">
     <NFlex vertical :size="20">
       <NFlex align="start" :size="12">
         <div class="info-item__icon">
@@ -42,7 +38,7 @@ const displayLocation = computed(() => formatLocation(props.event) ?? 'Sin ubica
         </div>
       </NFlex>
     </NFlex>
-  </NCard>
+  </CollapsibleCard>
 </template>
 
 <style scoped src="./event-info-card.css"></style>

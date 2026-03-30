@@ -2,7 +2,9 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton, NCard, NEmpty, NFlex, NGrid, NGridItem, NIcon, NResult } from 'naive-ui'
-import { PersonOutline, TimeOutline } from '@vicons/ionicons5'
+import { TimeOutline } from '@vicons/ionicons5'
+
+import CollapsibleCard from '@/shared/components/CollapsibleCard.vue'
 
 import { PHOTO_ROUTE_NAMES } from '@/features/photos/routes'
 import { usePhotosGalleryQuery } from '@/features/photos/composables/queries/use-photos-gallery'
@@ -16,6 +18,7 @@ import EventCoverCard from '../components/EventCoverCard/EventCoverCard.vue'
 import EventInfoCard from '../components/EventInfoCard/EventInfoCard.vue'
 import EventQuickSearch from '../components/EventQuickSearch/EventQuickSearch.vue'
 import EventQuickActions from '../components/EventQuickActions/EventQuickActions.vue'
+import PhotoCategoryManager from '@/features/photo-categories/presentation/components/PhotoCategoryManager/PhotoCategoryManager.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -103,18 +106,19 @@ function navigateToGallery() {
               :event-name="event.name"
               :photo-count="event.photoCount"
             />
-            <EventCoverCard :event="event" :event-id="id" />
             <EventInfoCard :event="event" />
+            <PhotoCategoryManager :event-id="id" />
+            <EventCoverCard :event="event" :event-id="id" />
 
-            <NCard size="small">
-              <template #header>
-                <div style="font-size: 14px; font-weight: 600">Clasificador Asignado</div>
-              </template>
+            <CollapsibleCard
+              title="Clasificador Asignado"
+              subtitle="Persona encargada del retoque"
+              :default-expanded="false"
+            >
               <NFlex vertical align="center" :size="8" style="padding: 16px 0">
-                <NIcon :component="PersonOutline" :size="28" color="var(--tt-neutral-light)" />
                 <span class="placeholder-text">Próximamente</span>
               </NFlex>
-            </NCard>
+            </CollapsibleCard>
           </NFlex>
         </div>
       </template>

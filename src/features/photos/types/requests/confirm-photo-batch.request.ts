@@ -9,4 +9,5 @@ export interface IPhotoBatchItem {
 /** Request body for POST /events/:eventId/photos/confirm-batch */
 export interface IConfirmPhotoBatchRequest {
   photos: IPhotoBatchItem[]
+  photoCategoryId?: string
 }

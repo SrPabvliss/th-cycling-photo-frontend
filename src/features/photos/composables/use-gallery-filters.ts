@@ -15,6 +15,7 @@ export function useGalleryFilters(eventId: () => string) {
   const helmetColors = ref<string[]>([])
   const clothingColors = ref<string[]>([])
   const bikeColors = ref<string[]>([])
+  const photoCategoryId = ref<string | null>(null)
 
   // Read query params on mount (from event detail quick search)
   watch(
@@ -35,6 +36,7 @@ export function useGalleryFilters(eventId: () => string) {
     helmetColor: helmetColors.value.length > 0 ? helmetColors.value.join(',') : null,
     clothingColor: clothingColors.value.length > 0 ? clothingColors.value.join(',') : null,
     bikeColor: bikeColors.value.length > 0 ? bikeColors.value.join(',') : null,
+    photoCategoryId: photoCategoryId.value,
   }))
 
   const hasActiveFilters = computed(
@@ -44,7 +46,8 @@ export function useGalleryFilters(eventId: () => string) {
         activeStatus.value ||
         helmetColors.value.length ||
         clothingColors.value.length ||
-        bikeColors.value.length
+        bikeColors.value.length ||
+        photoCategoryId.value
       ),
   )
 
@@ -59,6 +62,7 @@ export function useGalleryFilters(eventId: () => string) {
     clothingColors.value = []
     bikeColors.value = []
     activeStatus.value = null
+    photoCategoryId.value = null
     page.value = 1
   }
 
@@ -73,6 +77,7 @@ export function useGalleryFilters(eventId: () => string) {
     helmetColors,
     clothingColors,
     bikeColors,
+    photoCategoryId,
     filters,
     hasActiveFilters,
     handleStatusChange,

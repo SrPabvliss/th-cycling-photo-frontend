@@ -52,6 +52,13 @@
   font-size: 13px;
   color: #374151;
   font-weight: 500;
+  flex: 1;
+}
+
+.status-option__count {
+  font-size: 11px;
+  color: var(--tt-neutral-mid);
+  margin-left: auto;
 }
 
 .status-option--active .status-option__label {
