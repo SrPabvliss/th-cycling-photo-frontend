@@ -3,6 +3,7 @@ import { NButton, NFlex, NIcon, NInput, NTooltip } from 'naive-ui'
 import { SearchOutline } from '@vicons/ionicons5'
 
 import { COLOR_PALETTE } from '@/features/classifications/constants/color-palette'
+import type { IPhotoCategory } from '@/features/photo-categories/types/responses/photo-category.response'
 import type { PhotoStatus } from '../../../types/responses/photo-list.response'
 
 const STATUS_OPTIONS: Array<{ label: string; status: PhotoStatus | null }> = [
@@ -18,12 +19,15 @@ defineProps<{
   helmetColors: string[]
   clothingColors: string[]
   bikeColors: string[]
+  photoCategoryId: string | null
+  categories: IPhotoCategory[]
   hasActiveFilters: boolean
 }>()
 
 const emit = defineEmits<{
   'update:plateNumber': [value: string]
   'update:activeStatus': [value: PhotoStatus | null]
+  'update:photoCategoryId': [value: string | null]
   'update:helmetColors': [value: string[]]
   'update:clothingColors': [value: string[]]
   'update:bikeColors': [value: string[]]
@@ -61,6 +65,27 @@ function toggleColor(list: string[], color: string): string[] {
           @click="emit('update:activeStatus', opt.status)"
         >
           <span class="status-option__label">{{ opt.label }}</span>
+        </button>
+      </NFlex>
+    </div>
+
+    <div v-if="categories.length > 0" class="filter-section">
+      <p class="filter-section__title">Categoría</p>
+      <NFlex vertical :size="4">
+        <button
+          :class="['status-option', { 'status-option--active': photoCategoryId === null }]"
+          @click="emit('update:photoCategoryId', null)"
+        >
+          <span class="status-option__label">Todas</span>
+        </button>
+        <button
+          v-for="cat in categories"
+          :key="cat.id"
+          :class="['status-option', { 'status-option--active': photoCategoryId === cat.id }]"
+          @click="emit('update:photoCategoryId', cat.id)"
+        >
+          <span class="status-option__label">{{ cat.name }}</span>
+          <span class="status-option__count">{{ cat.photoCount }}</span>
         </button>
       </NFlex>
     </div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   NButton,
@@ -9,12 +9,16 @@ import {
   NGrid,
   NGridItem,
   NIcon,
+  NModal,
   NPagination,
   NResult,
+  NSelect,
 } from 'naive-ui'
 import { CloseOutline } from '@vicons/ionicons5'
 
 import { useEventDetailQuery } from '@/features/events/composables/queries/use-event-detail'
+import { usePhotoCategoriesQuery } from '@/features/photo-categories/composables/queries/use-photo-categories'
+import { useBulkAssignCategory } from '@/features/photo-categories/composables/mutations/use-bulk-assign-category'
 import { usePhotoSelectionStore } from '@/features/preview-links/stores/photo-selection.store'
 import { usePhotosSearchQuery } from '../../composables/queries/use-photos-search'
 import { useGalleryFilters } from '../../composables/use-gallery-filters'
@@ -39,11 +43,14 @@ const {
   helmetColors,
   clothingColors,
   bikeColors,
+  photoCategoryId,
   filters,
   hasActiveFilters,
 } = useGalleryFilters(() => eventId.value)
 
 const { data: event } = useEventDetailQuery(eventId)
+const { data: categories } = usePhotoCategoriesQuery(eventId)
+const { mutate: bulkAssign } = useBulkAssignCategory(eventId.value)
 const {
   data: photosData,
   isPending,
@@ -71,6 +78,32 @@ function handlePhotoClick(id: string) {
 
 function handleGeneratePreview() {
   router.push({ name: 'preview-links-create', params: { eventId: eventId.value } })
+}
+
+const showCategoryModal = ref(false)
+const selectedCategoryForAssign = ref<string | null>(null)
+
+const categoryOptions = computed(
+  () => categories.value?.map((c) => ({ label: c.name, value: c.id })) ?? [],
+)
+
+function handleAssignCategory() {
+  showCategoryModal.value = true
+  selectedCategoryForAssign.value = null
+}
+
+function confirmAssignCategory() {
+  const photoIds = Array.from(selectionStore.selectedIds)
+  if (photoIds.length === 0) return
+  bulkAssign(
+    { photoIds, photoCategoryId: selectedCategoryForAssign.value },
+    {
+      onSuccess: () => {
+        showCategoryModal.value = false
+        selectionStore.clear()
+      },
+    },
+  )
 }
 
 onUnmounted(() => {
@@ -118,11 +151,19 @@ onUnmounted(() => {
             :helmet-colors="helmetColors"
             :clothing-colors="clothingColors"
             :bike-colors="bikeColors"
+            :photo-category-id="photoCategoryId"
+            :categories="categories ?? []"
             :has-active-filters="hasActiveFilters"
             @update:plate-number="plateNumber = $event"
             @update:active-status="
               (s) => {
                 activeStatus = s
+                page = 1
+              }
+            "
+            @update:photo-category-id="
+              (id) => {
+                photoCategoryId = id
                 page = 1
               }
             "
@@ -136,6 +177,7 @@ onUnmounted(() => {
                 clothingColors = []
                 bikeColors = []
                 activeStatus = null
+                photoCategoryId = null
                 page = 1
               }
             "
@@ -209,7 +251,30 @@ onUnmounted(() => {
       </template>
     </div>
 
-    <PhotoSelectionBar @generate-preview="handleGeneratePreview" />
+    <PhotoSelectionBar
+      @generate-preview="handleGeneratePreview"
+      @assign-category="handleAssignCategory"
+    />
+
+    <NModal
+      v-model:show="showCategoryModal"
+      preset="card"
+      title="Asignar categoría"
+      style="max-width: 400px"
+    >
+      <NFlex vertical :size="16">
+        <NSelect
+          v-model:value="selectedCategoryForAssign"
+          :options="categoryOptions"
+          placeholder="Sin categoría (quitar)"
+          clearable
+        />
+        <NFlex justify="end" :size="8">
+          <NButton @click="showCategoryModal = false">Cancelar</NButton>
+          <NButton type="primary" @click="confirmAssignCategory">Asignar</NButton>
+        </NFlex>
+      </NFlex>
+    </NModal>
   </div>
 </template>
 

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NCard, NFlex, NResult } from 'naive-ui'
+import { NButton, NCard, NFlex, NFormItem, NResult, NSelect } from 'naive-ui'
 
 import { useEventDetailQuery } from '@/features/events/composables/queries/use-event-detail'
+import { usePhotoCategoriesQuery } from '@/features/photo-categories/composables/queries/use-photo-categories'
 import { useUploadOrchestration } from '../../composables/use-upload-orchestration'
 import { MAX_FILES } from '../../constants/upload.constants'
 import { PHOTO_ROUTE_NAMES } from '../../routes'
@@ -25,6 +26,12 @@ const {
   isError: isEventError,
 } = useEventDetailQuery(eventId)
 
+const { data: categories } = usePhotoCategoriesQuery(eventId)
+
+const categoryOptions = computed(
+  () => categories.value?.map((c) => ({ label: c.name, value: c.id })) ?? [],
+)
+
 const {
   store,
   selectedFiles,
@@ -34,6 +41,7 @@ const {
   isActive,
   isOnline,
   autoConfirmedCount,
+  photoCategoryId,
   handleFilesSelected,
   handleFilesRejected,
   handleStartUpload,
@@ -120,6 +128,15 @@ function handleGoToGallery() {
               @files-selected="handleFilesSelected"
               @files-rejected="handleFilesRejected"
             />
+
+            <NFormItem v-if="categoryOptions.length > 0" label="Categoría (opcional)">
+              <NSelect
+                v-model:value="photoCategoryId"
+                :options="categoryOptions"
+                placeholder="Sin categoría"
+                clearable
+              />
+            </NFormItem>
 
             <NFlex v-if="selectedFiles.length > 0" justify="space-between" align="center">
               <span class="selected-count">
