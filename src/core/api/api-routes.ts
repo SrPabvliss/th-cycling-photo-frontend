@@ -9,6 +9,7 @@ const DELIVERY_PUBLIC_BASE = '/delivery'
 const NOTIFICATIONS_BASE = '/notifications'
 const LOCATIONS_BASE = '/locations'
 const CYCLISTS_BASE = '/cyclists'
+const PHOTO_CATEGORIES_BASE = '/photo-categories'
 
 export const API_ROUTES = {
   AUTH: {
@@ -50,9 +51,18 @@ export const API_ROUTES = {
     CLASSIFY: (photoId: string) => `${PHOTOS_BASE}/${photoId}/classify`,
     SIMILAR: (photoId: string) => `${PHOTOS_BASE}/${photoId}/similar`,
     BULK_CLASSIFY: `${PHOTOS_BASE}/bulk-classify`,
+    BULK_CATEGORY: `${PHOTOS_BASE}/bulk-category`,
     CYCLISTS_BY_PHOTO: (photoId: string) => `${PHOTOS_BASE}/${photoId}/cyclists`,
     RESUME_POINT: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/resume-point`,
     DOWNLOAD_MANIFEST: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/download-manifest`,
+  },
+  PHOTO_CATEGORIES: {
+    GET_ALL: PHOTO_CATEGORIES_BASE,
+    CREATE: PHOTO_CATEGORIES_BASE,
+    BY_EVENT: (eventId: string) => `${EVENTS_BASE}/${eventId}/photo-categories`,
+    ASSIGN: (eventId: string) => `${EVENTS_BASE}/${eventId}/photo-categories`,
+    UNASSIGN: (eventId: string, categoryId: string) =>
+      `${EVENTS_BASE}/${eventId}/photo-categories/${categoryId}`,
   },
   CLASSIFICATIONS: {
     BASE: CYCLISTS_BASE,
