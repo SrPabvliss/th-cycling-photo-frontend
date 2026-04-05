@@ -15,7 +15,7 @@ export function useGalleryFilters(eventId: () => string) {
   const helmetColors = ref<string[]>([])
   const clothingColors = ref<string[]>([])
   const bikeColors = ref<string[]>([])
-  const photoCategoryId = ref<string | null>(null)
+  const photoCategoryId = ref<number | null>(null)
 
   // Read query params on mount (from event detail quick search)
   watch(

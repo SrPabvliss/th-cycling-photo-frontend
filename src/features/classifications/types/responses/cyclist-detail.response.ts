@@ -1,26 +1,26 @@
-import type { IApiEquipmentColor, IEquipmentColor } from './equipment-color.response'
-import type { IApiPlateNumber, IPlateNumber } from './plate-number.response'
+import type { IApiGearColor, IGearColor } from './equipment-color.response'
+import type { IApiIdentifier, IIdentifier } from './plate-number.response'
 
-export type CyclistSource = 'manual' | 'ai'
+export type ParticipantSource = 'manual' | 'ai'
 
-/** API projection from GET /cyclists/:id */
-export interface IApiCyclistDetail {
+/** API projection from GET /participants/:id */
+export interface IApiParticipantDetail {
   id: string
   photoId: string
   source: string
-  plateNumber: IApiPlateNumber | null
-  equipmentColors: IApiEquipmentColor[]
+  identifier: IApiIdentifier | null
+  gearColors: IApiGearColor[]
   createdAt: string
   updatedAt: string
 }
 
 /** Frontend domain type with parsed dates and typed enums */
-export interface ICyclistDetail {
+export interface IParticipantDetail {
   id: string
   photoId: string
-  source: CyclistSource
-  plateNumber: IPlateNumber | null
-  equipmentColors: IEquipmentColor[]
+  source: ParticipantSource
+  identifier: IIdentifier | null
+  gearColors: IGearColor[]
   createdAt: Date
   updatedAt: Date
 }

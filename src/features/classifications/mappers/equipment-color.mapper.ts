@@ -1,13 +1,9 @@
-import type { EquipmentItemType } from '../types/responses/equipment-color.response'
-import type {
-  IApiEquipmentColor,
-  IEquipmentColor,
-} from '../types/responses/equipment-color.response'
+import type { IApiGearColor, IGearColor } from '../types/responses/equipment-color.response'
 
-export function toEquipmentColor(api: IApiEquipmentColor): IEquipmentColor {
+export function toGearColor(api: IApiGearColor): IGearColor {
   return {
     id: api.id,
-    itemType: api.itemType as EquipmentItemType,
+    gearTypeId: api.gearTypeId,
     colorName: api.colorName,
     colorHex: api.colorHex,
     rawHex: api.rawHex,

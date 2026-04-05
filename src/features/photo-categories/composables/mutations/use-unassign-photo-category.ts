@@ -9,8 +9,8 @@ export function useUnassignPhotoCategory(eventId: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (categoryId: string) =>
-      httpClient.delete(API_ROUTES.PHOTO_CATEGORIES.UNASSIGN(eventId, categoryId)),
+    mutationFn: (categoryId: number) =>
+      httpClient.delete(API_ROUTES.PHOTO_CATEGORIES.UNASSIGN(eventId, String(categoryId))),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: PHOTO_CATEGORY_QUERY_KEYS.byEvent(eventId) })
       queryClient.invalidateQueries({ queryKey: PHOTO_QUERY_KEYS.all() })

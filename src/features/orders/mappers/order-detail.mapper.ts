@@ -37,16 +37,15 @@ export function toOrderDetail(api: IApiOrderDetail): IOrderDetail {
     paidAt: api.paidAt ? new Date(api.paidAt) : null,
     deliveredAt: api.deliveredAt ? new Date(api.deliveredAt) : null,
     cancelledAt: api.cancelledAt ? new Date(api.cancelledAt) : null,
-    customer: {
-      id: api.customer.id,
-      firstName: api.customer.firstName,
-      lastName: api.customer.lastName,
-      whatsapp: api.customer.whatsapp,
-      email: api.customer.email,
-    },
-    eventName: api.eventName,
+    userName: api.userName,
+    snapFirstName: api.snapFirstName,
+    snapLastName: api.snapLastName,
+    snapWhatsapp: api.snapWhatsapp,
+    snapEmail: api.snapEmail,
     previewLinkToken: api.previewLinkToken,
+    eventName: api.eventName,
     photos: api.photos.map(toOrderDetailPhoto),
     deliveryLink: api.deliveryLink ? toOrderDetailDeliveryLink(api.deliveryLink) : null,
+    retouchProgress: api.retouchProgress,
   }
 }

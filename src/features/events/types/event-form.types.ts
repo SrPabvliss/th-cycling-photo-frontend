@@ -4,4 +4,5 @@ export interface IEventFormData {
   date: number | null
   provinceId: number | null
   cantonId: number | null
+  eventTypeId: number | null
 }

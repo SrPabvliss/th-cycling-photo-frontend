@@ -4,18 +4,18 @@ import { useQuery } from '@tanstack/vue-query'
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
 import { CLASSIFICATION_QUERY_KEYS } from '../../constants/query-keys'
-import { toCyclistDetail } from '../../mappers/cyclist-detail.mapper'
-import type { IApiCyclistDetail } from '../../types/responses/cyclist-detail.response'
+import { toParticipantDetail } from '../../mappers/cyclist-detail.mapper'
+import type { IApiParticipantDetail } from '../../types/responses/cyclist-detail.response'
 
-export function useCyclistDetailQuery(cyclistId: Ref<string | null>) {
+export function useParticipantDetailQuery(participantId: Ref<string | null>) {
   return useQuery({
-    queryKey: computed(() => CLASSIFICATION_QUERY_KEYS.cyclistDetail(cyclistId.value!)),
+    queryKey: computed(() => CLASSIFICATION_QUERY_KEYS.participantDetail(participantId.value!)),
     queryFn: async () => {
-      const response = await httpClient.get<IApiCyclistDetail>(
-        API_ROUTES.CLASSIFICATIONS.CYCLIST_DETAIL(cyclistId.value!),
+      const response = await httpClient.get<IApiParticipantDetail>(
+        API_ROUTES.CLASSIFICATIONS.PARTICIPANT_DETAIL(participantId.value!),
       )
-      return toCyclistDetail(response.data)
+      return toParticipantDetail(response.data)
     },
-    enabled: computed(() => !!cyclistId.value),
+    enabled: computed(() => !!participantId.value),
   })
 }

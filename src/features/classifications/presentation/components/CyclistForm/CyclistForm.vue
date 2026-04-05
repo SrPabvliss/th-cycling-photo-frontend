@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { NButton, NIcon, NInputNumber } from 'naive-ui'
+import { NButton, NIcon, NInput } from 'naive-ui'
 import { AddOutline } from '@vicons/ionicons5'
 
-import type { ICyclistDetail } from '../../../types/responses/cyclist-detail.response'
-import { useCyclistFormState } from '../../../composables/use-cyclist-form-state'
+import type { IParticipantDetail } from '../../../types/responses/cyclist-detail.response'
+import { useParticipantFormState } from '../../../composables/use-cyclist-form-state'
+import { useGearTypesQuery } from '../../../composables/queries/use-gear-types'
 import EquipmentColorRow from '../EquipmentColorRow/EquipmentColorRow.vue'
 
 const props = defineProps<{
   photoId: string
-  cyclist?: ICyclistDetail
+  cyclist?: IParticipantDetail
 }>()
 
 const emit = defineEmits<{
@@ -16,16 +17,18 @@ const emit = defineEmits<{
   cancel: []
 }>()
 
+const { data: gearTypes } = useGearTypesQuery(1) // Default: Downhill (eventTypeId=1)
+
 const {
   isEditing,
-  plateNumber,
-  colors,
+  identifier,
+  gearColors,
   isSubmitting,
   addColorRow,
   removeColorRow,
   updateColorRow,
   handleSubmit,
-} = useCyclistFormState(props.photoId, props.cyclist)
+} = useParticipantFormState(props.photoId, props.cyclist)
 
 async function onSubmit() {
   const success = await handleSubmit()
@@ -37,10 +40,8 @@ async function onSubmit() {
   <div class="cyclist-form">
     <div>
       <p class="cyclist-form__section-label">Dorsal (opcional)</p>
-      <NInputNumber
-        v-model:value="plateNumber"
-        :min="1"
-        :max="9999"
+      <NInput
+        v-model:value="identifier"
         placeholder="Ej: 42"
         size="small"
         clearable
@@ -52,9 +53,10 @@ async function onSubmit() {
       <p class="cyclist-form__section-label">Colores del equipamiento</p>
       <div class="cyclist-form__colors">
         <EquipmentColorRow
-          v-for="(color, index) in colors"
+          v-for="(color, index) in gearColors"
           :key="index"
           :model-value="color"
+          :gear-types="gearTypes ?? []"
           @update:model-value="(v) => updateColorRow(index, v)"
           @remove="removeColorRow(index)"
         />

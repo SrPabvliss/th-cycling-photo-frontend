@@ -1,7 +1,16 @@
-import type { EquipmentItemType } from './responses/equipment-color.response'
+/** API projection from GET /gear-types */
+export interface IApiGearType {
+  id: number
+  name: string
+}
 
-export const EQUIPMENT_ITEM_LABELS: Record<EquipmentItemType, string> = {
-  helmet: 'Casco',
+export interface IGearType {
+  id: number
+  name: string
+}
+
+export const GEAR_TYPE_LABELS: Record<string, string> = {
+  headwear: 'Casco',
   clothing: 'Ropa',
-  bike: 'Bicicleta',
+  vehicle: 'Bicicleta',
 }

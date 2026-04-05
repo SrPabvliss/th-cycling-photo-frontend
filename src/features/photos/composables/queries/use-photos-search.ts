@@ -15,7 +15,7 @@ export interface IPhotoSearchFilters {
   helmetColor?: string | null
   clothingColor?: string | null
   bikeColor?: string | null
-  photoCategoryId?: string | null
+  photoCategoryId?: number | null
 }
 
 export function usePhotosSearchQuery(

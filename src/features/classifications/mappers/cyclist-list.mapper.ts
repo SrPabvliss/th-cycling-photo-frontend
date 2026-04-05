@@ -1,21 +1,21 @@
-import type { CyclistSource } from '../types/responses/cyclist-detail.response'
+import type { ParticipantSource } from '../types/responses/cyclist-detail.response'
 import type {
-  IApiCyclistListItem,
-  ICyclistListItem,
+  IApiParticipantListItem,
+  IParticipantListItem,
 } from '../types/responses/cyclist-list.response'
 
-export function toCyclistListItem(api: IApiCyclistListItem): ICyclistListItem {
+export function toParticipantListItem(api: IApiParticipantListItem): IParticipantListItem {
   return {
     id: api.id,
     photoId: api.photoId,
-    source: api.source as CyclistSource,
-    plateNumber: api.plateNumber,
+    source: api.source as ParticipantSource,
+    identifier: api.identifier,
     colorCount: api.colorCount,
     createdAt: new Date(api.createdAt),
     updatedAt: new Date(api.updatedAt),
   }
 }
 
-export function toCyclistListItems(items: IApiCyclistListItem[]): ICyclistListItem[] {
-  return items.map(toCyclistListItem)
+export function toParticipantListItems(items: IApiParticipantListItem[]): IParticipantListItem[] {
+  return items.map(toParticipantListItem)
 }

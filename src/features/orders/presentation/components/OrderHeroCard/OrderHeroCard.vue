@@ -12,11 +12,18 @@ const props = defineProps<{
 
 const statusConfig = computed(() => ORDER_STATUS_CONFIG[props.order.status])
 
-const initials = computed(() =>
-  (
-    (props.order.customer.firstName[0] ?? '') + (props.order.customer.lastName[0] ?? '')
-  ).toUpperCase(),
-)
+const initials = computed(() => {
+  const first = props.order.snapFirstName?.[0] ?? ''
+  const last = props.order.snapLastName?.[0] ?? ''
+  return (first + last).toUpperCase() || (props.order.userName[0]?.toUpperCase() ?? '')
+})
+
+const displayName = computed(() => {
+  if (props.order.snapFirstName || props.order.snapLastName) {
+    return [props.order.snapFirstName, props.order.snapLastName].filter(Boolean).join(' ')
+  }
+  return props.order.userName
+})
 </script>
 
 <template>
@@ -26,7 +33,7 @@ const initials = computed(() =>
         <div class="od-hero__avatar">{{ initials }}</div>
         <div>
           <div class="od-hero__name">
-            {{ order.customer.firstName }} {{ order.customer.lastName }}
+            {{ displayName }}
           </div>
           <div class="od-hero__sub">
             {{ order.eventName }} &nbsp;·&nbsp; {{ formatRelativeTime(order.createdAt) }}

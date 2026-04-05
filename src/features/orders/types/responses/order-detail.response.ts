@@ -8,14 +8,6 @@ export const DELIVERY_LINK_STATUS = {
 
 export type DeliveryLinkStatus = (typeof DELIVERY_LINK_STATUS)[keyof typeof DELIVERY_LINK_STATUS]
 
-export interface IApiOrderDetailCustomer {
-  id: string
-  firstName: string
-  lastName: string
-  whatsapp: string
-  email: string | null
-}
-
 export interface IApiOrderDetailPhoto {
   id: string
   filename: string
@@ -38,19 +30,16 @@ export interface IApiOrderDetail {
   paidAt: string | null
   deliveredAt: string | null
   cancelledAt: string | null
-  customer: IApiOrderDetailCustomer
+  userName: string
+  snapFirstName: string | null
+  snapLastName: string | null
+  snapWhatsapp: string | null
+  snapEmail: string | null
+  previewLinkToken: string | null
   eventName: string
-  previewLinkToken: string
   photos: IApiOrderDetailPhoto[]
   deliveryLink: IApiOrderDetailDeliveryLink | null
-}
-
-export interface IOrderDetailCustomer {
-  id: string
-  firstName: string
-  lastName: string
-  whatsapp: string
-  email: string | null
+  retouchProgress?: { total: number; retouched: number }
 }
 
 export interface IOrderDetailPhoto {
@@ -76,9 +65,14 @@ export interface IOrderDetail {
   paidAt: Date | null
   deliveredAt: Date | null
   cancelledAt: Date | null
-  customer: IOrderDetailCustomer
+  userName: string
+  snapFirstName: string | null
+  snapLastName: string | null
+  snapWhatsapp: string | null
+  snapEmail: string | null
+  previewLinkToken: string | null
   eventName: string
-  previewLinkToken: string
   photos: IOrderDetailPhoto[]
   deliveryLink: IOrderDetailDeliveryLink | null
+  retouchProgress?: { total: number; retouched: number }
 }

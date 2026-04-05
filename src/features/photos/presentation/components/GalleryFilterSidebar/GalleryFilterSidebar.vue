@@ -19,7 +19,7 @@ defineProps<{
   helmetColors: string[]
   clothingColors: string[]
   bikeColors: string[]
-  photoCategoryId: string | null
+  photoCategoryId: number | null
   categories: IPhotoCategory[]
   hasActiveFilters: boolean
 }>()
@@ -27,7 +27,7 @@ defineProps<{
 const emit = defineEmits<{
   'update:plateNumber': [value: string]
   'update:activeStatus': [value: PhotoStatus | null]
-  'update:photoCategoryId': [value: string | null]
+  'update:photoCategoryId': [value: number | null]
   'update:helmetColors': [value: string[]]
   'update:clothingColors': [value: string[]]
   'update:bikeColors': [value: string[]]

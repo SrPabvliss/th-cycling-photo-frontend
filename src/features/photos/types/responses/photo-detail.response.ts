@@ -1,6 +1,6 @@
 import type {
-  IApiCyclistDetail,
-  ICyclistDetail,
+  IApiParticipantDetail,
+  IParticipantDetail,
 } from '@/features/classifications/types/responses/cyclist-detail.response'
 
 import type { PhotoStatus } from './photo-list.response'
@@ -24,7 +24,7 @@ export interface IApiPhotoDetail {
   capturedAt: string | null
   uploadedAt: string
   processedAt: string | null
-  detectedCyclists: IApiCyclistDetail[]
+  detectedParticipants: IApiParticipantDetail[]
 }
 
 /** Frontend domain type with resolved CDN URL and parsed dates */
@@ -47,5 +47,5 @@ export interface IPhotoDetail {
   capturedAt: Date | null
   uploadedAt: Date
   processedAt: Date | null
-  detectedCyclists: ICyclistDetail[]
+  detectedParticipants: IParticipantDetail[]
 }

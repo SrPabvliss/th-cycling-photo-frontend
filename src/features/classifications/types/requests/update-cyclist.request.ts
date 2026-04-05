@@ -1,6 +1,6 @@
-import type { IColorInput } from './create-cyclist.request'
+import type { IGearColorInput } from './create-cyclist.request'
 
-export interface IUpdateCyclistRequest {
-  plateNumber?: number | null
-  colors?: IColorInput[]
+export interface IUpdateParticipantRequest {
+  identifier?: string | null
+  colors?: IGearColorInput[]
 }

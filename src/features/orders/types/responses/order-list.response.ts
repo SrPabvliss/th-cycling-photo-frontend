@@ -14,8 +14,8 @@ export interface IApiOrderListItem {
   createdAt: string
   paidAt: string | null
   deliveredAt: string | null
-  customerName: string
-  customerWhatsapp: string
+  userName: string
+  snapWhatsapp: string | null
   eventName: string
   photoCount: number
   hasDeliveryLink: boolean
@@ -28,8 +28,8 @@ export interface IOrderListItem {
   createdAt: Date
   paidAt: Date | null
   deliveredAt: Date | null
-  customerName: string
-  customerWhatsapp: string
+  userName: string
+  snapWhatsapp: string | null
   eventName: string
   photoCount: number
   hasDeliveryLink: boolean

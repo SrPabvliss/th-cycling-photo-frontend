@@ -12,6 +12,7 @@ export function toEventFormData(event: IEventDetail): IEventFormData {
     date: event.date.getTime(),
     provinceId: event.provinceId,
     cantonId: event.cantonId,
+    eventTypeId: null,
   }
 }
 
@@ -23,6 +24,7 @@ export function toCreateEventRequest(form: IEventFormData): ICreateEventRequest 
     location: null,
     provinceId: form.provinceId,
     cantonId: form.cantonId,
+    eventTypeId: form.eventTypeId!,
   }
 }
 
@@ -34,5 +36,6 @@ export function toUpdateEventRequest(form: IEventFormData): IUpdateEventRequest 
     location: null,
     provinceId: form.provinceId,
     cantonId: form.cantonId,
+    eventTypeId: form.eventTypeId ?? undefined,
   }
 }

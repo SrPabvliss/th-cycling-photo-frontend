@@ -42,7 +42,7 @@ export function useUploadQueue(eventId: Ref<string>) {
 
   // --- Photo category for batch ---
 
-  const photoCategoryId = ref<string | null>(null)
+  const photoCategoryId = ref<number | null>(null)
 
   // --- Duplicate tracking ---
 

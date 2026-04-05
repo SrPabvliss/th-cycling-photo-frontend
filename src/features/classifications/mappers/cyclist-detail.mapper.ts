@@ -1,15 +1,18 @@
-import type { CyclistSource } from '../types/responses/cyclist-detail.response'
-import type { IApiCyclistDetail, ICyclistDetail } from '../types/responses/cyclist-detail.response'
-import { toEquipmentColor } from './equipment-color.mapper'
-import { toPlateNumber } from './plate-number.mapper'
+import type { ParticipantSource } from '../types/responses/cyclist-detail.response'
+import type {
+  IApiParticipantDetail,
+  IParticipantDetail,
+} from '../types/responses/cyclist-detail.response'
+import { toGearColor } from './equipment-color.mapper'
+import { toIdentifier } from './plate-number.mapper'
 
-export function toCyclistDetail(api: IApiCyclistDetail): ICyclistDetail {
+export function toParticipantDetail(api: IApiParticipantDetail): IParticipantDetail {
   return {
     id: api.id,
     photoId: api.photoId,
-    source: api.source as CyclistSource,
-    plateNumber: api.plateNumber ? toPlateNumber(api.plateNumber) : null,
-    equipmentColors: api.equipmentColors.map(toEquipmentColor),
+    source: api.source as ParticipantSource,
+    identifier: api.identifier ? toIdentifier(api.identifier) : null,
+    gearColors: api.gearColors.map(toGearColor),
     createdAt: new Date(api.createdAt),
     updatedAt: new Date(api.updatedAt),
   }

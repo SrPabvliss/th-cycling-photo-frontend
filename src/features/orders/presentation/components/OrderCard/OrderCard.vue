@@ -31,14 +31,16 @@ const isNew = computed(
 )
 
 const statusConfig = computed(() => ORDER_STATUS_CONFIG[props.order.status])
-const formattedPhone = computed(() => formatWhatsAppNumber(props.order.customerWhatsapp))
+const formattedPhone = computed(() =>
+  props.order.snapWhatsapp ? formatWhatsAppNumber(props.order.snapWhatsapp) : null,
+)
 </script>
 
 <template>
   <div :class="['oc', { 'oc--new': isNew }]" @click="emit('view', order.id)">
     <!-- Top: name + badges -->
     <div class="oc__top">
-      <span class="oc__name">{{ order.customerName }}</span>
+      <span class="oc__name">{{ order.userName }}</span>
       <div class="oc__badges">
         <NTag :type="statusConfig.type" size="tiny" round :bordered="false">
           {{ statusConfig.label }}
@@ -49,7 +51,7 @@ const formattedPhone = computed(() => formatWhatsAppNumber(props.order.customerW
 
     <!-- Meta -->
     <div class="oc__meta">
-      <div class="oc__phone">
+      <div v-if="formattedPhone" class="oc__phone">
         <NIcon :component="LogoWhatsapp" :size="12" color="#25D366" />
         {{ formattedPhone }}
       </div>

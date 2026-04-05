@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { NButton, NIcon, NInputNumber, useMessage } from 'naive-ui'
+import { NButton, NIcon, NInput, useMessage } from 'naive-ui'
 import { AddOutline } from '@vicons/ionicons5'
 
-import type { IColorInput } from '../../../types/requests/create-cyclist.request'
+import type { IGearColorInput } from '../../../types/requests/create-cyclist.request'
 import type { ILabelSet } from '../../../composables/use-label-conflict'
 import { useBulkClassify } from '../../../composables/mutations/use-bulk-classify'
+import { useGearTypesQuery } from '../../../composables/queries/use-gear-types'
 import EquipmentColorRow from '../EquipmentColorRow/EquipmentColorRow.vue'
 
 const props = defineProps<{
@@ -21,12 +22,13 @@ const emit = defineEmits<{
 
 const message = useMessage()
 const bulkClassifyMutation = useBulkClassify()
+const { data: gearTypes } = useGearTypesQuery(1) // Default: Downhill
 
-const plateNumber = ref<number | null>(props.initialLabels?.plateNumber ?? null)
-const colors = ref<IColorInput[]>(
-  props.initialLabels?.colors.length
-    ? [...props.initialLabels.colors]
-    : [{ itemType: 'clothing', colorName: '', colorHex: '' }],
+const identifier = ref<string | null>(props.initialLabels?.identifier ?? null)
+const gearColors = ref<IGearColorInput[]>(
+  props.initialLabels?.gearColors.length
+    ? [...props.initialLabels.gearColors]
+    : [{ gearTypeId: 1, colorName: '', colorHex: '' }],
 )
 
 // Update when initialLabels change (inherited labels)
@@ -34,27 +36,27 @@ watch(
   () => props.initialLabels,
   (labels) => {
     if (!labels) return
-    plateNumber.value = labels.plateNumber
-    if (labels.colors.length) {
-      colors.value = [...labels.colors]
+    identifier.value = labels.identifier
+    if (labels.gearColors.length) {
+      gearColors.value = [...labels.gearColors]
     }
   },
 )
 
 function addColorRow() {
-  colors.value.push({ itemType: 'clothing', colorName: '', colorHex: '' })
+  gearColors.value.push({ gearTypeId: 1, colorName: '', colorHex: '' })
 }
 
 function removeColorRow(index: number) {
-  colors.value.splice(index, 1)
+  gearColors.value.splice(index, 1)
 }
 
-function updateColorRow(index: number, value: IColorInput) {
-  colors.value[index] = value
+function updateColorRow(index: number, value: IGearColorInput) {
+  gearColors.value[index] = value
 }
 
 async function handleSubmit() {
-  const validColors = colors.value.filter((c) => c.colorName && c.colorHex)
+  const validColors = gearColors.value.filter((c) => c.colorName && c.colorHex)
 
   if (validColors.length === 0) {
     message.warning('Agrega al menos un color')
@@ -66,7 +68,7 @@ async function handleSubmit() {
       data: {
         photoIds: props.photoIds,
         colors: validColors,
-        ...(plateNumber.value ? { plateNumber: plateNumber.value } : {}),
+        ...(identifier.value ? { identifier: identifier.value } : {}),
       },
       eventId: props.eventId,
     })
@@ -84,10 +86,8 @@ async function handleSubmit() {
 
     <div>
       <p class="bulk-classify-form__section-label">Dorsal (opcional)</p>
-      <NInputNumber
-        v-model:value="plateNumber"
-        :min="1"
-        :max="9999"
+      <NInput
+        v-model:value="identifier"
         placeholder="Ej: 42"
         size="small"
         clearable
@@ -99,9 +99,10 @@ async function handleSubmit() {
       <p class="bulk-classify-form__section-label">Colores del equipamiento</p>
       <div class="bulk-classify-form__colors">
         <EquipmentColorRow
-          v-for="(color, index) in colors"
+          v-for="(color, index) in gearColors"
           :key="index"
           :model-value="color"
+          :gear-types="gearTypes ?? []"
           @update:model-value="(v) => updateColorRow(index, v)"
           @remove="removeColorRow(index)"
         />

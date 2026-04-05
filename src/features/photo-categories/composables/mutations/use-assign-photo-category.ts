@@ -8,7 +8,7 @@ export function useAssignPhotoCategory(eventId: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (photoCategoryId: string) =>
+    mutationFn: (photoCategoryId: number) =>
       httpClient.post(
         API_ROUTES.PHOTO_CATEGORIES.ASSIGN(eventId),
         { photoCategoryId },

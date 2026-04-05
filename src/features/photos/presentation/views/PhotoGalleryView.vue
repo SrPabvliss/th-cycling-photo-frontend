@@ -81,7 +81,7 @@ function handleGeneratePreview() {
 }
 
 const showCategoryModal = ref(false)
-const selectedCategoryForAssign = ref<string | null>(null)
+const selectedCategoryForAssign = ref<number | null>(null)
 
 const categoryOptions = computed(
   () => categories.value?.map((c) => ({ label: c.name, value: c.id })) ?? [],

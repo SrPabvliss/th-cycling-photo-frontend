@@ -149,7 +149,7 @@ const {
             :event-id="eventId"
             :is-classified="!!photo.classifiedAt"
             :has-next="hasNext"
-            :cyclist-count="photo.detectedCyclists.length"
+            :cyclist-count="photo.detectedParticipants.length"
             :group-size="workingGroup.groupSize.value"
             @next="goNext"
           />

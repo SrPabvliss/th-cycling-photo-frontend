@@ -1,4 +1,4 @@
-import { toCyclistDetail } from '@/features/classifications/mappers/cyclist-detail.mapper'
+import { toParticipantDetail } from '@/features/classifications/mappers/cyclist-detail.mapper'
 import { getPhotoUrl } from '@/shared/utils/cdn.utils'
 
 import type { PhotoStatus } from '../types/responses/photo-list.response'
@@ -24,6 +24,6 @@ export function toPhotoDetail(api: IApiPhotoDetail): IPhotoDetail {
     capturedAt: api.capturedAt ? new Date(api.capturedAt) : null,
     uploadedAt: new Date(api.uploadedAt),
     processedAt: api.processedAt ? new Date(api.processedAt) : null,
-    detectedCyclists: api.detectedCyclists.map(toCyclistDetail),
+    detectedParticipants: api.detectedParticipants.map(toParticipantDetail),
   }
 }

@@ -8,7 +8,8 @@ const ORDERS_BASE = '/orders'
 const DELIVERY_PUBLIC_BASE = '/delivery'
 const NOTIFICATIONS_BASE = '/notifications'
 const LOCATIONS_BASE = '/locations'
-const CYCLISTS_BASE = '/cyclists'
+const PARTICIPANTS_BASE = '/participants'
+const COUNTRIES_BASE = '/countries'
 const PHOTO_CATEGORIES_BASE = '/photo-categories'
 
 export const API_ROUTES = {
@@ -18,6 +19,12 @@ export const API_ROUTES = {
     REFRESH: `${AUTH_BASE}/refresh`,
     LOGOUT: `${AUTH_BASE}/logout`,
     ME: `${AUTH_BASE}/me`,
+    REGISTER: `${AUTH_BASE}/register`,
+  },
+  USER_PHONES: {
+    BASE: '/users/me/phones',
+    BY_ID: (phoneId: string) => `/users/me/phones/${phoneId}`,
+    SET_PRIMARY: (phoneId: string) => `/users/me/phones/${phoneId}/primary`,
   },
   EVENTS: {
     BASE: EVENTS_BASE,
@@ -52,7 +59,8 @@ export const API_ROUTES = {
     SIMILAR: (photoId: string) => `${PHOTOS_BASE}/${photoId}/similar`,
     BULK_CLASSIFY: `${PHOTOS_BASE}/bulk-classify`,
     BULK_CATEGORY: `${PHOTOS_BASE}/bulk-category`,
-    CYCLISTS_BY_PHOTO: (photoId: string) => `${PHOTOS_BASE}/${photoId}/cyclists`,
+    PENDING_RETOUCH: `${PHOTOS_BASE}/pending-retouch`,
+    PARTICIPANTS_BY_PHOTO: (photoId: string) => `${PHOTOS_BASE}/${photoId}/participants`,
     RESUME_POINT: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/resume-point`,
     DOWNLOAD_MANIFEST: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/download-manifest`,
   },
@@ -64,11 +72,18 @@ export const API_ROUTES = {
     UNASSIGN: (eventId: string, categoryId: string) =>
       `${EVENTS_BASE}/${eventId}/photo-categories/${categoryId}`,
   },
+  GEAR_TYPES: {
+    GET_ALL: '/gear-types',
+  },
+  PARTICIPANT_CATEGORIES: {
+    GET_ALL: '/participant-categories',
+  },
   CLASSIFICATIONS: {
-    BASE: CYCLISTS_BASE,
-    CYCLIST_DETAIL: (id: string) => `${CYCLISTS_BASE}/${id}`,
-    UPDATE_CYCLIST: (id: string) => `${CYCLISTS_BASE}/${id}`,
-    DELETE_CYCLIST: (id: string) => `${CYCLISTS_BASE}/${id}`,
+    BASE: PARTICIPANTS_BASE,
+    PARTICIPANTS_BY_PHOTO: (photoId: string) => `${PHOTOS_BASE}/${photoId}/participants`,
+    PARTICIPANT_DETAIL: (id: string) => `${PARTICIPANTS_BASE}/${id}`,
+    UPDATE_PARTICIPANT: (id: string) => `${PARTICIPANTS_BASE}/${id}`,
+    DELETE_PARTICIPANT: (id: string) => `${PARTICIPANTS_BASE}/${id}`,
   },
   PREVIEW_LINKS: {
     BASE: PREVIEW_LINKS_BASE,
@@ -79,6 +94,8 @@ export const API_ROUTES = {
     BASE: PUBLIC_EVENTS_BASE,
     GET_ALL: PUBLIC_EVENTS_BASE,
     GET_BY_ID: (id: string) => `${PUBLIC_EVENTS_BASE}/${id}`,
+    PHOTOS: (id: string) => `${PUBLIC_EVENTS_BASE}/${id}/photos`,
+    CREATE_ORDER: (id: string) => `${PUBLIC_EVENTS_BASE}/${id}/orders`,
   },
   PREVIEW_PUBLIC: {
     BASE: PREVIEW_PUBLIC_BASE,
@@ -96,6 +113,16 @@ export const API_ROUTES = {
     SEND_DELIVERY: (id: string) => `${ORDERS_BASE}/${id}/send-delivery`,
     REGENERATE_DELIVERY: (id: string) => `${ORDERS_BASE}/${id}/regenerate-delivery`,
   },
+  BUYERS: {
+    GET_ALL: '/buyers',
+  },
+  CART: {
+    GET: '/cart',
+    ADD_ITEM: '/cart/items',
+    REMOVE_ITEM: (photoId: string) => `/cart/items/${photoId}`,
+    MERGE: '/cart/merge',
+    CHECKOUT: '/cart/checkout',
+  },
   DELIVERY_PUBLIC: {
     BASE: DELIVERY_PUBLIC_BASE,
     GET_BY_TOKEN: (token: string) => `${DELIVERY_PUBLIC_BASE}/${token}`,
@@ -112,5 +139,9 @@ export const API_ROUTES = {
     PROVINCES: `${LOCATIONS_BASE}/provinces`,
     CANTONS_BY_PROVINCE: (provinceId: number) =>
       `${LOCATIONS_BASE}/provinces/${provinceId}/cantons`,
+  },
+  COUNTRIES: {
+    GET_ALL: COUNTRIES_BASE,
+    PROVINCES: (countryId: number) => `${COUNTRIES_BASE}/${countryId}/provinces`,
   },
 } as const

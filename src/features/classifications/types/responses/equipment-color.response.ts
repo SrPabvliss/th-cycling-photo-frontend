@@ -1,9 +1,7 @@
-export type EquipmentItemType = 'helmet' | 'clothing' | 'bike'
-
-/** API projection for equipment color — nested in cyclist detail */
-export interface IApiEquipmentColor {
+/** API projection for gear color — nested in participant detail */
+export interface IApiGearColor {
   id: string
-  itemType: string
+  gearTypeId: number
   colorName: string
   colorHex: string
   rawHex: string | null
@@ -11,9 +9,9 @@ export interface IApiEquipmentColor {
 }
 
 /** Frontend domain type */
-export interface IEquipmentColor {
+export interface IGearColor {
   id: string
-  itemType: EquipmentItemType
+  gearTypeId: number
   colorName: string
   colorHex: string
   rawHex: string | null

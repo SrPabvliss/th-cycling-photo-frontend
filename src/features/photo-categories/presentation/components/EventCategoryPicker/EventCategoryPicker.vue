@@ -6,11 +6,11 @@ import { AddOutline } from '@vicons/ionicons5'
 import { usePhotoCategoriesGlobalQuery } from '../../../composables/queries/use-photo-categories-global'
 
 const props = defineProps<{
-  selectedIds: string[]
+  selectedIds: number[]
 }>()
 
 const emit = defineEmits<{
-  'update:selectedIds': [ids: string[]]
+  'update:selectedIds': [ids: number[]]
   'create-new': [name: string]
 }>()
 
@@ -19,7 +19,7 @@ const newCategoryName = ref('')
 
 const displayCategories = computed(() => globalCategories.value ?? [])
 
-function toggleCategory(id: string) {
+function toggleCategory(id: number) {
   if (props.selectedIds.includes(id)) {
     emit(
       'update:selectedIds',

@@ -28,7 +28,7 @@ export function useOrderActions() {
     })
   }
 
-  function handleSendDelivery(orderId: string, customerWhatsapp?: string) {
+  function handleSendDelivery(orderId: string, snapWhatsapp?: string) {
     dialog.info({
       title: 'Enviar fotos',
       content: '¿Generar el enlace de descarga y marcar como entregado?',
@@ -43,8 +43,8 @@ export function useOrderActions() {
           positiveText: 'Enviar por WhatsApp',
           negativeText: 'Cerrar',
           onPositiveClick: () => {
-            if (customerWhatsapp) {
-              openWhatsApp(customerWhatsapp, result.whatsappTemplate)
+            if (snapWhatsapp) {
+              openWhatsApp(snapWhatsapp, result.whatsappTemplate)
             } else {
               openWhatsAppWithTemplate(result.whatsappTemplate)
             }
@@ -54,11 +54,11 @@ export function useOrderActions() {
     })
   }
 
-  function handleCancel(orderId: string, customerName?: string) {
+  function handleCancel(orderId: string, userName?: string) {
     dialog.error({
       title: 'Cancelar pedido',
-      content: customerName
-        ? `¿Estás seguro de cancelar el pedido de ${customerName}? Esta acción no se puede deshacer.`
+      content: userName
+        ? `¿Estás seguro de cancelar el pedido de ${userName}? Esta acción no se puede deshacer.`
         : '¿Estás seguro de cancelar este pedido? Esta acción no se puede deshacer.',
       positiveText: 'Cancelar pedido',
       negativeText: 'Volver',
@@ -69,7 +69,7 @@ export function useOrderActions() {
     })
   }
 
-  async function handleRegenerate(orderId: string, customerWhatsapp?: string) {
+  async function handleRegenerate(orderId: string, snapWhatsapp?: string) {
     const result = await regenerateDelivery(orderId)
     message.success('Enlace regenerado')
     dialog.success({
@@ -78,8 +78,8 @@ export function useOrderActions() {
       positiveText: 'Enviar por WhatsApp',
       negativeText: 'Cerrar',
       onPositiveClick: () => {
-        if (customerWhatsapp) {
-          openWhatsApp(customerWhatsapp, result.whatsappTemplate)
+        if (snapWhatsapp) {
+          openWhatsApp(snapWhatsapp, result.whatsappTemplate)
         } else {
           openWhatsAppWithTemplate(result.whatsappTemplate)
         }

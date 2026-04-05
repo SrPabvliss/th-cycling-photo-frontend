@@ -5,4 +5,5 @@ export interface ICreateEventRequest {
   location?: string | null
   provinceId?: number | null
   cantonId?: number | null
+  eventTypeId: number
 }

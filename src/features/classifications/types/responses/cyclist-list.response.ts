@@ -1,22 +1,22 @@
-import type { CyclistSource } from './cyclist-detail.response'
+import type { ParticipantSource } from './cyclist-detail.response'
 
-/** API projection from GET /photos/:photoId/cyclists */
-export interface IApiCyclistListItem {
+/** API projection from GET /photos/:photoId/participants */
+export interface IApiParticipantListItem {
   id: string
   photoId: string
   source: string
-  plateNumber: number | null
+  identifier: string | null
   colorCount: number
   createdAt: string
   updatedAt: string
 }
 
 /** Frontend domain type */
-export interface ICyclistListItem {
+export interface IParticipantListItem {
   id: string
   photoId: string
-  source: CyclistSource
-  plateNumber: number | null
+  source: ParticipantSource
+  identifier: string | null
   colorCount: number
   createdAt: Date
   updatedAt: Date

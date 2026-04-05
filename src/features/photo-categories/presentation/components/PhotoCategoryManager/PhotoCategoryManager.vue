@@ -21,7 +21,7 @@ const { mutate: assignCategory } = useAssignPhotoCategory(props.eventId)
 const { mutate: unassignCategory } = useUnassignPhotoCategory(props.eventId)
 
 const newCategoryName = ref('')
-const selectedGlobalId = ref<string | null>(null)
+const selectedGlobalId = ref<number | null>(null)
 
 const assignedIds = computed(() => new Set(assignedCategories.value?.map((c) => c.id) ?? []))
 
