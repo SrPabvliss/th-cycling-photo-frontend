@@ -1,25 +1,25 @@
 import { computed, ref, watch, type Ref } from 'vue'
 import { useDialog, useMessage } from 'naive-ui'
 
-import { useCyclistDetailQuery } from './queries/use-cyclist-detail'
-import { useDeleteCyclist } from './mutations/use-delete-cyclist'
-import type { ICyclistListItem } from '../types/responses/cyclist-list.response'
+import { useParticipantDetailQuery } from './queries/use-cyclist-detail'
+import { useDeleteParticipant } from './mutations/use-delete-cyclist'
+import type { IParticipantListItem } from '../types/responses/cyclist-list.response'
 
 type FormMode = 'closed' | 'creating' | 'loading-edit' | 'editing'
 
-export function useCyclistListState(photoId: Ref<string>) {
+export function useParticipantListState(photoId: Ref<string>) {
   const message = useMessage()
   const dialog = useDialog()
-  const deleteMutation = useDeleteCyclist()
+  const deleteMutation = useDeleteParticipant()
 
   const formMode = ref<FormMode>('closed')
-  const editingCyclistId = ref<string | null>(null)
+  const editingParticipantId = ref<string | null>(null)
 
-  const { data: editingCyclistDetail, isFetching: isLoadingDetail } =
-    useCyclistDetailQuery(editingCyclistId)
+  const { data: editingParticipantDetail, isFetching: isLoadingDetail } =
+    useParticipantDetailQuery(editingParticipantId)
 
   // Transition loading-edit → editing when detail arrives
-  watch(editingCyclistDetail, (detail) => {
+  watch(editingParticipantDetail, (detail) => {
     if (detail && formMode.value === 'loading-edit') {
       formMode.value = 'editing'
     }
@@ -28,35 +28,38 @@ export function useCyclistListState(photoId: Ref<string>) {
   // Reset form when photo changes
   watch(photoId, () => {
     formMode.value = 'closed'
-    editingCyclistId.value = null
+    editingParticipantId.value = null
   })
 
   function handleAdd() {
-    editingCyclistId.value = null
+    editingParticipantId.value = null
     formMode.value = 'creating'
   }
 
-  function handleEdit(cyclist: ICyclistListItem) {
-    editingCyclistId.value = cyclist.id
+  function handleEdit(participant: IParticipantListItem) {
+    editingParticipantId.value = participant.id
     formMode.value = 'loading-edit'
   }
 
-  function handleDelete(cyclist: ICyclistListItem) {
+  function handleDelete(participant: IParticipantListItem) {
     dialog.warning({
-      title: 'Eliminar ciclista',
-      content: `Se eliminará el ciclista ${cyclist.plateNumber ? `#${cyclist.plateNumber}` : 'sin dorsal'}. Esta acción no se puede deshacer.`,
+      title: 'Eliminar participante',
+      content: `Se eliminará el participante ${participant.identifier ? `#${participant.identifier}` : 'sin identificador'}. Esta acción no se puede deshacer.`,
       positiveText: 'Eliminar',
       negativeText: 'Cancelar',
       onPositiveClick: async () => {
-        await deleteMutation.mutateAsync({ cyclistId: cyclist.id, photoId: photoId.value })
-        message.success('Ciclista eliminado')
+        await deleteMutation.mutateAsync({
+          participantId: participant.id,
+          photoId: photoId.value,
+        })
+        message.success('Participante eliminado')
       },
     })
   }
 
   function closeForm() {
     formMode.value = 'closed'
-    editingCyclistId.value = null
+    editingParticipantId.value = null
   }
 
   const showForm = computed(() => formMode.value === 'creating' || formMode.value === 'editing')
@@ -64,8 +67,8 @@ export function useCyclistListState(photoId: Ref<string>) {
 
   return {
     formMode,
-    editingCyclistId,
-    editingCyclistDetail,
+    editingParticipantId,
+    editingParticipantDetail,
     isLoadingDetail,
     showForm,
     isFormBusy,

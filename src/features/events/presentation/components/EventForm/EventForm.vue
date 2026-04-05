@@ -30,7 +30,7 @@ import type { IEventFormData } from '../../../types/event-form.types'
 export interface IEventFormExtra {
   assetFiles?: Map<EventAssetType, File>
   assetRemovals?: EventAssetType[]
-  categoryIds?: string[]
+  categoryIds?: number[]
   isFeatured?: boolean
 }
 
@@ -41,7 +41,7 @@ const props = defineProps<{
   hideAssetUpload?: boolean
   existingAssets?: IEventAsset[]
   initialFeatured?: boolean
-  initialCategoryIds?: string[]
+  initialCategoryIds?: number[]
 }>()
 
 const emit = defineEmits<{
@@ -63,7 +63,7 @@ const form = useForm({
 })
 
 const assetPreviews = useLocalAssetPreviews(() => props.existingAssets)
-const selectedCategoryIds = ref<string[]>(props.initialCategoryIds ?? [])
+const selectedCategoryIds = ref<number[]>(props.initialCategoryIds ?? [])
 const isFeatured = ref(props.initialFeatured ?? false)
 
 const { mutateAsync: createCategory } = useCreatePhotoCategory()

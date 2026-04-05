@@ -59,9 +59,19 @@
   margin-bottom: 16px;
 }
 
-.login-disclaimer {
+.login-create-account {
   margin: 0;
   text-align: center;
   font-size: 13px;
-  color: #9ca3af;
+  color: #6b7280;
+}
+
+.login-create-account a {
+  color: #105080;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.login-create-account a:hover {
+  text-decoration: underline;
 }

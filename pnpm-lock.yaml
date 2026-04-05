@@ -13,12 +13,18 @@ importers:
       '@tanstack/vue-query':
         specifier: ^5.92.9
         version: 5.92.9(vue@3.5.28(typescript@5.9.3))
+      '@tanstack/vue-virtual':
+        specifier: ^3.13.23
+        version: 3.13.23(vue@3.5.28(typescript@5.9.3))
       axios:
         specifier: ^1.13.5
         version: 1.13.5
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
+      intl-tel-input:
+        specifier: ^26.9.2
+        version: 26.9.2
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
@@ -37,6 +43,9 @@ importers:
       socket.io-client:
         specifier: ^4.8.3
         version: 4.8.3
+      uuid:
+        specifier: ^13.0.0
+        version: 13.0.0
       vue:
         specifier: ^3.5.27
         version: 3.5.28(typescript@5.9.3)
@@ -1196,6 +1205,12 @@ packages:
         integrity: sha512-PtOisLjUZPz5VyPRSCGjNOlwTvabdTBQ2K80DpVL1chGVr35WRxfeavAPdNq6pm/t7F8GhoR2qtmkkqtCEtHYw==,
       }
 
+  '@tanstack/virtual-core@3.13.23':
+    resolution:
+      {
+        integrity: sha512-zSz2Z2HNyLjCplANTDyl3BcdQJc2k1+yyFoKhNRmCr7V7dY8o8q5m8uFTI1/Pg1kL+Hgrz6u3Xo6eFUB7l66cg==,
+      }
+
   '@tanstack/vue-form@1.28.3':
     resolution:
       {
@@ -1227,6 +1242,14 @@ packages:
     peerDependenciesMeta:
       '@vue/composition-api':
         optional: true
+
+  '@tanstack/vue-virtual@3.13.23':
+    resolution:
+      {
+        integrity: sha512-b5jPluAR6U3eOq6GWAYSpj3ugnAIZgGR0e6aGAgyRse0Yu6MVQQ0ZWm9SArSXWtageogn6bkVD8D//c4IjW3xQ==,
+      }
+    peerDependencies:
+      vue: ^2.7.0 || ^3.0.0
 
   '@tsconfig/node24@24.0.4':
     resolution:
@@ -2749,6 +2772,12 @@ packages:
         integrity: sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==,
       }
 
+  intl-tel-input@26.9.2:
+    resolution:
+      {
+        integrity: sha512-40v/uBlE7Wpg3Dz79T1AaE9eH66D86fCXucnI8UVCayypG91lBDyoXLXb7WAQuAdjLtB2+OuTJtlihjByWYL1g==,
+      }
+
   is-docker@3.0.0:
     resolution:
       {
@@ -3975,6 +4004,13 @@ packages:
         integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==,
       }
 
+  uuid@13.0.0:
+    resolution:
+      {
+        integrity: sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w==,
+      }
+    hasBin: true
+
   vdirs@0.1.8:
     resolution:
       {
@@ -4935,6 +4971,8 @@ snapshots:
 
   '@tanstack/store@0.8.1': {}
 
+  '@tanstack/virtual-core@3.13.23': {}
+
   '@tanstack/vue-form@1.28.3(vue@3.5.28(typescript@5.9.3))':
     dependencies:
       '@tanstack/form-core': 1.28.3
@@ -4956,6 +4994,11 @@ snapshots:
       '@tanstack/store': 0.8.1
       vue: 3.5.28(typescript@5.9.3)
       vue-demi: 0.14.10(vue@3.5.28(typescript@5.9.3))
+
+  '@tanstack/vue-virtual@3.13.23(vue@3.5.28(typescript@5.9.3))':
+    dependencies:
+      '@tanstack/virtual-core': 3.13.23
+      vue: 3.5.28(typescript@5.9.3)
 
   '@tsconfig/node24@24.0.4': {}
 
@@ -5938,6 +5981,8 @@ snapshots:
 
   ini@1.3.8: {}
 
+  intl-tel-input@26.9.2: {}
+
   is-docker@3.0.0: {}
 
   is-extglob@2.1.1: {}
@@ -6629,6 +6674,8 @@ snapshots:
       punycode: 2.3.1
 
   util-deprecate@1.0.2: {}
+
+  uuid@13.0.0: {}
 
   vdirs@0.1.8(vue@3.5.28(typescript@5.9.3)):
     dependencies:

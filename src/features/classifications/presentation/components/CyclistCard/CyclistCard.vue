@@ -2,10 +2,10 @@
 import { NButton, NIcon, NTag } from 'naive-ui'
 import { CreateOutline, TrashOutline } from '@vicons/ionicons5'
 
-import type { ICyclistListItem } from '../../../types/responses/cyclist-list.response'
+import type { IParticipantListItem } from '../../../types/responses/cyclist-list.response'
 
 defineProps<{
-  cyclist: ICyclistListItem
+  cyclist: IParticipantListItem
 }>()
 
 defineEmits<{
@@ -18,7 +18,7 @@ defineEmits<{
   <div class="cyclist-card">
     <div class="cyclist-card__info">
       <div class="cyclist-card__plate">
-        {{ cyclist.plateNumber ? `#${cyclist.plateNumber}` : 'Sin dorsal' }}
+        {{ cyclist.identifier ? `#${cyclist.identifier}` : 'Sin dorsal' }}
       </div>
       <div class="cyclist-card__meta">
         <NTag size="tiny" :bordered="false" :type="cyclist.source === 'ai' ? 'info' : 'default'">

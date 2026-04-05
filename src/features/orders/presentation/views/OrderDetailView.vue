@@ -12,7 +12,7 @@ import {
 } from '@vicons/ionicons5'
 
 import { formatWhatsAppNumber } from '@/shared/utils/phone.utils'
-import { openWhatsApp } from '@/shared/utils/whatsapp.utils'
+import { openWhatsApp, openWhatsAppWithTemplate } from '@/shared/utils/whatsapp.utils'
 import { ORDER_STATUS } from '../../types/responses/order-list.response'
 import { useOrderDetailQuery } from '../../composables/queries/use-order-detail'
 import { useOrderActions } from '../../composables/use-order-actions'
@@ -35,22 +35,27 @@ function onConfirmPayment() {
 }
 
 function onSendDelivery() {
-  if (order.value) handleSendDelivery(order.value.id, order.value.customer.whatsapp)
+  if (order.value) handleSendDelivery(order.value.id, order.value.snapWhatsapp ?? undefined)
 }
 
 function onCancel() {
-  if (order.value) handleCancel(order.value.id, order.value.customer.firstName)
+  if (order.value) handleCancel(order.value.id, order.value.userName)
 }
 
 function onSendDeliveryWhatsApp() {
   if (!order.value?.deliveryLink) return
   const deliveryUrl = `${window.location.origin}/delivery/${order.value.deliveryLink.token}`
-  const msg = `¡Hola ${order.value.customer.firstName}! ✅ Aquí tienes tus ${order.value.photos.length} fotos en alta calidad: ${deliveryUrl}. El link estará disponible por 7 días. ¡Gracias! 🎉`
-  openWhatsApp(order.value.customer.whatsapp, msg)
+  const displayName = order.value.snapFirstName ?? order.value.userName
+  const msg = `¡Hola ${displayName}! ✅ Aquí tienes tus ${order.value.photos.length} fotos en alta calidad: ${deliveryUrl}. El link estará disponible por 7 días. ¡Gracias! 🎉`
+  if (order.value.snapWhatsapp) {
+    openWhatsApp(order.value.snapWhatsapp, msg)
+  } else {
+    openWhatsAppWithTemplate(msg)
+  }
 }
 
 function onRegenerate() {
-  if (order.value) handleRegenerate(order.value.id, order.value.customer.whatsapp)
+  if (order.value) handleRegenerate(order.value.id, order.value.snapWhatsapp ?? undefined)
 }
 </script>
 
@@ -76,9 +81,7 @@ function onRegenerate() {
           <span class="od-crumb__text">
             Pedidos
             <span class="od-crumb__sep">/</span>
-            <span class="od-crumb__cur"
-              >{{ order.customer.firstName }} {{ order.customer.lastName }}</span
-            >
+            <span class="od-crumb__cur">{{ order.userName }}</span>
           </span>
         </div>
 
@@ -86,6 +89,37 @@ function onRegenerate() {
           <div class="od-main">
             <OrderHeroCard :order="order" />
             <OrderPhotosCarousel :photos="order.photos" />
+
+            <!-- Retouch progress -->
+            <div v-if="order.retouchProgress" class="od-retouch">
+              <div class="od-retouch__header">
+                <span class="od-retouch__label">Retoque</span>
+                <span class="od-retouch__count">
+                  {{ order.retouchProgress.retouched }}/{{ order.retouchProgress.total }} retocadas
+                </span>
+              </div>
+              <div class="od-retouch__bar">
+                <div
+                  class="od-retouch__fill"
+                  :style="{
+                    width: `${(order.retouchProgress.retouched / order.retouchProgress.total) * 100}%`,
+                  }"
+                />
+              </div>
+              <p
+                v-if="
+                  order.status === 'paid' &&
+                  order.retouchProgress.retouched < order.retouchProgress.total
+                "
+                class="od-retouch__warning"
+              >
+                {{ order.retouchProgress.total - order.retouchProgress.retouched }} foto{{
+                  order.retouchProgress.total - order.retouchProgress.retouched !== 1 ? 's' : ''
+                }}
+                sin retocar. Si envías ahora, se entregarán las originales.
+              </p>
+            </div>
+
             <DeliveryLinkCard
               v-if="order.deliveryLink"
               :delivery-link="order.deliveryLink"
@@ -104,13 +138,15 @@ function onRegenerate() {
                   <div class="od-contact__icon od-contact__icon--wa">
                     <NIcon :component="LogoWhatsapp" :size="13" />
                   </div>
-                  <span>{{ formatWhatsAppNumber(order.customer.whatsapp) }}</span>
+                  <span>{{
+                    order.snapWhatsapp ? formatWhatsAppNumber(order.snapWhatsapp) : '—'
+                  }}</span>
                 </div>
-                <div v-if="order.customer.email" class="od-contact__row">
+                <div v-if="order.snapEmail" class="od-contact__row">
                   <div class="od-contact__icon od-contact__icon--mail">
                     <NIcon :component="MailOutline" :size="13" />
                   </div>
-                  <span>{{ order.customer.email }}</span>
+                  <span>{{ order.snapEmail }}</span>
                 </div>
               </div>
             </div>

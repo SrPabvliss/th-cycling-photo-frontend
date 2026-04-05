@@ -6,7 +6,7 @@ import { PHOTO_CATEGORY_QUERY_KEYS } from '../../constants/query-keys'
 
 interface AssignBatchParams {
   eventId: string
-  categoryIds: string[]
+  categoryIds: number[]
 }
 
 export function useAssignPhotoCategoriesBatch() {

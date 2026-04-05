@@ -7,7 +7,7 @@ import { PHOTO_CATEGORY_QUERY_KEYS } from '../../constants/query-keys'
 
 interface UnassignBatchParams {
   eventId: string
-  categoryIds: string[]
+  categoryIds: number[]
 }
 
 export function useUnassignPhotoCategoriesBatch() {
@@ -17,7 +17,7 @@ export function useUnassignPhotoCategoriesBatch() {
     mutationFn: async ({ eventId, categoryIds }: UnassignBatchParams) => {
       await Promise.all(
         categoryIds.map((categoryId) =>
-          httpClient.delete(API_ROUTES.PHOTO_CATEGORIES.UNASSIGN(eventId, categoryId), {
+          httpClient.delete(API_ROUTES.PHOTO_CATEGORIES.UNASSIGN(eventId, String(categoryId)), {
             silent: true,
           }),
         ),

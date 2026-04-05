@@ -17,8 +17,8 @@ defineEmits<{
   conflict: [winner: 'existing' | 'incoming']
 }>()
 
-function formatPlate(plateNumber: number | null): string {
-  return plateNumber ? `#${plateNumber}` : 'Sin dorsal'
+function formatIdentifier(identifier: string | null): string {
+  return identifier ? `#${identifier}` : 'Sin dorsal'
 }
 </script>
 
@@ -35,7 +35,9 @@ function formatPlate(plateNumber: number | null): string {
     <div v-if="mode === 'inherit' && incomingLabels" class="label-conflict-modal">
       <p class="label-conflict-modal__description">
         La foto <strong>{{ photoFilename }}</strong> ya tiene clasificaciones.
-        {{ incomingLabels.plateNumber ? `Dorsal ${formatPlate(incomingLabels.plateNumber)}.` : '' }}
+        {{
+          incomingLabels.identifier ? `Dorsal ${formatIdentifier(incomingLabels.identifier)}.` : ''
+        }}
       </p>
       <p class="label-conflict-modal__question">
         Aplicar estos datos al formulario de clasificacion grupal?
@@ -58,11 +60,15 @@ function formatPlate(plateNumber: number | null): string {
       <div class="label-conflict-modal__comparison">
         <div class="label-conflict-modal__side">
           <p class="label-conflict-modal__side-title">Grupo actual</p>
-          <NTag size="small" :bordered="false">{{ formatPlate(existingLabels.plateNumber) }}</NTag>
+          <NTag size="small" :bordered="false">{{
+            formatIdentifier(existingLabels.identifier)
+          }}</NTag>
         </div>
         <div class="label-conflict-modal__side">
           <p class="label-conflict-modal__side-title">Foto nueva</p>
-          <NTag size="small" :bordered="false">{{ formatPlate(incomingLabels.plateNumber) }}</NTag>
+          <NTag size="small" :bordered="false">{{
+            formatIdentifier(incomingLabels.identifier)
+          }}</NTag>
         </div>
       </div>
 

@@ -3,8 +3,8 @@ import { computed } from 'vue'
 import { NButton, NIcon, NSpin } from 'naive-ui'
 import { AddOutline } from '@vicons/ionicons5'
 
-import { usePhotoCyclistsQuery } from '../../../composables/queries/use-photo-cyclists'
-import { useCyclistListState } from '../../../composables/use-cyclist-list-state'
+import { usePhotoParticipantsQuery } from '../../../composables/queries/use-photo-cyclists'
+import { useParticipantListState } from '../../../composables/use-cyclist-list-state'
 import CyclistCard from '../CyclistCard/CyclistCard.vue'
 import CyclistForm from '../CyclistForm/CyclistForm.vue'
 
@@ -13,12 +13,12 @@ const props = defineProps<{
 }>()
 
 const photoIdRef = computed(() => props.photoId)
-const { data: cyclists, isPending } = usePhotoCyclistsQuery(photoIdRef)
+const { data: participants, isPending } = usePhotoParticipantsQuery(photoIdRef)
 
 const {
   formMode,
-  editingCyclistId,
-  editingCyclistDetail,
+  editingParticipantId,
+  editingParticipantDetail,
   isLoadingDetail,
   showForm,
   isFormBusy,
@@ -26,13 +26,13 @@ const {
   handleEdit,
   handleDelete,
   closeForm,
-} = useCyclistListState(photoIdRef)
+} = useParticipantListState(photoIdRef)
 </script>
 
 <template>
   <div class="cyclist-list">
     <div class="cyclist-list__header">
-      <p class="cyclist-list__title">Ciclistas ({{ cyclists?.length ?? 0 }})</p>
+      <p class="cyclist-list__title">Ciclistas ({{ participants?.length ?? 0 }})</p>
       <NButton size="tiny" type="primary" :disabled="isFormBusy" @click="handleAdd">
         <template #icon><NIcon :component="AddOutline" /></template>
         Agregar
@@ -45,21 +45,21 @@ const {
 
     <CyclistForm
       v-if="showForm"
-      :key="editingCyclistId ?? 'new'"
+      :key="editingParticipantId ?? 'new'"
       :photo-id="photoId"
-      :cyclist="formMode === 'editing' ? (editingCyclistDetail ?? undefined) : undefined"
+      :cyclist="formMode === 'editing' ? (editingParticipantDetail ?? undefined) : undefined"
       @done="closeForm"
       @cancel="closeForm"
     />
 
     <NSpin :show="isPending" size="small">
-      <div v-if="cyclists?.length" class="cyclist-list__items">
+      <div v-if="participants?.length" class="cyclist-list__items">
         <CyclistCard
-          v-for="cyclist in cyclists"
-          :key="cyclist.id"
-          :cyclist="cyclist"
-          @edit="handleEdit(cyclist)"
-          @delete="handleDelete(cyclist)"
+          v-for="participant in participants"
+          :key="participant.id"
+          :cyclist="participant"
+          @edit="handleEdit(participant)"
+          @delete="handleDelete(participant)"
         />
       </div>
       <div v-else-if="!isPending" class="cyclist-list__empty">

@@ -7,10 +7,8 @@ export function toCreateOrderRequest(
 ): ICreateOrderRequest {
   return {
     photoIds: Array.from(selectedIds),
-    firstName: formData.firstName.trim(),
-    lastName: formData.lastName.trim(),
-    whatsapp: formData.whatsapp.trim(),
-    email: formData.email?.trim() || null,
     notes: formData.notes?.trim() || null,
+    bibNumber: formData.bibNumber?.trim() || null,
+    snapCategoryName: formData.snapCategoryName?.trim() || null,
   }
 }

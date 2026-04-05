@@ -7,6 +7,8 @@ import { LogOutOutline } from '@vicons/ionicons5'
 import { useAuth } from '@/features/auth/composables/use-auth'
 import { EVENTS_PATH } from '@/features/events/routes'
 import { ORDERS_PATH } from '@/features/orders/routes'
+import { RETOUCH_PATH } from '@/features/retouch/routes'
+import { BUYERS_PATH } from '@/features/buyers/routes'
 import NotificationBell from '@/features/notifications/presentation/components/NotificationBell/NotificationBell.vue'
 import TitanLogo from './public/TitanLogo.vue'
 
@@ -33,6 +35,8 @@ async function handleLogout() {
     <nav class="app-nav-links">
       <router-link :to="EVENTS_PATH" class="app-nav-link">Eventos</router-link>
       <router-link :to="ORDERS_PATH" class="app-nav-link">Pedidos</router-link>
+      <router-link :to="RETOUCH_PATH" class="app-nav-link">Retoque</router-link>
+      <router-link :to="BUYERS_PATH" class="app-nav-link">Compradores</router-link>
     </nav>
 
     <div id="page-actions" class="app-nav-center" />

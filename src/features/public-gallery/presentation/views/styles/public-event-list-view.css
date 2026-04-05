@@ -1,0 +1,42 @@
+.pel {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+}
+
+.pel__header {
+  margin-bottom: 32px;
+}
+
+.pel__title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #1a1f2c;
+  margin: 0 0 4px;
+}
+
+.pel__subtitle {
+  font-size: 15px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.pel__loading {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.pel__featured {
+  margin-bottom: 24px;
+}
+
+.pel__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.pel__empty {
+  padding: 80px 0;
+}

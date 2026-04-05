@@ -9,7 +9,7 @@ export function useCreatePhotoCategory() {
 
   return useMutation({
     mutationFn: (name: string) =>
-      httpClient.post<{ id: string }>(
+      httpClient.post<{ id: number }>(
         API_ROUTES.PHOTO_CATEGORIES.CREATE,
         { name },
         { silent: true },

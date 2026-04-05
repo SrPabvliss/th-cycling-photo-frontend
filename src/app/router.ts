@@ -12,19 +12,32 @@ import { clientGalleryRoutes } from '@/features/client-gallery/routes'
 import { deliveryRoutes } from '@/features/delivery/routes'
 import { orderRoutes } from '@/features/orders/routes'
 import { previewLinkRoutes } from '@/features/preview-links/routes'
+import { publicGalleryRoutes } from '@/features/public-gallery/routes'
+import { retouchRoutes } from '@/features/retouch/routes'
+import { buyerRoutes } from '@/features/buyers/routes'
+import { cartRoutes } from '@/features/cart/routes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     ...landingRoutes,
     ...authRoutes,
+    ...publicGalleryRoutes,
+    ...cartRoutes,
     ...clientGalleryRoutes,
     ...deliveryRoutes,
     ...standaloneRoutes,
     {
       path: '/',
       component: AppLayout,
-      children: [...eventRoutes, ...photoRoutes, ...previewLinkRoutes, ...orderRoutes],
+      children: [
+        ...eventRoutes,
+        ...photoRoutes,
+        ...previewLinkRoutes,
+        ...orderRoutes,
+        ...retouchRoutes,
+        ...buyerRoutes,
+      ],
     },
     ...classificationRoutes,
     {

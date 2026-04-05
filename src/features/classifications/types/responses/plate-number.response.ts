@@ -1,16 +1,16 @@
-/** API projection for plate number — nested in cyclist detail */
-export interface IApiPlateNumber {
+/** API projection for participant identifier — nested in participant detail */
+export interface IApiIdentifier {
   id: string
-  number: number
+  value: string
   confidenceScore: number | null
   manuallyCorrected: boolean
   correctedAt: string | null
 }
 
 /** Frontend domain type with parsed dates */
-export interface IPlateNumber {
+export interface IIdentifier {
   id: string
-  number: number
+  value: string
   confidenceScore: number | null
   manuallyCorrected: boolean
   correctedAt: Date | null

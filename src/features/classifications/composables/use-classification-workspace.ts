@@ -110,7 +110,7 @@ export function useClassificationWorkspace() {
       return
     }
 
-    if (photo.value.detectedCyclists.length === 0) return
+    if (photo.value.detectedParticipants.length === 0) return
 
     classifyMutation.mutate(
       { photoId: currentPhotoId.value, eventId: eventId.value },

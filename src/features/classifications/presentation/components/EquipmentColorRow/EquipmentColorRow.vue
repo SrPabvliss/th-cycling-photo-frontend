@@ -3,33 +3,39 @@ import { computed } from 'vue'
 import { NButton, NIcon, NSelect } from 'naive-ui'
 import { CloseOutline } from '@vicons/ionicons5'
 
-import type { IColorInput } from '../../../types/requests/create-cyclist.request'
-import { EQUIPMENT_ITEM_LABELS } from '../../../types/equipment-item.types'
+import type { IGearColorInput } from '../../../types/requests/create-cyclist.request'
+import type { IGearType } from '../../../types/equipment-item.types'
+import { GEAR_TYPE_LABELS } from '../../../types/equipment-item.types'
 import type { IPaletteColor } from '../../../constants/color-palette'
 import ColorPicker from '../ColorPicker/ColorPicker.vue'
 
 const props = defineProps<{
-  modelValue: IColorInput
+  modelValue: IGearColorInput
+  gearTypes: IGearType[]
 }>()
 
 const emit = defineEmits<{
-  'update:modelValue': [value: IColorInput]
+  'update:modelValue': [value: IGearColorInput]
   remove: []
 }>()
 
-const itemTypeOptions = [
-  { label: EQUIPMENT_ITEM_LABELS.helmet, value: 'helmet' },
-  { label: EQUIPMENT_ITEM_LABELS.clothing, value: 'clothing' },
-  { label: EQUIPMENT_ITEM_LABELS.bike, value: 'bike' },
-]
+const gearTypeOptions = computed(() =>
+  props.gearTypes.map((gt) => ({
+    label: GEAR_TYPE_LABELS[gt.name] ?? gt.name,
+    value: gt.id,
+  })),
+)
 
 const selectedColor = computed<IPaletteColor | null>(() => {
   if (!props.modelValue.colorName) return null
   return { name: props.modelValue.colorName, hex: props.modelValue.colorHex }
 })
 
-function handleItemTypeChange(value: string) {
-  emit('update:modelValue', { ...props.modelValue, itemType: value })
+function handleGearTypeChange(value: number | null) {
+  emit('update:modelValue', {
+    ...props.modelValue,
+    gearTypeId: value ?? props.gearTypes[0]?.id ?? 1,
+  })
 }
 
 function handleColorChange(color: IPaletteColor) {
@@ -46,11 +52,11 @@ function handleColorChange(color: IPaletteColor) {
     <div class="equipment-color-row__header">
       <NSelect
         class="equipment-color-row__select"
-        :value="modelValue.itemType"
-        :options="itemTypeOptions"
+        :value="modelValue.gearTypeId"
+        :options="gearTypeOptions"
         placeholder="Tipo"
         size="small"
-        @update:value="handleItemTypeChange"
+        @update:value="handleGearTypeChange"
       />
       <div v-if="modelValue.colorName" class="equipment-color-row__preview">
         <div

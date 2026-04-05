@@ -8,6 +8,7 @@ export const EVENT_FORM_DEFAULTS: IEventFormData = {
   date: null,
   provinceId: null,
   cantonId: null,
+  eventTypeId: 1, // Default: Downhill
 }
 
 export const eventFormSchema = z.object({
@@ -16,4 +17,5 @@ export const eventFormSchema = z.object({
   date: z.number({ error: 'La fecha es requerida' }),
   provinceId: z.number().nullable(),
   cantonId: z.number().nullable(),
+  eventTypeId: z.number({ error: 'El tipo de evento es requerido' }),
 })

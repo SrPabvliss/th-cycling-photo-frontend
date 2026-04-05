@@ -2,14 +2,14 @@ import { ref } from 'vue'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
-import type { IColorInput } from '../types/requests/create-cyclist.request'
+import type { IGearColorInput } from '../types/requests/create-cyclist.request'
 import type { ISimilarPhoto } from '../types/responses/similar-photo.response'
-import type { IApiCyclistListItem } from '../types/responses/cyclist-list.response'
-import { toCyclistListItems } from '../mappers/cyclist-list.mapper'
+import type { IApiParticipantListItem } from '../types/responses/cyclist-list.response'
+import { toParticipantListItems } from '../mappers/cyclist-list.mapper'
 
 export interface ILabelSet {
-  plateNumber: number | null
-  colors: IColorInput[]
+  identifier: string | null
+  gearColors: IGearColorInput[]
 }
 
 export function useLabelConflict() {
@@ -20,17 +20,17 @@ export function useLabelConflict() {
   const incomingLabels = ref<ILabelSet | null>(null)
   const inheritedLabels = ref<ILabelSet | null>(null)
 
-  async function fetchCyclistLabels(photoId: string): Promise<ILabelSet | null> {
+  async function fetchParticipantLabels(photoId: string): Promise<ILabelSet | null> {
     try {
-      const response = await httpClient.get<IApiCyclistListItem[]>(
-        API_ROUTES.PHOTOS.CYCLISTS_BY_PHOTO(photoId),
+      const response = await httpClient.get<IApiParticipantListItem[]>(
+        API_ROUTES.CLASSIFICATIONS.PARTICIPANTS_BY_PHOTO(photoId),
       )
-      const cyclists = toCyclistListItems(response.data)
-      const first = cyclists[0]
+      const participants = toParticipantListItems(response.data)
+      const first = participants[0]
       if (!first) return null
       return {
-        plateNumber: first.plateNumber,
-        colors: [],
+        identifier: first.identifier,
+        gearColors: [],
       }
     } catch {
       return null
@@ -47,7 +47,7 @@ export function useLabelConflict() {
       return
     }
 
-    const photoLabels = await fetchCyclistLabels(photo.id)
+    const photoLabels = await fetchParticipantLabels(photo.id)
     if (!photoLabels) {
       addToGroup(photo)
       return
@@ -59,7 +59,7 @@ export function useLabelConflict() {
     if (!currentLabels) {
       // No labels in current group — offer to inherit
       showInheritModal.value = true
-    } else if (currentLabels.plateNumber !== photoLabels.plateNumber) {
+    } else if (currentLabels.identifier !== photoLabels.identifier) {
       // Different labels — show conflict resolution
       existingLabels.value = currentLabels
       showConflictModal.value = true

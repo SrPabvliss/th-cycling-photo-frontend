@@ -16,7 +16,7 @@ export interface IApiPublicEventDetail {
 }
 
 export interface IApiPublicPhotoCategory {
-  id: string
+  id: number
   name: string
 }
 
@@ -36,6 +36,6 @@ export interface IPublicEventDetail {
 }
 
 export interface IPublicPhotoCategory {
-  id: string
+  id: number
   name: string
 }

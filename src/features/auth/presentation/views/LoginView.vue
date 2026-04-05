@@ -123,7 +123,10 @@ const form = useForm({
           </form.Subscribe>
         </form>
 
-        <p class="login-disclaimer">Area protegida. El acceso no autorizado esta prohibido.</p>
+        <p class="login-create-account">
+          ¿No tienes cuenta?
+          <RouterLink to="/register">Crear cuenta</RouterLink>
+        </p>
       </NCard>
     </div>
   </PublicLayout>

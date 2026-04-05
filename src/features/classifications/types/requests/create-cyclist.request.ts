@@ -1,10 +1,10 @@
-export interface IColorInput {
-  itemType: string
+export interface IGearColorInput {
+  gearTypeId: number
   colorName: string
   colorHex: string
 }
 
-export interface ICreateCyclistRequest {
-  plateNumber?: number
-  colors: IColorInput[]
+export interface ICreateParticipantRequest {
+  identifier?: string
+  colors: IGearColorInput[]
 }
