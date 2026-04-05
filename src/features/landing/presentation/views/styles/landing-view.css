@@ -33,6 +33,39 @@
   font-weight: 500;
 }
 
+/* Events sections */
+.events-section {
+  padding: 48px 32px;
+  background: #f8f9fa;
+}
+.events-section--light {
+  background: #fff;
+}
+.events-inner {
+  max-width: 960px;
+  margin: 0 auto;
+}
+.events-section__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.events-section__title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1f2c;
+  margin: 0 0 16px;
+}
+.events-section__header .events-section__title {
+  margin-bottom: 0;
+}
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
 /* About */
 .about {
   padding: 80px 32px;
