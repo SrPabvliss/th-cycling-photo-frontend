@@ -1,0 +1,10 @@
+export interface IRegisterRequest {
+  email: string
+  password: string
+  firstName: string
+  lastName: string
+  phoneNumber: string
+  countryId: number
+  provinceId?: number
+  cantonId?: number
+}
