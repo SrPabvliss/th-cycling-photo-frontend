@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router'
 import { NSpin, NResult } from 'naive-ui'
 
 import { useAuth } from '@/features/auth/composables/use-auth'
-import { CLASSIFICATION_ROUTE_NAMES } from '@/features/classifications/routes'
+import { OPERATOR_ROUTE_NAMES } from '../../routes'
 import { useOperatorDashboardQuery } from '../../composables/queries/use-operator-dashboard'
 import DashboardGreeting from '../components/DashboardGreeting/DashboardGreeting.vue'
 import ActiveEventCard from '../components/ActiveEventCard/ActiveEventCard.vue'
@@ -14,8 +14,8 @@ const router = useRouter()
 const { currentUser } = useAuth()
 const { data: dashboard, isLoading, error } = useOperatorDashboardQuery()
 
-function handleClassify(eventId: string) {
-  router.push({ name: CLASSIFICATION_ROUTE_NAMES.WORKSPACE, params: { eventId } })
+function handleSelectEvent(eventId: string) {
+  router.push({ name: OPERATOR_ROUTE_NAMES.EVENT_WORKSPACE, params: { eventId } })
 }
 </script>
 
@@ -41,7 +41,7 @@ function handleClassify(eventId: string) {
                   v-for="event in dashboard.activeEvents"
                   :key="event.eventId"
                   :event="event"
-                  @classify="handleClassify"
+                  @select="handleSelectEvent"
                 />
               </div>
             </section>

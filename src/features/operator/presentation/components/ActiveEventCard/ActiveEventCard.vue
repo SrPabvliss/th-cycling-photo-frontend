@@ -10,7 +10,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  classify: [eventId: string]
+  select: [eventId: string]
 }>()
 </script>
 
@@ -48,12 +48,12 @@ const emit = defineEmits<{
       <NButton
         type="primary"
         class="active-event-card__action"
-        @click="emit('classify', props.event.eventId)"
+        @click="emit('select', props.event.eventId)"
       >
         <template #icon>
           <NIcon :component="PlayOutline" />
         </template>
-        {{ event.hasProgress ? 'Reanudar Clasificación' : 'Iniciar Clasificación' }}
+        Abrir Workspace
       </NButton>
     </div>
   </div>
