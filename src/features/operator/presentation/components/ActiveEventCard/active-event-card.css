@@ -1,0 +1,69 @@
+.active-event-card {
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
+  transition: box-shadow 0.2s;
+}
+
+.active-event-card:hover {
+  box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+}
+
+.active-event-card__cover {
+  position: relative;
+  height: 180px;
+  background: linear-gradient(135deg, #374151, #1f2937);
+  background-size: cover;
+  background-position: center;
+}
+
+.active-event-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgb(0 0 0 / 70%) 0%, transparent 60%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 16px;
+}
+
+.active-event-card__name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 4px;
+}
+
+.active-event-card__meta {
+  font-size: 13px;
+  color: rgb(255 255 255 / 80%);
+  margin: 0;
+}
+
+.active-event-card__body {
+  padding: 16px;
+}
+
+.active-event-card__progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.active-event-card__progress-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.active-event-card__progress-pct {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.active-event-card__action {
+  margin-top: 12px;
+}

@@ -16,6 +16,7 @@ import { publicGalleryRoutes } from '@/features/public-gallery/routes'
 import { retouchRoutes } from '@/features/retouch/routes'
 import { buyerRoutes } from '@/features/buyers/routes'
 import { cartRoutes } from '@/features/cart/routes'
+import { operatorRoutes } from '@/features/operator/routes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,6 +38,7 @@ const router = createRouter({
         ...orderRoutes,
         ...retouchRoutes,
         ...buyerRoutes,
+        ...operatorRoutes,
       ],
     },
     ...classificationRoutes,

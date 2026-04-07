@@ -11,6 +11,7 @@ const LOCATIONS_BASE = '/locations'
 const PARTICIPANTS_BASE = '/participants'
 const COUNTRIES_BASE = '/countries'
 const PHOTO_CATEGORIES_BASE = '/photo-categories'
+const OPERATOR_BASE = '/operator'
 
 export const API_ROUTES = {
   AUTH: {
@@ -143,5 +144,9 @@ export const API_ROUTES = {
   COUNTRIES: {
     GET_ALL: COUNTRIES_BASE,
     PROVINCES: (countryId: number) => `${COUNTRIES_BASE}/${countryId}/provinces`,
+  },
+  OPERATOR: {
+    BASE: OPERATOR_BASE,
+    DASHBOARD: `${OPERATOR_BASE}/dashboard`,
   },
 } as const
