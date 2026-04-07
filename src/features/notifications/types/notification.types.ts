@@ -3,6 +3,7 @@ export const NOTIFICATION_TYPE = {
   ORDER_CREATED: 'order.created',
   ORDER_PAID: 'order.paid',
   ORDER_DELIVERED: 'order.delivered',
+  ORDER_RETOUCH_COMPLETED: 'order.retouch_completed',
 } as const
 
 export type NotificationType = (typeof NOTIFICATION_TYPE)[keyof typeof NOTIFICATION_TYPE]

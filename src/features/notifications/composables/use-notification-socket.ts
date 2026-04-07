@@ -55,6 +55,7 @@ export function useNotificationSocket() {
   //   'order:delivered'  → admin sent delivery (self-action, not useful for single admin)
   const WS_EVENTS = [
     'order:created',
+    'order:retouch_completed',
     // 'preview:viewed',
     // 'order:paid',
     // 'order:delivered',

@@ -1,4 +1,10 @@
-import { EyeOutline, CartOutline, CheckmarkCircleOutline, SendOutline } from '@vicons/ionicons5'
+import {
+  EyeOutline,
+  CartOutline,
+  CheckmarkCircleOutline,
+  SendOutline,
+  BrushOutline,
+} from '@vicons/ionicons5'
 import type { Component } from 'vue'
 
 import { NOTIFICATION_TYPE, type NotificationType } from '../types/notification.types'
@@ -28,6 +34,11 @@ export const NOTIFICATION_CONFIG: Record<NotificationType, INotificationConfig> 
   [NOTIFICATION_TYPE.ORDER_DELIVERED]: {
     icon: SendOutline,
     color: '#105080',
+    getRoute: (data) => (data.orderId ? `/orders/${data.orderId}` : null),
+  },
+  [NOTIFICATION_TYPE.ORDER_RETOUCH_COMPLETED]: {
+    icon: BrushOutline,
+    color: '#8b5cf6',
     getRoute: (data) => (data.orderId ? `/orders/${data.orderId}` : null),
   },
 }
