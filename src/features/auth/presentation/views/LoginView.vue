@@ -6,7 +6,7 @@ import { NFormItem, NInput, NButton, NCard, NCheckbox, NIcon } from 'naive-ui'
 import { MailOutline, LockClosedOutline } from '@vicons/ionicons5'
 
 import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
-import { EVENTS_PATH } from '@/features/events/routes'
+import { getHomePath } from '@/core/auth/role-config'
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import TitanLogo from '@/core/layout/public/TitanLogo.vue'
 import { useAuth } from '../../composables/use-auth'
@@ -22,9 +22,9 @@ const form = useForm({
   defaultValues: LOGIN_FORM_DEFAULTS,
   onSubmit: async ({ value }) => {
     try {
-      await login(value)
-      const redirect = (route.query.redirect as string) || EVENTS_PATH
-      router.push(redirect)
+      const user = await login(value)
+      const redirect = route.query.redirect as string | undefined
+      router.push(redirect ?? getHomePath(user.role))
     } catch {
       // Error toast is shown by error interceptor
       // Form preserves email field value

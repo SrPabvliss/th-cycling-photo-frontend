@@ -1,5 +1,6 @@
 import { computed } from 'vue'
 
+import { USER_ROLES } from '@/core/auth/role-config'
 import { useAuthStore } from '../stores/auth.store'
 import { useLoginMutation } from './mutations/use-login'
 import { useLogoutMutation } from './mutations/use-logout'
@@ -15,7 +16,7 @@ export function useAuth() {
 
   const isAuthenticated = computed(() => authStore.isAuthenticated)
   const currentUser = computed(() => authStore.currentUser)
-  const isCustomer = computed(() => authStore.currentUser?.role === 'customer')
+  const isCustomer = computed(() => authStore.currentUser?.role === USER_ROLES.CUSTOMER)
 
   async function login(credentials: ILoginRequest) {
     return loginMutation.mutateAsync(credentials)

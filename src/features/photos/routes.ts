@@ -1,5 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router'
 
+import { USER_ROLES } from '@/core/auth/role-config'
+
 export const PHOTOS_PATH = '/photos'
 
 export const PHOTO_ROUTE_NAMES = {
@@ -13,18 +15,18 @@ export const photoRoutes: RouteRecordRaw[] = [
     path: 'events/:eventId/photos',
     name: PHOTO_ROUTE_NAMES.GALLERY,
     component: () => import('./presentation/views/PhotoGalleryView.vue'),
-    meta: { requiresAuth: true, roles: ['admin'] },
+    meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN] },
   },
   {
     path: 'events/:eventId/photos/upload',
     name: PHOTO_ROUTE_NAMES.UPLOAD,
     component: () => import('./presentation/views/PhotoUploadView.vue'),
-    meta: { requiresAuth: true, roles: ['admin'] },
+    meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN] },
   },
   {
     path: 'photos/:id',
     name: PHOTO_ROUTE_NAMES.DETAIL,
     component: () => import('./presentation/views/PhotoDetailView.vue'),
-    meta: { requiresAuth: true, roles: ['admin'] },
+    meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN] },
   },
 ]

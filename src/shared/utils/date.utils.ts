@@ -29,6 +29,26 @@ export function formatRelativeTime(date: Date): string {
 /**
  * Checks if a date is within the last N hours (default 24).
  */
+/**
+ * Formats a date with time: "16 oct, 11:00"
+ */
+export function formatDateTime(date: Date): string {
+  return format(date, 'd MMM, HH:mm', { locale: es })
+}
+
+/**
+ * Returns a time-appropriate greeting: "Buenos días" / "Buenas tardes" / "Buenas noches"
+ */
+export function getTimeGreeting(): string {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Buenos días'
+  if (hour < 18) return 'Buenas tardes'
+  return 'Buenas noches'
+}
+
+/**
+ * Checks if a date is within the last N hours (default 24).
+ */
 export function isRecent(date: Date, hours = 24): boolean {
   const threshold = new Date()
   threshold.setHours(threshold.getHours() - hours)

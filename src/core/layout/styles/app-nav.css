@@ -52,6 +52,12 @@
   background: #f0f6ff;
 }
 
+.app-nav-link--disabled {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
 .app-nav-center {
   display: flex;
   align-items: center;

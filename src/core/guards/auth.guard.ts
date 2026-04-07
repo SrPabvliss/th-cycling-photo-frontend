@@ -1,11 +1,12 @@
 import type { Router } from 'vue-router'
 
 import { API_ROUTES } from '@/core/api/api-routes'
+import { getHomePath, type UserRole } from '@/core/auth/role-config'
 import { httpClient } from '@/core/http/axios-client'
 import { toCurrentUser } from '@/features/auth/mappers/current-user.mapper'
+import { AUTH_PATH, REGISTER_PATH } from '@/features/auth/routes'
 import { useAuthStore } from '@/features/auth/stores/auth.store'
 import type { IApiCurrentUser } from '@/features/auth/types/responses/current-user.response'
-import { EVENTS_PATH } from '@/features/events/routes'
 
 let isHydrated = false
 
@@ -37,21 +38,20 @@ export function registerAuthGuard(router: Router): void {
 
     // Public routes — no auth required
     if (to.meta.public) {
-      if (authStore.isAuthenticated && (to.path === '/login' || to.path === '/register')) {
-        const isCustomer = authStore.currentUser?.role === 'customer'
-        return isCustomer ? '/' : EVENTS_PATH
+      if (authStore.isAuthenticated && (to.path === AUTH_PATH || to.path === REGISTER_PATH)) {
+        return getHomePath(authStore.currentUser!.role)
       }
       return true
     }
 
     // Auth required — redirect to login if not authenticated
     if (!authStore.isAuthenticated) {
-      return { path: '/login', query: { redirect: to.fullPath } }
+      return { path: AUTH_PATH, query: { redirect: to.fullPath } }
     }
 
     // Role check
-    const allowedRoles = to.meta.roles as string[] | undefined
-    if (allowedRoles && !allowedRoles.includes(authStore.currentUser!.role)) {
+    const allowedRoles = to.meta.roles as UserRole[] | undefined
+    if (allowedRoles && !allowedRoles.includes(authStore.currentUser!.role as UserRole)) {
       return '/access-denied'
     }
 
