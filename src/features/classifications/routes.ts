@@ -1,6 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-import { USER_ROLES } from '@/core/auth/role-config'
+import { USER_ROLES } from '@/core/auth/user-roles'
 
 export const CLASSIFICATION_ROUTE_NAMES = {
   WORKSPACE: 'classification-workspace',

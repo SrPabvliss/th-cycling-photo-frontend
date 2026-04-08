@@ -4,14 +4,9 @@ import { RETOUCH_PATH } from '@/features/retouch/routes'
 import { BUYERS_PATH } from '@/features/buyers/routes'
 import { OPERATOR_PATH } from '@/features/operator/routes'
 import { LANDING_PATH } from '@/features/landing/routes'
+import { USER_ROLES, type UserRole } from './user-roles'
 
-export type UserRole = 'admin' | 'operator' | 'customer'
-
-export const USER_ROLES = {
-  ADMIN: 'admin',
-  OPERATOR: 'operator',
-  CUSTOMER: 'customer',
-} as const satisfies Record<string, UserRole>
+export { USER_ROLES, type UserRole } from './user-roles'
 
 export interface INavLink {
   label: string
