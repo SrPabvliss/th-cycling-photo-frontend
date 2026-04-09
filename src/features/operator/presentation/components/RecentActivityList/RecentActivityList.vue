@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { NIcon } from 'naive-ui'
-import { CheckmarkCircle, ImagesOutline } from '@vicons/ionicons5'
+import { NFlex, NIcon } from 'naive-ui'
+import { CheckmarkCircle, ImagesOutline, TimeOutline } from '@vicons/ionicons5'
 
 import { formatRelativeTime } from '@/shared/utils/date.utils'
 import type { IRecentActivity } from '../../../types/responses/operator-dashboard.response'
@@ -12,11 +12,19 @@ defineProps<{
 
 <template>
   <div class="recent-activity">
-    <div class="recent-activity__header">
-      <h3 class="recent-activity__title">Actividad Reciente</h3>
-    </div>
-
-    <div v-if="activities.length === 0" class="recent-activity__empty">Sin actividad reciente</div>
+    <NFlex
+      v-if="activities.length === 0"
+      vertical
+      align="center"
+      :size="8"
+      class="recent-activity__empty"
+    >
+      <NIcon :component="TimeOutline" :size="28" color="var(--tt-neutral-light)" />
+      <span class="recent-activity__empty-text">Sin actividad reciente</span>
+      <span class="recent-activity__empty-hint">
+        La actividad aparecerá aquí cuando clasifiques o retoques fotos
+      </span>
+    </NFlex>
 
     <div v-else class="recent-activity__list">
       <div v-for="(activity, index) in activities" :key="index" class="recent-activity__item">
