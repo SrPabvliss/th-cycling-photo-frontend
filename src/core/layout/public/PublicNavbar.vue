@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useAuth } from '@/features/auth/composables/use-auth'
+import { getHomePath } from '@/core/auth/role-config'
 import { useCartQuery } from '@/features/cart/composables/queries/use-cart'
-import { EVENTS_PATH } from '@/features/events/routes'
 import CartIcon from '@/features/cart/presentation/components/CartIcon/CartIcon.vue'
 import CartDrawer from '@/features/cart/presentation/components/CartDrawer/CartDrawer.vue'
 import TitanLogo from './TitanLogo.vue'
 
 const router = useRouter()
-const { isAuthenticated, logout } = useAuth()
+const { isAuthenticated, currentUser, logout } = useAuth()
+
+const panelPath = computed(() => getHomePath(currentUser.value?.role ?? 'customer'))
 
 // Initialize cart query to keep store in sync
 useCartQuery()
@@ -39,7 +41,7 @@ async function handleLogout() {
           {{ link.label }}
         </a>
         <template v-if="isAuthenticated">
-          <RouterLink :to="EVENTS_PATH" class="public-navbar-link public-navbar-link--accent">
+          <RouterLink :to="panelPath" class="public-navbar-link public-navbar-link--accent">
             Ir al panel
           </RouterLink>
           <a class="public-navbar-link" href="#" @click.prevent="handleLogout"> Cerrar sesion </a>

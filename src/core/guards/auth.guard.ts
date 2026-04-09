@@ -4,6 +4,7 @@ import { API_ROUTES } from '@/core/api/api-routes'
 import { getHomePath, type UserRole } from '@/core/auth/role-config'
 import { httpClient } from '@/core/http/axios-client'
 import { toCurrentUser } from '@/features/auth/mappers/current-user.mapper'
+import { STANDALONE_PATHS } from '@/core/views/standalone-routes'
 import { AUTH_PATH, REGISTER_PATH } from '@/features/auth/routes'
 import { useAuthStore } from '@/features/auth/stores/auth.store'
 import type { IApiCurrentUser } from '@/features/auth/types/responses/current-user.response'
@@ -52,7 +53,7 @@ export function registerAuthGuard(router: Router): void {
     // Role check
     const allowedRoles = to.meta.roles as UserRole[] | undefined
     if (allowedRoles && !allowedRoles.includes(authStore.currentUser!.role as UserRole)) {
-      return '/access-denied'
+      return STANDALONE_PATHS.ACCESS_DENIED
     }
 
     return true
