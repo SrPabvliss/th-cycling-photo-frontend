@@ -12,8 +12,11 @@ export function useCheckout() {
 
   return useMutation({
     mutationFn: async (data: ICheckoutRequest) => {
-      const response = await httpClient.post<ICheckoutOrderResult[]>(API_ROUTES.CART.CHECKOUT, data)
-      return response.data
+      const response = await httpClient.post<{ orders: ICheckoutOrderResult[] }>(
+        API_ROUTES.CART.CHECKOUT,
+        data,
+      )
+      return response.data.orders
     },
     onSuccess: () => {
       cartStore.clear()
