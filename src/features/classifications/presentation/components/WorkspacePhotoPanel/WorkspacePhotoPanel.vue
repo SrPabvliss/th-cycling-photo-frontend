@@ -22,9 +22,10 @@ const props = defineProps<{
   previewStorageKey?: string | null
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   next: []
   prev: []
+  retouched: [photoId: string]
 }>()
 
 const message = useMessage()
@@ -84,6 +85,7 @@ async function handleFileSelected(event: Event) {
 
   try {
     await uploadRetouched.mutateAsync({ photoId: props.photo.id, file })
+    emit('retouched', props.photo.id)
     message.success('Imagen retocada subida correctamente')
   } catch {
     message.error('Error al subir la imagen retocada')

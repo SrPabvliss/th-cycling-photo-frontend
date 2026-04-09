@@ -2,8 +2,10 @@ import { watch, onUnmounted } from 'vue'
 import { useQueryClient } from '@tanstack/vue-query'
 import { useMessage } from 'naive-ui'
 
+import { USER_ROLES } from '@/core/auth/user-roles'
 import { connectSocket, disconnectSocket, getSocket } from '@/core/socket/socket-client'
 import { useAuthStore } from '@/features/auth/stores/auth.store'
+import { OPERATOR_QUERY_KEYS } from '@/features/operator/constants/query-keys'
 import { ORDER_QUERY_KEYS } from '@/features/orders/constants/query-keys'
 import { NOTIFICATION_QUERY_KEYS } from '../constants/query-keys'
 import { useNotificationStore } from '../stores/notification.store'
@@ -44,6 +46,15 @@ export function useNotificationSocket() {
       queryClient.invalidateQueries({ queryKey: ORDER_QUERY_KEYS.all() })
     }
 
+    // Invalidate operator queries when relevant events arrive
+    const role = authStore.currentUser?.role
+    if (
+      role === USER_ROLES.OPERATOR &&
+      (payload.type === 'order.paid' || payload.type === 'order.retouch_completed')
+    ) {
+      queryClient.invalidateQueries({ queryKey: OPERATOR_QUERY_KEYS.all() })
+    }
+
     // Show toast
     message.info(payload.message, { duration: 5000 })
   }
@@ -55,9 +66,9 @@ export function useNotificationSocket() {
   //   'order:delivered'  → admin sent delivery (self-action, not useful for single admin)
   const WS_EVENTS = [
     'order:created',
+    'order:paid',
     'order:retouch_completed',
     // 'preview:viewed',
-    // 'order:paid',
     // 'order:delivered',
   ] as const
 

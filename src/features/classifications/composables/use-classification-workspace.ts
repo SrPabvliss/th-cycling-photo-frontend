@@ -2,6 +2,8 @@ import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMessage } from 'naive-ui'
 
+import { USER_ROLES } from '@/core/auth/user-roles'
+import { useAuthStore } from '@/features/auth/stores/auth.store'
 import { useEventDetailQuery } from '@/features/events/composables/queries/use-event-detail'
 import { usePhotoDetailQuery } from '@/features/photos/composables/queries/use-photo-detail'
 import type { ISimilarPhoto } from '../types/responses/similar-photo.response'
@@ -15,7 +17,9 @@ import { useLabelConflict } from './use-label-conflict'
 export function useClassificationWorkspace() {
   const route = useRoute()
   const message = useMessage()
+  const authStore = useAuthStore()
   const eventId = computed(() => route.params.eventId as string)
+  const isOperator = computed(() => authStore.currentUser?.role === USER_ROLES.OPERATOR)
 
   // Classified filter
   const showOnlyUnclassified = ref(false)
@@ -145,7 +149,7 @@ export function useClassificationWorkspace() {
 
   // Derived
   const breadcrumbs = computed(() =>
-    classifyBreadcrumbs(eventId.value, event.value?.name ?? 'Cargando...'),
+    classifyBreadcrumbs(eventId.value, event.value?.name ?? 'Cargando...', isOperator.value),
   )
   const isLoading = computed(() => isEventPending.value || isLoadingPhotos.value)
 

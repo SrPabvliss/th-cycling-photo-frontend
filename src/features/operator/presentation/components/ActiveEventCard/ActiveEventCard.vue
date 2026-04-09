@@ -53,7 +53,7 @@ const emit = defineEmits<{
         <template #icon>
           <NIcon :component="PlayOutline" />
         </template>
-        Abrir Workspace
+        Trabajar Evento
       </NButton>
     </div>
   </div>
