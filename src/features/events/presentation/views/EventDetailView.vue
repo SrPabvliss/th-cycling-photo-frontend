@@ -4,8 +4,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { NButton, NCard, NEmpty, NFlex, NGrid, NGridItem, NIcon, NResult } from 'naive-ui'
 import { TimeOutline } from '@vicons/ionicons5'
 
-import CollapsibleCard from '@/shared/components/CollapsibleCard.vue'
-
 import { PHOTO_ROUTE_NAMES } from '@/features/photos/routes'
 import { usePhotosGalleryQuery } from '@/features/photos/composables/queries/use-photos-gallery'
 import PhotoCard from '@/features/photos/presentation/components/PhotoCard/PhotoCard.vue'
@@ -17,6 +15,7 @@ import EventDetailSkeleton from '../components/EventDetailSkeleton/EventDetailSk
 import EventCoverCard from '../components/EventCoverCard/EventCoverCard.vue'
 import EventInfoCard from '../components/EventInfoCard/EventInfoCard.vue'
 import EventQuickSearch from '../components/EventQuickSearch/EventQuickSearch.vue'
+import EventOperatorCard from '../components/EventOperatorCard/EventOperatorCard.vue'
 import EventQuickActions from '../components/EventQuickActions/EventQuickActions.vue'
 import PhotoCategoryManager from '@/features/photo-categories/presentation/components/PhotoCategoryManager/PhotoCategoryManager.vue'
 
@@ -110,15 +109,7 @@ function navigateToGallery() {
             <PhotoCategoryManager :event-id="id" />
             <EventCoverCard :event="event" :event-id="id" />
 
-            <CollapsibleCard
-              title="Clasificador Asignado"
-              subtitle="Persona encargada del retoque"
-              :default-expanded="false"
-            >
-              <NFlex vertical align="center" :size="8" style="padding: 16px 0">
-                <span class="placeholder-text">Próximamente</span>
-              </NFlex>
-            </CollapsibleCard>
+            <EventOperatorCard :event-id="id" />
           </NFlex>
         </div>
       </template>

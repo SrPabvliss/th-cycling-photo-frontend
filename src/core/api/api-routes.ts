@@ -1,3 +1,4 @@
+const USERS_BASE = '/users'
 const PUBLIC_EVENTS_BASE = '/public/events'
 const PREVIEW_PUBLIC_BASE = '/preview'
 const AUTH_BASE = '/auth'
@@ -36,6 +37,8 @@ export const API_ROUTES = {
     DELETE: (id: string) => `${EVENTS_BASE}/${id}`,
     STATS: `${EVENTS_BASE}/stats`,
     FEATURED: (id: string) => `${EVENTS_BASE}/${id}/featured`,
+    OPERATORS: (id: string) => `${EVENTS_BASE}/${id}/operators`,
+    OPERATOR: (eventId: string, userId: string) => `${EVENTS_BASE}/${eventId}/operators/${userId}`,
     ASSETS: {
       GET_ALL: (id: string) => `${EVENTS_BASE}/${id}/assets`,
       PRESIGNED_URL: (id: string, assetType: string) =>
@@ -144,6 +147,10 @@ export const API_ROUTES = {
   COUNTRIES: {
     GET_ALL: COUNTRIES_BASE,
     PROVINCES: (countryId: number) => `${COUNTRIES_BASE}/${countryId}/provinces`,
+  },
+  USERS: {
+    BASE: USERS_BASE,
+    GET_ALL: USERS_BASE,
   },
   OPERATOR: {
     BASE: OPERATOR_BASE,
