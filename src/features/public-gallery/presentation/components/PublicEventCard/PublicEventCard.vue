@@ -4,6 +4,7 @@ import { NIcon } from 'naive-ui'
 import { CameraOutline, LocationOutline, CalendarOutline, Star } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
+import { getAssetTransformUrl } from '@/shared/utils/cdn.utils'
 import type { IPublicEventListItem } from '../../../types/responses/public-event-list.response'
 
 const props = defineProps<{
@@ -15,7 +16,10 @@ const emit = defineEmits<{
   click: [eventId: string]
 }>()
 
-const coverUrl = computed(() => props.event.assets.find((a) => a.assetType === 'cover_image')?.url)
+const coverUrl = computed(() => {
+  const cover = props.event.assets.find((a) => a.assetType === 'cover_image')
+  return cover ? getAssetTransformUrl(cover.publicSlug, 'cover_small') : null
+})
 
 const location = computed(() => {
   const parts = [props.event.cantonName, props.event.provinceName].filter(Boolean)

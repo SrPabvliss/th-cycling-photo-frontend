@@ -85,7 +85,7 @@ const {
         v-if="photo"
         :current-photo="{
           id: currentPhotoId,
-          storageKey: photo.storageKey,
+          publicSlug: photo.publicSlug,
           filename: photo.filename,
         }"
         :group-photos="workingGroup.groupPhotos.value"

@@ -11,6 +11,7 @@ export interface IApiPhotoDetail {
   eventId: string
   filename: string
   storageKey: string
+  publicSlug: string
   fileSize: number
   mimeType: string
   width: number | null
@@ -33,6 +34,7 @@ export interface IPhotoDetail {
   eventId: string
   filename: string
   storageKey: string
+  publicSlug: string
   imageUrl: string
   fileSize: number
   mimeType: string

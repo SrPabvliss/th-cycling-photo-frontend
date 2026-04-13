@@ -12,6 +12,7 @@ export interface IApiEventDetail {
   provinceId: number | null
   cantonId: number | null
   coverImageUrl: string | null
+  coverImageSlug: string | null
   coverImageSource: CoverImageSource | null
   status: string
   isFeatured: boolean
@@ -34,6 +35,7 @@ export interface IEventDetail {
   provinceId: number | null
   cantonId: number | null
   coverImageUrl: string | null
+  coverImageSlug: string | null
   coverImageSource: CoverImageSource | null
   status: EventStatus
   isFeatured: boolean

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { NButton, NFlex, NIcon, NSpin } from 'naive-ui'
 
 import CollapsibleCard from '@/shared/components/CollapsibleCard.vue'
@@ -7,6 +7,7 @@ import { CameraOutline, TrashOutline, ImageOutline } from '@vicons/ionicons5'
 
 import { useUploadAsset } from '@/features/event-assets/composables/mutations/use-upload-asset'
 import { useRemoveAsset } from '@/features/event-assets/composables/mutations/use-remove-asset'
+import { getAssetTransformUrl } from '@/shared/utils/cdn.utils'
 import type { IEventDetail } from '../../../types/responses/event-detail.response'
 
 const ACCEPTED_TYPES = 'image/jpeg,image/png,image/webp'
@@ -20,6 +21,13 @@ const fileInput = ref<HTMLInputElement | null>(null)
 
 const { mutate: uploadAsset, isPending: isUploading } = useUploadAsset(props.eventId)
 const { mutate: removeAsset, isPending: isRemoving } = useRemoveAsset(props.eventId)
+
+/** Cover hero variant (1200px/q85) — larger on the detail page. */
+const coverUrl = computed(() =>
+  props.event.coverImageSlug
+    ? getAssetTransformUrl(props.event.coverImageSlug, 'cover_large')
+    : null,
+)
 
 function triggerFileInput() {
   fileInput.value?.click()
@@ -41,8 +49,8 @@ function handleFileChange(e: Event) {
   >
     <div class="cover-card__preview">
       <NSpin :show="isUploading || isRemoving">
-        <div v-if="event.coverImageUrl" class="cover-card__image-wrapper">
-          <img :src="event.coverImageUrl" :alt="event.name" class="cover-card__image" />
+        <div v-if="coverUrl" class="cover-card__image-wrapper">
+          <img :src="coverUrl" :alt="event.name" class="cover-card__image" />
         </div>
         <NFlex
           v-else
@@ -64,7 +72,7 @@ function handleFileChange(e: Event) {
         {{ event.coverImageUrl ? 'Cambiar' : 'Subir imagen' }}
       </NButton>
       <NButton
-        v-if="event.coverImageUrl && event.coverImageSource === 'manual'"
+        v-if="event.coverImageUrl"
         size="small"
         :loading="isRemoving"
         :disabled="isUploading"

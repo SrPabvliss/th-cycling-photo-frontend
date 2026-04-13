@@ -13,6 +13,7 @@ import {
 import { formatDate } from '@/shared/utils/date.utils'
 import { formatFileSize } from '@/shared/utils/format.utils'
 import { formatLocation } from '@/shared/utils/location.utils'
+import { getAssetTransformUrl } from '@/shared/utils/cdn.utils'
 import { EVENT_STATUS_CONFIG } from '../../../constants/status-config'
 import type { IEventListItem } from '../../../types/responses/event-list.response'
 
@@ -26,6 +27,13 @@ const emit = defineEmits<{
 }>()
 
 const displayLocation = computed(() => formatLocation(props.event))
+
+/** Cover card variant (400px/q80) — keeps memory/bandwidth low in lists. */
+const coverUrl = computed(() =>
+  props.event.coverImageSlug
+    ? getAssetTransformUrl(props.event.coverImageSlug, 'cover_small')
+    : null,
+)
 </script>
 
 <template>
@@ -37,8 +45,8 @@ const displayLocation = computed(() => formatLocation(props.event))
     <!-- Cover -->
     <div class="event-card__cover">
       <img
-        v-if="event.coverImageUrl"
-        :src="event.coverImageUrl"
+        v-if="coverUrl"
+        :src="coverUrl"
         :alt="event.name"
         class="event-card__cover-image"
         loading="lazy"
@@ -62,6 +70,14 @@ const displayLocation = computed(() => formatLocation(props.event))
       <!-- Status badge -->
       <div class="event-card__badge" :class="`event-card__badge--${event.status}`">
         {{ EVENT_STATUS_CONFIG[event.status].label }}
+      </div>
+
+      <!-- Not-public warning: event is active but has no cover → hidden from buyers -->
+      <div
+        v-if="event.status === 'active' && !event.coverImageUrl"
+        class="event-card__badge event-card__badge--draft"
+      >
+        Sin portada — no visible al público
       </div>
 
       <!-- Featured badge -->

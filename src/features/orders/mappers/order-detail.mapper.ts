@@ -1,4 +1,4 @@
-import { getPhotoUrl, getTransformedPhotoUrl } from '@/shared/utils/cdn.utils'
+import { getInternalTransformUrl, getInternalUrl } from '@/shared/utils/cdn.utils'
 import type {
   DeliveryLinkStatus,
   IApiOrderDetail,
@@ -14,8 +14,8 @@ function toOrderDetailPhoto(api: IApiOrderDetailPhoto): IOrderDetailPhoto {
   return {
     id: api.id,
     filename: api.filename,
-    thumbnailUrl: getTransformedPhotoUrl(api.storageKey, 'thumbnail'),
-    fullUrl: getPhotoUrl(api.storageKey),
+    thumbnailUrl: getInternalTransformUrl(api.publicSlug, 'thumbnail'),
+    fullUrl: getInternalUrl(api.publicSlug),
   }
 }
 

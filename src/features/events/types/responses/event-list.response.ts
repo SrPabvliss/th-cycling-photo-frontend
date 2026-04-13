@@ -1,6 +1,7 @@
 export type EventStatus = 'active' | 'archived'
 
-export type CoverImageSource = 'manual' | 'auto'
+/** Only 'manual' exists now — the photo-as-cover fallback ('auto') was removed. */
+export type CoverImageSource = 'manual'
 
 /** API projection from GET /events — already camelCase from backend */
 export interface IApiEventListItem {
@@ -12,6 +13,7 @@ export interface IApiEventListItem {
   provinceName: string | null
   cantonName: string | null
   coverImageUrl: string | null
+  coverImageSlug: string | null
   coverImageSource: CoverImageSource | null
   status: string
   isFeatured: boolean
@@ -30,6 +32,7 @@ export interface IEventListItem {
   provinceName: string | null
   cantonName: string | null
   coverImageUrl: string | null
+  coverImageSlug: string | null
   coverImageSource: CoverImageSource | null
   status: EventStatus
   isFeatured: boolean

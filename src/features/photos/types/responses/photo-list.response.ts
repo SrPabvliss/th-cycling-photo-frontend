@@ -6,6 +6,7 @@ export interface IApiPhotoListItem {
   eventId: string
   filename: string
   storageKey: string
+  publicSlug: string
   status: string
   width: number | null
   height: number | null

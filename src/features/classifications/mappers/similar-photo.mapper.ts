@@ -1,4 +1,4 @@
-import { getTransformedPhotoUrl } from '@/shared/utils/cdn.utils'
+import { getInternalTransformUrl } from '@/shared/utils/cdn.utils'
 import type { IApiSimilarPhoto, ISimilarPhoto } from '../types/responses/similar-photo.response'
 
 export function toSimilarPhoto(api: IApiSimilarPhoto): ISimilarPhoto {
@@ -6,9 +6,10 @@ export function toSimilarPhoto(api: IApiSimilarPhoto): ISimilarPhoto {
     id: api.id,
     filename: api.filename,
     storageKey: api.storageKey,
+    publicSlug: api.publicSlug,
     similarity: api.similarity,
     hasClassifications: api.hasClassifications,
-    thumbnailUrl: getTransformedPhotoUrl(api.storageKey, 'thumbnail'),
+    thumbnailUrl: getInternalTransformUrl(api.publicSlug, 'thumbnail'),
   }
 }
 
