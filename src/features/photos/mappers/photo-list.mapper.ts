@@ -1,4 +1,4 @@
-import { getTransformedPhotoUrl } from '@/shared/utils/cdn.utils'
+import { getInternalTransformUrl } from '@/shared/utils/cdn.utils'
 
 import type {
   IApiPhotoListItem,
@@ -11,7 +11,7 @@ export function toPhotoListItem(api: IApiPhotoListItem): IPhotoListItem {
     id: api.id,
     eventId: api.eventId,
     filename: api.filename,
-    thumbnailUrl: getTransformedPhotoUrl(api.storageKey, 'thumbnail'),
+    thumbnailUrl: getInternalTransformUrl(api.publicSlug, 'thumbnail'),
     status: api.status as PhotoStatus,
     width: api.width,
     height: api.height,

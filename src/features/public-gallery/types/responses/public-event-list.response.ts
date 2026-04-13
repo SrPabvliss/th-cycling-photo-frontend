@@ -14,6 +14,7 @@ export interface IApiPublicEventListItem {
 export interface IApiPublicEventAsset {
   assetType: string
   url: string
+  publicSlug: string
 }
 
 /** Frontend domain type */
@@ -32,4 +33,5 @@ export interface IPublicEventListItem {
 export interface IPublicEventAsset {
   assetType: string
   url: string
+  publicSlug: string
 }

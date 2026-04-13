@@ -6,6 +6,7 @@ import { ArrowBack } from '@vicons/ionicons5'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { formatDate } from '@/shared/utils/date.utils'
+import { getAssetTransformUrl } from '@/shared/utils/cdn.utils'
 import { useCartStore } from '@/features/cart/stores/cart.store'
 import { useAddToCart } from '@/features/cart/composables/mutations/use-add-to-cart'
 import { useRemoveFromCart } from '@/features/cart/composables/mutations/use-remove-from-cart'
@@ -73,8 +74,10 @@ function handleLoadMore() {
 
 // --- Hero image ---
 const heroUrl = computed(() => {
-  const hero = event.value?.assets.find((a) => a.assetType === 'hero_image')
-  return hero?.url ?? event.value?.assets.find((a) => a.assetType === 'cover_image')?.url
+  const hero =
+    event.value?.assets.find((a) => a.assetType === 'hero_image') ??
+    event.value?.assets.find((a) => a.assetType === 'cover_image')
+  return hero ? getAssetTransformUrl(hero.publicSlug, 'cover_large') : null
 })
 </script>
 

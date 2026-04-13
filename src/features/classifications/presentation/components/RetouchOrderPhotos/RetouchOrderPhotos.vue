@@ -2,7 +2,7 @@
 import { NIcon } from 'naive-ui'
 import { CheckmarkCircle } from '@vicons/ionicons5'
 
-import { getTransformedPhotoUrl } from '@/shared/utils/cdn.utils'
+import { getInternalTransformUrl } from '@/shared/utils/cdn.utils'
 import type { IRetouchQueueItem } from '@/features/operator/types/responses/retouch-queue.response'
 
 defineProps<{
@@ -37,7 +37,7 @@ const emit = defineEmits<{
         @click="emit('select', photo.photoId)"
       >
         <img
-          :src="getTransformedPhotoUrl(photo.storageKey, 'thumbnail')"
+          :src="getInternalTransformUrl(photo.publicSlug, 'thumbnail')"
           alt=""
           loading="lazy"
           class="retouch-photos__thumb"

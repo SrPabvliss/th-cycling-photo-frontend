@@ -16,6 +16,7 @@ export function toEventListItem(api: IApiEventListItem): IEventListItem {
     provinceName: api.provinceName,
     cantonName: api.cantonName,
     coverImageUrl: api.coverImageUrl,
+    coverImageSlug: api.coverImageSlug,
     coverImageSource: api.coverImageSource as CoverImageSource | null,
     status: api.status as EventStatus,
     isFeatured: api.isFeatured,

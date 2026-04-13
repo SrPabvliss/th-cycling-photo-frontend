@@ -13,6 +13,7 @@ function toCartGroup(api: IApiCartGroup): ICartGroup {
     eventName: api.eventName,
     eventDate: new Date(api.eventDate),
     coverUrl: api.coverUrl,
+    coverSlug: api.coverSlug,
     photos: api.photos,
   }
 }

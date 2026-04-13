@@ -10,6 +10,7 @@ export interface IApiCartGroup {
   eventName: string
   eventDate: string
   coverUrl: string | null
+  coverSlug: string | null
   photos: IApiCartPhoto[]
 }
 
@@ -25,5 +26,6 @@ export interface ICartGroup {
   eventName: string
   eventDate: Date
   coverUrl: string | null
+  coverSlug: string | null
   photos: ICartPhoto[]
 }

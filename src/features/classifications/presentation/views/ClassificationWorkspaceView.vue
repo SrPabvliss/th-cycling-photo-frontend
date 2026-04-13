@@ -17,4 +17,7 @@ const eventId = computed(() => route.params.eventId as string)
   </div>
 </template>
 
-<style scoped src="./classification-workspace-view.css" />
+<!-- Unscoped: these .workspace__* classes are consumed by child component
+     fragments (RetouchModeWorkspace, ClassificationModeWorkspace) which
+     Vue 3 scoped CSS cannot reach. The BEM prefix avoids collisions. -->
+<style src="./classification-workspace-view.css" />

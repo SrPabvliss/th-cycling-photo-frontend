@@ -3,10 +3,10 @@ import { NButton, NIcon } from 'naive-ui'
 import { CloseOutline } from '@vicons/ionicons5'
 
 import type { ISimilarPhoto } from '../../../types/responses/similar-photo.response'
-import { getTransformedPhotoUrl } from '@/shared/utils/cdn.utils'
+import { getInternalTransformUrl } from '@/shared/utils/cdn.utils'
 
 defineProps<{
-  currentPhoto: { id: string; storageKey: string; filename: string }
+  currentPhoto: { id: string; publicSlug: string; filename: string }
   groupPhotos: ISimilarPhoto[]
   previewPhotoId: string | null
 }>()
@@ -16,8 +16,8 @@ const emit = defineEmits<{
   remove: [photoId: string]
 }>()
 
-function thumbnailUrl(storageKey: string) {
-  return getTransformedPhotoUrl(storageKey, 'thumbnail')
+function thumbnailUrl(slug: string) {
+  return getInternalTransformUrl(slug, 'thumbnail')
 }
 </script>
 
@@ -32,7 +32,7 @@ function thumbnailUrl(storageKey: string) {
         @click="emit('preview', null)"
       >
         <img
-          :src="thumbnailUrl(currentPhoto.storageKey)"
+          :src="thumbnailUrl(currentPhoto.publicSlug)"
           :alt="currentPhoto.filename"
           class="working-group-gallery__thumb"
         />

@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { NButton, NModal, NTag } from 'naive-ui'
 
 import type { ISimilarPhoto } from '../../../types/responses/similar-photo.response'
-import { getTransformedPhotoUrl } from '@/shared/utils/cdn.utils'
+import { getInternalTransformUrl } from '@/shared/utils/cdn.utils'
 
 const props = defineProps<{
   show: boolean
@@ -18,7 +18,7 @@ defineEmits<{
 
 const imageUrl = computed(() => {
   if (!props.photo) return ''
-  return getTransformedPhotoUrl(props.photo.storageKey, 'workspace')
+  return getInternalTransformUrl(props.photo.publicSlug, 'workspace')
 })
 
 const similarityPercent = computed(() => {

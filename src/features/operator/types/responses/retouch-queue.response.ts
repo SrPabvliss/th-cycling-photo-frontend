@@ -2,6 +2,7 @@
 export interface IApiRetouchQueueItem {
   photoId: string
   storageKey: string
+  publicSlug: string
   isRetouched: boolean
   retouchedStorageKey: string | null
 }
@@ -23,6 +24,7 @@ export interface IApiRetouchQueue {
 export interface IRetouchQueueItem {
   photoId: string
   storageKey: string
+  publicSlug: string
   isRetouched: boolean
   retouchedStorageKey: string | null
 }

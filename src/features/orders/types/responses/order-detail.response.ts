@@ -12,6 +12,7 @@ export interface IApiOrderDetailPhoto {
   id: string
   filename: string
   storageKey: string
+  publicSlug: string
 }
 
 export interface IApiOrderDetailDeliveryLink {
