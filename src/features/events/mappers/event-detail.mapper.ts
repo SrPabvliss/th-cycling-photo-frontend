@@ -8,7 +8,6 @@ export function toEventDetail(api: IApiEventDetail): IEventDetail {
     name: api.name,
     description: api.description,
     date: parseDateOnly(api.date),
-    location: api.location,
     provinceName: api.provinceName,
     cantonName: api.cantonName,
     provinceId: api.provinceId,

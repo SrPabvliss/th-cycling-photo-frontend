@@ -6,7 +6,6 @@ export interface IApiEventDetail {
   name: string
   description: string | null
   date: string
-  location: string | null
   provinceName: string | null
   cantonName: string | null
   provinceId: number | null
@@ -29,7 +28,6 @@ export interface IEventDetail {
   name: string
   description: string | null
   date: Date
-  location: string | null
   provinceName: string | null
   cantonName: string | null
   provinceId: number | null

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { NCard, NFlex, NIcon, NTag } from 'naive-ui'
-import { CalendarOutline, CameraOutline, LocationOutline } from '@vicons/ionicons5'
+import { CalendarOutline, CameraOutline } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
 import { EVENT_STATUS_CONFIG } from '@/features/events/constants/status-config'
@@ -25,10 +25,6 @@ defineProps<{
           <NFlex :size="4" align="center">
             <NIcon :component="CalendarOutline" :size="13" />
             <span>{{ formatDate(event.date) }}</span>
-          </NFlex>
-          <NFlex v-if="event.location" :size="4" align="center">
-            <NIcon :component="LocationOutline" :size="13" />
-            <span>{{ event.location }}</span>
           </NFlex>
           <NFlex :size="4" align="center">
             <NIcon :component="CameraOutline" :size="13" />

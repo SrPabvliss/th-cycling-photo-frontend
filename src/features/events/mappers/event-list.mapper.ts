@@ -12,7 +12,6 @@ export function toEventListItem(api: IApiEventListItem): IEventListItem {
     name: api.name,
     description: api.description,
     date: parseDateOnly(api.date),
-    location: api.location,
     provinceName: api.provinceName,
     cantonName: api.cantonName,
     coverImageUrl: api.coverImageUrl,

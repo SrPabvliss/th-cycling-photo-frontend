@@ -9,7 +9,6 @@ export interface IApiEventListItem {
   name: string
   description: string | null
   date: string
-  location: string | null
   provinceName: string | null
   cantonName: string | null
   coverImageUrl: string | null
@@ -28,7 +27,6 @@ export interface IEventListItem {
   name: string
   description: string | null
   date: Date
-  location: string | null
   provinceName: string | null
   cantonName: string | null
   coverImageUrl: string | null
