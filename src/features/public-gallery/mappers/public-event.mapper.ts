@@ -10,25 +10,23 @@ import type {
 
 export function toPublicEventListItem(api: IApiPublicEventListItem): IPublicEventListItem {
   return {
-    id: api.id,
+    slug: api.slug,
     name: api.name,
     date: parseDateOnly(api.date),
-    location: api.location,
     provinceName: api.provinceName,
     cantonName: api.cantonName,
     isFeatured: api.isFeatured,
     photoCount: api.photoCount,
-    assets: api.assets,
+    coverSlug: api.coverSlug,
   }
 }
 
 export function toPublicEventDetail(api: IApiPublicEventDetail): IPublicEventDetail {
   return {
-    id: api.id,
+    slug: api.slug,
     name: api.name,
     description: api.description,
     date: parseDateOnly(api.date),
-    location: api.location,
     provinceName: api.provinceName,
     cantonName: api.cantonName,
     isFeatured: api.isFeatured,

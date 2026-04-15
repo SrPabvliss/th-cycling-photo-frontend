@@ -1,12 +1,11 @@
 import type { IApiPublicEventAsset, IPublicEventAsset } from './public-event-list.response'
 
-/** API projection from GET /public/events/:eventId */
+/** API projection from GET /public/events/:slug */
 export interface IApiPublicEventDetail {
-  id: string
+  slug: string
   name: string
   description: string | null
   date: string
-  location: string | null
   provinceName: string | null
   cantonName: string | null
   isFeatured: boolean
@@ -22,11 +21,10 @@ export interface IApiPublicPhotoCategory {
 
 /** Frontend domain type */
 export interface IPublicEventDetail {
-  id: string
+  slug: string
   name: string
   description: string | null
   date: Date
-  location: string | null
   provinceName: string | null
   cantonName: string | null
   isFeatured: boolean

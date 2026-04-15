@@ -1,33 +1,32 @@
 /** API projection from GET /public/events */
 export interface IApiPublicEventListItem {
-  id: string
+  slug: string
   name: string
   date: string
-  location: string | null
   provinceName: string | null
   cantonName: string | null
   isFeatured: boolean
   photoCount: number
-  assets: IApiPublicEventAsset[]
-}
-
-export interface IApiPublicEventAsset {
-  assetType: string
-  url: string
-  publicSlug: string
+  coverSlug: string | null
 }
 
 /** Frontend domain type */
 export interface IPublicEventListItem {
-  id: string
+  slug: string
   name: string
   date: Date
-  location: string | null
   provinceName: string | null
   cantonName: string | null
   isFeatured: boolean
   photoCount: number
-  assets: IPublicEventAsset[]
+  coverSlug: string | null
+}
+
+/** Used by detail projection — full asset info */
+export interface IApiPublicEventAsset {
+  assetType: string
+  url: string
+  publicSlug: string
 }
 
 export interface IPublicEventAsset {

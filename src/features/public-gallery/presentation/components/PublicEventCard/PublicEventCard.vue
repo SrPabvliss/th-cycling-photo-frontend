@@ -13,17 +13,16 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  click: [eventId: string]
+  click: [slug: string]
 }>()
 
-const coverUrl = computed(() => {
-  const cover = props.event.assets.find((a) => a.assetType === 'cover_image')
-  return cover ? getAssetTransformUrl(cover.publicSlug, 'cover_small') : null
-})
+const coverUrl = computed(() =>
+  props.event.coverSlug ? getAssetTransformUrl(props.event.coverSlug, 'cover_small') : null,
+)
 
 const location = computed(() => {
   const parts = [props.event.cantonName, props.event.provinceName].filter(Boolean)
-  return parts.join(', ') || props.event.location
+  return parts.join(', ') || null
 })
 </script>
 
@@ -31,7 +30,7 @@ const location = computed(() => {
   <article
     class="pub-event-card"
     :class="{ 'pub-event-card--featured': featured }"
-    @click="emit('click', event.id)"
+    @click="emit('click', event.slug)"
   >
     <div class="pub-event-card__cover">
       <img v-if="coverUrl" :src="coverUrl" :alt="event.name" loading="lazy" />

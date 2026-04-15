@@ -15,7 +15,7 @@ export const publicGalleryRoutes: RouteRecordRaw[] = [
     meta: { public: true },
   },
   {
-    path: `${PUBLIC_GALLERY_PATH}/:eventId`,
+    path: `${PUBLIC_GALLERY_PATH}/:slug`,
     name: PUBLIC_GALLERY_ROUTE_NAMES.EVENT_GALLERY,
     component: () => import('./presentation/views/PublicEventGalleryView.vue'),
     meta: { public: true },

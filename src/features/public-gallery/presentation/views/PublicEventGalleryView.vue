@@ -18,9 +18,9 @@ import PhotoLightbox from '../components/PhotoLightbox/PhotoLightbox.vue'
 
 const route = useRoute()
 const router = useRouter()
-const eventId = computed(() => route.params.eventId as string)
+const slug = computed(() => route.params.slug as string)
 
-const { data: event, isPending: isEventPending } = usePublicEventDetailQuery(eventId)
+const { data: event, isPending: isEventPending } = usePublicEventDetailQuery(slug)
 
 const activeCategoryId = ref<number | null>(null)
 
@@ -30,7 +30,7 @@ const {
   fetchNextPage,
   hasNextPage,
   isFetchingNextPage,
-} = usePublicEventPhotosInfinite(eventId, activeCategoryId)
+} = usePublicEventPhotosInfinite(slug, activeCategoryId)
 
 const allPhotos = computed(() => infiniteData.value?.pages.flatMap((p) => p.items) ?? [])
 
@@ -101,7 +101,9 @@ const heroUrl = computed(() => {
             <h1 class="gallery-hero__title">{{ event.name }}</h1>
             <p class="gallery-hero__meta">
               {{ formatDate(event.date) }}
-              <span v-if="event.location"> · {{ event.location }}</span>
+              <span v-if="event.cantonName || event.provinceName">
+                · {{ [event.cantonName, event.provinceName].filter(Boolean).join(', ') }}
+              </span>
               · {{ event.photoCount }} fotos
             </p>
           </div>

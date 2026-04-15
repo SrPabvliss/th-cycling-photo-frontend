@@ -97,9 +97,9 @@ export const API_ROUTES = {
   PUBLIC_EVENTS: {
     BASE: PUBLIC_EVENTS_BASE,
     GET_ALL: PUBLIC_EVENTS_BASE,
-    GET_BY_ID: (id: string) => `${PUBLIC_EVENTS_BASE}/${id}`,
-    PHOTOS: (id: string) => `${PUBLIC_EVENTS_BASE}/${id}/photos`,
-    CREATE_ORDER: (id: string) => `${PUBLIC_EVENTS_BASE}/${id}/orders`,
+    GET_BY_SLUG: (slug: string) => `${PUBLIC_EVENTS_BASE}/${slug}`,
+    PHOTOS: (slug: string) => `${PUBLIC_EVENTS_BASE}/${slug}/photos`,
+    CREATE_ORDER: (slug: string) => `${PUBLIC_EVENTS_BASE}/${slug}/orders`,
   },
   PREVIEW_PUBLIC: {
     BASE: PREVIEW_PUBLIC_BASE,

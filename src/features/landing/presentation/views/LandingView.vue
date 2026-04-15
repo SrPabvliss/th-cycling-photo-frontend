@@ -16,8 +16,8 @@ const { data: events } = usePublicEventsQuery()
 const featuredEvent = computed(() => events.value?.find((e) => e.isFeatured))
 const recentEvents = computed(() => events.value?.filter((e) => !e.isFeatured).slice(0, 3) ?? [])
 
-function handleEventClick(eventId: string) {
-  router.push({ name: PUBLIC_GALLERY_ROUTE_NAMES.EVENT_GALLERY, params: { eventId } })
+function handleEventClick(slug: string) {
+  router.push({ name: PUBLIC_GALLERY_ROUTE_NAMES.EVENT_GALLERY, params: { slug } })
 }
 </script>
 
@@ -65,7 +65,7 @@ function handleEventClick(eventId: string) {
         <div class="events-grid">
           <PublicEventCard
             v-for="event in recentEvents"
-            :key="event.id"
+            :key="event.slug"
             :event="event"
             @click="handleEventClick"
           />

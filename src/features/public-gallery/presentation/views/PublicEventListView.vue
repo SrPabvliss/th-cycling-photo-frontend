@@ -14,8 +14,8 @@ const { data: events, isPending } = usePublicEventsQuery()
 const featuredEvent = computed(() => events.value?.find((e) => e.isFeatured))
 const otherEvents = computed(() => events.value?.filter((e) => !e.isFeatured) ?? [])
 
-function handleEventClick(eventId: string) {
-  router.push({ name: PUBLIC_GALLERY_ROUTE_NAMES.EVENT_GALLERY, params: { eventId } })
+function handleEventClick(slug: string) {
+  router.push({ name: PUBLIC_GALLERY_ROUTE_NAMES.EVENT_GALLERY, params: { slug } })
 }
 </script>
 
@@ -45,7 +45,7 @@ function handleEventClick(eventId: string) {
         <div v-if="otherEvents.length > 0" class="pel__grid">
           <PublicEventCard
             v-for="event in otherEvents"
-            :key="event.id"
+            :key="event.slug"
             :event="event"
             @click="handleEventClick"
           />
