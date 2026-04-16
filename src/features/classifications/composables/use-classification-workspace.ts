@@ -56,13 +56,13 @@ export function useClassificationWorkspace() {
   // Label conflict
   const labelConflict = useLabelConflict()
 
-  // Preview: resolve storageKey for previewed photo
-  const previewStorageKey = computed(() => {
+  // Preview: resolve publicSlug for previewed photo
+  const previewPublicSlug = computed(() => {
     if (!workingGroup.previewPhotoId.value) return null
     const found = workingGroup.groupPhotos.value.find(
       (p) => p.id === workingGroup.previewPhotoId.value,
     )
-    return found?.storageKey ?? null
+    return found?.publicSlug ?? null
   })
 
   // Handlers
@@ -173,7 +173,7 @@ export function useClassificationWorkspace() {
     // Label conflict
     labelConflict,
     // Preview
-    previewStorageKey,
+    previewPublicSlug,
     previewModalPhoto,
     showPreviewModal,
     handlePreviewSimilar,

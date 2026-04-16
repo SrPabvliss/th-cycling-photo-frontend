@@ -30,7 +30,7 @@ const {
   goPrev,
   workingGroup,
   labelConflict,
-  previewStorageKey,
+  previewPublicSlug,
   previewModalPhoto,
   showPreviewModal,
   handlePreviewSimilar,
@@ -87,6 +87,7 @@ const {
           id: currentPhotoId,
           publicSlug: photo.publicSlug,
           filename: photo.filename,
+          thumbnailUrl: photo.thumbnailUrl,
         }"
         :group-photos="workingGroup.groupPhotos.value"
         :preview-photo-id="workingGroup.previewPhotoId.value"
@@ -110,7 +111,7 @@ const {
         :photo="photo"
         :has-next="hasNext"
         :has-prev="hasPrev"
-        :preview-storage-key="previewStorageKey"
+        :preview-public-slug="previewPublicSlug"
         @next="goNext"
         @prev="goPrev"
       />

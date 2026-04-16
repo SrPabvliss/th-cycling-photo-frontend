@@ -13,7 +13,7 @@ import {
 import { formatDate } from '@/shared/utils/date.utils'
 import { formatFileSize } from '@/shared/utils/format.utils'
 import { formatLocation } from '@/shared/utils/location.utils'
-import { getAssetTransformUrl } from '@/shared/utils/cdn.utils'
+import { getAssetPresetUrl } from '@/shared/utils/cdn.utils'
 import { EVENT_STATUS_CONFIG } from '../../../constants/status-config'
 import type { IEventListItem } from '../../../types/responses/event-list.response'
 
@@ -30,9 +30,7 @@ const displayLocation = computed(() => formatLocation(props.event))
 
 /** Cover card variant (400px/q80) — keeps memory/bandwidth low in lists. */
 const coverUrl = computed(() =>
-  props.event.coverImageSlug
-    ? getAssetTransformUrl(props.event.coverImageSlug, 'cover_small')
-    : null,
+  props.event.coverImageSlug ? getAssetPresetUrl(props.event.coverImageSlug, 'cover-sm') : null,
 )
 </script>
 

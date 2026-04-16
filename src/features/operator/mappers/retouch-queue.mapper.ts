@@ -12,10 +12,9 @@ function toRetouchQueueOrder(api: IApiRetouchQueueOrder): IRetouchQueueOrder {
     retouchedItems: api.retouchedItems,
     items: api.items.map((item) => ({
       photoId: item.photoId,
-      storageKey: item.storageKey,
       publicSlug: item.publicSlug,
+      thumbnailUrl: item.thumbnailUrl,
       isRetouched: item.isRetouched,
-      retouchedStorageKey: item.retouchedStorageKey,
     })),
   }
 }

@@ -13,6 +13,7 @@ import {
 } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
+import { getGalleryUrl } from '@/shared/utils/cdn.utils'
 import { useParticipantCategoriesQuery } from '@/features/classifications/composables/queries/use-participant-categories'
 import type { ICartGroup } from '../../../types/responses/cart.response'
 import type { IEventFormData } from '../../../composables/use-checkout-stepper'
@@ -52,7 +53,7 @@ const categoryOptions = computed(
 
       <div class="cf-photos">
         <div v-for="photo in group.photos" :key="photo.id" class="cf-photo-tile">
-          <img :src="photo.url" alt="" />
+          <img :src="getGalleryUrl(photo.publicSlug)" alt="" />
         </div>
       </div>
 

@@ -1,5 +1,3 @@
-import { getInternalTransformUrl } from '@/shared/utils/cdn.utils'
-
 import type {
   IApiPhotoListItem,
   IPhotoListItem,
@@ -11,7 +9,7 @@ export function toPhotoListItem(api: IApiPhotoListItem): IPhotoListItem {
     id: api.id,
     eventId: api.eventId,
     filename: api.filename,
-    thumbnailUrl: getInternalTransformUrl(api.publicSlug, 'thumbnail'),
+    thumbnailUrl: api.thumbnailUrl,
     status: api.status as PhotoStatus,
     width: api.width,
     height: api.height,

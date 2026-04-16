@@ -1,6 +1,4 @@
 import { toParticipantDetail } from '@/features/classifications/mappers/cyclist-detail.mapper'
-import { getInternalUrl } from '@/shared/utils/cdn.utils'
-
 import type { PhotoStatus } from '../types/responses/photo-list.response'
 import type { IApiPhotoDetail, IPhotoDetail } from '../types/responses/photo-detail.response'
 
@@ -9,16 +7,16 @@ export function toPhotoDetail(api: IApiPhotoDetail): IPhotoDetail {
     id: api.id,
     eventId: api.eventId,
     filename: api.filename,
-    storageKey: api.storageKey,
     publicSlug: api.publicSlug,
-    imageUrl: getInternalUrl(api.publicSlug),
+    imageUrl: api.imageUrl,
+    thumbnailUrl: api.thumbnailUrl,
     fileSize: api.fileSize,
     mimeType: api.mimeType,
     width: api.width,
     height: api.height,
     status: api.status as PhotoStatus,
     unclassifiedReason: api.unclassifiedReason,
-    retouchedImageUrl: api.retouchedStorageKey ? getInternalUrl(api.publicSlug) : null,
+    retouchedImageUrl: api.retouchedFileSize ? api.imageUrl : null,
     retouchedFileSize: api.retouchedFileSize,
     retouchedAt: api.retouchedAt ? new Date(api.retouchedAt) : null,
     classifiedAt: api.classifiedAt ? new Date(api.classifiedAt) : null,

@@ -4,7 +4,7 @@ import { NIcon } from 'naive-ui'
 import { CameraOutline, LocationOutline, CalendarOutline, Star } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
-import { getAssetTransformUrl } from '@/shared/utils/cdn.utils'
+import { getAssetPresetUrl } from '@/shared/utils/cdn.utils'
 import type { IPublicEventListItem } from '../../../types/responses/public-event-list.response'
 
 const props = defineProps<{
@@ -17,7 +17,7 @@ const emit = defineEmits<{
 }>()
 
 const coverUrl = computed(() =>
-  props.event.coverSlug ? getAssetTransformUrl(props.event.coverSlug, 'cover_small') : null,
+  props.event.coverSlug ? getAssetPresetUrl(props.event.coverSlug, 'cover-sm') : null,
 )
 
 const location = computed(() => {

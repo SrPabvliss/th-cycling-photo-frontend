@@ -1,10 +1,9 @@
 /** API projection from GET /operator/events/:eventId/retouch-queue — already camelCase */
 export interface IApiRetouchQueueItem {
   photoId: string
-  storageKey: string
   publicSlug: string
+  thumbnailUrl: string
   isRetouched: boolean
-  retouchedStorageKey: string | null
 }
 
 export interface IApiRetouchQueueOrder {
@@ -23,10 +22,9 @@ export interface IApiRetouchQueue {
 /** Frontend domain types */
 export interface IRetouchQueueItem {
   photoId: string
-  storageKey: string
   publicSlug: string
+  thumbnailUrl: string
   isRetouched: boolean
-  retouchedStorageKey: string | null
 }
 
 export interface IRetouchQueueOrder {

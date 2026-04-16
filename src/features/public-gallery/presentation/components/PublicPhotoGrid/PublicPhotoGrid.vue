@@ -5,6 +5,7 @@ import { useWindowSize } from '@vueuse/core'
 import { NIcon } from 'naive-ui'
 import { CheckmarkCircle, AddCircleOutline } from '@vicons/ionicons5'
 
+import { getGalleryUrl } from '@/shared/utils/cdn.utils'
 import type { IPublicPhoto } from '../../../types/responses/public-photo.response'
 
 const ROW_HEIGHT = 240
@@ -88,7 +89,7 @@ function getPhotoIndex(rowIndex: number, colIndex: number): number {
           :class="{ 'grid-cell--selected': selectedIds.has(photo.id) }"
         >
           <img
-            :src="photo.url"
+            :src="getGalleryUrl(photo.publicSlug)"
             alt=""
             loading="lazy"
             class="grid-cell__img"

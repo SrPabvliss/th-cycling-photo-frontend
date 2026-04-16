@@ -10,15 +10,15 @@ export interface IApiPhotoDetail {
   id: string
   eventId: string
   filename: string
-  storageKey: string
   publicSlug: string
+  imageUrl: string
+  thumbnailUrl: string
   fileSize: number
   mimeType: string
   width: number | null
   height: number | null
   status: string
   unclassifiedReason: string | null
-  retouchedStorageKey: string | null
   retouchedFileSize: number | null
   retouchedAt: string | null
   classifiedAt: string | null
@@ -33,9 +33,9 @@ export interface IPhotoDetail {
   id: string
   eventId: string
   filename: string
-  storageKey: string
   publicSlug: string
   imageUrl: string
+  thumbnailUrl: string
   fileSize: number
   mimeType: string
   width: number | null

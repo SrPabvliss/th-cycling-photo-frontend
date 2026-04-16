@@ -1,8 +1,8 @@
 export interface IApiSimilarPhoto {
   id: string
   filename: string
-  storageKey: string
   publicSlug: string
+  thumbnailUrl: string
   similarity: number
   hasClassifications: boolean
 }
@@ -10,7 +10,6 @@ export interface IApiSimilarPhoto {
 export interface ISimilarPhoto {
   id: string
   filename: string
-  storageKey: string
   publicSlug: string
   similarity: number
   hasClassifications: boolean

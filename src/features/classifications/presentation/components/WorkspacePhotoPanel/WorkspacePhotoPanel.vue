@@ -9,7 +9,6 @@ import {
 } from '@vicons/ionicons5'
 
 import type { IPhotoDetail } from '@/features/photos/types/responses/photo-detail.response'
-import { getInternalTransformUrl } from '@/shared/utils/cdn.utils'
 import { usePhotoDownloadUrl } from '../../../composables/queries/use-photo-download-url'
 import { useUploadRetouched } from '../../../composables/mutations/use-upload-retouched'
 import { useImageZoom } from '../../../composables/use-image-zoom'
@@ -19,7 +18,7 @@ const props = defineProps<{
   photo: IPhotoDetail
   hasNext: boolean
   hasPrev: boolean
-  previewStorageKey?: string | null
+  previewPublicSlug?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -94,8 +93,7 @@ async function handleFileSelected(event: Event) {
   input.value = ''
 }
 
-const workspaceImageUrl = (slug: string) => getInternalTransformUrl(slug, 'workspace')
-const displaySlug = computed(() => props.photo.publicSlug)
+const displayImageUrl = computed(() => props.photo.imageUrl)
 </script>
 
 <template>
@@ -111,15 +109,15 @@ const displaySlug = computed(() => props.photo.publicSlug)
       @mouseleave="handleMouseUp"
     >
       <ImageComparisonSlider
-        v-if="showComparison && photo.retouchedImageUrl && !previewStorageKey"
-        :original-src="workspaceImageUrl(photo.publicSlug)"
+        v-if="showComparison && photo.retouchedImageUrl && !previewPublicSlug"
+        :original-src="photo.imageUrl"
         :retouched-src="photo.retouchedImageUrl"
         :alt="photo.filename"
       />
       <img
         v-else
-        :key="displaySlug"
-        :src="workspaceImageUrl(displaySlug)"
+        :key="displayImageUrl"
+        :src="displayImageUrl"
         :alt="photo.filename"
         class="workspace-photo-panel__image"
         :class="{ 'workspace-photo-panel__image--no-transition': isPanning }"

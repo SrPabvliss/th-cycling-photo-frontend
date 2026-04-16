@@ -1,31 +1,23 @@
 export interface IApiCartPhoto {
   id: string
-  url: string
-  width: number | null
-  height: number | null
+  publicSlug: string
 }
 
 export interface IApiCartGroup {
   eventId: string
   eventName: string
   eventDate: string
-  coverUrl: string | null
-  coverSlug: string | null
   photos: IApiCartPhoto[]
 }
 
 export interface ICartPhoto {
   id: string
-  url: string
-  width: number | null
-  height: number | null
+  publicSlug: string
 }
 
 export interface ICartGroup {
   eventId: string
   eventName: string
   eventDate: Date
-  coverUrl: string | null
-  coverSlug: string | null
   photos: ICartPhoto[]
 }
