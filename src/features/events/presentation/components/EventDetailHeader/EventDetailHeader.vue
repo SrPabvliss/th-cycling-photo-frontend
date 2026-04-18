@@ -1,0 +1,69 @@
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+import { NButton, NFlex, NIcon, NTag } from 'naive-ui'
+import { ArrowBack, CreateOutline, CloudUploadOutline, StarOutline, Star } from '@vicons/ionicons5'
+
+import { formatDate, formatRelativeTime } from '@/shared/utils/date.utils'
+import { PHOTO_ROUTE_NAMES } from '@/features/photos/routes'
+import { EVENT_ROUTE_NAMES } from '../../../routes'
+import { EVENT_STATUS_CONFIG } from '../../../constants/status-config'
+import { useToggleFeatured } from '../../../composables/mutations/use-toggle-featured'
+import type { IEventDetail } from '../../../types/responses/event-detail.response'
+
+const props = defineProps<{
+  event: IEventDetail
+  eventId: string
+  eventSlug: string
+}>()
+
+const router = useRouter()
+const { mutate: toggleFeatured, isPending: isToggling } = useToggleFeatured(props.eventId)
+</script>
+
+<template>
+  <NFlex justify="space-between" align="start" :size="16" wrap style="margin-bottom: 32px">
+    <NFlex align="start" :size="12">
+      <button class="event-header__back" @click="router.push('/events')">
+        <NIcon :component="ArrowBack" :size="20" />
+      </button>
+      <div>
+        <NFlex align="center" :size="12" style="margin-bottom: 4px">
+          <h1 class="event-header__title">{{ event.name }}</h1>
+          <NTag :type="EVENT_STATUS_CONFIG[event.status].type" size="small" round>
+            {{ EVENT_STATUS_CONFIG[event.status].label }}
+          </NTag>
+          <NTag v-if="event.isFeatured" type="warning" size="small" round> Destacado </NTag>
+        </NFlex>
+        <p class="event-header__subtitle">
+          {{ formatDate(event.date) }} · Actualizado {{ formatRelativeTime(event.updatedAt) }}
+        </p>
+      </div>
+    </NFlex>
+    <NFlex :size="10">
+      <NButton
+        :type="event.isFeatured ? 'warning' : 'default'"
+        :ghost="event.isFeatured"
+        :loading="isToggling"
+        @click="toggleFeatured(!event.isFeatured)"
+      >
+        <template #icon>
+          <NIcon :component="event.isFeatured ? Star : StarOutline" />
+        </template>
+        {{ event.isFeatured ? 'Quitar destacado' : 'Destacar' }}
+      </NButton>
+      <NButton @click="router.push({ name: EVENT_ROUTE_NAMES.EDIT, params: { slug: eventSlug } })">
+        <template #icon><NIcon :component="CreateOutline" /></template>
+        Editar evento
+      </NButton>
+      <NButton
+        type="primary"
+        @click="router.push({ name: PHOTO_ROUTE_NAMES.UPLOAD, params: { slug: eventSlug } })"
+      >
+        <template #icon><NIcon :component="CloudUploadOutline" /></template>
+        Subir fotos
+      </NButton>
+    </NFlex>
+  </NFlex>
+</template>
+
+<style scoped src="./event-detail-header.css"></style>

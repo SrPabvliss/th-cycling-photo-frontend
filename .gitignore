@@ -13,6 +13,9 @@ dist
 dist-ssr
 coverage
 *.local
+.env.development
+.env.production
+.env.staging
 
 # Editor directories and files
 .vscode/*
@@ -42,3 +45,7 @@ __screenshots__/
 .claude/ledger/research/*
 !.claude/ledger/research/README.md
 .claude/settings.local.json
+
+# graphify knowledge graph output
+graphify-out/
+

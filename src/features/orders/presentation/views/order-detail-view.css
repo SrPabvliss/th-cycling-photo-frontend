@@ -1,0 +1,271 @@
+.od-loading {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+/* Breadcrumb */
+.od-crumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.od-crumb__back {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.15s;
+}
+
+.od-crumb__back:hover {
+  color: #1a1f2c;
+  border-color: #d1d5db;
+}
+
+.od-crumb__text {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.od-crumb__sep {
+  color: #d1d5db;
+  margin: 0 4px;
+}
+
+.od-crumb__cur {
+  color: #1a1f2c;
+  font-weight: 500;
+}
+
+/* Layout */
+.od-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 16px;
+  padding: 20px 28px 48px;
+  align-items: start;
+}
+
+.od-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.od-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Sidebar cards */
+.od-side-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.od-side-card__title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9ca3af;
+  margin-bottom: 12px;
+}
+
+/* Contact */
+.od-contact__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f1f3;
+  font-size: 12px;
+  color: #374151;
+}
+
+.od-contact__row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.od-contact__row:first-child {
+  padding-top: 0;
+}
+
+.od-contact__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.od-contact__icon--wa {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #16a34a;
+}
+
+.od-contact__icon--mail {
+  background: #f0f6ff;
+  border: 1px solid #dbe6f0;
+  color: #2080f0;
+}
+
+/* Status actions */
+.od-status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.od-status-btn {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 7px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #6b7280;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s;
+}
+
+.od-status-btn:hover:not(:disabled) {
+  color: #1a1f2c;
+  border-color: #d1d5db;
+}
+
+.od-status-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.od-status-btn--current {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #16a34a;
+  cursor: default;
+}
+
+.od-status-btn--current:disabled {
+  opacity: 1;
+}
+
+.od-status-btn--cancel:hover:not(:disabled) {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #e05252;
+}
+
+.od-status-btn--current-cancel {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #e05252;
+  cursor: default;
+}
+
+.od-status-btn--current-cancel:disabled {
+  opacity: 1;
+}
+
+/* Notes */
+.od-notes {
+  background: #f9fafb;
+  border-radius: 7px;
+  padding: 11px 13px;
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.od-notes__label {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #105080;
+  margin-bottom: 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .od-layout {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .od-crumb {
+    padding: 12px 16px;
+  }
+}
+
+/* Retouch progress */
+.od-retouch {
+  padding: 16px 20px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.od-retouch__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.od-retouch__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.od-retouch__count {
+  font-size: 13px;
+  font-weight: 600;
+  color: #105080;
+}
+
+.od-retouch__bar {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.od-retouch__fill {
+  height: 100%;
+  background: #18a058;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.od-retouch__warning {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: #d97706;
+  line-height: 1.4;
+}

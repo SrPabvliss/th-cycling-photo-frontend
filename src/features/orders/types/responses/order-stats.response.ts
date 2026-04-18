@@ -1,0 +1,17 @@
+/** API projection from GET /orders/stats */
+export interface IApiOrderStats {
+  totalOrders: number
+  pendingCount: number
+  paidCount: number
+  deliveredCount: number
+  cancelledCount: number
+}
+
+/** Frontend domain type (identical — no transformation needed) */
+export interface IOrderStats {
+  totalOrders: number
+  pendingCount: number
+  paidCount: number
+  deliveredCount: number
+  cancelledCount: number
+}

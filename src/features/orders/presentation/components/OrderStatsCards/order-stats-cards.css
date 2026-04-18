@@ -1,0 +1,47 @@
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-card__num {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1a1f2c;
+  line-height: 1;
+}
+
+.stat-card--warning .stat-card__num {
+  color: #f0a020;
+}
+
+.stat-card--info .stat-card__num {
+  color: #2080f0;
+}
+
+.stat-card--success .stat-card__num {
+  color: #18a058;
+}
+
+.stat-card__label {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+@media (max-width: 768px) {
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

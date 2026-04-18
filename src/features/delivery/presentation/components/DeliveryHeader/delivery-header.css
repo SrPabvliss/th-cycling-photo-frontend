@@ -1,0 +1,77 @@
+.dh {
+  text-align: center;
+  padding: 40px 20px 24px;
+}
+
+.dh__hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.dh__code {
+  font-size: 140px;
+  font-weight: 800;
+  color: rgba(0, 0, 0, 0.04);
+  line-height: 1;
+  user-select: none;
+}
+
+.dh__icon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: #18a058;
+  box-shadow: 0 8px 32px rgba(24, 160, 88, 0.3);
+}
+
+.dh__title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1a1f2c;
+  margin: 0 0 8px;
+}
+
+.dh__subtitle {
+  font-size: 15px;
+  color: #6b7280;
+  margin: 0 0 16px;
+}
+
+.dh__stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #9ca3af;
+  flex-wrap: wrap;
+}
+
+.dh__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #d1d5db;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .dh__title {
+    font-size: 22px;
+  }
+
+  .dh__code {
+    font-size: 100px;
+  }
+
+  .dh {
+    padding: 28px 16px 20px;
+  }
+}

@@ -1,0 +1,25 @@
+.upload-progress {
+  background: #fff;
+  border: 1px solid var(--tt-neutral-light);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.upload-progress__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.upload-progress__value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--tt-primary);
+}
+
+.upload-progress__success-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0a0a0a;
+  margin: 0;
+}
