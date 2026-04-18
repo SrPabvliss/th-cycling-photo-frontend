@@ -18,14 +18,11 @@ import UploadSummary from '../components/UploadSummary/UploadSummary.vue'
 const route = useRoute()
 const router = useRouter()
 
-const eventId = computed(() => route.params.eventId as string)
+const slug = computed(() => route.params.slug as string)
 
-const {
-  data: event,
-  isPending: isEventPending,
-  isError: isEventError,
-} = useEventDetailQuery(eventId)
+const { data: event, isPending: isEventPending, isError: isEventError } = useEventDetailQuery(slug)
 
+const eventId = computed(() => event.value?.id ?? '')
 const { data: categories } = usePhotoCategoriesQuery(eventId)
 
 const categoryOptions = computed(
@@ -53,14 +50,14 @@ const {
 } = useUploadOrchestration(eventId)
 
 function handleGoToGallery() {
-  router.push({ name: PHOTO_ROUTE_NAMES.GALLERY, params: { eventId: eventId.value } })
+  router.push({ name: PHOTO_ROUTE_NAMES.GALLERY, params: { slug: slug.value } })
 }
 </script>
 
 <template>
   <div class="page-view">
     <div class="page-view__content upload-content">
-      <PageHeader title="Subir Fotos" :back-to="'/events/' + eventId" />
+      <PageHeader title="Subir Fotos" :back-to="'/events/' + slug" />
       <div v-if="isEventError" class="error-container">
         <NResult
           status="error"

@@ -31,7 +31,7 @@ export const API_ROUTES = {
   EVENTS: {
     BASE: EVENTS_BASE,
     GET_ALL: EVENTS_BASE,
-    GET_BY_ID: (id: string) => `${EVENTS_BASE}/${id}`,
+    GET_BY_ID: (slug: string) => `${EVENTS_BASE}/${slug}`,
     CREATE: EVENTS_BASE,
     UPDATE: (id: string) => `${EVENTS_BASE}/${id}`,
     DELETE: (id: string) => `${EVENTS_BASE}/${id}`,
@@ -52,6 +52,7 @@ export const API_ROUTES = {
     BASE: PHOTOS_BASE,
     BY_EVENT: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos`,
     DETAIL: (id: string) => `${PHOTOS_BASE}/${id}`,
+    VIEW: (slug: string) => `${PHOTOS_BASE}/view/${slug}`,
     SEARCH: `${PHOTOS_BASE}/search`,
     UPLOAD: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos`,
     PRESIGNED_URL: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/presigned-url`,
@@ -97,9 +98,9 @@ export const API_ROUTES = {
   PUBLIC_EVENTS: {
     BASE: PUBLIC_EVENTS_BASE,
     GET_ALL: PUBLIC_EVENTS_BASE,
-    GET_BY_ID: (id: string) => `${PUBLIC_EVENTS_BASE}/${id}`,
-    PHOTOS: (id: string) => `${PUBLIC_EVENTS_BASE}/${id}/photos`,
-    CREATE_ORDER: (id: string) => `${PUBLIC_EVENTS_BASE}/${id}/orders`,
+    GET_BY_SLUG: (slug: string) => `${PUBLIC_EVENTS_BASE}/${slug}`,
+    PHOTOS: (slug: string) => `${PUBLIC_EVENTS_BASE}/${slug}/photos`,
+    CREATE_ORDER: (slug: string) => `${PUBLIC_EVENTS_BASE}/${slug}/orders`,
   },
   PREVIEW_PUBLIC: {
     BASE: PREVIEW_PUBLIC_BASE,

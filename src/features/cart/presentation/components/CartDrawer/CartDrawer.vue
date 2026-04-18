@@ -3,6 +3,7 @@ import { useRouter } from 'vue-router'
 import { NButton, NDrawer, NDrawerContent, NEmpty, NFlex, NIcon } from 'naive-ui'
 import { CloseCircleOutline, CartOutline } from '@vicons/ionicons5'
 
+import { getGalleryUrl } from '@/shared/utils/cdn.utils'
 import { useCartStore } from '../../../stores/cart.store'
 import { useRemoveFromCart } from '../../../composables/mutations/use-remove-from-cart'
 
@@ -47,7 +48,7 @@ function goToCheckout() {
 
             <div class="cart-group__thumbs">
               <div v-for="photo in group.photos" :key="photo.id" class="cart-thumb">
-                <img :src="photo.url" alt="" />
+                <img :src="getGalleryUrl(photo.publicSlug)" alt="" />
                 <button class="cart-thumb__remove" @click="removeFromCart(photo.id)">
                   <NIcon :component="CloseCircleOutline" :size="12" />
                 </button>

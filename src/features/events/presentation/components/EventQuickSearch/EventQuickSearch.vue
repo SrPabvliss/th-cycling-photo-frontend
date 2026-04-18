@@ -7,7 +7,7 @@ import { SearchOutline } from '@vicons/ionicons5'
 import { PHOTO_ROUTE_NAMES } from '@/features/photos/routes'
 
 const props = defineProps<{
-  eventId: string
+  eventSlug: string
 }>()
 
 const router = useRouter()
@@ -18,7 +18,7 @@ function handleQuickSearch() {
   if (!plate) return
   router.push({
     name: PHOTO_ROUTE_NAMES.GALLERY,
-    params: { eventId: props.eventId },
+    params: { slug: props.eventSlug },
     query: { plateNumber: plate },
   })
 }

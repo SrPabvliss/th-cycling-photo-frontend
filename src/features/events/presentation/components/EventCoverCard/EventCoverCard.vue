@@ -7,7 +7,7 @@ import { CameraOutline, TrashOutline, ImageOutline } from '@vicons/ionicons5'
 
 import { useUploadAsset } from '@/features/event-assets/composables/mutations/use-upload-asset'
 import { useRemoveAsset } from '@/features/event-assets/composables/mutations/use-remove-asset'
-import { getAssetTransformUrl } from '@/shared/utils/cdn.utils'
+import { getAssetPresetUrl } from '@/shared/utils/cdn.utils'
 import type { IEventDetail } from '../../../types/responses/event-detail.response'
 
 const ACCEPTED_TYPES = 'image/jpeg,image/png,image/webp'
@@ -24,9 +24,7 @@ const { mutate: removeAsset, isPending: isRemoving } = useRemoveAsset(props.even
 
 /** Cover hero variant (1200px/q85) — larger on the detail page. */
 const coverUrl = computed(() =>
-  props.event.coverImageSlug
-    ? getAssetTransformUrl(props.event.coverImageSlug, 'cover_large')
-    : null,
+  props.event.coverImageSlug ? getAssetPresetUrl(props.event.coverImageSlug, 'cover-lg') : null,
 )
 
 function triggerFileInput() {

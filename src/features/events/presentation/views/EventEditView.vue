@@ -15,7 +15,6 @@ import { useEventDetailQuery } from '../../composables/queries/use-event-detail'
 import { EVENT_ROUTE_NAMES } from '../../routes'
 import { useUpdateEvent } from '../../composables/mutations/use-update-event'
 import { toEventFormData, toUpdateEventRequest } from '../../mappers/event-form.mapper'
-import type { IEventDetail } from '../../types/responses/event-detail.response'
 import type { IEventFormData } from '../../types/event-form.types'
 import type { IEventFormExtra } from '../components/EventForm/EventForm.vue'
 import EventForm from '../components/EventForm/EventForm.vue'
@@ -23,12 +22,15 @@ import EventFormSkeleton from '../components/EventFormSkeleton/EventFormSkeleton
 
 const route = useRoute()
 const router = useRouter()
-const id = computed(() => route.params.id as IEventDetail['id'])
+const slug = computed(() => route.params.slug as string)
 
-const { data: event, isPending, isError, refetch } = useEventDetailQuery(id)
+const { data: event, isPending, isError, refetch } = useEventDetailQuery(slug)
+
+const id = computed(() => event.value?.id ?? '')
+
 const { data: assets } = useEventAssetsQuery(id)
 const { data: assignedCategories } = usePhotoCategoriesQuery(id)
-const { mutateAsync: updateEvent, isPending: isUpdating } = useUpdateEvent(id.value)
+const { mutateAsync: updateEvent, isPending: isUpdating } = useUpdateEvent(id.value, slug.value)
 const { mutateAsync: uploadAssetsBatch } = useUploadAssetsBatch()
 const { mutateAsync: removeAssetsBatch } = useRemoveAssetsBatch()
 const { mutateAsync: assignCategoriesBatch } = useAssignPhotoCategoriesBatch()
@@ -90,7 +92,7 @@ async function handleSubmit(formData: IEventFormData, extra: IEventFormExtra) {
   <div class="page-view">
     <div class="page-view__content event-form-view">
       <div class="event-form-container">
-        <PageHeader title="Editar Evento" :back-to="'/events/' + id" />
+        <PageHeader title="Editar Evento" :back-to="'/events/' + slug" />
         <EventFormSkeleton v-if="isPending" />
 
         <div v-else-if="isError" class="error-container">
@@ -114,7 +116,7 @@ async function handleSubmit(formData: IEventFormData, extra: IEventFormExtra) {
           :is-submitting="isUpdating"
           submit-label="Guardar Cambios"
           @submit="handleSubmit"
-          @cancel="router.push({ name: EVENT_ROUTE_NAMES.DETAIL, params: { id: id } })"
+          @cancel="router.push({ name: EVENT_ROUTE_NAMES.DETAIL, params: { slug: slug } })"
         />
       </div>
     </div>

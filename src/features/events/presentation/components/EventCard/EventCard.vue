@@ -13,7 +13,7 @@ import {
 import { formatDate } from '@/shared/utils/date.utils'
 import { formatFileSize } from '@/shared/utils/format.utils'
 import { formatLocation } from '@/shared/utils/location.utils'
-import { getAssetTransformUrl } from '@/shared/utils/cdn.utils'
+import { getAssetPresetUrl } from '@/shared/utils/cdn.utils'
 import { EVENT_STATUS_CONFIG } from '../../../constants/status-config'
 import type { IEventListItem } from '../../../types/responses/event-list.response'
 
@@ -22,17 +22,15 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  view: [id: IEventListItem['id']]
-  upload: [id: IEventListItem['id']]
+  view: [slug: IEventListItem['slug']]
+  upload: [slug: IEventListItem['slug']]
 }>()
 
 const displayLocation = computed(() => formatLocation(props.event))
 
 /** Cover card variant (400px/q80) — keeps memory/bandwidth low in lists. */
 const coverUrl = computed(() =>
-  props.event.coverImageSlug
-    ? getAssetTransformUrl(props.event.coverImageSlug, 'cover_small')
-    : null,
+  props.event.coverImageSlug ? getAssetPresetUrl(props.event.coverImageSlug, 'cover-sm') : null,
 )
 </script>
 
@@ -40,7 +38,7 @@ const coverUrl = computed(() =>
   <article
     class="event-card"
     :class="{ 'event-card--featured': event.isFeatured }"
-    @click="emit('view', event.id)"
+    @click="emit('view', event.slug)"
   >
     <!-- Cover -->
     <div class="event-card__cover">
@@ -119,12 +117,12 @@ const coverUrl = computed(() =>
           v-if="event.photoCount === 0"
           block
           type="primary"
-          @click.stop="emit('upload', event.id)"
+          @click.stop="emit('upload', event.slug)"
         >
           <template #icon><NIcon :component="CloudUploadOutline" /></template>
           Subir Fotos
         </NButton>
-        <NButton v-else block @click.stop="emit('view', event.id)"> Ver Detalle </NButton>
+        <NButton v-else block @click.stop="emit('view', event.slug)"> Ver Detalle </NButton>
       </div>
     </div>
   </article>

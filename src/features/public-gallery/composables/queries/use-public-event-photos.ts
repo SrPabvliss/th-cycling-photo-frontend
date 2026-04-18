@@ -10,19 +10,19 @@ import type { IApiPublicPhoto, IPublicPhoto } from '../../types/responses/public
 const PHOTOS_PER_PAGE = 30
 
 export function usePublicEventPhotosInfinite(
-  eventId: MaybeRefOrGetter<string>,
+  slug: MaybeRefOrGetter<string>,
   categoryId: Ref<number | null>,
 ) {
   return useInfiniteQuery({
     queryKey: computed(() =>
-      PUBLIC_GALLERY_QUERY_KEYS.photos(toValue(eventId), undefined, categoryId.value ?? undefined),
+      PUBLIC_GALLERY_QUERY_KEYS.photos(toValue(slug), undefined, categoryId.value ?? undefined),
     ),
     queryFn: async ({ pageParam }) => {
       const params: Record<string, unknown> = { page: pageParam, limit: PHOTOS_PER_PAGE }
       if (categoryId.value) params.photoCategoryId = categoryId.value
 
       const response = await httpClient.get<IApiPublicPhoto[]>(
-        API_ROUTES.PUBLIC_EVENTS.PHOTOS(toValue(eventId)),
+        API_ROUTES.PUBLIC_EVENTS.PHOTOS(toValue(slug)),
         { params },
       )
       const pagination = response.meta.pagination as IApiPagination
@@ -38,6 +38,6 @@ export function usePublicEventPhotosInfinite(
       }
       return undefined
     },
-    enabled: computed(() => !!toValue(eventId)),
+    enabled: computed(() => !!toValue(slug)),
   })
 }

@@ -1,12 +1,6 @@
-export type ActivityType = 'classification' | 'retouch'
+export type ActivityType = 'retouch'
 
 /** API projection from GET /operator/dashboard — already camelCase from backend */
-export interface IApiClassificationProgress {
-  total: number
-  classified: number
-  percentage: number
-}
-
 export interface IApiRetouchProgress {
   pendingOrders: number
   pendingPhotos: number
@@ -18,9 +12,7 @@ export interface IApiActiveEvent {
   date: string
   location: string
   coverUrl: string | null
-  classification: IApiClassificationProgress
   retouch: IApiRetouchProgress
-  hasProgress: boolean
 }
 
 export interface IApiCompletedEvent {
@@ -29,7 +21,7 @@ export interface IApiCompletedEvent {
   location: string
   date: string
   coverUrl: string | null
-  totalClassified: number
+  totalRetouched: number
   completedAt: string
 }
 
@@ -42,7 +34,6 @@ export interface IApiRecentActivity {
 
 export interface IApiDashboardSummary {
   assignedEventsCount: number
-  pendingPhotosCount: number
   pendingRetouchCount: number
 }
 
@@ -54,12 +45,6 @@ export interface IApiOperatorDashboard {
 }
 
 /** Frontend domain types */
-export interface IClassificationProgress {
-  total: number
-  classified: number
-  percentage: number
-}
-
 export interface IRetouchProgress {
   pendingOrders: number
   pendingPhotos: number
@@ -71,9 +56,7 @@ export interface IActiveEvent {
   date: Date
   location: string
   coverUrl: string | null
-  classification: IClassificationProgress
   retouch: IRetouchProgress
-  hasProgress: boolean
 }
 
 export interface ICompletedEvent {
@@ -82,7 +65,7 @@ export interface ICompletedEvent {
   location: string
   date: Date
   coverUrl: string | null
-  totalClassified: number
+  totalRetouched: number
   completedAt: Date
 }
 
@@ -95,7 +78,6 @@ export interface IRecentActivity {
 
 export interface IDashboardSummary {
   assignedEventsCount: number
-  pendingPhotosCount: number
   pendingRetouchCount: number
 }
 

@@ -18,16 +18,10 @@ function toActiveEvent(api: IApiActiveEvent): IActiveEvent {
     date: parseDateOnly(api.date),
     location: api.location,
     coverUrl: api.coverUrl,
-    classification: {
-      total: api.classification.total,
-      classified: api.classification.classified,
-      percentage: api.classification.percentage,
-    },
     retouch: {
       pendingOrders: api.retouch.pendingOrders,
       pendingPhotos: api.retouch.pendingPhotos,
     },
-    hasProgress: api.hasProgress,
   }
 }
 
@@ -38,7 +32,7 @@ function toCompletedEvent(api: IApiCompletedEvent): ICompletedEvent {
     location: api.location,
     date: parseDateOnly(api.date),
     coverUrl: api.coverUrl,
-    totalClassified: api.totalClassified,
+    totalRetouched: api.totalRetouched,
     completedAt: new Date(api.completedAt),
   }
 }
@@ -56,7 +50,6 @@ export function toOperatorDashboard(api: IApiOperatorDashboard): IOperatorDashbo
   return {
     summary: {
       assignedEventsCount: api.summary.assignedEventsCount,
-      pendingPhotosCount: api.summary.pendingPhotosCount,
       pendingRetouchCount: api.summary.pendingRetouchCount,
     },
     activeEvents: api.activeEvents.map(toActiveEvent),

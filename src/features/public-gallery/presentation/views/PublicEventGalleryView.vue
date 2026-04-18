@@ -6,7 +6,7 @@ import { ArrowBack } from '@vicons/ionicons5'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { formatDate } from '@/shared/utils/date.utils'
-import { getAssetTransformUrl } from '@/shared/utils/cdn.utils'
+import { getAssetPresetUrl } from '@/shared/utils/cdn.utils'
 import { useCartStore } from '@/features/cart/stores/cart.store'
 import { useAddToCart } from '@/features/cart/composables/mutations/use-add-to-cart'
 import { useRemoveFromCart } from '@/features/cart/composables/mutations/use-remove-from-cart'
@@ -18,9 +18,9 @@ import PhotoLightbox from '../components/PhotoLightbox/PhotoLightbox.vue'
 
 const route = useRoute()
 const router = useRouter()
-const eventId = computed(() => route.params.eventId as string)
+const slug = computed(() => route.params.slug as string)
 
-const { data: event, isPending: isEventPending } = usePublicEventDetailQuery(eventId)
+const { data: event, isPending: isEventPending } = usePublicEventDetailQuery(slug)
 
 const activeCategoryId = ref<number | null>(null)
 
@@ -30,7 +30,7 @@ const {
   fetchNextPage,
   hasNextPage,
   isFetchingNextPage,
-} = usePublicEventPhotosInfinite(eventId, activeCategoryId)
+} = usePublicEventPhotosInfinite(slug, activeCategoryId)
 
 const allPhotos = computed(() => infiniteData.value?.pages.flatMap((p) => p.items) ?? [])
 
@@ -77,7 +77,7 @@ const heroUrl = computed(() => {
   const hero =
     event.value?.assets.find((a) => a.assetType === 'hero_image') ??
     event.value?.assets.find((a) => a.assetType === 'cover_image')
-  return hero ? getAssetTransformUrl(hero.publicSlug, 'cover_large') : null
+  return hero ? getAssetPresetUrl(hero.publicSlug, 'cover-lg') : null
 })
 </script>
 
@@ -101,7 +101,9 @@ const heroUrl = computed(() => {
             <h1 class="gallery-hero__title">{{ event.name }}</h1>
             <p class="gallery-hero__meta">
               {{ formatDate(event.date) }}
-              <span v-if="event.location"> · {{ event.location }}</span>
+              <span v-if="event.cantonName || event.provinceName">
+                · {{ [event.cantonName, event.provinceName].filter(Boolean).join(', ') }}
+              </span>
               · {{ event.photoCount }} fotos
             </p>
           </div>

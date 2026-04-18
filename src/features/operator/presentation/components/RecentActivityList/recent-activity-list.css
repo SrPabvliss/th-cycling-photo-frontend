@@ -36,11 +36,6 @@
   flex-shrink: 0;
 }
 
-.recent-activity__icon--classification {
-  background: #ecfdf5;
-  color: #059669;
-}
-
 .recent-activity__icon--retouch {
   background: #eff6ff;
   color: #2563eb;

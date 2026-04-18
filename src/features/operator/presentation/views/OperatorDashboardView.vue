@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { NButton, NCard, NEmpty, NFlex, NIcon, NResult, NSpin } from 'naive-ui'
 import { TimeOutline } from '@vicons/ionicons5'
@@ -15,6 +16,12 @@ import RecentActivityList from '../components/RecentActivityList/RecentActivityL
 const router = useRouter()
 const { currentUser } = useAuth()
 const { data: dashboard, isLoading, error, refetch } = useOperatorDashboardQuery()
+
+const sortedActiveEvents = computed(() =>
+  [...(dashboard.value?.activeEvents ?? [])].sort(
+    (a, b) => b.retouch.pendingPhotos - a.retouch.pendingPhotos,
+  ),
+)
 
 function handleSelectEvent(eventId: string) {
   router.push({
@@ -50,9 +57,9 @@ function handleSelectEvent(eventId: string) {
               <DashboardStatCards :summary="dashboard.summary" />
 
               <NCard title="Eventos Asignados" size="small">
-                <div v-if="dashboard.activeEvents.length > 0" class="dashboard-events">
+                <div v-if="sortedActiveEvents.length > 0" class="dashboard-events">
                   <ActiveEventCard
-                    v-for="event in dashboard.activeEvents"
+                    v-for="event in sortedActiveEvents"
                     :key="event.eventId"
                     :event="event"
                     @select="handleSelectEvent"

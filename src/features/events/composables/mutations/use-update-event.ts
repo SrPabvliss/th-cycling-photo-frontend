@@ -8,7 +8,7 @@ import { EVENT_ROUTE_NAMES } from '../../routes'
 import type { IEventDetail } from '../../types/responses/event-detail.response'
 import type { IUpdateEventRequest } from '../../types/requests/update-event.request'
 
-export function useUpdateEvent(id: IEventDetail['id']) {
+export function useUpdateEvent(id: IEventDetail['id'], slug: string) {
   const queryClient = useQueryClient()
   const router = useRouter()
 
@@ -17,7 +17,7 @@ export function useUpdateEvent(id: IEventDetail['id']) {
       httpClient.patch<{ id: string }>(API_ROUTES.EVENTS.UPDATE(id), data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: EVENT_QUERY_KEYS.all() })
-      router.push({ name: EVENT_ROUTE_NAMES.DETAIL, params: { id } })
+      router.push({ name: EVENT_ROUTE_NAMES.DETAIL, params: { slug } })
     },
   })
 }

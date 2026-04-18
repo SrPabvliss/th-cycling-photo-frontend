@@ -11,8 +11,9 @@ export type DeliveryLinkStatus = (typeof DELIVERY_LINK_STATUS)[keyof typeof DELI
 export interface IApiOrderDetailPhoto {
   id: string
   filename: string
-  storageKey: string
   publicSlug: string
+  thumbnailUrl: string
+  fullUrl: string
 }
 
 export interface IApiOrderDetailDeliveryLink {

@@ -15,8 +15,8 @@ defineProps<{
     </h1>
     <p class="dashboard-greeting__summary">
       Tienes
-      <strong>{{ summary.assignedEventsCount }} eventos asignados</strong>,
-      <strong>{{ summary.pendingPhotosCount }} fotos pendientes</strong> de clasificación.
+      <strong>{{ summary.assignedEventsCount }} eventos asignados</strong> y
+      <strong>{{ summary.pendingRetouchCount }} fotos pendientes</strong> de retoque.
     </p>
   </div>
 </template>

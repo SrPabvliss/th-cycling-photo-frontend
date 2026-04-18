@@ -13,15 +13,15 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  click: [id: IPhotoListItem['id']]
-  select: [id: IPhotoListItem['id']]
+  click: [slug: string]
+  select: [id: string]
 }>()
 
 function handleClick() {
   if (props.selectable) {
     emit('select', props.photo.id)
   } else {
-    emit('click', props.photo.id)
+    emit('click', props.photo.publicSlug)
   }
 }
 

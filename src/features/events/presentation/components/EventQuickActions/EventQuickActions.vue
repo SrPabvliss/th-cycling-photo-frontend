@@ -14,6 +14,7 @@ import { useDownloadZip } from '@/features/photos/composables/mutations/use-down
 
 const props = defineProps<{
   eventId: string
+  eventSlug: string
   eventName: string
   photoCount: number
 }>()
@@ -50,14 +51,19 @@ async function handleDownloadZip() {
         class="quick-action"
         :class="{ 'quick-action--disabled': photoCount === 0 }"
         :disabled="photoCount === 0"
-        @click="router.push({ name: CLASSIFICATION_ROUTE_NAMES.WORKSPACE, params: { eventId } })"
+        @click="
+          router.push({
+            name: CLASSIFICATION_ROUTE_NAMES.WORKSPACE,
+            params: { eventId: props.eventId },
+          })
+        "
       >
         <NIcon :component="ColorPaletteOutline" :size="24" color="var(--tt-primary)" />
         <span class="quick-action__label">Clasificar</span>
       </button>
       <button
         class="quick-action"
-        @click="router.push({ name: PHOTO_ROUTE_NAMES.GALLERY, params: { eventId } })"
+        @click="router.push({ name: PHOTO_ROUTE_NAMES.GALLERY, params: { slug: props.eventSlug } })"
       >
         <NIcon :component="EyeOutline" :size="24" color="var(--tt-primary)" />
         <span class="quick-action__label">Generar Previews</span>

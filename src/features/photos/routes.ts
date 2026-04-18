@@ -12,19 +12,19 @@ export const PHOTO_ROUTE_NAMES = {
 
 export const photoRoutes: RouteRecordRaw[] = [
   {
-    path: 'events/:eventId/photos',
+    path: 'events/:slug/photos',
     name: PHOTO_ROUTE_NAMES.GALLERY,
     component: () => import('./presentation/views/PhotoGalleryView.vue'),
     meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN] },
   },
   {
-    path: 'events/:eventId/photos/upload',
+    path: 'events/:slug/photos/upload',
     name: PHOTO_ROUTE_NAMES.UPLOAD,
     component: () => import('./presentation/views/PhotoUploadView.vue'),
     meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN] },
   },
   {
-    path: 'photos/:id',
+    path: 'photos/:slug',
     name: PHOTO_ROUTE_NAMES.DETAIL,
     component: () => import('./presentation/views/PhotoDetailView.vue'),
     meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN] },

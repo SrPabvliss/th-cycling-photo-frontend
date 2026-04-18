@@ -9,6 +9,7 @@ import {
   CheckmarkCircle,
 } from '@vicons/ionicons5'
 
+import { getGalleryUrl } from '@/shared/utils/cdn.utils'
 import type { IPublicPhoto } from '../../../types/responses/public-photo.response'
 
 const props = defineProps<{
@@ -107,7 +108,7 @@ onUnmounted(() => {
           <NSpin v-if="isImageLoading" size="large" class="lightbox__spinner" />
           <img
             :key="currentPhoto.id"
-            :src="currentPhoto.url"
+            :src="getGalleryUrl(currentPhoto.publicSlug)"
             alt=""
             class="lightbox__image"
             @load="isImageLoading = false"

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { NCard, NFlex, NGrid, NGridItem, NIcon } from 'naive-ui'
-import { CalendarOutline, ImagesOutline, BrushOutline } from '@vicons/ionicons5'
+import { CalendarOutline, BrushOutline } from '@vicons/ionicons5'
 
 import type { IDashboardSummary } from '../../../types/responses/operator-dashboard.response'
 
@@ -18,13 +18,6 @@ const stats = computed(() => [
     description: 'Eventos asignados',
   },
   {
-    icon: ImagesOutline,
-    color: 'amber',
-    label: 'Clasificación',
-    value: props.summary.pendingPhotosCount,
-    description: 'Fotos pendientes',
-  },
-  {
     icon: BrushOutline,
     color: 'purple',
     label: 'Retoque',
@@ -35,7 +28,7 @@ const stats = computed(() => [
 </script>
 
 <template>
-  <NGrid :cols="3" :x-gap="16" :y-gap="16">
+  <NGrid :cols="2" :x-gap="16" :y-gap="16">
     <NGridItem v-for="stat in stats" :key="stat.label">
       <NCard>
         <NFlex justify="space-between" align="start" style="margin-bottom: 16px">
