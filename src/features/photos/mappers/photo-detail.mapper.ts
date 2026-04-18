@@ -6,6 +6,7 @@ export function toPhotoDetail(api: IApiPhotoDetail): IPhotoDetail {
   return {
     id: api.id,
     eventId: api.eventId,
+    eventSlug: api.eventSlug,
     filename: api.filename,
     publicSlug: api.publicSlug,
     imageUrl: api.imageUrl,

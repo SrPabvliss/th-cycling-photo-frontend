@@ -33,8 +33,11 @@ import PhotoSelectionBar from '../components/PhotoSelectionBar/PhotoSelectionBar
 const router = useRouter()
 const selectionStore = usePhotoSelectionStore()
 
-const eventId = computed(() => router.currentRoute.value.params.eventId as string)
+const slug = computed(() => router.currentRoute.value.params.slug as string)
 const PHOTOS_PER_PAGE = 8
+
+const { data: event } = useEventDetailQuery(slug)
+const eventId = computed(() => event.value?.id ?? '')
 
 const {
   page,
@@ -48,7 +51,6 @@ const {
   hasActiveFilters,
 } = useGalleryFilters(() => eventId.value)
 
-const { data: event } = useEventDetailQuery(eventId)
 const { data: categories } = usePhotoCategoriesQuery(eventId)
 const { mutate: bulkAssign } = useBulkAssignCategory(eventId.value)
 const {
@@ -72,8 +74,8 @@ const {
   selectAllMatchingResults,
 } = usePhotoSelection(items, totalResults, filters)
 
-function handlePhotoClick(id: string) {
-  router.push({ name: PHOTO_ROUTE_NAMES.DETAIL, params: { id } })
+function handlePhotoClick(slug: string) {
+  router.push({ name: PHOTO_ROUTE_NAMES.DETAIL, params: { slug } })
 }
 
 function handleGeneratePreview() {
@@ -129,7 +131,12 @@ onUnmounted(() => {
       </div>
 
       <template v-else-if="event">
-        <PhotoGalleryHeader :event="event" :event-id="eventId" :back-to="'/events/' + eventId">
+        <PhotoGalleryHeader
+          :event="event"
+          :event-id="eventId"
+          :event-slug="slug"
+          :back-to="'/events/' + slug"
+        >
           <template #extra-actions>
             <NButton
               v-if="!selectionStore.isSelectionMode"

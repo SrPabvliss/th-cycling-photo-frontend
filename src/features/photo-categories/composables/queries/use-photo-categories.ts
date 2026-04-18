@@ -16,5 +16,6 @@ export function usePhotoCategoriesQuery(eventId: MaybeRefOrGetter<string>) {
       )
       return data.map(toPhotoCategory)
     },
+    enabled: computed(() => !!toValue(eventId)),
   })
 }

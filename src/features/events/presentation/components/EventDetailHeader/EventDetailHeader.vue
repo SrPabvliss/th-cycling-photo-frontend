@@ -13,6 +13,7 @@ import type { IEventDetail } from '../../../types/responses/event-detail.respons
 const props = defineProps<{
   event: IEventDetail
   eventId: string
+  eventSlug: string
 }>()
 
 const router = useRouter()
@@ -50,13 +51,13 @@ const { mutate: toggleFeatured, isPending: isToggling } = useToggleFeatured(prop
         </template>
         {{ event.isFeatured ? 'Quitar destacado' : 'Destacar' }}
       </NButton>
-      <NButton @click="router.push({ name: EVENT_ROUTE_NAMES.EDIT, params: { id: eventId } })">
+      <NButton @click="router.push({ name: EVENT_ROUTE_NAMES.EDIT, params: { slug: eventSlug } })">
         <template #icon><NIcon :component="CreateOutline" /></template>
         Editar evento
       </NButton>
       <NButton
         type="primary"
-        @click="router.push({ name: PHOTO_ROUTE_NAMES.UPLOAD, params: { eventId } })"
+        @click="router.push({ name: PHOTO_ROUTE_NAMES.UPLOAD, params: { slug: eventSlug } })"
       >
         <template #icon><NIcon :component="CloudUploadOutline" /></template>
         Subir fotos

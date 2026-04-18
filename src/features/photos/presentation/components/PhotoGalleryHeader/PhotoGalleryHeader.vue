@@ -11,6 +11,7 @@ import type { IEventDetail } from '@/features/events/types/responses/event-detai
 defineProps<{
   event: IEventDetail
   eventId: string
+  eventSlug: string
   backTo?: string
 }>()
 
@@ -43,7 +44,7 @@ const router = useRouter()
       <slot name="extra-actions" />
       <NButton
         type="primary"
-        @click="router.push({ name: PHOTO_ROUTE_NAMES.UPLOAD, params: { eventId } })"
+        @click="router.push({ name: PHOTO_ROUTE_NAMES.UPLOAD, params: { slug: eventSlug } })"
       >
         <template #icon><NIcon :component="CloudUploadOutline" /></template>
         Subir fotos

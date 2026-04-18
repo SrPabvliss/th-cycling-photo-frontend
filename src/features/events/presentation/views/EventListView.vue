@@ -22,12 +22,12 @@ const EVENTS_PER_PAGE = 5
 const { data, isPending, isError, refetch } = useEventsListQuery(page, EVENTS_PER_PAGE)
 const { data: stats } = useEventsStatsQuery()
 
-function handleView(id: IEventListItem['id']) {
-  router.push({ name: EVENT_ROUTE_NAMES.DETAIL, params: { id } })
+function handleView(slug: IEventListItem['slug']) {
+  router.push({ name: EVENT_ROUTE_NAMES.DETAIL, params: { slug } })
 }
 
-function handleUpload(eventId: IEventListItem['id']) {
-  router.push({ name: PHOTO_ROUTE_NAMES.UPLOAD, params: { eventId } })
+function handleUpload(slug: IEventListItem['slug']) {
+  router.push({ name: PHOTO_ROUTE_NAMES.UPLOAD, params: { slug } })
 }
 
 function handleCreate() {

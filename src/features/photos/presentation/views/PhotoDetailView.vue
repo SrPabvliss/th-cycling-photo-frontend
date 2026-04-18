@@ -2,20 +2,18 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { NButton, NCard, NFlex, NIcon, NResult, NTag } from 'naive-ui'
-import { CalendarOutline, ImageOutline, ResizeOutline } from '@vicons/ionicons5'
+import { CalendarOutline, ImageOutline } from '@vicons/ionicons5'
 
 import { formatRelativeTime } from '@/shared/utils/date.utils'
 import { formatFileSize } from '@/shared/utils/format.utils'
 import PageHeader from '@/shared/components/PageHeader.vue'
-import { usePhotoDetailQuery } from '../../composables/queries/use-photo-detail'
+import { usePhotoViewQuery } from '../../composables/queries/use-photo-view'
 import { PHOTO_STATUS_CONFIG } from '../../constants/status-config'
 
 const route = useRoute()
-const id = computed(() => route.params.id as string)
+const slug = computed(() => route.params.slug as string)
 
-const { data: photo, isPending, isError, refetch } = usePhotoDetailQuery(id)
-
-const eventId = computed(() => photo.value?.eventId ?? '')
+const { data: photo, isPending, isError, refetch } = usePhotoViewQuery(slug)
 </script>
 
 <template>
@@ -23,7 +21,7 @@ const eventId = computed(() => photo.value?.eventId ?? '')
     <div class="page-view__content detail-content">
       <PageHeader
         :title="photo?.filename ?? 'Detalle de Foto'"
-        :back-to="'/events/' + eventId + '/photos'"
+        :back-to="'/events/' + (photo?.eventSlug ?? '') + '/photos'"
       />
       <!-- Loading -->
       <div v-if="isPending" class="detail-loading">
@@ -77,16 +75,6 @@ const eventId = computed(() => photo.value?.eventId ?? '')
                     <p class="detail-info__value">
                       {{ photo.mimeType }} · {{ formatFileSize(photo.fileSize) }}
                     </p>
-                  </div>
-                </NFlex>
-
-                <NFlex v-if="photo.width && photo.height" align="start" :size="12">
-                  <div class="detail-info__icon">
-                    <NIcon :component="ResizeOutline" :size="18" />
-                  </div>
-                  <div>
-                    <p class="detail-info__label">Dimensiones</p>
-                    <p class="detail-info__value">{{ photo.width }} x {{ photo.height }} px</p>
                   </div>
                 </NFlex>
 

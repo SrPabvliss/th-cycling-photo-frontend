@@ -25,13 +25,13 @@ export const eventRoutes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN] },
   },
   {
-    path: 'events/:id',
+    path: 'events/:slug',
     name: EVENT_ROUTE_NAMES.DETAIL,
     component: () => import('./presentation/views/EventDetailView.vue'),
     meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN] },
   },
   {
-    path: 'events/:id/edit',
+    path: 'events/:slug/edit',
     name: EVENT_ROUTE_NAMES.EDIT,
     component: () => import('./presentation/views/EventEditView.vue'),
     meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN] },

@@ -7,12 +7,10 @@ import type {
 export function toPhotoListItem(api: IApiPhotoListItem): IPhotoListItem {
   return {
     id: api.id,
-    eventId: api.eventId,
+    publicSlug: api.publicSlug,
     filename: api.filename,
     thumbnailUrl: api.thumbnailUrl,
     status: api.status as PhotoStatus,
-    width: api.width,
-    height: api.height,
     uploadedAt: new Date(api.uploadedAt),
     classifiedAt: api.classifiedAt ? new Date(api.classifiedAt) : null,
   }

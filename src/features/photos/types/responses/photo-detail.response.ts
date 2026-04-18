@@ -9,6 +9,7 @@ import type { PhotoStatus } from './photo-list.response'
 export interface IApiPhotoDetail {
   id: string
   eventId: string
+  eventSlug: string
   filename: string
   publicSlug: string
   imageUrl: string
@@ -32,6 +33,7 @@ export interface IApiPhotoDetail {
 export interface IPhotoDetail {
   id: string
   eventId: string
+  eventSlug: string
   filename: string
   publicSlug: string
   imageUrl: string

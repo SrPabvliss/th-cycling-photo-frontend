@@ -8,7 +8,6 @@ import { PHOTO_ROUTE_NAMES } from '@/features/photos/routes'
 import { usePhotosGalleryQuery } from '@/features/photos/composables/queries/use-photos-gallery'
 import PhotoCard from '@/features/photos/presentation/components/PhotoCard/PhotoCard.vue'
 import { useEventDetailQuery } from '../../composables/queries/use-event-detail'
-import type { IEventDetail } from '../../types/responses/event-detail.response'
 import EventDetailHeader from '../components/EventDetailHeader/EventDetailHeader.vue'
 import EventStatCards from '../components/EventStatCards/EventStatCards.vue'
 import EventDetailSkeleton from '../components/EventDetailSkeleton/EventDetailSkeleton.vue'
@@ -21,9 +20,11 @@ import PhotoCategoryManager from '@/features/photo-categories/presentation/compo
 
 const route = useRoute()
 const router = useRouter()
-const id = computed(() => route.params.id as IEventDetail['id'])
+const slug = computed(() => route.params.slug as string)
 
-const { data: event, isPending, isError, refetch } = useEventDetailQuery(id)
+const { data: event, isPending, isError, refetch } = useEventDetailQuery(slug)
+
+const id = computed(() => event.value?.id ?? '')
 
 const recentPhotosPage = ref(1)
 const recentPhotosStatus = ref(null)
@@ -36,12 +37,12 @@ const { data: recentPhotos } = usePhotosGalleryQuery(
   RECENT_PHOTOS_LIMIT,
 )
 
-function handlePhotoClick(photoId: string) {
-  router.push({ name: PHOTO_ROUTE_NAMES.DETAIL, params: { id: photoId } })
+function handlePhotoClick(slug: string) {
+  router.push({ name: PHOTO_ROUTE_NAMES.DETAIL, params: { slug } })
 }
 
 function navigateToGallery() {
-  router.push({ name: PHOTO_ROUTE_NAMES.GALLERY, params: { eventId: id.value } })
+  router.push({ name: PHOTO_ROUTE_NAMES.GALLERY, params: { slug: slug.value } })
 }
 </script>
 
@@ -61,11 +62,11 @@ function navigateToGallery() {
       </div>
 
       <template v-else-if="event">
-        <EventDetailHeader :event="event" :event-id="id" />
+        <EventDetailHeader :event="event" :event-id="id" :event-slug="slug" />
 
         <div class="dashboard-grid">
           <NFlex vertical :size="24">
-            <EventQuickSearch :event-id="id" />
+            <EventQuickSearch :event-slug="slug" />
             <EventStatCards :event="event" />
 
             <NCard title="Fotos Recientes" size="small">
@@ -102,6 +103,7 @@ function navigateToGallery() {
           <NFlex vertical :size="24">
             <EventQuickActions
               :event-id="id"
+              :event-slug="slug"
               :event-name="event.name"
               :photo-count="event.photoCount"
             />

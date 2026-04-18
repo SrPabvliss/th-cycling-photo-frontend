@@ -22,8 +22,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  view: [id: IEventListItem['id']]
-  upload: [id: IEventListItem['id']]
+  view: [slug: IEventListItem['slug']]
+  upload: [slug: IEventListItem['slug']]
 }>()
 
 const displayLocation = computed(() => formatLocation(props.event))
@@ -38,7 +38,7 @@ const coverUrl = computed(() =>
   <article
     class="event-card"
     :class="{ 'event-card--featured': event.isFeatured }"
-    @click="emit('view', event.id)"
+    @click="emit('view', event.slug)"
   >
     <!-- Cover -->
     <div class="event-card__cover">
@@ -117,12 +117,12 @@ const coverUrl = computed(() =>
           v-if="event.photoCount === 0"
           block
           type="primary"
-          @click.stop="emit('upload', event.id)"
+          @click.stop="emit('upload', event.slug)"
         >
           <template #icon><NIcon :component="CloudUploadOutline" /></template>
           Subir Fotos
         </NButton>
-        <NButton v-else block @click.stop="emit('view', event.id)"> Ver Detalle </NButton>
+        <NButton v-else block @click.stop="emit('view', event.slug)"> Ver Detalle </NButton>
       </div>
     </div>
   </article>

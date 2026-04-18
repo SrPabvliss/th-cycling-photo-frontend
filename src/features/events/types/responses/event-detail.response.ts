@@ -1,8 +1,9 @@
-import type { CoverImageSource, EventStatus } from './event-list.response'
+import type { EventStatus } from './event-list.response'
 
-/** API projection from GET /events/:id — already camelCase from backend */
+/** API projection from GET /events/:slug — already camelCase from backend */
 export interface IApiEventDetail {
   id: string
+  slug: string
   name: string
   description: string | null
   date: string
@@ -12,7 +13,6 @@ export interface IApiEventDetail {
   cantonId: number | null
   coverImageUrl: string | null
   coverImageSlug: string | null
-  coverImageSource: CoverImageSource | null
   status: string
   isFeatured: boolean
   photoCount: number
@@ -25,6 +25,7 @@ export interface IApiEventDetail {
 /** Frontend domain type with parsed dates and typed status */
 export interface IEventDetail {
   id: string
+  slug: string
   name: string
   description: string | null
   date: Date
@@ -34,7 +35,6 @@ export interface IEventDetail {
   cantonId: number | null
   coverImageUrl: string | null
   coverImageSlug: string | null
-  coverImageSource: CoverImageSource | null
   status: EventStatus
   isFeatured: boolean
   photoCount: number
