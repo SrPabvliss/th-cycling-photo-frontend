@@ -25,7 +25,7 @@ defineProps<{
       </p>
 
       <div class="completed-event-card__footer">
-        <span>{{ event.totalClassified }} fotos clasificadas</span>
+        <span>{{ event.totalRetouched }} fotos retocadas</span>
         <span>{{ formatDateTime(event.completedAt) }}</span>
       </div>
     </div>

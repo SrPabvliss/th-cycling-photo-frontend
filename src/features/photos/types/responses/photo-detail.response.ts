@@ -20,6 +20,7 @@ export interface IApiPhotoDetail {
   height: number | null
   status: string
   unclassifiedReason: string | null
+  retouchedImageUrl: string | null
   retouchedFileSize: number | null
   retouchedAt: string | null
   classifiedAt: string | null

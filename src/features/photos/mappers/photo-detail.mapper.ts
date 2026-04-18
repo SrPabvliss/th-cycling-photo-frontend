@@ -17,7 +17,7 @@ export function toPhotoDetail(api: IApiPhotoDetail): IPhotoDetail {
     height: api.height,
     status: api.status as PhotoStatus,
     unclassifiedReason: api.unclassifiedReason,
-    retouchedImageUrl: api.retouchedFileSize ? api.imageUrl : null,
+    retouchedImageUrl: api.retouchedImageUrl,
     retouchedFileSize: api.retouchedFileSize,
     retouchedAt: api.retouchedAt ? new Date(api.retouchedAt) : null,
     classifiedAt: api.classifiedAt ? new Date(api.classifiedAt) : null,

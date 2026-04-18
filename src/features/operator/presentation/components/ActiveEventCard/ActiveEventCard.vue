@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { NButton, NIcon, NProgress } from 'naive-ui'
+import { computed } from 'vue'
+import { NButton, NIcon } from 'naive-ui'
 import { PlayOutline } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
@@ -12,6 +13,16 @@ const props = defineProps<{
 const emit = defineEmits<{
   select: [eventId: string]
 }>()
+
+const hasPendingWork = computed(() => props.event.retouch.pendingPhotos > 0)
+
+const retouchLabel = computed(() => {
+  if (!hasPendingWork.value) return 'Sin trabajo asignado'
+  const { pendingPhotos, pendingOrders } = props.event.retouch
+  const photoText = pendingPhotos === 1 ? '1 foto' : `${pendingPhotos} fotos`
+  const orderText = pendingOrders === 1 ? '1 orden' : `${pendingOrders} órdenes`
+  return `${photoText} en ${orderText} por retocar`
+})
 </script>
 
 <template>
@@ -29,25 +40,12 @@ const emit = defineEmits<{
     </div>
 
     <div class="active-event-card__body">
-      <div class="active-event-card__progress-info">
-        <span class="active-event-card__progress-text">
-          {{ event.classification.classified }} / {{ event.classification.total }} fotos
-        </span>
-        <span class="active-event-card__progress-pct">
-          {{ event.classification.percentage }}%
-        </span>
-      </div>
-      <NProgress
-        type="line"
-        :percentage="event.classification.percentage"
-        :show-indicator="false"
-        :height="6"
-        :border-radius="3"
-      />
+      <p class="active-event-card__retouch-info">{{ retouchLabel }}</p>
 
       <NButton
         type="primary"
         class="active-event-card__action"
+        :disabled="!hasPendingWork"
         @click="emit('select', props.event.eventId)"
       >
         <template #icon>
