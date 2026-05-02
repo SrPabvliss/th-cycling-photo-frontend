@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import PublicTopbar from './PublicTopbar.vue'
 import PublicNavbar from './PublicNavbar.vue'
 import PublicFooter from './PublicFooter.vue'
 </script>
 
 <template>
   <div class="public-layout">
+    <PublicTopbar />
     <PublicNavbar />
     <main class="public-layout-content">
       <slot />

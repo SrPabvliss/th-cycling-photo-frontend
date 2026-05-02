@@ -1,56 +1,154 @@
-.public-navbar {
-  border-bottom: 1px solid #e5e7eb;
-  background: #fff;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-
-.public-navbar-inner {
+.pub-nav {
+  background: var(--titan-paper);
+  border-bottom: 1px solid rgba(10, 15, 20, 0.08);
+  padding: 14px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 16px 32px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 
-.public-navbar-brand {
+.pub-nav-brand {
   display: flex;
   align-items: center;
   gap: 10px;
-  cursor: pointer;
-}
-
-.public-navbar-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1a1f2c;
-}
-
-.public-navbar-links {
-  display: flex;
-  align-items: center;
-  gap: 32px;
-}
-
-.public-navbar-link {
-  font-size: 14px;
-  font-weight: 500;
-  color: #4b5563;
   text-decoration: none;
+  color: var(--titan-ink);
+}
+
+.pub-nav-logo {
+  height: 32px;
+  width: auto;
+}
+
+.pub-nav-wordmark {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: var(--titan-ink);
+}
+
+.pub-nav-wordmark small {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  color: var(--titan-steel);
+  margin-top: 2px;
+}
+
+.pub-nav-links {
+  display: none;
+  gap: 36px;
+}
+
+.pub-nav-link {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--titan-ink);
+  position: relative;
+  padding: 6px 0;
   transition: color 0.15s;
 }
 
-.public-navbar-link:hover {
-  color: #1a1f2c;
+.pub-nav-link--active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  background: var(--titan-blue);
 }
 
-.public-navbar-link--accent {
-  color: #105080;
-  font-weight: 600;
+.pub-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.public-navbar-link--accent:hover {
-  color: #005080;
+.pub-nav-btn {
+  border: 1.5px solid var(--titan-ink);
+  padding: 8px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: transparent;
+  cursor: pointer;
+  font-family: 'Archivo', sans-serif;
+  color: var(--titan-ink);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.pub-nav-btn:hover {
+  background: var(--titan-ink);
+  color: var(--titan-paper);
+}
+
+.pub-nav-cart {
+  width: 40px;
+  height: 40px;
+  border: 1.5px solid var(--titan-ink);
+  background: var(--titan-ink);
+  color: var(--titan-paper);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+}
+
+.pub-nav-cart :deep(.cart-icon) {
+  color: var(--titan-paper);
+  padding: 0;
+}
+
+@media (min-width: 768px) {
+  .pub-nav {
+    padding: 18px 40px;
+  }
+
+  .pub-nav-logo {
+    height: 42px;
+  }
+
+  .pub-nav-wordmark {
+    font-size: 20px;
+  }
+
+  .pub-nav-wordmark small {
+    font-size: 9px;
+    margin-top: 3px;
+  }
+
+  .pub-nav-links {
+    display: flex;
+  }
+
+  .pub-nav-actions {
+    gap: 14px;
+  }
+
+  .pub-nav-btn {
+    padding: 9px 18px;
+    font-size: 12px;
+  }
+
+  .pub-nav-cart {
+    width: 42px;
+    height: 42px;
+  }
 }

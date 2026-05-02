@@ -1,0 +1,67 @@
+.public-topbar {
+  background: var(--titan-ink);
+  color: var(--titan-fog);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.public-topbar-ticker {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.public-topbar-ticker span {
+  white-space: nowrap;
+}
+
+.public-topbar-ticker span::before {
+  content: '●';
+  color: var(--titan-blue-light);
+  margin-right: 6px;
+  font-size: 8px;
+  vertical-align: middle;
+}
+
+.public-topbar-season {
+  display: none;
+}
+
+.public-topbar-socials {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.public-topbar-socials a {
+  color: inherit;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.public-topbar-socials a:hover {
+  color: var(--titan-paper);
+}
+
+@media (min-width: 768px) {
+  .public-topbar {
+    font-size: 11px;
+    padding: 8px 40px;
+  }
+
+  .public-topbar-ticker {
+    gap: 28px;
+  }
+
+  .public-topbar-season {
+    display: inline;
+  }
+}
