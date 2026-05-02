@@ -1,6 +1,21 @@
 /* CSS custom properties mirrored from titan-tv-theme.ts palette */
 /* Keep in sync with the exported TS constants */
 :root {
+  /* ── Titan Design System ── */
+  --titan-blue: #1e6a8e;
+  --titan-blue-deep: #154e6b;
+  --titan-blue-dark: #0e3448;
+  --titan-blue-light: #3b8fb8;
+  --titan-ink: #0a0f14;
+  --titan-coal: #15191f;
+  --titan-graphite: #232a33;
+  --titan-steel: #6a7380;
+  --titan-fog: #b6bfcb;
+  --titan-bone: #f2efe9;
+  --titan-paper: #fbfaf6;
+  --titan-warn: #c4502e;
+  --titan-warn-soft: #f4e2dc;
+  --titan-success: #4a7b4f;
   --tt-primary: #105080;
   --tt-primary-dark: #005080;
   --tt-primary-light: #406090;

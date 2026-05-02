@@ -2,13 +2,12 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useForm } from '@tanstack/vue-form'
-import { NFormItem, NInput, NButton, NCard, NCheckbox, NIcon } from 'naive-ui'
+import { NIcon } from 'naive-ui'
 import { MailOutline, LockClosedOutline } from '@vicons/ionicons5'
 
-import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
+import { getFieldErrors } from '@/shared/utils/form.utils'
 import { getHomePath } from '@/core/auth/role-config'
-import PublicLayout from '@/core/layout/public/PublicLayout.vue'
-import TitanLogo from '@/core/layout/public/TitanLogo.vue'
+import AuthLayout from '@/core/layout/auth/AuthLayout.vue'
 import { useAuth } from '../../composables/use-auth'
 import { LOGIN_FORM_DEFAULTS, loginFormSchema } from '../../constants/login-form.schema'
 
@@ -17,6 +16,7 @@ const route = useRoute()
 const { login, isLoggingIn } = useAuth()
 
 const rememberMe = ref(false)
+const showPassword = ref(false)
 
 const form = useForm({
   defaultValues: LOGIN_FORM_DEFAULTS,
@@ -27,109 +27,156 @@ const form = useForm({
       router.push(redirect ?? getHomePath(user.role))
     } catch {
       // Error toast is shown by error interceptor
-      // Form preserves email field value
     }
   },
 })
 </script>
 
 <template>
-  <PublicLayout>
-    <div class="login-page">
-      <NCard class="login-card">
-        <div class="login-header">
-          <TitanLogo :size="56" />
-          <h1 class="login-title">Bienvenido de nuevo</h1>
-          <p class="login-subtitle">Acceso interno para administradores y clasificadores.</p>
-        </div>
+  <AuthLayout mode="login">
+    <!-- Header -->
+    <div class="auth-eyebrow">Acceso · Titan TV</div>
 
-        <form
-          @submit="
-            (e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              form.handleSubmit()
-            }
-          "
-        >
-          <form.Field
-            name="email"
-            :validators="{
-              onBlur: loginFormSchema.shape.email,
-              onSubmit: loginFormSchema.shape.email,
-            }"
-          >
-            <template v-slot="{ field }">
-              <NFormItem label="Correo electronico" required v-bind="fieldStatus(field)">
-                <NInput placeholder="correo@titantv.com" v-bind="fieldInput(field)">
-                  <template #prefix>
-                    <NIcon :component="MailOutline" color="#9CA3AF" />
-                  </template>
-                </NInput>
-              </NFormItem>
-            </template>
-          </form.Field>
-
-          <form.Field
-            name="password"
-            :validators="{
-              onBlur: loginFormSchema.shape.password,
-              onSubmit: loginFormSchema.shape.password,
-            }"
-          >
-            <template v-slot="{ field }">
-              <NFormItem required v-bind="fieldStatus(field)">
-                <template #label>
-                  <div class="login-password-label">
-                    <span>Contrasena</span>
-                    <a href="#" class="login-forgot" @click.prevent>Olvidaste tu contrasena?</a>
-                  </div>
-                </template>
-                <NInput
-                  type="password"
-                  show-password-on="click"
-                  placeholder="••••••••"
-                  :value="field.state.value"
-                  @update:value="field.handleChange"
-                  @blur="field.handleBlur"
-                  @keydown.enter="form.handleSubmit()"
-                >
-                  <template #prefix>
-                    <NIcon :component="LockClosedOutline" color="#9CA3AF" />
-                  </template>
-                </NInput>
-              </NFormItem>
-            </template>
-          </form.Field>
-
-          <NCheckbox v-model:checked="rememberMe" class="login-remember">
-            Recordarme por 30 dias
-          </NCheckbox>
-
-          <form.Subscribe>
-            <template v-slot="{ canSubmit }">
-              <NButton
-                type="primary"
-                block
-                size="large"
-                :loading="isLoggingIn"
-                :disabled="!canSubmit"
-                attr-type="submit"
-                class="login-submit"
-              >
-                Iniciar sesion
-              </NButton>
-            </template>
-          </form.Subscribe>
-        </form>
-
-        <p class="login-create-account">
-          ¿No tienes cuenta?
-          <RouterLink to="/register">Crear cuenta</RouterLink>
-        </p>
-      </NCard>
+    <!-- Tabs -->
+    <div class="auth-tabs" role="tablist">
+      <RouterLink to="/login" class="auth-tab auth-tab--active">Iniciar sesión</RouterLink>
+      <RouterLink to="/register" class="auth-tab">Crear cuenta</RouterLink>
     </div>
-  </PublicLayout>
+
+    <h1 class="auth-title">Bienvenido<br />de vuelta.</h1>
+    <p class="auth-sub">
+      Accede a tu archivo de fotos, gestiona tus pedidos y recibe alertas de nuevas galerías.
+    </p>
+    <div style="min-height: 14px" />
+
+    <!-- Form -->
+    <form
+      @submit="
+        (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          form.handleSubmit()
+        }
+      "
+    >
+      <!-- Email -->
+      <form.Field
+        name="email"
+        :validators="{ onBlur: loginFormSchema.shape.email, onSubmit: loginFormSchema.shape.email }"
+      >
+        <template v-slot="{ field }">
+          <div class="auth-field">
+            <label class="auth-label" :for="field.name">
+              Correo electrónico <span class="auth-req">*</span>
+            </label>
+            <div class="auth-input-wrap">
+              <span class="auth-field-icon">
+                <NIcon :component="MailOutline" :size="16" />
+              </span>
+              <input
+                :id="field.name"
+                type="email"
+                class="auth-input auth-input--icon"
+                placeholder="correo@ejemplo.com"
+                :value="field.state.value"
+                @input="(e) => field.handleChange((e.target as HTMLInputElement).value)"
+                @blur="field.handleBlur"
+              />
+            </div>
+            <div v-if="field.state.meta.errors.length" class="auth-field-error">
+              {{ getFieldErrors(field.state.meta.errors) }}
+            </div>
+          </div>
+        </template>
+      </form.Field>
+
+      <!-- Password -->
+      <form.Field
+        name="password"
+        :validators="{
+          onBlur: loginFormSchema.shape.password,
+          onSubmit: loginFormSchema.shape.password,
+        }"
+      >
+        <template v-slot="{ field }">
+          <div class="auth-field">
+            <label class="auth-label auth-label--row" :for="field.name">
+              <span>Contraseña <span class="auth-req">*</span></span>
+              <a href="#" class="auth-label-link" @click.prevent>¿Olvidaste tu contraseña?</a>
+            </label>
+            <div class="auth-input-wrap">
+              <span class="auth-field-icon">
+                <NIcon :component="LockClosedOutline" :size="16" />
+              </span>
+              <input
+                :id="field.name"
+                :type="showPassword ? 'text' : 'password'"
+                class="auth-input auth-input--icon auth-input--pass"
+                placeholder="Mínimo 8 caracteres"
+                :value="field.state.value"
+                @input="(e) => field.handleChange((e.target as HTMLInputElement).value)"
+                @blur="field.handleBlur"
+                @keydown.enter="form.handleSubmit()"
+              />
+              <button
+                type="button"
+                class="auth-pass-toggle"
+                :style="showPassword ? 'color: var(--titan-blue)' : ''"
+                @click="showPassword = !showPassword"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </button>
+            </div>
+            <div v-if="field.state.meta.errors.length" class="auth-field-error">
+              {{ getFieldErrors(field.state.meta.errors) }}
+            </div>
+          </div>
+        </template>
+      </form.Field>
+
+      <!-- Remember me -->
+      <label class="auth-checkbox-row">
+        <input v-model="rememberMe" type="checkbox" />
+        <span>Recordarme por 30 días en este dispositivo</span>
+      </label>
+
+      <!-- Submit -->
+      <form.Subscribe>
+        <template v-slot="{ canSubmit }">
+          <button type="submit" class="auth-btn-cta" :disabled="!canSubmit || isLoggingIn">
+            <span v-if="isLoggingIn">Ingresando…</span>
+            <template v-else>
+              Iniciar sesión
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </template>
+          </button>
+        </template>
+      </form.Subscribe>
+    </form>
+
+    <div class="auth-switch-row">
+      ¿No tienes cuenta? <RouterLink to="/register">Crear cuenta</RouterLink>
+    </div>
+  </AuthLayout>
 </template>
 
 <style scoped src="./styles/login-view.css" />

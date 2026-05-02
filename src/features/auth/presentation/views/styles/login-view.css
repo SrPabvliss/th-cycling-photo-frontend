@@ -1,77 +1,70 @@
-.login-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - 140px);
-  padding: 40px 32px;
-  background: #f8f9fa;
-}
+@import '../../styles/auth-form-fields.css';
 
-.login-card {
-  width: 100%;
-  max-width: 440px;
-}
-
-.login-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+/* ── Tabs ── */
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--titan-bone);
+  padding: 4px;
   margin-bottom: 32px;
-}
-
-.login-title {
-  margin: 8px 0 0;
-  font-size: 26px;
-  font-weight: 700;
-  color: #1a1f2c;
-}
-
-.login-subtitle {
-  margin: 0;
-  font-size: 14px;
-  color: #6b7280;
-}
-
-.login-password-label {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.login-forgot {
-  font-size: 13px;
-  font-weight: 500;
-  color: #105080;
   text-decoration: none;
 }
 
-.login-forgot:hover {
-  color: #005080;
-}
-
-.login-remember {
-  margin-bottom: 20px;
-}
-
-.login-submit {
-  margin-bottom: 16px;
-}
-
-.login-create-account {
-  margin: 0;
+.auth-tab {
+  padding: 12px 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--titan-steel);
   text-align: center;
-  font-size: 13px;
-  color: #6b7280;
-}
-
-.login-create-account a {
-  color: #105080;
-  font-weight: 500;
   text-decoration: none;
+  transition: all 0.18s ease;
 }
 
-.login-create-account a:hover {
-  text-decoration: underline;
+.auth-tab--active {
+  background: var(--titan-ink);
+  color: var(--titan-paper);
+}
+
+/* ── Form header ── */
+.auth-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--titan-blue-deep);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.auth-eyebrow::before {
+  content: '';
+  width: 24px;
+  height: 1.5px;
+  background: var(--titan-blue-deep);
+  flex-shrink: 0;
+}
+
+.auth-title {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: clamp(36px, 3.6vw, 48px);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+  color: var(--titan-ink);
+}
+
+.auth-sub {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--titan-graphite);
+  max-width: 38ch;
+  margin: 0 0 28px;
 }
