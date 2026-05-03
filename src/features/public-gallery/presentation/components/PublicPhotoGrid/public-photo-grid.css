@@ -1,84 +1,193 @@
-.virtual-grid {
-  height: calc(100vh - 200px);
-  min-height: 400px;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
+/* ── Grid ── */
+.photo-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
 }
 
-.grid-cell {
+.photo-grid--s {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (min-width: 768px) {
+  .photo-grid--l {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .photo-grid--m {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .photo-grid--s {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .photo-grid--l {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .photo-grid--m {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .photo-grid--s {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.sentinel {
+  height: 1px;
+}
+
+/* ── Photo cell ── */
+.photo {
   position: relative;
-  border-radius: 8px;
+  aspect-ratio: 4 / 5;
   overflow: hidden;
-  cursor: pointer;
-  border: 3px solid transparent;
-  transition: border-color 0.15s;
+  background: var(--titan-bone);
+  cursor: zoom-in;
 }
 
-.grid-cell:hover {
-  border-color: rgba(0, 0, 0, 0.15);
-}
-
-.grid-cell--selected {
-  border-color: #18a058;
-  box-shadow: 0 0 0 1px #18a058;
-}
-
-.grid-cell__img {
+.photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  transition:
+    transform 0.5s ease,
+    filter 0.3s ease;
 }
 
-.grid-cell__select {
+.photo:hover img {
+  transform: scale(1.04);
+}
+
+/* ── Watermark ── */
+.photo-watermark {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(0, 0, 0, 0.5);
-  border: none;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    -28deg,
+    transparent 0,
+    transparent 110px,
+    rgba(255, 255, 255, 0.15) 110px,
+    rgba(255, 255, 255, 0.15) 112px,
+    transparent 112px,
+    transparent 220px
+  );
+}
+
+/* ── Selection frame ── */
+.photo-frame {
+  position: absolute;
+  inset: 0;
+  border: 0 solid var(--titan-blue);
+  transition: border-width 0.15s;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.photo--selected .photo-frame {
+  border-width: 4px;
+}
+
+.photo--selected img {
+  filter: saturate(1.1) contrast(1.05);
+}
+
+/* ── "En tu pedido" badge ── */
+.photo-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 5;
+  background: var(--titan-success, #4a7b4f);
+  color: var(--titan-paper);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 5px 8px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: white;
-  cursor: pointer;
+  gap: 5px;
+  transform: translateY(-30px);
   opacity: 0;
   transition:
-    opacity 0.15s,
-    background 0.15s;
+    transform 0.2s ease,
+    opacity 0.2s ease;
+  pointer-events: none;
 }
 
-.grid-cell:hover .grid-cell__select,
-.grid-cell__select--active {
+.photo--selected .photo-badge {
+  transform: translateY(0);
   opacity: 1;
 }
 
-.grid-cell__select--active {
-  background: #18a058;
+/* ── Add button ── */
+.photo-add-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 6;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(10, 15, 20, 0.78);
+  backdrop-filter: blur(6px);
+  color: var(--titan-paper);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+  opacity: 1;
 }
 
-.grid-cell__select:hover {
-  background: rgba(0, 0, 0, 0.7);
+.photo-add-btn:hover {
+  background: var(--titan-blue);
+  border-color: var(--titan-blue);
+  transform: scale(1.1);
 }
 
-.grid-cell__select--active:hover {
-  background: #15803d;
+.photo-add-btn--added {
+  background: var(--titan-success, #4a7b4f);
+  border-color: var(--titan-success, #4a7b4f);
 }
 
-@media (max-width: 1024px) {
-  .virtual-grid {
-    height: calc(100vh - 340px);
+@media (min-width: 1024px) {
+  .photo-add-btn {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  .photo:hover .photo-add-btn {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .photo-add-btn--added {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
-@media (max-width: 768px) {
-  .virtual-grid {
-    height: calc(100vh - 300px);
-  }
-
-  .grid-cell {
-    border-width: 2px;
-  }
+/* ── ID tag ── */
+.photo-id-tag {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 5;
+  background: rgba(10, 15, 20, 0.7);
+  backdrop-filter: blur(6px);
+  color: var(--titan-paper);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  padding: 4px 7px;
+  pointer-events: none;
 }

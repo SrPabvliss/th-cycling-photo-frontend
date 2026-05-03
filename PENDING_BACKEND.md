@@ -36,3 +36,17 @@ La imagen de la sección upcoming está hardcodeada (Unsplash). Requiere que el 
 
 **Archivo:** `src/core/layout/public/PublicTopbar.vue`
 "Temporada 2026" y "Papallacta Downhill Open · 23–26 Abr" están hardcodeados. Requiere un endpoint de configuración global o del evento activo.
+
+---
+
+## Galería Evento — Cart bar "Vaciar" usa N llamadas individuales
+
+**Archivo:** `src/features/public-gallery/presentation/views/PublicEventGalleryView.vue`
+El botón "Vaciar" llama `removeFromCart` por cada foto seleccionada del evento (N requests). Para optimizar requiere un endpoint `DELETE /cart/events/:eventId` que vacíe todas las fotos de un evento en una sola llamada.
+
+---
+
+## Galería Evento — Búsqueda por dorsal + tag de dorsal en foto
+
+**Archivo:** `src/features/public-gallery/presentation/views/PublicEventGalleryView.vue`, `PublicPhotoGrid.vue`
+(1) El input de búsqueda por dorsal es solo UI — no filtra. (2) El tag de dorsal (`#045`) en la esquina inferior derecha de cada foto no se muestra. `IPublicPhoto` solo tiene `id` y `publicSlug`. Para que ambos funcionen requiere: que el endpoint `GET /public/events/:slug/photos` acepte un query param `bib` y que la respuesta incluya los dorsales detectados por foto (`bibs: string[]`). Luego agregar el param a `usePublicEventPhotosInfinite` y el tag al componente.
