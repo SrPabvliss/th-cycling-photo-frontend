@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { NIcon } from 'naive-ui'
-import { CameraOutline, LocationOutline, CalendarOutline, Star } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
 import { getAssetPresetUrl } from '@/shared/utils/cdn.utils'
@@ -9,7 +7,7 @@ import type { IPublicEventListItem } from '../../../types/responses/public-event
 
 const props = defineProps<{
   event: IPublicEventListItem
-  featured?: boolean
+  expiring?: { label: string; daysLeft: number; urgencyPct: number }
 }>()
 
 const emit = defineEmits<{
@@ -28,34 +26,63 @@ const location = computed(() => {
 
 <template>
   <article
-    class="pub-event-card"
-    :class="{ 'pub-event-card--featured': featured }"
+    class="ev-card"
+    :class="{ expiring: !!expiring }"
+    :style="expiring ? `--w: ${expiring.urgencyPct}%` : ''"
     @click="emit('click', event.slug)"
   >
-    <div class="pub-event-card__cover">
+    <div class="cover">
+      <!-- Expiring top banner -->
+      <div v-if="expiring" class="top-banner">
+        <span><span class="dot" />{{ expiring.label }}</span>
+        <span>{{ expiring.daysLeft }} días</span>
+      </div>
+
       <img v-if="coverUrl" :src="coverUrl" :alt="event.name" loading="lazy" />
-      <div v-else class="pub-event-card__cover-placeholder" />
-      <div v-if="featured" class="pub-event-card__featured-badge">
-        <NIcon :component="Star" :size="12" />
-        Destacado
+      <div v-else class="cover-placeholder" />
+
+      <!-- Photo count badge -->
+      <div class="photos">
+        <svg
+          width="11"
+          height="11"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <rect x="3" y="6" width="18" height="14" rx="1" />
+          <circle cx="12" cy="13" r="4" />
+          <path d="M9 6l2-3h2l2 3" />
+        </svg>
+        {{ event.photoCount.toLocaleString() }} fotos
       </div>
-      <div class="pub-event-card__overlay">
-        <NIcon :component="CameraOutline" :size="14" />
-        {{ event.photoCount }} fotos
+
+      <!-- Body overlay -->
+      <div class="body">
+        <h3>{{ event.name }}</h3>
+        <div class="meta">
+          <span v-if="location">📍 {{ location }}</span>
+          <span>{{ formatDate(event.date) }}</span>
+        </div>
       </div>
-    </div>
-    <div class="pub-event-card__body">
-      <h3 class="pub-event-card__title">{{ event.name }}</h3>
-      <div class="pub-event-card__meta">
-        <span v-if="location">
-          <NIcon :component="LocationOutline" :size="13" />
-          {{ location }}
-        </span>
-        <span>
-          <NIcon :component="CalendarOutline" :size="13" />
-          {{ formatDate(event.date) }}
-        </span>
+
+      <!-- Arrow -->
+      <div class="arrow">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
       </div>
+
+      <!-- Urgency bar (expiring only) -->
+      <div v-if="expiring" class="urgency-bar" />
     </div>
   </article>
 </template>

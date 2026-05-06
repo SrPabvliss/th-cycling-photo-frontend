@@ -53,8 +53,9 @@ const similarPhotos = computed(() => {
   for (let off = -2; off <= 2; off++) {
     if (off === 0) continue
     const idx = currentIndex.value + off
-    if (idx >= 0 && idx < props.photos.length) {
-      result.push({ index: idx, photo: props.photos[idx] })
+    const photo = props.photos[idx]
+    if (idx >= 0 && idx < props.photos.length && photo) {
+      result.push({ index: idx, photo })
     }
   }
   return result

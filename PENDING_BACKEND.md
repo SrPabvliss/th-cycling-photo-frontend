@@ -46,6 +46,18 @@ El botón "Vaciar" llama `removeFromCart` por cada foto seleccionada del evento 
 
 ---
 
+## Galería Evento — Categorías de fotos con etiqueta de día
+
+**Archivo:** `src/features/public-gallery/presentation/views/PublicEventGalleryView.vue`
+El filter bar muestra chips de categorías (Entrenamiento, Podio, Track walk, Social) con una etiqueta de día encima (ej. "Jue 23", "Sáb 25"). Actualmente se usan categorías mockeadas porque el endpoint `GET /public/events/:slug` devuelve `photoCategories: []` vacío o sin el campo `dayLabel`. Requiere:
+
+1. Que el endpoint devuelva las categorías del evento con sus fotos contadas.
+2. Que cada categoría incluya un campo `dayLabel: string` (ej. `"Jue 23"`) indicando el día al que pertenece.
+3. Extender `IApiPublicPhotoCategory` e `IPublicPhotoCategory` con `dayLabel: string` y actualizar el mapper.
+   Cuando el backend envíe datos reales, eliminar `MOCK_CATEGORIES` en `PublicEventGalleryView.vue`.
+
+---
+
 ## Galería Evento — Búsqueda por dorsal + tag de dorsal en foto
 
 **Archivo:** `src/features/public-gallery/presentation/views/PublicEventGalleryView.vue`, `PublicPhotoGrid.vue`

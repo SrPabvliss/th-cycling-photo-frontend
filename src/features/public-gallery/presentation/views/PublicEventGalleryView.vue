@@ -87,6 +87,25 @@ const eventLocation = computed(() => {
 const dorsalSearch = ref('')
 const gridSize = ref<'l' | 'm' | 's'>('m')
 
+// Categorías: usa las del backend si existen, sino mock
+// TODO(PENDING_BACKEND): el backend debe devolver dayLabel por categoría (ver PENDING_BACKEND.md)
+interface ICategoryChip {
+  id: number
+  dayLabel: string
+  name: string
+}
+const MOCK_CATEGORIES: ICategoryChip[] = [
+  { id: 1, dayLabel: 'Jue 23', name: 'Entrenamiento' },
+  { id: 2, dayLabel: 'Sáb 25', name: 'Podio' },
+  { id: 3, dayLabel: 'Vie 24', name: 'Track walk' },
+  { id: 4, dayLabel: 'Dom 26', name: 'Social' },
+]
+const categoryChips = computed<ICategoryChip[]>(() => {
+  const cats = event.value?.photoCategories ?? []
+  if (cats.length > 0) return cats.map((c) => ({ id: c.id, dayLabel: '', name: c.name }))
+  return MOCK_CATEGORIES
+})
+
 // --- Cart bar ---
 const router = useRouter()
 
@@ -105,7 +124,7 @@ function goToCheckout() {
 </script>
 
 <template>
-  <PublicLayout>
+  <PublicLayout hide-footer>
     <div v-if="isEventPending" class="ev-loading">
       <NSpin size="large" />
     </div>
@@ -180,13 +199,13 @@ function goToCheckout() {
               </span>
             </button>
             <button
-              v-for="cat in event.photoCategories"
+              v-for="cat in categoryChips"
               :key="cat.id"
               class="fb-chip"
               :class="{ 'fb-chip--active': activeCategoryId === cat.id }"
               @click="activeCategoryId = cat.id"
             >
-              <span class="fb-chip-label">&nbsp;</span>
+              <span class="fb-chip-label" v-html="cat.dayLabel || '&nbsp;'" />
               <span class="fb-chip-name">{{ cat.name }}</span>
             </button>
           </div>

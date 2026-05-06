@@ -2,6 +2,8 @@
 import PublicTopbar from './PublicTopbar.vue'
 import PublicNavbar from './PublicNavbar.vue'
 import PublicFooter from './PublicFooter.vue'
+
+defineProps<{ hideFooter?: boolean }>()
 </script>
 
 <template>
@@ -11,7 +13,7 @@ import PublicFooter from './PublicFooter.vue'
     <main class="public-layout-content">
       <slot />
     </main>
-    <PublicFooter />
+    <PublicFooter v-if="!hideFooter" />
   </div>
 </template>
 

@@ -185,7 +185,7 @@
   background: var(--titan-paper);
   border-bottom: 1px solid rgba(10, 15, 20, 0.1);
   position: sticky;
-  top: 93px; /* topbar ~33px + navbar ~60px */
+  top: 61px; /* solo navbar — el topbar no es sticky */
   z-index: 20;
 }
 
@@ -327,7 +327,7 @@
 
 @media (min-width: 768px) {
   .filter-bar {
-    top: 111px; /* topbar ~33px + navbar ~78px */
+    top: 78px; /* solo navbar 768px+ */
   }
 
   .fb-inner {
