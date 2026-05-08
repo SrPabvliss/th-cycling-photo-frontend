@@ -2,14 +2,29 @@
 import { NButton, NFlex, NIcon, NInput, NTooltip } from 'naive-ui'
 import { SearchOutline } from '@vicons/ionicons5'
 
-import { COLOR_PALETTE } from '@/features/classifications/constants/color-palette'
+import {
+  COLOR_PALETTE,
+  COLOR_PALETTE_HEX,
+  COLOR_PALETTE_LABELS,
+  type ColorName,
+} from '@/shared/constants/color-palette'
 import type { IPhotoCategory } from '@/features/photo-categories/types/responses/photo-category.response'
-import type { PhotoStatus } from '../../../types/responses/photo-list.response'
+import type { PhotoStatus } from '@/shared/types/photo-enums'
+
+const PALETTE_OPTIONS: Array<{ name: ColorName; hex: string; label: string }> = COLOR_PALETTE.map(
+  (name) => ({
+    name,
+    hex: COLOR_PALETTE_HEX[name],
+    label: COLOR_PALETTE_LABELS[name],
+  }),
+)
 
 const STATUS_OPTIONS: Array<{ label: string; status: PhotoStatus | null }> = [
   { label: 'Todas', status: null },
-  { label: 'Clasificadas', status: 'completed' },
+  { label: 'Procesadas', status: 'processed' },
   { label: 'Pendientes', status: 'pending' },
+  { label: 'Procesando', status: 'processing' },
+  { label: 'Revisadas', status: 'reviewed' },
   { label: 'Fallidas', status: 'failed' },
 ]
 
@@ -95,7 +110,7 @@ function toggleColor(list: string[], color: string): string[] {
 
       <p class="filter-subsection">Casco / Ropa</p>
       <div class="color-grid">
-        <NTooltip v-for="color in COLOR_PALETTE" :key="'h-' + color.name" :delay="300">
+        <NTooltip v-for="color in PALETTE_OPTIONS" :key="'h-' + color.name" :delay="300">
           <template #trigger>
             <div
               class="color-dot"
@@ -110,7 +125,7 @@ function toggleColor(list: string[], color: string): string[] {
               "
             />
           </template>
-          <span>{{ color.name }}<br /><small>Click = casco · Click der. = ropa</small></span>
+          <span>{{ color.label }}<br /><small>Click = casco · Click der. = ropa</small></span>
         </NTooltip>
       </div>
       <NFlex
@@ -125,7 +140,7 @@ function toggleColor(list: string[], color: string): string[] {
           class="color-tag"
           @click="emit('update:helmetColors', toggleColor(helmetColors, c))"
         >
-          🪖 {{ c }} ✕
+          🪖 {{ COLOR_PALETTE_LABELS[c as ColorName] }} ✕
         </span>
         <span
           v-for="c in clothingColors"
@@ -133,13 +148,13 @@ function toggleColor(list: string[], color: string): string[] {
           class="color-tag"
           @click="emit('update:clothingColors', toggleColor(clothingColors, c))"
         >
-          👕 {{ c }} ✕
+          👕 {{ COLOR_PALETTE_LABELS[c as ColorName] }} ✕
         </span>
       </NFlex>
 
       <p class="filter-subsection" style="margin-top: 12px">Bicicleta</p>
       <div class="color-grid">
-        <NTooltip v-for="color in COLOR_PALETTE" :key="'b-' + color.name" :delay="300">
+        <NTooltip v-for="color in PALETTE_OPTIONS" :key="'b-' + color.name" :delay="300">
           <template #trigger>
             <div
               class="color-dot"
@@ -148,7 +163,7 @@ function toggleColor(list: string[], color: string): string[] {
               @click="emit('update:bikeColors', toggleColor(bikeColors, color.name))"
             />
           </template>
-          {{ color.name }}
+          {{ color.label }}
         </NTooltip>
       </div>
       <NFlex v-if="bikeColors.length" :size="4" wrap style="margin-top: 6px">
@@ -158,7 +173,7 @@ function toggleColor(list: string[], color: string): string[] {
           class="color-tag"
           @click="emit('update:bikeColors', toggleColor(bikeColors, c))"
         >
-          🚲 {{ c }} ✕
+          🚲 {{ COLOR_PALETTE_LABELS[c as ColorName] }} ✕
         </span>
       </NFlex>
     </div>

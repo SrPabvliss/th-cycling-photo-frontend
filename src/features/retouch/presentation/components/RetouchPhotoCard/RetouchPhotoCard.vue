@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { NButton, NIcon, NSpin } from 'naive-ui'
 import { CloudUploadOutline, CheckmarkCircleOutline } from '@vicons/ionicons5'
 
-import { useUploadRetouched } from '@/features/classifications/composables/mutations/use-upload-retouched'
+import { useUploadRetouched } from '@/features/retouch/composables/mutations/use-upload-retouched'
 import { PENDING_RETOUCH_KEY } from '../../../composables/queries/use-pending-retouch'
 import { useQueryClient } from '@tanstack/vue-query'
 import type { IPendingRetouchPhoto } from '../../../types/responses/pending-retouch.response'
