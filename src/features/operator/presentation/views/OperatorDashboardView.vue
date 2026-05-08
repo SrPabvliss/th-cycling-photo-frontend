@@ -5,7 +5,7 @@ import { NButton, NCard, NEmpty, NFlex, NIcon, NResult, NSpin } from 'naive-ui'
 import { TimeOutline } from '@vicons/ionicons5'
 
 import { useAuth } from '@/features/auth/composables/use-auth'
-import { CLASSIFICATION_ROUTE_NAMES } from '@/features/classifications/routes'
+import { RETOUCH_ROUTE_NAMES } from '@/features/retouch/routes'
 import { useOperatorDashboardQuery } from '../../composables/queries/use-operator-dashboard'
 import DashboardGreeting from '../components/DashboardGreeting/DashboardGreeting.vue'
 import DashboardStatCards from '../components/DashboardStatCards/DashboardStatCards.vue'
@@ -25,9 +25,8 @@ const sortedActiveEvents = computed(() =>
 
 function handleSelectEvent(eventId: string) {
   router.push({
-    name: CLASSIFICATION_ROUTE_NAMES.WORKSPACE,
-    params: { eventId },
-    query: { mode: 'retouch' },
+    name: RETOUCH_ROUTE_NAMES.QUEUE,
+    query: { eventId },
   })
 }
 </script>

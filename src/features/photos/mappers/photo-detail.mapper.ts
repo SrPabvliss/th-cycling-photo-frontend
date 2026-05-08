@@ -1,5 +1,4 @@
-import { toParticipantDetail } from '@/features/classifications/mappers/cyclist-detail.mapper'
-import type { PhotoStatus } from '../types/responses/photo-list.response'
+import type { PhotoStatus } from '@/shared/types/photo-enums'
 import type { IApiPhotoDetail, IPhotoDetail } from '../types/responses/photo-detail.response'
 
 export function toPhotoDetail(api: IApiPhotoDetail): IPhotoDetail {
@@ -16,14 +15,12 @@ export function toPhotoDetail(api: IApiPhotoDetail): IPhotoDetail {
     width: api.width,
     height: api.height,
     status: api.status as PhotoStatus,
-    unclassifiedReason: api.unclassifiedReason,
     retouchedImageUrl: api.retouchedImageUrl,
     retouchedFileSize: api.retouchedFileSize,
     retouchedAt: api.retouchedAt ? new Date(api.retouchedAt) : null,
-    classifiedAt: api.classifiedAt ? new Date(api.classifiedAt) : null,
     capturedAt: api.capturedAt ? new Date(api.capturedAt) : null,
     uploadedAt: new Date(api.uploadedAt),
     processedAt: api.processedAt ? new Date(api.processedAt) : null,
-    detectedParticipants: api.detectedParticipants.map(toParticipantDetail),
+    reviewedAt: api.reviewedAt ? new Date(api.reviewedAt) : null,
   }
 }

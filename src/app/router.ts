@@ -4,7 +4,6 @@ import AppLayout from '@/core/layout/AppLayout.vue'
 import { registerAuthGuard } from '@/core/guards/auth.guard'
 import { standaloneRoutes } from '@/core/views/standalone-routes'
 import { authRoutes } from '@/features/auth/routes'
-import { classificationRoutes } from '@/features/classifications/routes'
 import { eventRoutes } from '@/features/events/routes'
 import { landingRoutes } from '@/features/landing/routes'
 import { photoRoutes } from '@/features/photos/routes'
@@ -41,7 +40,6 @@ const router = createRouter({
         ...operatorRoutes,
       ],
     },
-    ...classificationRoutes,
     {
       path: '/:pathMatch(.*)*',
       redirect: '/404',

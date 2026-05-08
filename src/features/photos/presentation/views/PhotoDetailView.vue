@@ -62,6 +62,7 @@ const { data: photo, isPending, isError, refetch } = usePhotoViewQuery(slug)
                   <NTag :type="PHOTO_STATUS_CONFIG[photo.status].type" size="small" round>
                     {{ PHOTO_STATUS_CONFIG[photo.status].label }}
                   </NTag>
+                  <NTag v-if="photo.reviewedAt" type="success" size="small" round> Revisada </NTag>
                 </NFlex>
               </template>
 
@@ -97,11 +98,6 @@ const { data: photo, isPending, isError, refetch } = usePhotoViewQuery(slug)
                     <p class="detail-info__value">{{ formatRelativeTime(photo.processedAt) }}</p>
                   </div>
                 </NFlex>
-
-                <div v-if="photo.unclassifiedReason" class="detail-info__reason">
-                  <p class="detail-info__label">Razón sin clasificar</p>
-                  <p class="detail-info__value">{{ photo.unclassifiedReason }}</p>
-                </div>
               </NFlex>
             </NCard>
           </NFlex>

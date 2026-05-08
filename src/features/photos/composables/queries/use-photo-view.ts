@@ -3,8 +3,8 @@ import { computed, type Ref } from 'vue'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
+import type { PhotoStatus } from '@/shared/types/photo-enums'
 import { PHOTO_QUERY_KEYS } from '../../constants/query-keys'
-import type { PhotoStatus } from '../../types/responses/photo-list.response'
 import type { IApiPhotoView, IPhotoView } from '../../types/responses/photo-view.response'
 
 export function usePhotoViewQuery(slug: Ref<string>) {
@@ -17,6 +17,7 @@ export function usePhotoViewQuery(slug: Ref<string>) {
         status: data.status as PhotoStatus,
         uploadedAt: new Date(data.uploadedAt),
         processedAt: data.processedAt ? new Date(data.processedAt) : null,
+        reviewedAt: data.reviewedAt ? new Date(data.reviewedAt) : null,
       } satisfies IPhotoView
     },
     enabled: computed(() => !!slug.value),

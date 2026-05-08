@@ -1,15 +1,9 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { NCard, NIcon, NTooltip, useMessage } from 'naive-ui'
-import {
-  CloudDownloadOutline,
-  ColorPaletteOutline,
-  EyeOutline,
-  GiftOutline,
-} from '@vicons/ionicons5'
+import { CloudDownloadOutline, EyeOutline, GiftOutline } from '@vicons/ionicons5'
 
 import { PHOTO_ROUTE_NAMES } from '@/features/photos/routes'
-import { CLASSIFICATION_ROUTE_NAMES } from '@/features/classifications/routes'
 import { useDownloadZip } from '@/features/photos/composables/mutations/use-download-zip'
 
 const props = defineProps<{
@@ -46,20 +40,6 @@ async function handleDownloadZip() {
         <span class="quick-action__label">
           {{ isDownloading ? `ZIP ${progress}%` : 'Descargar ZIP' }}
         </span>
-      </button>
-      <button
-        class="quick-action"
-        :class="{ 'quick-action--disabled': photoCount === 0 }"
-        :disabled="photoCount === 0"
-        @click="
-          router.push({
-            name: CLASSIFICATION_ROUTE_NAMES.WORKSPACE,
-            params: { eventId: props.eventId },
-          })
-        "
-      >
-        <NIcon :component="ColorPaletteOutline" :size="24" color="var(--tt-primary)" />
-        <span class="quick-action__label">Clasificar</span>
       </button>
       <button
         class="quick-action"

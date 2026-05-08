@@ -1,8 +1,5 @@
-import type {
-  IApiPhotoListItem,
-  IPhotoListItem,
-  PhotoStatus,
-} from '../types/responses/photo-list.response'
+import type { PhotoStatus } from '@/shared/types/photo-enums'
+import type { IApiPhotoListItem, IPhotoListItem } from '../types/responses/photo-list.response'
 
 export function toPhotoListItem(api: IApiPhotoListItem): IPhotoListItem {
   return {
@@ -12,7 +9,7 @@ export function toPhotoListItem(api: IApiPhotoListItem): IPhotoListItem {
     thumbnailUrl: api.thumbnailUrl,
     status: api.status as PhotoStatus,
     uploadedAt: new Date(api.uploadedAt),
-    classifiedAt: api.classifiedAt ? new Date(api.classifiedAt) : null,
+    reviewedAt: api.reviewedAt ? new Date(api.reviewedAt) : null,
   }
 }
 

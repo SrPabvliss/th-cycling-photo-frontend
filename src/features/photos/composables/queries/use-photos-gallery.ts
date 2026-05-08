@@ -6,7 +6,8 @@ import { httpClient } from '@/core/http/axios-client'
 import type { IApiPagination } from '@/core/http/http-response.interface'
 import { PHOTO_QUERY_KEYS } from '../../constants/query-keys'
 import { toPhotoListItems } from '../../mappers/photo-list.mapper'
-import type { IApiPhotoListItem, PhotoStatus } from '../../types/responses/photo-list.response'
+import type { PhotoStatus } from '@/shared/types/photo-enums'
+import type { IApiPhotoListItem } from '../../types/responses/photo-list.response'
 
 export function usePhotosGalleryQuery(
   eventId: Ref<string>,
