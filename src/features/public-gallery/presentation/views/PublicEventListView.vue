@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { NSpin } from 'naive-ui'
+import { NSpin, useMessage } from 'naive-ui'
+import { useIntervalFn } from '@vueuse/core'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { formatDate } from '@/shared/utils/date.utils'
@@ -62,6 +63,10 @@ const filteredOtherEvents = computed(() => {
     case 'az':
       list = [...list].sort((a, b) => a.name.localeCompare(b.name))
       break
+    case 'expiring':
+      // TODO(PENDING_BACKEND): orden real requiere campo expiresAt por evento
+      list = [...list].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      break
     default:
       list = [...list].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   }
@@ -89,6 +94,36 @@ const eventsWithExpiring = computed(() =>
 
 function goToEvent(slug: string) {
   router.push({ name: PUBLIC_GALLERY_ROUTE_NAMES.EVENT_GALLERY, params: { slug } })
+}
+
+// ── Countdown ──
+// TODO(PENDING_BACKEND): fecha del próximo evento debe venir del endpoint de configuración global
+const NEXT_EVENT_DATE = new Date('2026-05-17T00:00:00')
+
+function calcCountdown() {
+  const diff = NEXT_EVENT_DATE.getTime() - Date.now()
+  if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 }
+  return {
+    days: Math.floor(diff / 86_400_000),
+    hours: Math.floor((diff % 86_400_000) / 3_600_000),
+    minutes: Math.floor((diff % 3_600_000) / 60_000),
+    seconds: Math.floor((diff % 60_000) / 1_000),
+  }
+}
+
+const countdown = ref(calcCountdown())
+useIntervalFn(() => {
+  countdown.value = calcCountdown()
+}, 1000)
+
+// ── Notify form ──
+const message = useMessage()
+const notifyEmail = ref('')
+
+function handleNotify() {
+  if (!notifyEmail.value) return
+  message.success('¡Te avisamos cuando se publique la galería!')
+  notifyEmail.value = ''
 }
 </script>
 
@@ -152,6 +187,7 @@ function goToEvent(slug: string) {
             <select v-model="order">
               <option value="recent">Más recientes</option>
               <option value="photos">Más fotos</option>
+              <option value="expiring">Próximos a expirar</option>
               <option value="az">A–Z</option>
             </select>
           </div>
@@ -288,9 +324,61 @@ function goToEvent(slug: string) {
               @click="goToEvent"
             />
           </div>
+
+          <!-- TODO(PENDING_BACKEND): paginación real requiere endpoint con cursor/page -->
+          <div class="load-more-row">
+            <button class="load-more-btn">Cargar más eventos →</button>
+          </div>
         </div>
       </section>
     </template>
+
+    <!-- ── PRÓXIMO EVENTO ── -->
+    <section class="upcoming">
+      <div class="upcoming-wrap upcoming-inner">
+        <div class="upcoming-image">
+          <div class="upcoming-corners" />
+          <div class="upcoming-stamp">Save the date · 17 May 2026</div>
+        </div>
+
+        <div class="upcoming-body">
+          <div class="upcoming-eyebrow">Próximamente · Coming up</div>
+          <h2 class="upcoming-title">Algo grande<br />se asoma<br />en los Andes.</h2>
+          <p class="upcoming-desc">
+            La siguiente parada de la temporada viene con pista nueva. Sigue la cobertura y sé el
+            primero en ver las fotos.
+          </p>
+
+          <div class="countdown">
+            <div>
+              <div class="countdown-n">{{ String(countdown.days).padStart(2, '0') }}</div>
+              <div class="countdown-l">Días</div>
+            </div>
+            <div>
+              <div class="countdown-n">{{ String(countdown.hours).padStart(2, '0') }}</div>
+              <div class="countdown-l">Horas</div>
+            </div>
+            <div>
+              <div class="countdown-n">{{ String(countdown.minutes).padStart(2, '0') }}</div>
+              <div class="countdown-l">Min</div>
+            </div>
+            <div>
+              <div class="countdown-n">{{ String(countdown.seconds).padStart(2, '0') }}</div>
+              <div class="countdown-l">Seg</div>
+            </div>
+          </div>
+
+          <form class="notify-form" @submit.prevent="handleNotify">
+            <input
+              v-model="notifyEmail"
+              type="email"
+              placeholder="tu@correo.com — te avisamos cuando se publique"
+            />
+            <button type="submit">Notificarme</button>
+          </form>
+        </div>
+      </div>
+    </section>
   </PublicLayout>
 </template>
 

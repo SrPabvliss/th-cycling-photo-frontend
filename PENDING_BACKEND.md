@@ -58,6 +58,34 @@ El filter bar muestra chips de categorías (Entrenamiento, Podio, Track walk, So
 
 ---
 
+## Cart Drawer — Bib tag y hora de foto en el grid
+
+**Archivo:** `src/features/cart/presentation/components/CartDrawer/CartDrawer.vue`
+El grid de fotos del drawer solo muestra los primeros 8 caracteres del `id`. El mockup muestra también el número de dorsal (`bib`) y la hora de captura (`time`). Requiere agregar `bibs: string[]` y `capturedAt: string` a `IApiCartPhoto`, `ICartPhoto` y el mapper.
+
+---
+
+## Cart Drawer — "Ver galería" del evento
+
+**Archivo:** `src/features/cart/presentation/components/CartDrawer/CartDrawer.vue`
+El enlace "Ver galería" dentro de cada grupo del drawer navega a `/gallery` (lista de eventos) como fallback porque `ICartGroup` no incluye el slug del evento. Requiere agregar `eventSlug: string` a `IApiCartGroup`, `ICartGroup` y el mapper para poder construir la ruta `/gallery/:slug`.
+
+---
+
+## Lista Eventos — Ordenar "Próximos a expirar"
+
+**Archivo:** `src/features/public-gallery/presentation/views/PublicEventListView.vue`
+La opción "Próximos a expirar" del select Orden está implementada en UI pero ordena por fecha ascendente como aproximación. Para que sea real requiere que el endpoint `GET /public/events` devuelva un campo `expiresAt: string | null` por evento, y actualizar `IApiPublicEventListItem`, `IPublicEventListItem` y el mapper con dicho campo. El sort entonces ordenará `expiresAt asc` poniendo primero los que expiran antes.
+
+---
+
+## Lista Eventos — Botón "Cargar más eventos"
+
+**Archivo:** `src/features/public-gallery/presentation/views/PublicEventListView.vue`
+El botón "Cargar más eventos →" está mockeado (sin handler). Requiere que el endpoint `GET /public/events` soporte paginación (cursor o page/limit) y que se implemente `useInfiniteQuery` con `fetchNextPage` conectado al botón. El botón debería ocultarse cuando no haya más páginas (`!hasNextPage`).
+
+---
+
 ## Galería Evento — Búsqueda por dorsal + tag de dorsal en foto
 
 **Archivo:** `src/features/public-gallery/presentation/views/PublicEventGalleryView.vue`, `PublicPhotoGrid.vue`
