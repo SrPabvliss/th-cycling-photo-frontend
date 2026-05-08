@@ -24,7 +24,7 @@ const router = useRouter()
 const cartStore = useCartStore()
 const { isAuthenticated } = useAuth()
 const { mutate: removeFromCart } = useRemoveFromCart()
-// TODO(PENDING_BACKEND): quitar cuando ICartGroup incluya eventSlug
+// TODO: workaround — busca el slug por nombre; eliminar cuando GET /cart devuelva eventSlug en ICartGroup
 const { data: publicEvents } = usePublicEventsQuery()
 
 function goToCheckout() {
@@ -46,7 +46,7 @@ function navigateAndClose(path: string) {
   router.push(path)
 }
 
-// TODO(PENDING_BACKEND): usar group.eventSlug directamente cuando el backend lo incluya
+// TODO: reemplazar con router.push({ name: EVENT_GALLERY, params: { slug: group.eventSlug } }) cuando el backend incluya eventSlug
 function goToEventGallery(group: ICartGroup) {
   const match = publicEvents.value?.find((e) => e.name === group.eventName)
   const target = match
@@ -73,7 +73,7 @@ function isCollapsed(id: string) {
   return collapsed.value.has(id)
 }
 
-// ── Remove all photos from a group (N calls — see PENDING_BACKEND) ──
+// TODO: N llamadas individuales — reemplazar con DELETE /cart/events/:eventId cuando el backend lo tenga
 function removeGroupPhotos(group: ICartGroup) {
   group.photos.forEach((p) => removeFromCart(p.id))
 }
@@ -196,10 +196,10 @@ function removeGroupPhotos(group: ICartGroup) {
                   />
                   <div class="td-p-info">
                     <div class="td-p-id-line">
-                      <!-- TODO(PENDING_BACKEND): bib tag requiere campo bibs[] en ICartPhoto -->
+                      <!-- TODO: oculto — mostrar dorsal cuando GET /cart incluya bibs[] en ICartPhoto -->
                       <span class="td-p-id">{{ photo.id.slice(0, 8) }}</span>
                     </div>
-                    <!-- TODO(PENDING_BACKEND): time/session requieren campos en ICartPhoto -->
+                    <!-- TODO: oculto — mostrar hora y sesión cuando GET /cart incluya capturedAt y session en ICartPhoto -->
                   </div>
                   <button
                     class="td-p-remove"

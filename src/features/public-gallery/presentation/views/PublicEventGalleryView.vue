@@ -85,11 +85,12 @@ const eventLocation = computed(() => {
 })
 
 // --- Filter bar ---
+// TODO: sin filtrar — conectar dorsalSearch al query param ?bib= de GET /public/events/:slug/photos cuando el backend lo soporte
 const dorsalSearch = ref('')
 const gridSize = ref<'l' | 'm' | 's'>('m')
 
 // Categorías: usa las del backend si existen, sino mock
-// TODO(PENDING_BACKEND): el backend debe devolver dayLabel por categoría (ver PENDING_BACKEND.md)
+// TODO: mock — categorías usan datos ficticios; backend debe incluir dayLabel por categoría en GET /public/events/:slug. Eliminar MOCK_CATEGORIES cuando lleguen datos reales
 interface ICategoryChip {
   id: number
   dayLabel: string
@@ -114,6 +115,7 @@ const cartThumbs = computed(() => eventPhotosInCart.value.slice(0, 5))
 const cartOverflow = computed(() => Math.max(0, eventPhotosInCart.value.length - 5))
 const showCartDrawer = ref(false)
 
+// TODO: N llamadas individuales — reemplazar con DELETE /cart/events/:eventId cuando el backend lo tenga
 function clearEventCart() {
   eventPhotosInCart.value.forEach((p) => removeFromCart(p.id))
 }

@@ -33,6 +33,7 @@ function handleEventClick(slug: string) {
 }
 
 // ── Countdown ──
+// TODO: fecha hardcoded — reemplazar con campo nextEventDate del endpoint de configuración global
 const NEXT_EVENT_DATE = new Date('2026-05-17T00:00:00')
 
 function calcCountdown() {
@@ -71,6 +72,7 @@ function handleNotify() {
       <div class="hero-watermark">TITAN · TV · DOWNHILL · MEDIA · EC · 2026</div>
       <div class="hero-content wrap">
         <div>
+          <!-- TODO: hardcoded — usar temporada activa del endpoint de configuración global -->
           <div class="hero-tag">Temporada 2026 · Activa</div>
           <h1 class="hero-title">Cada<br />curva.<br /><em>Cada salto.</em></h1>
           <p class="hero-sub">
@@ -225,6 +227,7 @@ function handleNotify() {
       <div class="wrap upcoming-inner">
         <div class="upcoming-image">
           <div class="upcoming-corners" />
+          <!-- TODO: hardcoded — imagen y fecha del próximo evento deben venir del backend (campo coverSlug + nextEventDate) -->
           <div class="upcoming-stamp">Save the date · 17 May 2026</div>
         </div>
 
@@ -261,6 +264,7 @@ function handleNotify() {
               type="email"
               placeholder="tu@correo.com — te avisamos cuando se publique"
             />
+            <!-- TODO: sin endpoint — backend debe exponer POST /notifications/subscribe para guardar el correo -->
             <button type="submit">Notificarme</button>
           </form>
         </div>

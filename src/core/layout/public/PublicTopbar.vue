@@ -1,6 +1,7 @@
 <template>
   <div class="public-topbar">
     <div class="public-topbar-ticker">
+      <!-- TODO: hardcoded — backend debe proveer temporada activa y nombre/fechas del evento activo (endpoint configuración global) -->
       <span class="public-topbar-season">Temporada 2026</span>
       <span>Papallacta Downhill Open · 23–26 Abr</span>
     </div>

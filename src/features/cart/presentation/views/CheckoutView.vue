@@ -313,7 +313,7 @@ onUnmounted(() => {
                     <div class="ck-rs-k">Eventos</div>
                     <div class="ck-rs-v">{{ cartStore.eventCount }}</div>
                   </div>
-                  <!-- TODO(PENDING_BACKEND): sesiones requiere campo sessions[] en ICartGroup -->
+                  <!-- TODO: oculto — mostrar sesiones cuando GET /cart incluya sessions[] en ICartGroup -->
                   <div>
                     <div class="ck-rs-k">Sesiones</div>
                     <div class="ck-rs-v">—</div>
@@ -380,7 +380,7 @@ onUnmounted(() => {
                           WhatsApp para este pedido
                           <span class="ck-req">*</span>
                         </label>
-                        <!-- TODO(PENDING_BACKEND): pre-llenar desde ICurrentUser cuando el backend incluya whatsapp -->
+                        <!-- TODO: pre-llenar desde ICurrentUser cuando el backend incluya campo whatsapp -->
                         <input
                           v-model="contactWhatsapp"
                           type="tel"
@@ -422,7 +422,7 @@ onUnmounted(() => {
                       valores exactos y te acompañará hasta la entrega.
                     </div>
                   </div>
-                  <!-- TODO(PENDING_BACKEND): ref. de orden disponible solo tras el envío -->
+                  <!-- TODO: hardcoded — reemplazar con ref. real devuelta por POST /orders tras el envío -->
                   <div class="ck-total-ref">
                     <div class="ck-total-ref-lbl">Ref.</div>
                     <div class="ck-total-ref-val">—</div>

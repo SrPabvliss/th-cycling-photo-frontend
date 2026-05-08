@@ -229,7 +229,7 @@ function handleCheckout() {
             >
           </div>
 
-          <!-- TODO(PENDING_BACKEND): select de sesión requiere campo sessions[] en ICartGroup -->
+          <!-- TODO: oculto — mostrar select de sesión cuando GET /cart incluya sessions[] en ICartGroup -->
 
           <!-- Observaciones -->
           <div class="cs-fld cs-fld--full">

@@ -64,7 +64,7 @@ const filteredOtherEvents = computed(() => {
       list = [...list].sort((a, b) => a.name.localeCompare(b.name))
       break
     case 'expiring':
-      // TODO(PENDING_BACKEND): orden real requiere campo expiresAt por evento
+      // TODO: mock — reemplazar con sort por expiresAt cuando el backend lo incluya en GET /public/events
       list = [...list].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       break
     default:
@@ -76,7 +76,7 @@ const filteredOtherEvents = computed(() => {
 
 const totalEvents = computed(() => events.value?.length ?? 0)
 
-// TODO(PENDING_BACKEND): totales de fotos, expirando y expiresAt por evento deben venir del backend
+// TODO: mock — totalPhotos, expirando y expiresAt deben venir del backend en GET /public/events (extender IApiPublicEventListItem)
 const MOCK_TOTAL_PHOTOS = '42,841'
 const MOCK_EXPIRING = 2
 const MOCK_EXPIRING_DATE = '12 May 2026'
@@ -97,7 +97,7 @@ function goToEvent(slug: string) {
 }
 
 // ── Countdown ──
-// TODO(PENDING_BACKEND): fecha del próximo evento debe venir del endpoint de configuración global
+// TODO: hardcoded — reemplazar con campo nextEventDate del endpoint de configuración global
 const NEXT_EVENT_DATE = new Date('2026-05-17T00:00:00')
 
 function calcCountdown() {
@@ -132,6 +132,7 @@ function handleNotify() {
     <!-- ── PAGE HEAD ── -->
     <section class="page-head">
       <div class="ph-inner">
+        <!-- TODO: hardcoded — usar temporada activa del endpoint de configuración global -->
         <div class="ph-eyebrow">Archivo · Temporada 2026</div>
         <div class="ph-row">
           <h1 class="ph-title">Eventos<br /><em>Titan TV.</em></h1>
@@ -325,7 +326,7 @@ function handleNotify() {
             />
           </div>
 
-          <!-- TODO(PENDING_BACKEND): paginación real requiere endpoint con cursor/page -->
+          <!-- TODO: sin implementar — conectar fetchNextPage cuando GET /public/events soporte paginación (cursor o page/limit) -->
           <div class="load-more-row">
             <button class="load-more-btn">Cargar más eventos →</button>
           </div>
@@ -374,6 +375,7 @@ function handleNotify() {
               type="email"
               placeholder="tu@correo.com — te avisamos cuando se publique"
             />
+            <!-- TODO: sin endpoint — backend debe exponer POST /notifications/subscribe para guardar el correo -->
             <button type="submit">Notificarme</button>
           </form>
         </div>

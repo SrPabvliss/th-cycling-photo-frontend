@@ -379,6 +379,7 @@ watch(countries, (list) => {
         </template>
       </form.Field>
 
+      <!-- TODO: no enviado al backend — agregar campo referralSource al endpoint POST /auth/register -->
       <div class="auth-field">
         <label class="auth-label" for="register-source">¿Cómo nos conociste?</label>
         <select id="register-source" class="auth-select">
