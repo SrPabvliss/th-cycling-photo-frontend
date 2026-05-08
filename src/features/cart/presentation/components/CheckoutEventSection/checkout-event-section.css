@@ -458,3 +458,25 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ── Field error state ── */
+.cs-fld--error input,
+.cs-fld--error select,
+.cs-fld--error textarea {
+  border-color: var(--titan-warn, #c4502e);
+}
+
+.cs-fld--error input:focus,
+.cs-fld--error select:focus,
+.cs-fld--error textarea:focus {
+  border-color: var(--titan-warn, #c4502e);
+}
+
+.cs-fld-error {
+  margin-top: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--titan-warn, #c4502e);
+  line-height: 1.4;
+}

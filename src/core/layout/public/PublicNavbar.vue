@@ -57,9 +57,9 @@ async function handleLogout() {
       </template>
       <RouterLink v-else to="/login" class="pub-nav-btn">Iniciar sesión</RouterLink>
 
-      <button class="pub-nav-cart" aria-label="Carrito" @click="showCart = true">
-        <CartIcon />
-      </button>
+      <div class="pub-nav-cart">
+        <CartIcon @click="showCart = true" />
+      </div>
     </div>
   </header>
 

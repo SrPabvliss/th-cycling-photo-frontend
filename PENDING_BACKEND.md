@@ -86,6 +86,27 @@ El botón "Cargar más eventos →" está mockeado (sin handler). Requiere que e
 
 ---
 
+## Checkout — Campo "Sesiones" por evento
+
+**Archivos:** `src/features/cart/presentation/components/CheckoutEventSection/CheckoutEventSection.vue` · `src/features/cart/presentation/views/CheckoutView.vue`
+El formulario por evento tiene un select de sesión comentado, y el bloque de estadísticas del paso de revisión muestra "Sesiones: —" hardcodeado. Requiere agregar `sessions: string[]` a `IApiCartGroup`, `ICartGroup` y el mapper. Con los datos reales, activar el select en el formulario y mostrar el conteo real en la revisión.
+
+---
+
+## Checkout Review — WhatsApp pre-llenado desde el perfil
+
+**Archivo:** `src/features/cart/presentation/views/CheckoutView.vue`
+El campo "WhatsApp para este pedido" en el paso de revisión siempre aparece vacío. Debería pre-llenarse desde el usuario autenticado. Requiere agregar `whatsapp: string | null` a `ICurrentUser` (respuesta del endpoint de perfil) y enlazarlo con `v-model` al `contactWhatsapp` ref cuando el valor exista.
+
+---
+
+## Cart Drawer — "Quitar todas" hace N llamadas individuales
+
+**Archivo:** `src/features/cart/presentation/components/CartDrawer/CartDrawer.vue`
+El botón "Quitar todas" dentro de cada grupo del drawer llama `removeFromCart` una vez por foto (N requests), igual que el "Vaciar" de la barra de la galería. Requiere el mismo endpoint `DELETE /cart/events/:eventId` descrito en la entrada de la galería para reemplazar ambos con una sola llamada.
+
+---
+
 ## Galería Evento — Búsqueda por dorsal + tag de dorsal en foto
 
 **Archivo:** `src/features/public-gallery/presentation/views/PublicEventGalleryView.vue`, `PublicPhotoGrid.vue`

@@ -5,9 +5,13 @@ import { useForm } from '@tanstack/vue-form'
 import { NIcon } from 'naive-ui'
 import { MailOutline, LockClosedOutline } from '@vicons/ionicons5'
 
+import { computed } from 'vue'
 import { getFieldErrors } from '@/shared/utils/form.utils'
 import { getHomePath } from '@/core/auth/role-config'
+import { getGalleryUrl } from '@/shared/utils/cdn.utils'
 import AuthLayout from '@/core/layout/auth/AuthLayout.vue'
+import { useCartStore } from '@/features/cart/stores/cart.store'
+import { useCartQuery } from '@/features/cart/composables/queries/use-cart'
 import { useAuth } from '../../composables/use-auth'
 import { LOGIN_FORM_DEFAULTS, loginFormSchema } from '../../constants/login-form.schema'
 
@@ -17,6 +21,17 @@ const { login, isLoggingIn } = useAuth()
 
 const rememberMe = ref(false)
 const showPassword = ref(false)
+
+// Cart return banner — shown when redirected from checkout with items in cart
+const cartStore = useCartStore()
+useCartQuery()
+const isCheckoutRedirect = computed(() => route.query.redirect === '/checkout')
+const showCartBanner = computed(() => isCheckoutRedirect.value && cartStore.totalCount > 0)
+const cartBannerThumbs = computed(() => {
+  const photos: string[] = []
+  cartStore.groups.forEach((g) => g.photos.forEach((p) => photos.push(p.publicSlug)))
+  return photos.slice(0, 3).map(getGalleryUrl)
+})
 
 const form = useForm({
   defaultValues: LOGIN_FORM_DEFAULTS,
@@ -34,6 +49,25 @@ const form = useForm({
 
 <template>
   <AuthLayout mode="login">
+    <!-- Cart return banner -->
+    <div v-if="showCartBanner" class="auth-cart-banner">
+      <div class="auth-cart-thumbs">
+        <div
+          v-for="(url, i) in cartBannerThumbs"
+          :key="i"
+          class="auth-cart-thumb"
+          :style="`background-image: url(${url})`"
+        />
+      </div>
+      <div class="auth-cart-banner-text">
+        <strong
+          >Tienes {{ cartStore.totalCount }} {{ cartStore.totalCount === 1 ? 'foto' : 'fotos' }} en
+          tu pedido</strong
+        >
+        <small>Inicia sesión para continuar donde lo dejaste</small>
+      </div>
+    </div>
+
     <!-- Header -->
     <div class="auth-eyebrow">Acceso · Titan TV</div>
 

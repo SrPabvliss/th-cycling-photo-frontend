@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 import { formatDate } from '@/shared/utils/date.utils'
 import { getGalleryUrl } from '@/shared/utils/cdn.utils'
@@ -41,6 +41,24 @@ const visibleThumbs = computed(() =>
 )
 const thumbLimit = computed(() => (isHeavy.value ? 8 : 6))
 const extraCount = computed(() => Math.max(0, props.group.photos.length - thumbLimit.value))
+
+// ── Inline validation ──
+const submitted = ref(false)
+const categoryError = computed(() => submitted.value && !props.form.categoryName)
+const bibError = computed(() => submitted.value && !props.form.bibNumber?.trim())
+
+function validate(): boolean {
+  submitted.value = true
+  return !!props.form.categoryName && !!props.form.bibNumber?.trim()
+}
+
+function handleNext() {
+  if (validate()) emit('next')
+}
+
+function handleCheckout() {
+  if (validate()) emit('checkout')
+}
 </script>
 
 <template>
@@ -173,7 +191,7 @@ const extraCount = computed(() => Math.max(0, props.group.photos.length - thumbL
       <div class="cs-form-body">
         <div class="cs-fgrid">
           <!-- Categoría -->
-          <div class="cs-fld">
+          <div class="cs-fld" :class="{ 'cs-fld--error': categoryError }">
             <label>
               Categoría
               <span class="cs-req">*</span>
@@ -189,10 +207,11 @@ const extraCount = computed(() => Math.max(0, props.group.photos.length - thumbL
                 {{ c.label }}
               </option>
             </select>
+            <span v-if="categoryError" class="cs-fld-error">Elige una categoría</span>
           </div>
 
           <!-- Dorsal -->
-          <div class="cs-fld">
+          <div class="cs-fld" :class="{ 'cs-fld--error': bibError }">
             <label>
               Número de dorsal
               <span class="cs-req">*</span>
@@ -204,7 +223,8 @@ const extraCount = computed(() => Math.max(0, props.group.photos.length - thumbL
               maxlength="10"
               @input="(e) => updateForm({ bibNumber: (e.target as HTMLInputElement).value })"
             />
-            <span class="cs-fld-hint"
+            <span v-if="bibError" class="cs-fld-error">Ingresa tu número de dorsal</span>
+            <span v-else class="cs-fld-hint"
               >Si no competiste, escribe <strong>S/N</strong> en observaciones.</span
             >
           </div>
@@ -260,7 +280,7 @@ const extraCount = computed(() => Math.max(0, props.group.photos.length - thumbL
           </button>
           <div v-else />
 
-          <button v-if="!isLast" class="cs-btn cs-btn--primary" @click="emit('next')">
+          <button v-if="!isLast" class="cs-btn cs-btn--primary" @click="handleNext">
             Siguiente evento
             <svg
               width="14"
@@ -277,7 +297,7 @@ const extraCount = computed(() => Math.max(0, props.group.photos.length - thumbL
             v-else
             class="cs-btn cs-btn--primary"
             :disabled="isCheckingOut"
-            @click="emit('checkout')"
+            @click="handleCheckout"
           >
             Revisar pedido
             <svg

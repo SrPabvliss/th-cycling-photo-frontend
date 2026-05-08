@@ -4,13 +4,6 @@
   background: var(--titan-bone, #f2efe9);
 }
 
-html:has(.ck-page),
-html:has(.ck-page) body,
-html:has(.ck-page) #app {
-  overflow: visible;
-  height: auto;
-}
-
 /* ── Checkout nav ── */
 .ck-nav {
   background: var(--titan-paper, #fbfaf6);

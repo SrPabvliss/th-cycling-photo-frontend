@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { formatDate } from '@/shared/utils/date.utils'
 import { useAuth } from '@/features/auth/composables/use-auth'
 import { useCartStore } from '../../stores/cart.store'
+import { useCartQuery } from '../../composables/queries/use-cart'
 import { useMergeCart } from '../../composables/mutations/use-merge-cart'
 import { useCheckout } from '../../composables/mutations/use-checkout'
 import { useCheckoutStepper, type IEventFormData } from '../../composables/use-checkout-stepper'
@@ -15,6 +16,7 @@ import CheckoutEventSection from '../components/CheckoutEventSection/CheckoutEve
 const router = useRouter()
 const cartStore = useCartStore()
 const { isAuthenticated, currentUser } = useAuth()
+const { isPending: isCartLoading } = useCartQuery()
 const { mutateAsync: mergeCart } = useMergeCart()
 const { mutateAsync: checkout, isPending: isCheckingOut } = useCheckout()
 
@@ -69,6 +71,22 @@ const allEventsComplete = computed(() => cartStore.groups.every((g) => isStepCom
 
 const isLargeOrder = computed(() => cartStore.totalCount > 20 || cartStore.eventCount > 3)
 
+// ── Local order reference (pre-checkout, frontend-generated) ──
+const ORDER_REF_KEY = 'titan_checkout_ref'
+function generateOrderRef(): string {
+  return (
+    'TT-' + new Date().getFullYear() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase()
+  )
+}
+const localOrderRef = ref(
+  sessionStorage.getItem(ORDER_REF_KEY) ??
+    (() => {
+      const ref = generateOrderRef()
+      sessionStorage.setItem(ORDER_REF_KEY, ref)
+      return ref
+    })(),
+)
+
 // ── Checkout submission ──
 const orderResults = ref<ICheckoutOrderResult[] | null>(null)
 
@@ -100,7 +118,32 @@ async function handleCheckout() {
   })
 
   orderResults.value = await checkout({ items })
+  sessionStorage.removeItem(ORDER_REF_KEY)
 }
+
+onMounted(() => {
+  document.documentElement.style.overflowY = 'auto'
+  document.documentElement.style.height = '100%'
+  document.body.style.height = 'auto'
+  document.body.style.overflow = 'visible'
+  const app = document.getElementById('app')
+  if (app) {
+    app.style.height = 'auto'
+    app.style.overflow = 'visible'
+  }
+})
+
+onUnmounted(() => {
+  document.documentElement.style.overflowY = ''
+  document.documentElement.style.height = ''
+  document.body.style.height = ''
+  document.body.style.overflow = ''
+  const app = document.getElementById('app')
+  if (app) {
+    app.style.height = ''
+    app.style.overflow = ''
+  }
+})
 </script>
 
 <template>
@@ -190,14 +233,21 @@ async function handleCheckout() {
             <h1 class="ck-title">Confirma tu <em>pedido.</em></h1>
           </div>
           <div class="ck-meta-line">
-            <span>{{ cartStore.totalCount }} foto{{ cartStore.totalCount !== 1 ? 's' : '' }}</span
+            <span
+              >Orden <strong>{{ localOrderRef }}</strong></span
             ><br />
             <strong>{{ formatDate(new Date()) }}</strong>
           </div>
         </div>
 
+        <!-- Loading state -->
+        <div v-if="isCartLoading" class="ck-empty">
+          <div class="ck-empty-icon skeleton-bg" style="border: none" />
+          <h3 class="ck-empty-title" style="opacity: 0.4">Cargando tu pedido…</h3>
+        </div>
+
         <!-- Empty state -->
-        <div v-if="cartStore.totalCount === 0" class="ck-empty">
+        <div v-else-if="cartStore.totalCount === 0" class="ck-empty">
           <div class="ck-empty-icon">
             <svg
               width="36"

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { NEmpty, NSpin } from 'naive-ui'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
@@ -13,6 +13,7 @@ import { usePublicEventDetailQuery } from '../../composables/queries/use-public-
 import { usePublicEventPhotosInfinite } from '../../composables/queries/use-public-event-photos'
 import PublicPhotoGrid from '../components/PublicPhotoGrid/PublicPhotoGrid.vue'
 import PhotoLightbox from '../components/PhotoLightbox/PhotoLightbox.vue'
+import CartDrawer from '@/features/cart/presentation/components/CartDrawer/CartDrawer.vue'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -107,19 +108,18 @@ const categoryChips = computed<ICategoryChip[]>(() => {
 })
 
 // --- Cart bar ---
-const router = useRouter()
-
 const eventPhotosInCart = computed(() => allPhotos.value.filter((p) => selectedIds.value.has(p.id)))
 const cartBarVisible = computed(() => eventPhotosInCart.value.length > 0)
 const cartThumbs = computed(() => eventPhotosInCart.value.slice(0, 5))
 const cartOverflow = computed(() => Math.max(0, eventPhotosInCart.value.length - 5))
+const showCartDrawer = ref(false)
 
 function clearEventCart() {
   eventPhotosInCart.value.forEach((p) => removeFromCart(p.id))
 }
 
-function goToCheckout() {
-  router.push('/checkout')
+function openCartDrawer() {
+  showCartDrawer.value = true
 }
 </script>
 
@@ -337,7 +337,7 @@ function goToCheckout() {
           </div>
           <div class="cart-bar-actions">
             <button class="cart-bar-btn-ghost" @click="clearEventCart">Vaciar</button>
-            <button class="cart-bar-btn-primary" @click="goToCheckout">
+            <button class="cart-bar-btn-primary" @click="openCartDrawer">
               Revisar pedido
               <svg
                 width="14"
@@ -354,6 +354,8 @@ function goToCheckout() {
         </div>
       </div>
     </Teleport>
+
+    <CartDrawer :show="showCartDrawer" @update:show="showCartDrawer = $event" />
   </PublicLayout>
 </template>
 
