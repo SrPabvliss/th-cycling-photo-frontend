@@ -17,6 +17,17 @@ import {
 
 const ECUADOR_ISO = 'EC'
 
+// TODO: no enviado al backend — agregar campo referralSource al endpoint POST /auth/register
+const referralOptions = [
+  { label: 'Fotógrafo en el evento', value: 'photographer' },
+  { label: 'Instagram', value: 'instagram' },
+  { label: 'Facebook', value: 'facebook' },
+  { label: 'YouTube', value: 'youtube' },
+  { label: 'Amigo / recomendación', value: 'friend' },
+  { label: 'Organizador del evento', value: 'organizer' },
+  { label: 'Otro', value: 'other' },
+]
+
 defineProps<{
   isSubmitting: boolean
   loginUrl?: string
@@ -353,10 +364,11 @@ watch(countries, (list) => {
 
     <!-- Country + ¿Cómo nos conociste? -->
     <div class="auth-two-cols">
-      <form.Field name="countryId" :validators="{ onSubmit: v.countryId }">
-        <template v-slot="{ field }">
-          <div class="auth-field">
-            <label class="auth-label">País <span class="auth-req">*</span></label>
+      <!-- auth-field wraps form.Field so both grid children are plain divs -->
+      <div class="auth-field">
+        <label class="auth-label" for="countryId">País <span class="auth-req">*</span></label>
+        <form.Field name="countryId" :validators="{ onSubmit: v.countryId }">
+          <template v-slot="{ field }">
             <NSelect
               class="auth-n-select"
               :options="countryOptions"
@@ -375,23 +387,19 @@ watch(countries, (list) => {
             <div v-if="field.state.meta.errors.length" class="auth-field-error">
               {{ getFieldErrors(field.state.meta.errors) }}
             </div>
-          </div>
-        </template>
-      </form.Field>
+          </template>
+        </form.Field>
+      </div>
 
       <!-- TODO: no enviado al backend — agregar campo referralSource al endpoint POST /auth/register -->
       <div class="auth-field">
-        <label class="auth-label" for="register-source">¿Cómo nos conociste?</label>
-        <select id="register-source" class="auth-select">
-          <option value="">Selecciona una opción</option>
-          <option>Fotógrafo en el evento</option>
-          <option>Instagram</option>
-          <option>Facebook</option>
-          <option>YouTube</option>
-          <option>Amigo / recomendación</option>
-          <option>Organizador del evento</option>
-          <option>Otro</option>
-        </select>
+        <label class="auth-label">¿Cómo nos conociste?</label>
+        <NSelect
+          class="auth-n-select"
+          :options="referralOptions"
+          placeholder="Selecciona una opción"
+          clearable
+        />
       </div>
     </div>
 

@@ -220,3 +220,39 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+@media (max-width: 720px) {
+  .stepper {
+    flex-direction: column;
+    overflow-x: visible;
+  }
+
+  .step-node {
+    min-width: 0;
+    padding: 14px 16px;
+    border-right: none;
+    border-bottom: 1px solid rgba(10, 15, 20, 0.1);
+  }
+
+  .step-node:last-child {
+    border-bottom: none;
+  }
+
+  /* Indicador activo pasa de borde inferior a borde izquierdo */
+  .step-node.active::after {
+    left: 0;
+    top: 0;
+    right: auto;
+    bottom: 0;
+    width: 3px;
+    height: auto;
+  }
+
+  .step-title {
+    white-space: normal;
+  }
+
+  .step-hint {
+    white-space: normal;
+  }
+}

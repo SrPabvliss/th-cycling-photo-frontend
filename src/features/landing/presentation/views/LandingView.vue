@@ -127,7 +127,7 @@ function handleNotify() {
                     Fecha
                     <strong>{{ formatDate(featuredEvent.date) }}</strong>
                   </div>
-                  <div v-if="featuredLocation">
+                  <div v-if="featuredLocation" class="current-info-loc">
                     Ubicación
                     <strong>{{ featuredLocation }}</strong>
                   </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useWindowSize } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import { NDrawer } from 'naive-ui'
 
@@ -24,6 +25,8 @@ const router = useRouter()
 const cartStore = useCartStore()
 const { isAuthenticated } = useAuth()
 const { mutate: removeFromCart } = useRemoveFromCart()
+const { width: windowWidth } = useWindowSize()
+const drawerWidth = computed(() => (windowWidth.value <= 768 ? windowWidth.value : 480))
 // TODO: workaround — busca el slug por nombre; eliminar cuando GET /cart devuelva eventSlug en ICartGroup
 const { data: publicEvents } = usePublicEventsQuery()
 
@@ -80,7 +83,12 @@ function removeGroupPhotos(group: ICartGroup) {
 </script>
 
 <template>
-  <NDrawer :show="show" :width="480" placement="right" @update:show="emit('update:show', $event)">
+  <NDrawer
+    :show="show"
+    :width="drawerWidth"
+    placement="right"
+    @update:show="emit('update:show', $event)"
+  >
     <div class="td-shell">
       <!-- ── HEAD ── -->
       <header class="td-head">

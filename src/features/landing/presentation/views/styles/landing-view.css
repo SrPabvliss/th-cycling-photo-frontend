@@ -289,6 +289,10 @@
   z-index: 2;
 }
 
+.current-info-loc {
+  display: none;
+}
+
 .current-photo-count {
   display: inline-flex;
   align-items: center;
@@ -344,6 +348,7 @@
 }
 
 .current-cta {
+  display: none;
   background: var(--titan-paper);
   color: var(--titan-ink);
   padding: 15px 24px;
@@ -353,7 +358,6 @@
   text-transform: uppercase;
   text-decoration: none;
   white-space: nowrap;
-  display: inline-flex;
   align-items: center;
   gap: 10px;
   width: 100%;
@@ -387,6 +391,14 @@
 
   .current-card-inner {
     padding: 48px;
+  }
+
+  .current-cta {
+    display: inline-flex;
+  }
+
+  .current-info-loc {
+    display: block;
   }
 
   .current-bottom {

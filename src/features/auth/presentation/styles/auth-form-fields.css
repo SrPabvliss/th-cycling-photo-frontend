@@ -187,12 +187,6 @@
   gap: 14px;
 }
 
-@media (max-width: 480px) {
-  .auth-two-cols {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* ── Select ── */
 .auth-select {
   width: 100%;
