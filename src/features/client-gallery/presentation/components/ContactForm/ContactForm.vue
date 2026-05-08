@@ -5,7 +5,7 @@ import { NButton, NFormItem, NIcon, NInput, NSelect } from 'naive-ui'
 import { SendOutline, ChevronBack, CheckmarkCircleOutline } from '@vicons/ionicons5'
 
 import { fieldInput } from '@/shared/utils/form.utils'
-import { useParticipantCategoriesQuery } from '@/features/photo-categories/composables/queries/use-participant-categories'
+import { useParticipantCategoriesQuery } from '@/features/participant-categories/composables/queries/use-participant-categories'
 import {
   CONTACT_FORM_DEFAULTS,
   type IContactFormData,

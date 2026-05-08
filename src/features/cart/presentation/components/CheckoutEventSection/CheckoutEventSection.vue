@@ -14,7 +14,7 @@ import {
 
 import { formatDate } from '@/shared/utils/date.utils'
 import { getGalleryUrl } from '@/shared/utils/cdn.utils'
-import { useParticipantCategoriesQuery } from '@/features/photo-categories/composables/queries/use-participant-categories'
+import { useParticipantCategoriesQuery } from '@/features/participant-categories/composables/queries/use-participant-categories'
 import type { ICartGroup } from '../../../types/responses/cart.response'
 import type { IEventFormData } from '../../../composables/use-checkout-stepper'
 
