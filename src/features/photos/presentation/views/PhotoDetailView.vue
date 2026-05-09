@@ -7,13 +7,15 @@ import { CalendarOutline, ImageOutline } from '@vicons/ionicons5'
 import { formatRelativeTime } from '@/shared/utils/date.utils'
 import { formatFileSize } from '@/shared/utils/format.utils'
 import PageHeader from '@/shared/components/PageHeader.vue'
-import { usePhotoViewQuery } from '../../composables/queries/use-photo-view'
+import { usePhotoDetailBySlugQuery } from '../../composables/queries/use-photo-detail-by-slug'
 import { PHOTO_STATUS_CONFIG } from '../../constants/status-config'
+import PhotoBibsGrid from '../components/PhotoBibsGrid/PhotoBibsGrid.vue'
+import PhotoColorsList from '../components/PhotoColorsList/PhotoColorsList.vue'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
-const { data: photo, isPending, isError, refetch } = usePhotoViewQuery(slug)
+const { data: photo, isPending, isError, refetch } = usePhotoDetailBySlugQuery(slug)
 </script>
 
 <template>
@@ -102,6 +104,16 @@ const { data: photo, isPending, isError, refetch } = usePhotoViewQuery(slug)
             </NCard>
           </NFlex>
         </div>
+
+        <section v-if="photo.bibs.length" class="detail-section">
+          <h2 class="detail-section__title">Placas detectadas</h2>
+          <PhotoBibsGrid :bibs="photo.bibs" />
+        </section>
+
+        <section v-if="photo.colors.length" class="detail-section">
+          <h2 class="detail-section__title">Colores detectados</h2>
+          <PhotoColorsList :colors="photo.colors" />
+        </section>
       </template>
     </div>
   </div>
