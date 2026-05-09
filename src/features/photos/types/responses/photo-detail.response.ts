@@ -1,4 +1,28 @@
-import type { PhotoStatus } from '@/shared/types/photo-enums'
+import type {
+  AttributeSource,
+  BibStatus,
+  ColorRegion,
+  PhotoStatus,
+} from '@/shared/types/photo-enums'
+
+export interface IApiBibAttribute {
+  id: string
+  digits: string
+  status: BibStatus | null
+  confidence: number | null
+  source: AttributeSource
+  cropUrl: string | null
+}
+
+export interface IApiColorAttribute {
+  id: string
+  region: ColorRegion
+  primaryColor: string
+  secondaryColor: string | null
+  confidence: number | null
+  source: AttributeSource
+  cropUrl: string | null
+}
 
 export interface IApiPhotoDetail {
   id: string
@@ -20,6 +44,27 @@ export interface IApiPhotoDetail {
   uploadedAt: string
   processedAt: string | null
   reviewedAt: string | null
+  bibs: IApiBibAttribute[]
+  colors: IApiColorAttribute[]
+}
+
+export interface IBibAttribute {
+  id: string
+  digits: string
+  status: BibStatus | null
+  confidence: number | null
+  source: AttributeSource
+  cropUrl: string | null
+}
+
+export interface IColorAttribute {
+  id: string
+  region: ColorRegion
+  primaryColor: string
+  secondaryColor: string | null
+  confidence: number | null
+  source: AttributeSource
+  cropUrl: string | null
 }
 
 export interface IPhotoDetail {
@@ -42,4 +87,6 @@ export interface IPhotoDetail {
   uploadedAt: Date
   processedAt: Date | null
   reviewedAt: Date | null
+  bibs: IBibAttribute[]
+  colors: IColorAttribute[]
 }

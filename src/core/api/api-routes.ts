@@ -52,6 +52,7 @@ export const API_ROUTES = {
     BASE: PHOTOS_BASE,
     BY_EVENT: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos`,
     DETAIL: (id: string) => `${PHOTOS_BASE}/${id}`,
+    DETAIL_BY_SLUG: (slug: string) => `${PHOTOS_BASE}/detail/${slug}`,
     VIEW: (slug: string) => `${PHOTOS_BASE}/view/${slug}`,
     SEARCH: `${PHOTOS_BASE}/search`,
     UPLOAD: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos`,

@@ -1,5 +1,31 @@
 import type { PhotoStatus } from '@/shared/types/photo-enums'
-import type { IApiPhotoDetail, IPhotoDetail } from '../types/responses/photo-detail.response'
+import type {
+  IApiBibAttribute,
+  IApiColorAttribute,
+  IApiPhotoDetail,
+  IBibAttribute,
+  IColorAttribute,
+  IPhotoDetail,
+} from '../types/responses/photo-detail.response'
+
+const toBib = (b: IApiBibAttribute): IBibAttribute => ({
+  id: b.id,
+  digits: b.digits,
+  status: b.status,
+  confidence: b.confidence,
+  source: b.source,
+  cropUrl: b.cropUrl,
+})
+
+const toColor = (c: IApiColorAttribute): IColorAttribute => ({
+  id: c.id,
+  region: c.region,
+  primaryColor: c.primaryColor,
+  secondaryColor: c.secondaryColor,
+  confidence: c.confidence,
+  source: c.source,
+  cropUrl: c.cropUrl,
+})
 
 export function toPhotoDetail(api: IApiPhotoDetail): IPhotoDetail {
   return {
@@ -22,5 +48,7 @@ export function toPhotoDetail(api: IApiPhotoDetail): IPhotoDetail {
     uploadedAt: new Date(api.uploadedAt),
     processedAt: api.processedAt ? new Date(api.processedAt) : null,
     reviewedAt: api.reviewedAt ? new Date(api.reviewedAt) : null,
+    bibs: api.bibs.map(toBib),
+    colors: api.colors.map(toColor),
   }
 }
