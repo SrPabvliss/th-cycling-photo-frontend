@@ -164,7 +164,10 @@ export const API_ROUTES = {
   },
   OPERATOR: {
     BASE: OPERATOR_BASE,
-    DASHBOARD: `${OPERATOR_BASE}/dashboard`,
+    DASHBOARD_SUMMARY: `${OPERATOR_BASE}/dashboard/summary`,
+    DASHBOARD_EVENTS_ACTIVE: `${OPERATOR_BASE}/dashboard/events/active`,
+    DASHBOARD_EVENTS_COMPLETED: `${OPERATOR_BASE}/dashboard/events/completed`,
+    DASHBOARD_RECENT_ACTIVITY: `${OPERATOR_BASE}/dashboard/recent-activity`,
     RETOUCH_QUEUE: (eventId: string) => `${OPERATOR_BASE}/events/${eventId}/retouch-queue`,
   },
 } as const

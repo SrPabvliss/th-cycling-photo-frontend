@@ -1,0 +1,13 @@
+.operator-greeting {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--tt-neutral-dark);
+  margin: 0;
+  line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+  .operator-greeting {
+    font-size: 26px;
+  }
+}

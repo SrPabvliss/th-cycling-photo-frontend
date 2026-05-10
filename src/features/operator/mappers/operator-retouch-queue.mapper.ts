@@ -1,7 +1,7 @@
 import type {
   IApiRetouchQueueOrder,
   IRetouchQueueOrder,
-} from '../types/responses/retouch-queue.response'
+} from '../types/responses/operator-retouch-queue.response'
 
 function toRetouchQueueOrder(api: IApiRetouchQueueOrder): IRetouchQueueOrder {
   return {

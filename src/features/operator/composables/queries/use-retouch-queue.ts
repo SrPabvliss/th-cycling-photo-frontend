@@ -3,9 +3,9 @@ import { useQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
-import { OPERATOR_QUERY_KEYS } from '../../constants/query-keys'
-import { toRetouchQueueOrders } from '../../mappers/retouch-queue.mapper'
-import type { IApiRetouchQueue } from '../../types/responses/retouch-queue.response'
+import { OPERATOR_QUERY_KEYS } from '../../constants/operator-query-keys'
+import { toRetouchQueueOrders } from '../../mappers/operator-retouch-queue.mapper'
+import type { IApiRetouchQueue } from '../../types/responses/operator-retouch-queue.response'
 
 export function useRetouchQueueQuery(eventId: Ref<string>, enabled: Ref<boolean> = ref(true)) {
   return useQuery({
