@@ -3,7 +3,7 @@ import { keepPreviousData, useQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
-import type { IApiPagination } from '@/core/http/http-response.interface'
+import { toPagination } from '@/core/http/pagination'
 import { PREVIEW_LINK_QUERY_KEYS } from '../../constants/query-keys'
 import { toPreviewLinkListItems } from '../../mappers/preview-link-list-item.mapper'
 import type { IApiPreviewLinkListItem } from '../../types/responses/preview-link-list-item.response'
@@ -17,9 +17,14 @@ export function usePreviewLinksListQuery(eventId: Ref<string>, page: Ref<number>
         { params: { page: page.value, limit } },
       )
 
+      const items = toPreviewLinkListItems(response.data)
       return {
-        items: toPreviewLinkListItems(response.data),
-        pagination: response.meta.pagination as IApiPagination,
+        items,
+        pagination: toPagination(response.meta.pagination, {
+          page: page.value,
+          limit,
+          itemsCount: items.length,
+        }),
       }
     },
     placeholderData: keepPreviousData,
