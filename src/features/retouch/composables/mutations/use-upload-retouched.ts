@@ -54,6 +54,7 @@ export function useUploadRetouched() {
     },
     onSuccess: (_data, { photoId }) => {
       queryClient.invalidateQueries({ queryKey: PHOTO_QUERY_KEYS.detail(photoId) })
+      queryClient.invalidateQueries({ queryKey: [API_ROUTES.PHOTOS.BASE, 'detail'] })
     },
   })
 }

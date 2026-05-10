@@ -10,6 +10,9 @@ const buildBib = (overrides: Partial<IBibAttribute> = {}): IBibAttribute => ({
   confidence: 0.9,
   source: 'ai',
   cropUrl: 'https://signed/crop.jpg',
+  digitsOriginal: '20',
+  wasCorrected: false,
+  correctedAt: null,
   ...overrides,
 })
 

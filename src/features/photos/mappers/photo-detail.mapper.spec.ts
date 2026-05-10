@@ -44,6 +44,9 @@ describe('toPhotoDetail', () => {
           confidence: 0.95,
           source: 'ai',
           cropUrl: 'https://signed/crops/bibs/0.jpg?sig=x',
+          digitsOriginal: '20',
+          wasCorrected: false,
+          correctedAt: null,
         },
       ],
     })
@@ -51,12 +54,63 @@ describe('toPhotoDetail', () => {
       {
         id: 'b1',
         digits: '20',
-        status: 'matched',
+        status: 'read',
         confidence: 0.95,
         source: 'ai',
         cropUrl: 'https://signed/crops/bibs/0.jpg?sig=x',
+        digitsOriginal: '20',
+        wasCorrected: false,
+        correctedAt: null,
       },
     ])
+  })
+
+  it('maps wasCorrected and digitsOriginal on bibs', () => {
+    const result = toPhotoDetail({
+      ...baseApi,
+      bibs: [
+        {
+          id: 'b-1',
+          digits: '42',
+          digitsOriginal: '24',
+          wasCorrected: true,
+          correctedAt: '2026-05-09T10:00:00Z',
+          status: 'read',
+          confidence: 0.9,
+          source: 'reviewer',
+          cropUrl: null,
+        },
+      ],
+    })
+    expect(result.bibs[0]!.digits).toBe('42')
+    expect(result.bibs[0]!.digitsOriginal).toBe('24')
+    expect(result.bibs[0]!.wasCorrected).toBe(true)
+    expect(result.bibs[0]!.correctedAt).toBeInstanceOf(Date)
+  })
+
+  it('maps color correction-tracking fields', () => {
+    const result = toPhotoDetail({
+      ...baseApi,
+      colors: [
+        {
+          id: 'c-1',
+          region: 'helmet',
+          primaryColor: 'rojo',
+          secondaryColor: 'blanco',
+          primaryColorOriginal: 'azul',
+          primaryWasCorrected: true,
+          secondaryColorOriginal: 'blanco',
+          secondaryWasCorrected: false,
+          confidence: 0.8,
+          source: 'reviewer',
+          cropUrl: null,
+        },
+      ],
+    })
+    expect(result.colors[0]!.primaryColorOriginal).toBe('azul')
+    expect(result.colors[0]!.primaryWasCorrected).toBe(true)
+    expect(result.colors[0]!.secondaryColorOriginal).toBe('blanco')
+    expect(result.colors[0]!.secondaryWasCorrected).toBe(false)
   })
 
   it('maps each color field through', () => {
@@ -71,6 +125,10 @@ describe('toPhotoDetail', () => {
           confidence: 0.9,
           source: 'ai',
           cropUrl: 'https://signed/crops/colors/helmet/0.jpg',
+          primaryColorOriginal: 'rojo',
+          primaryWasCorrected: false,
+          secondaryColorOriginal: 'blanco',
+          secondaryWasCorrected: false,
         },
       ],
     })
@@ -83,6 +141,10 @@ describe('toPhotoDetail', () => {
         confidence: 0.9,
         source: 'ai',
         cropUrl: 'https://signed/crops/colors/helmet/0.jpg',
+        primaryColorOriginal: 'rojo',
+        primaryWasCorrected: false,
+        secondaryColorOriginal: 'blanco',
+        secondaryWasCorrected: false,
       },
     ])
   })
@@ -98,6 +160,9 @@ describe('toPhotoDetail', () => {
           confidence: null,
           source: 'ai',
           cropUrl: null,
+          digitsOriginal: '20',
+          wasCorrected: false,
+          correctedAt: null,
         },
       ],
     })

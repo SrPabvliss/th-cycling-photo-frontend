@@ -13,10 +13,18 @@ export const COLOR_PALETTE = [
   'gris',
   'blanco',
   'dorado',
-  'plateado',
+  'beige',
 ] as const
 
 export type ColorName = (typeof COLOR_PALETTE)[number]
+
+const PALETTE_SET: ReadonlySet<string> = new Set(COLOR_PALETTE)
+
+/** Narrow a free-form string to a known ColorName, returning null for unknowns. */
+export function asColorName(value: string | null | undefined): ColorName | null {
+  if (value && PALETTE_SET.has(value)) return value as ColorName
+  return null
+}
 
 export const COLOR_PALETTE_HEX: Record<ColorName, string> = {
   rojo: '#E53935',
@@ -33,7 +41,7 @@ export const COLOR_PALETTE_HEX: Record<ColorName, string> = {
   gris: '#757575',
   blanco: '#FFFFFF',
   dorado: '#D4AF37',
-  plateado: '#C0C0C0',
+  beige: '#D6C4A3',
 }
 
 export const COLOR_PALETTE_LABELS: Record<ColorName, string> = {
@@ -51,5 +59,5 @@ export const COLOR_PALETTE_LABELS: Record<ColorName, string> = {
   gris: 'Gris',
   blanco: 'Blanco',
   dorado: 'Dorado',
-  plateado: 'Plateado',
+  beige: 'Beige',
 }

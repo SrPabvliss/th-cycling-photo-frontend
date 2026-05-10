@@ -12,6 +12,9 @@ export interface IApiBibAttribute {
   confidence: number | null
   source: AttributeSource
   cropUrl: string | null
+  digitsOriginal: string
+  wasCorrected: boolean
+  correctedAt: string | null
 }
 
 export interface IApiColorAttribute {
@@ -22,6 +25,10 @@ export interface IApiColorAttribute {
   confidence: number | null
   source: AttributeSource
   cropUrl: string | null
+  primaryColorOriginal: string
+  primaryWasCorrected: boolean
+  secondaryColorOriginal: string | null
+  secondaryWasCorrected: boolean
 }
 
 export interface IApiPhotoDetail {
@@ -55,6 +62,9 @@ export interface IBibAttribute {
   confidence: number | null
   source: AttributeSource
   cropUrl: string | null
+  digitsOriginal: string
+  wasCorrected: boolean
+  correctedAt: Date | null
 }
 
 export interface IColorAttribute {
@@ -65,6 +75,10 @@ export interface IColorAttribute {
   confidence: number | null
   source: AttributeSource
   cropUrl: string | null
+  primaryColorOriginal: string
+  primaryWasCorrected: boolean
+  secondaryColorOriginal: string | null
+  secondaryWasCorrected: boolean
 }
 
 export interface IPhotoDetail {
