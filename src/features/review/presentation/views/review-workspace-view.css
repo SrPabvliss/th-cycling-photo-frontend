@@ -1,0 +1,12 @@
+.review-workspace {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--rv-bg);
+}
+.review-workspace__loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

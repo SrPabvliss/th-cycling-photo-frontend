@@ -13,6 +13,7 @@ import { orderRoutes } from '@/features/orders/routes'
 import { previewLinkRoutes } from '@/features/preview-links/routes'
 import { publicGalleryRoutes } from '@/features/public-gallery/routes'
 import { retouchRoutes } from '@/features/retouch/routes'
+import { reviewRoutes } from '@/features/review/routes'
 import { buyerRoutes } from '@/features/buyers/routes'
 import { cartRoutes } from '@/features/cart/routes'
 import { operatorRoutes } from '@/features/operator/routes'
@@ -27,6 +28,7 @@ const router = createRouter({
     ...clientGalleryRoutes,
     ...deliveryRoutes,
     ...standaloneRoutes,
+    ...reviewRoutes,
     {
       path: '/',
       component: AppLayout,

@@ -1,17 +1,17 @@
 import type { GlobalThemeOverrides } from 'naive-ui'
 
-export const PRIMARY = '#105080'
-export const PRIMARY_DARK = '#005080'
-export const PRIMARY_LIGHT = '#406090'
+export const PRIMARY = '#2080F0'
+export const PRIMARY_DARK = '#1668CC'
+export const PRIMARY_LIGHT = '#4DA0F5'
 export const NEUTRAL_DARK = '#1A1F2C'
 export const SIDEBAR_ACCENT = '#141821'
 export const NEUTRAL_MID = '#808080'
-export const NEUTRAL_LIGHT = '#D4D4D8'
-export const BACKGROUND = '#F5F5F7'
+export const NEUTRAL_LIGHT = '#E6E7EB'
+export const BACKGROUND = '#F6F4EF'
 export const SURFACE = '#FFFFFF'
-export const SUCCESS = '#22C55E'
-export const WARNING = '#F59E0B'
-export const ERROR = '#EF4444'
+export const SUCCESS = '#18A058'
+export const WARNING = '#D99E0B'
+export const ERROR = '#D03050'
 
 export const titanTvTheme: GlobalThemeOverrides = {
   common: {
@@ -45,7 +45,7 @@ export const titanTvTheme: GlobalThemeOverrides = {
     borderColor: NEUTRAL_LIGHT,
     dividerColor: NEUTRAL_LIGHT,
 
-    borderRadius: '8px',
+    borderRadius: '10px',
     borderRadiusSmall: '6px',
 
     fontFamily:
@@ -57,12 +57,12 @@ export const titanTvTheme: GlobalThemeOverrides = {
     fontWeightStrong: '600',
     heightMedium: '38px',
     paddingMedium: '0 20px',
-    borderRadiusMedium: '8px',
+    borderRadiusMedium: '10px',
   },
 
   Card: {
-    borderRadius: '12px',
-    paddingMedium: '20px',
+    borderRadius: '14px',
+    paddingMedium: '16px',
     borderColor: NEUTRAL_LIGHT,
     boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
     titleFontWeight: '600',
@@ -79,7 +79,7 @@ export const titanTvTheme: GlobalThemeOverrides = {
 
   Input: {
     heightMedium: '38px',
-    borderRadius: '8px',
+    borderRadius: '10px',
   },
 
   DataTable: {

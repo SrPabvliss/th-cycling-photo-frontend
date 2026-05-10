@@ -39,6 +39,7 @@ export const API_ROUTES = {
     FEATURED: (id: string) => `${EVENTS_BASE}/${id}/featured`,
     OPERATORS: (id: string) => `${EVENTS_BASE}/${id}/operators`,
     OPERATOR: (eventId: string, userId: string) => `${EVENTS_BASE}/${eventId}/operators/${userId}`,
+    REVIEW_QUEUE: (eventId: string) => `${EVENTS_BASE}/${eventId}/review-queue`,
     ASSETS: {
       GET_ALL: (id: string) => `${EVENTS_BASE}/${id}/assets`,
       PRESIGNED_URL: (id: string, assetType: string) =>
@@ -69,6 +70,13 @@ export const API_ROUTES = {
     PARTICIPANTS_BY_PHOTO: (photoId: string) => `${PHOTOS_BASE}/${photoId}/participants`,
     RESUME_POINT: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/resume-point`,
     DOWNLOAD_MANIFEST: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/download-manifest`,
+    BIB_CORRECTIONS: (photoId: string, bibId: string) =>
+      `${PHOTOS_BASE}/${photoId}/bibs/${bibId}/corrections`,
+    COLOR_CORRECTIONS: (photoId: string, colorId: string) =>
+      `${PHOTOS_BASE}/${photoId}/colors/${colorId}/corrections`,
+    MARK_REVIEWED: (photoId: string) => `${PHOTOS_BASE}/${photoId}/reviewed`,
+    ADD_BIB: (photoId: string) => `${PHOTOS_BASE}/${photoId}/bibs`,
+    ADD_COLOR: (photoId: string) => `${PHOTOS_BASE}/${photoId}/colors`,
   },
   PHOTO_CATEGORIES: {
     GET_ALL: PHOTO_CATEGORIES_BASE,

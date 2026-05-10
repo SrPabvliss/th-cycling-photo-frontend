@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { NButton, NCard, NFlex, NIcon, NResult, NTag } from 'naive-ui'
-import { CalendarOutline, ImageOutline } from '@vicons/ionicons5'
+import { CalendarOutline, CheckmarkDoneOutline, ImageOutline } from '@vicons/ionicons5'
+
+import { REVIEW_ROUTE_NAMES } from '@/features/review/routes'
 
 import { formatRelativeTime } from '@/shared/utils/date.utils'
 import { formatFileSize } from '@/shared/utils/format.utils'
@@ -13,9 +15,19 @@ import PhotoBibsGrid from '../components/PhotoBibsGrid/PhotoBibsGrid.vue'
 import PhotoColorsList from '../components/PhotoColorsList/PhotoColorsList.vue'
 
 const route = useRoute()
+const router = useRouter()
 const slug = computed(() => route.params.slug as string)
 
 const { data: photo, isPending, isError, refetch } = usePhotoDetailBySlugQuery(slug)
+
+function goToReview() {
+  if (!photo.value?.eventSlug) return
+  router.push({
+    name: REVIEW_ROUTE_NAMES.WORKSPACE,
+    params: { eventSlug: photo.value.eventSlug },
+    query: { photo: photo.value.publicSlug },
+  })
+}
 </script>
 
 <template>
@@ -24,7 +36,12 @@ const { data: photo, isPending, isError, refetch } = usePhotoDetailBySlugQuery(s
       <PageHeader
         :title="photo?.filename ?? 'Detalle de Foto'"
         :back-to="'/events/' + (photo?.eventSlug ?? '') + '/photos'"
-      />
+      >
+        <NButton v-if="photo?.eventSlug" type="primary" @click="goToReview">
+          <template #icon><NIcon :component="CheckmarkDoneOutline" /></template>
+          Revisar este evento
+        </NButton>
+      </PageHeader>
       <!-- Loading -->
       <div v-if="isPending" class="detail-loading">
         <NCard>

@@ -11,6 +11,10 @@ const buildColor = (overrides: Partial<IColorAttribute> = {}): IColorAttribute =
   confidence: 0.9,
   source: 'ai',
   cropUrl: 'https://signed/crop.jpg',
+  primaryColorOriginal: 'rojo',
+  primaryWasCorrected: false,
+  secondaryColorOriginal: null,
+  secondaryWasCorrected: false,
   ...overrides,
 })
 

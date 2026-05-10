@@ -1,4 +1,5 @@
 import type { PhotoStatus } from '@/shared/types/photo-enums'
+import { normalizeColor } from '@/shared/utils/color.utils'
 import type {
   IApiBibAttribute,
   IApiColorAttribute,
@@ -15,16 +16,23 @@ const toBib = (b: IApiBibAttribute): IBibAttribute => ({
   confidence: b.confidence,
   source: b.source,
   cropUrl: b.cropUrl,
+  digitsOriginal: b.digitsOriginal,
+  wasCorrected: b.wasCorrected,
+  correctedAt: b.correctedAt ? new Date(b.correctedAt) : null,
 })
 
 const toColor = (c: IApiColorAttribute): IColorAttribute => ({
   id: c.id,
   region: c.region,
-  primaryColor: c.primaryColor,
-  secondaryColor: c.secondaryColor,
+  primaryColor: normalizeColor(c.primaryColor) as string,
+  secondaryColor: normalizeColor(c.secondaryColor),
   confidence: c.confidence,
   source: c.source,
   cropUrl: c.cropUrl,
+  primaryColorOriginal: normalizeColor(c.primaryColorOriginal) as string,
+  primaryWasCorrected: c.primaryWasCorrected,
+  secondaryColorOriginal: normalizeColor(c.secondaryColorOriginal),
+  secondaryWasCorrected: c.secondaryWasCorrected,
 })
 
 export function toPhotoDetail(api: IApiPhotoDetail): IPhotoDetail {

@@ -1,0 +1,34 @@
+.rv-add-color {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.rv-add-color__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.rv-add-color__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rv-text);
+  text-transform: capitalize;
+}
+.rv-add-color__hint {
+  font-size: 11px;
+  color: var(--rv-text-3);
+}
+.rv-add-color__row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.rv-add-color__error {
+  font-size: 12px;
+  color: var(--rv-error);
+  margin: 0;
+}
