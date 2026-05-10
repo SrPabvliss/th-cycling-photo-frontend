@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { useMessage } from 'naive-ui'
 
-import { usePhotoDownloadUrl } from '@/features/_legacy/classifications/composables/queries/use-photo-download-url'
+import { usePhotoDownloadUrl } from './queries/use-photo-download-url'
 import { useUploadRetouched } from '@/features/retouch/composables/mutations/use-upload-retouched'
 
 /** Photo download (presigned URL → anchor) + upload retouched (PUT → confirm). */
