@@ -3,7 +3,7 @@ import { keepPreviousData, useQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
-import type { IApiPagination } from '@/core/http/http-response.interface'
+import { toPagination } from '@/core/http/pagination'
 import type { PhotoStatus } from '@/shared/types/photo-enums'
 import { PHOTO_QUERY_KEYS } from '../../constants/query-keys'
 import { toPhotoListItems } from '../../mappers/photo-list.mapper'
@@ -56,9 +56,14 @@ export function usePhotosSearchQuery(
         const response = await httpClient.get<IApiPhotoListItem[]>(API_ROUTES.PHOTOS.SEARCH, {
           params,
         })
+        const items = toPhotoListItems(response.data)
         return {
-          items: toPhotoListItems(response.data),
-          pagination: response.meta.pagination as IApiPagination,
+          items,
+          pagination: toPagination(response.meta.pagination, {
+            page: page.value,
+            limit,
+            itemsCount: items.length,
+          }),
         }
       }
 
@@ -69,9 +74,14 @@ export function usePhotosSearchQuery(
         API_ROUTES.PHOTOS.BY_EVENT(f.eventId),
         { params },
       )
+      const items = toPhotoListItems(response.data)
       return {
-        items: toPhotoListItems(response.data),
-        pagination: response.meta.pagination as IApiPagination,
+        items,
+        pagination: toPagination(response.meta.pagination, {
+          page: page.value,
+          limit,
+          itemsCount: items.length,
+        }),
       }
     },
     placeholderData: keepPreviousData,

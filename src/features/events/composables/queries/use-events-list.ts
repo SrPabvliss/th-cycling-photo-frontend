@@ -3,7 +3,7 @@ import { keepPreviousData, useQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
-import type { IApiPagination } from '@/core/http/http-response.interface'
+import { toPagination } from '@/core/http/pagination'
 import { EVENT_QUERY_KEYS } from '../../constants/query-keys'
 import { toEventListItems } from '../../mappers/event-list.mapper'
 import type { IApiEventListItem } from '../../types/responses/event-list.response'
@@ -16,9 +16,14 @@ export function useEventsListQuery(page: Ref<number>, limit = 20) {
         params: { page: page.value, limit },
       })
 
+      const items = toEventListItems(response.data)
       return {
-        items: toEventListItems(response.data),
-        pagination: response.meta.pagination as IApiPagination,
+        items,
+        pagination: toPagination(response.meta.pagination, {
+          page: page.value,
+          limit,
+          itemsCount: items.length,
+        }),
       }
     },
     placeholderData: keepPreviousData,
