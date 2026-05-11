@@ -36,7 +36,7 @@ export function useReviewQueueQuery(
           params: {
             page: pageParam,
             limit: limit.value,
-            onlyPending: options.value.onlyPending ?? false,
+            status: options.value.onlyPending ? 'pending' : 'all',
           },
         },
       )

@@ -2,8 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
-import { PHOTO_QUERY_KEYS } from '@/features/photos/constants/query-keys'
-import { REVIEW_QUERY_KEYS } from '../../constants/query-keys'
+import { invalidateReviewWorkspaceQueries } from '../../utils/invalidate-review-workspace-queries'
 import type { IApplyColorCorrectionRequest } from '../../types/requests/apply-color-correction.request'
 import type { ICorrectionResultResponse } from '../../types/responses/correction-result.response'
 
@@ -19,10 +18,7 @@ export function useApplyColorCorrection() {
       return data
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: PHOTO_QUERY_KEYS.detailBySlug(variables.photoSlug),
-      })
-      queryClient.invalidateQueries({ queryKey: REVIEW_QUERY_KEYS.all() })
+      invalidateReviewWorkspaceQueries(queryClient, { photoSlug: variables.photoSlug })
     },
   })
 }

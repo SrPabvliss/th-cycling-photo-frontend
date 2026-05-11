@@ -11,9 +11,9 @@ import {
 import type { ColorRegion } from '../../../types/color-region.type'
 import { useApplyColorCorrection } from '../../../composables/mutations/use-apply-color-correction'
 import { useAsyncSaveState } from '@/shared/composables/use-async-save-state'
-import { useCropLightbox } from '../../../composables/use-crop-lightbox'
+import { useWorkspaceCropLightbox } from '@/features/workspace/composables/use-workspace-crop-lightbox'
 import { useGridKeyboardNav } from '@/shared/composables/use-grid-keyboard-nav'
-import { useReviewCardRegistration } from '../../../composables/use-review-card-registration'
+import { useWorkspaceCardRegistration } from '@/features/workspace/composables/use-workspace-card-registration'
 
 const props = defineProps<{
   color: IColorAttribute
@@ -24,10 +24,10 @@ const props = defineProps<{
 }>()
 
 const applyColorCorrection = useApplyColorCorrection()
-const lightbox = useCropLightbox()
+const lightbox = useWorkspaceCropLightbox()
 const save = useAsyncSaveState()
 const cardEl = ref<HTMLElement>()
-useReviewCardRegistration(props.color.id, props.region, cardEl)
+useWorkspaceCardRegistration(props.color.id, props.region, cardEl)
 const paletteGridEl = ref<HTMLElement>()
 const palette = useGridKeyboardNav(paletteGridEl, 8)
 const openPicker = ref<'primary' | 'secondary' | null>(null)

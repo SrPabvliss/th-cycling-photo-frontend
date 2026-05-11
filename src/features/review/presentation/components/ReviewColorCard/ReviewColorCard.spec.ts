@@ -9,8 +9,8 @@ vi.mock('../../../composables/mutations/use-apply-color-correction', () => ({
   }),
 }))
 
-import { CARD_NAV_KEY } from '../../../composables/keys'
-import { useCardNavigation } from '../../../composables/use-card-navigation'
+import { CARD_NAV_KEY } from '@/features/workspace/composables/keys'
+import { useWorkspaceCardNavigation } from '@/features/workspace/composables/use-workspace-card-navigation'
 import ReviewColorCard from './ReviewColorCard.vue'
 import type { IColorAttribute } from '@/features/photos/types/responses/photo-detail.response'
 
@@ -31,7 +31,7 @@ const baseColor: IColorAttribute = {
 function mountWithProviders(color: IColorAttribute) {
   const Comp = defineComponent({
     setup() {
-      provide(CARD_NAV_KEY, useCardNavigation())
+      provide(CARD_NAV_KEY, useWorkspaceCardNavigation())
       return () =>
         h(ReviewColorCard, {
           color,

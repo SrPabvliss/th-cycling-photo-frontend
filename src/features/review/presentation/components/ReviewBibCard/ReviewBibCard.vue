@@ -4,8 +4,8 @@ import type { IBibAttribute } from '@/features/photos/types/responses/photo-deta
 import { useApplyBibCorrection } from '../../../composables/mutations/use-apply-bib-correction'
 import { useAsyncSaveState } from '@/shared/composables/use-async-save-state'
 import { useBibConfidence } from '../../../composables/use-bib-confidence'
-import { useCropLightbox } from '../../../composables/use-crop-lightbox'
-import { useReviewCardRegistration } from '../../../composables/use-review-card-registration'
+import { useWorkspaceCropLightbox } from '@/features/workspace/composables/use-workspace-crop-lightbox'
+import { useWorkspaceCardRegistration } from '@/features/workspace/composables/use-workspace-card-registration'
 
 const props = defineProps<{
   bib: IBibAttribute
@@ -14,10 +14,10 @@ const props = defineProps<{
 }>()
 
 const applyBibCorrection = useApplyBibCorrection()
-const lightbox = useCropLightbox()
+const lightbox = useWorkspaceCropLightbox()
 const save = useAsyncSaveState()
 const cardEl = ref<HTMLElement>()
-useReviewCardRegistration(props.bib.id, 'bibs', cardEl)
+useWorkspaceCardRegistration(props.bib.id, 'bibs', cardEl)
 
 const isEditing = ref(false)
 const editValue = ref(props.bib.digits)

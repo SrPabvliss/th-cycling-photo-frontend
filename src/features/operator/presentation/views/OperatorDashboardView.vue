@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { NButton, NCard, NEmpty, NResult, NSpin } from 'naive-ui'
 
 import { useAuth } from '@/features/auth/composables/use-auth'
-import { REVIEW_ROUTE_NAMES } from '@/features/review/routes'
 import { RETOUCH_ROUTE_NAMES } from '@/features/retouch/routes'
+import PageHeader from '@/shared/components/PageHeader.vue'
+import { OPERATOR_ROUTE_NAMES } from '../../routes'
 import { useOperatorDashboardSummaryQuery } from '../../composables/queries/use-operator-dashboard-summary'
 import { useOperatorActiveEventsQuery } from '../../composables/queries/use-operator-active-events'
 import { useOperatorCompletedEventsQuery } from '../../composables/queries/use-operator-completed-events'
 import { useOperatorRecentActivityQuery } from '../../composables/queries/use-operator-recent-activity'
-import OperatorGreeting from '../components/OperatorGreeting/OperatorGreeting.vue'
 import OperatorKpiBand from '../components/OperatorKpiBand/OperatorKpiBand.vue'
 import OperatorQueueJumpCard from '../components/OperatorQueueJumpCard/OperatorQueueJumpCard.vue'
 import OperatorEventCard from '../components/OperatorEventCard/OperatorEventCard.vue'
@@ -30,8 +30,10 @@ const activeEvents = useOperatorActiveEventsQuery(activePage)
 const completedEvents = useOperatorCompletedEventsQuery(completedPage)
 const recentActivity = useOperatorRecentActivityQuery(activityPage)
 
+const greetingTitle = computed(() => `Hola, ${currentUser.value?.firstName ?? 'Operador'}`)
+
 function goToReviewQueue() {
-  // Cola review global aun no implementada — siguiente sprint.
+  router.push({ name: OPERATOR_ROUTE_NAMES.CROSS_EVENT_REVIEW_WORKSPACE })
 }
 
 function goToRetouchQueue() {
@@ -40,7 +42,7 @@ function goToRetouchQueue() {
 
 function goToEventReview(item: IOperatorActiveEvent) {
   router.push({
-    name: REVIEW_ROUTE_NAMES.WORKSPACE,
+    name: OPERATOR_ROUTE_NAMES.EVENT_REVIEW_QUEUE,
     params: { eventSlug: item.event.slug },
   })
 }
@@ -56,45 +58,41 @@ function goToEventRetouch(item: IOperatorActiveEvent) {
 <template>
   <div class="page-view">
     <div class="page-view__content operator-dashboard">
-      <OperatorGreeting :first-name="currentUser?.firstName ?? null" />
+      <PageHeader :title="greetingTitle" subtitle="Operador · Mi panel" />
+
+      <section>
+        <NSpin :show="summary.isLoading.value">
+          <NResult
+            v-if="summary.isError.value"
+            status="error"
+            title="Error al cargar el resumen"
+            size="small"
+          >
+            <template #footer>
+              <NButton size="small" @click="summary.refetch()">Reintentar</NButton>
+            </template>
+          </NResult>
+          <OperatorKpiBand v-else-if="summary.data.value" :summary="summary.data.value" />
+        </NSpin>
+      </section>
+
+      <section class="operator-dashboard__queues">
+        <OperatorQueueJumpCard
+          kind="review"
+          :count="summary.data.value?.pendingReviewCount ?? 0"
+          @click="goToReviewQueue"
+        />
+        <OperatorQueueJumpCard
+          kind="retouch"
+          :count="summary.data.value?.pendingRetouchCount ?? 0"
+          @click="goToRetouchQueue"
+        />
+      </section>
 
       <div class="operator-dashboard__grid">
         <div class="operator-dashboard__main">
-          <section>
-            <NSpin :show="summary.isLoading.value">
-              <NResult
-                v-if="summary.isError.value"
-                status="error"
-                title="Error al cargar el resumen"
-                size="small"
-              >
-                <template #footer>
-                  <NButton size="small" @click="summary.refetch()">Reintentar</NButton>
-                </template>
-              </NResult>
-              <OperatorKpiBand v-else-if="summary.data.value" :summary="summary.data.value" />
-            </NSpin>
-          </section>
-
-          <div class="operator-dashboard__queues">
-            <OperatorQueueJumpCard
-              kind="review"
-              :count="summary.data.value?.pendingReviewCount ?? 0"
-              disabled
-              disabled-hint="Proximamente"
-              @click="goToReviewQueue"
-            />
-            <OperatorQueueJumpCard
-              kind="retouch"
-              :count="summary.data.value?.pendingRetouchCount ?? 0"
-              @click="goToRetouchQueue"
-            />
-          </div>
-
           <section class="operator-dashboard__section">
-            <header class="operator-dashboard__section-head">
-              <h2 class="operator-dashboard__section-title">Mis eventos asignados</h2>
-            </header>
+            <h2 class="operator-dashboard__section-title">Mis eventos asignados</h2>
             <NSpin :show="activeEvents.isLoading.value">
               <NResult
                 v-if="activeEvents.isError.value"
@@ -106,18 +104,17 @@ function goToEventRetouch(item: IOperatorActiveEvent) {
                   <NButton size="small" @click="activeEvents.refetch()">Reintentar</NButton>
                 </template>
               </NResult>
-              <div
+              <NCard
                 v-else-if="!activeEvents.data.value || activeEvents.data.value.items.length === 0"
-                class="operator-dashboard__empty-card"
               >
-                <NEmpty description="Aun no tienes eventos asignados">
+                <NEmpty description="Aún no tienes eventos asignados">
                   <template #extra>
                     <span class="operator-dashboard__empty-hint">
-                      Un administrador te asignara eventos para revisar y retocar.
+                      Un administrador te asignará eventos para revisar y retocar.
                     </span>
                   </template>
                 </NEmpty>
-              </div>
+              </NCard>
               <div v-else class="operator-dashboard__events">
                 <OperatorEventCard
                   v-for="item in activeEvents.data.value.items"
@@ -131,10 +128,8 @@ function goToEventRetouch(item: IOperatorActiveEvent) {
           </section>
 
           <section class="operator-dashboard__section">
-            <header class="operator-dashboard__section-head">
-              <h2 class="operator-dashboard__section-title">Eventos completados</h2>
-            </header>
-            <NCard size="small" content-style="padding: 4px 12px;">
+            <h2 class="operator-dashboard__section-title">Eventos completados</h2>
+            <NCard>
               <NSpin :show="completedEvents.isLoading.value">
                 <NResult
                   v-if="completedEvents.isError.value"
@@ -143,7 +138,7 @@ function goToEventRetouch(item: IOperatorActiveEvent) {
                   size="small"
                 >
                   <template #footer>
-                    <NButton size="small" @click="completedEvents.refetch()"> Reintentar </NButton>
+                    <NButton size="small" @click="completedEvents.refetch()">Reintentar</NButton>
                   </template>
                 </NResult>
                 <OperatorCompletedList v-else :items="completedEvents.data.value?.items ?? []" />
@@ -153,11 +148,9 @@ function goToEventRetouch(item: IOperatorActiveEvent) {
         </div>
 
         <aside class="operator-dashboard__aside">
-          <section>
-            <header class="operator-dashboard__section-head">
-              <h2 class="operator-dashboard__section-title">Actividad reciente</h2>
-            </header>
-            <NCard size="small" content-style="padding: 6px 12px;">
+          <section class="operator-dashboard__section">
+            <h2 class="operator-dashboard__section-title">Actividad reciente</h2>
+            <NCard>
               <NSpin :show="recentActivity.isLoading.value">
                 <NResult
                   v-if="recentActivity.isError.value"
