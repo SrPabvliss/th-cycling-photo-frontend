@@ -1,0 +1,38 @@
+.completed-empty {
+  padding: 24px 16px;
+}
+
+.completed__cover {
+  width: 56px;
+  height: 40px;
+  border-radius: 6px;
+  background: var(--tt-neutral-light);
+  background-size: cover;
+  background-position: center;
+  flex: none;
+}
+
+.completed__name {
+  font-size: 14px;
+  color: #0a0a0a;
+  font-weight: 600;
+}
+
+.completed__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--tt-neutral-mid);
+  font-variant-numeric: tabular-nums;
+}
+
+.completed__sep {
+  opacity: 0.5;
+}
+
+.completed__photos {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}

@@ -1,0 +1,122 @@
+.rv-attrs {
+  width: var(--rv-attrs-width);
+  background: var(--rv-surface);
+  flex: none;
+  border-left: 1px solid var(--rv-border);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+.rv-attrs__hint-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: var(--rv-surface);
+  border-bottom: 1px solid var(--rv-divider);
+  font-size: 11px;
+  color: var(--rv-text-3);
+  flex: none;
+}
+.rv-attrs__hint-row .rv-kbd {
+  margin: 0 1px;
+}
+
+.rv-attrs__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 22px;
+  min-height: 0;
+}
+.rv-attrs__section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.rv-attrs__section-header--colors {
+  margin: 24px 0 16px;
+}
+.rv-attrs__section-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--rv-primary-tint);
+  color: var(--rv-primary);
+  flex: none;
+}
+.rv-attrs__section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--rv-text);
+}
+.rv-attrs__section-subtitle {
+  font-size: 12px;
+  color: var(--rv-text-3);
+}
+.rv-attrs__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.rv-attrs__add-dashed {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 14px;
+  border: 1.5px dashed var(--rv-border-strong);
+  background: var(--rv-surface-2);
+  color: var(--rv-text-2);
+  border-radius: var(--rv-r);
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    border-color 0.12s;
+}
+.rv-attrs__add-dashed:hover {
+  background: var(--rv-surface);
+  border-color: var(--rv-primary);
+  color: var(--rv-primary);
+}
+.rv-attrs__add-dashed[data-contextual-hidden='true'] {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.rv-attrs__footer {
+  padding: 16px 22px;
+  border-top: 1px solid var(--rv-border);
+  background: var(--rv-surface-2);
+}
+.rv-attrs__save {
+  width: 100%;
+  justify-content: center;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.rv-attrs__save-kbd {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+  margin-left: 8px;
+}
+.rv-attrs__hint {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--rv-text-3);
+  text-align: center;
+}
+.rv-attrs__hint strong {
+  color: var(--rv-text-2);
+}

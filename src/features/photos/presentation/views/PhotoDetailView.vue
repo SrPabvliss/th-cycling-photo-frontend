@@ -1,19 +1,33 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { NButton, NCard, NFlex, NIcon, NResult, NTag } from 'naive-ui'
-import { CalendarOutline, ImageOutline } from '@vicons/ionicons5'
+import { CalendarOutline, CheckmarkDoneOutline, ImageOutline } from '@vicons/ionicons5'
+
+import { REVIEW_ROUTE_NAMES } from '@/features/review/routes'
 
 import { formatRelativeTime } from '@/shared/utils/date.utils'
 import { formatFileSize } from '@/shared/utils/format.utils'
 import PageHeader from '@/shared/components/PageHeader.vue'
-import { usePhotoViewQuery } from '../../composables/queries/use-photo-view'
+import { usePhotoDetailBySlugQuery } from '../../composables/queries/use-photo-detail-by-slug'
 import { PHOTO_STATUS_CONFIG } from '../../constants/status-config'
+import PhotoBibsGrid from '../components/PhotoBibsGrid/PhotoBibsGrid.vue'
+import PhotoColorsList from '../components/PhotoColorsList/PhotoColorsList.vue'
 
 const route = useRoute()
+const router = useRouter()
 const slug = computed(() => route.params.slug as string)
 
-const { data: photo, isPending, isError, refetch } = usePhotoViewQuery(slug)
+const { data: photo, isPending, isError, refetch } = usePhotoDetailBySlugQuery(slug)
+
+function goToReview() {
+  if (!photo.value?.eventSlug) return
+  router.push({
+    name: REVIEW_ROUTE_NAMES.WORKSPACE,
+    params: { eventSlug: photo.value.eventSlug },
+    query: { photo: photo.value.publicSlug },
+  })
+}
 </script>
 
 <template>
@@ -22,7 +36,12 @@ const { data: photo, isPending, isError, refetch } = usePhotoViewQuery(slug)
       <PageHeader
         :title="photo?.filename ?? 'Detalle de Foto'"
         :back-to="'/events/' + (photo?.eventSlug ?? '') + '/photos'"
-      />
+      >
+        <NButton v-if="photo?.eventSlug" type="primary" @click="goToReview">
+          <template #icon><NIcon :component="CheckmarkDoneOutline" /></template>
+          Revisar este evento
+        </NButton>
+      </PageHeader>
       <!-- Loading -->
       <div v-if="isPending" class="detail-loading">
         <NCard>
@@ -62,6 +81,7 @@ const { data: photo, isPending, isError, refetch } = usePhotoViewQuery(slug)
                   <NTag :type="PHOTO_STATUS_CONFIG[photo.status].type" size="small" round>
                     {{ PHOTO_STATUS_CONFIG[photo.status].label }}
                   </NTag>
+                  <NTag v-if="photo.reviewedAt" type="success" size="small" round> Revisada </NTag>
                 </NFlex>
               </template>
 
@@ -97,15 +117,20 @@ const { data: photo, isPending, isError, refetch } = usePhotoViewQuery(slug)
                     <p class="detail-info__value">{{ formatRelativeTime(photo.processedAt) }}</p>
                   </div>
                 </NFlex>
-
-                <div v-if="photo.unclassifiedReason" class="detail-info__reason">
-                  <p class="detail-info__label">Razón sin clasificar</p>
-                  <p class="detail-info__value">{{ photo.unclassifiedReason }}</p>
-                </div>
               </NFlex>
             </NCard>
           </NFlex>
         </div>
+
+        <section v-if="photo.bibs.length" class="detail-section">
+          <h2 class="detail-section__title">Placas detectadas</h2>
+          <PhotoBibsGrid :bibs="photo.bibs" />
+        </section>
+
+        <section v-if="photo.colors.length" class="detail-section">
+          <h2 class="detail-section__title">Colores detectados</h2>
+          <PhotoColorsList :colors="photo.colors" />
+        </section>
       </template>
     </div>
   </div>

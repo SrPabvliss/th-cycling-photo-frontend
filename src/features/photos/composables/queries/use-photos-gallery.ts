@@ -3,10 +3,11 @@ import { keepPreviousData, useQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
-import type { IApiPagination } from '@/core/http/http-response.interface'
+import { toPagination } from '@/core/http/pagination'
 import { PHOTO_QUERY_KEYS } from '../../constants/query-keys'
 import { toPhotoListItems } from '../../mappers/photo-list.mapper'
-import type { IApiPhotoListItem, PhotoStatus } from '../../types/responses/photo-list.response'
+import type { PhotoStatus } from '@/shared/types/photo-enums'
+import type { IApiPhotoListItem } from '../../types/responses/photo-list.response'
 
 export function usePhotosGalleryQuery(
   eventId: Ref<string>,
@@ -29,9 +30,14 @@ export function usePhotosGalleryQuery(
             params: { page: page.value, limit },
           })
 
+      const items = toPhotoListItems(response.data)
       return {
-        items: toPhotoListItems(response.data),
-        pagination: response.meta.pagination as IApiPagination,
+        items,
+        pagination: toPagination(response.meta.pagination, {
+          page: page.value,
+          limit,
+          itemsCount: items.length,
+        }),
       }
     },
     placeholderData: keepPreviousData,

@@ -63,7 +63,7 @@ function handleCheckboxClick(e: MouseEvent) {
           {{ PHOTO_STATUS_CONFIG[props.photo.status].label }}
         </NTag>
       </div>
-      <div v-if="props.photo.classifiedAt" class="photo-card__classified-badge">
+      <div v-if="props.photo.reviewedAt" class="photo-card__classified-badge">
         <NIcon :component="CheckmarkCircle" :size="20" color="#18a058" />
       </div>
     </div>

@@ -67,3 +67,13 @@
   background: #fef2f2;
   border-radius: 8px;
 }
+
+.detail-section {
+  margin-top: 32px;
+}
+.detail-section__title {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--tt-neutral-strong, #1a1a1a);
+}

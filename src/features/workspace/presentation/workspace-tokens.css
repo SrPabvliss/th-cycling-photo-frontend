@@ -1,0 +1,352 @@
+/* Reviewer workspace tokens — Variant B (paper-warm) + scoped primitives */
+.review-workspace {
+  /* Layout vars */
+  --rv-queue-width: 240px;
+  --rv-attrs-width: 520px;
+  --rv-mobile-bar-height: 64px;
+  --rv-header-height: 64px;
+  --rv-drawer-radius-mobile: 18px;
+
+  /* Variant B paper-warm tokens (scoped — does not pollute global) */
+  --rv-bg: #f6f4ef;
+  --rv-bg-soft: #fbf9f4;
+  --rv-surface: #ffffff;
+  --rv-surface-2: #faf8f3;
+  --rv-border: #ece7dd;
+  --rv-border-strong: #d8d1c2;
+  --rv-divider: #f0ebe1;
+  --rv-text: #2a2620;
+  --rv-text-2: #574f43;
+  --rv-text-3: #847b6c;
+  --rv-text-4: #b1a895;
+
+  --rv-primary: #2080f0;
+  --rv-primary-strong: #1565d8;
+  --rv-primary-tint: #ecf3ff;
+
+  --rv-success: #18a058;
+  --rv-success-tint: #e8f6ee;
+  --rv-warn: #d99e0b;
+  --rv-warn-tint: #fdf3d8;
+  --rv-error: #d03050;
+  --rv-error-tint: #fbe5ea;
+
+  --rv-r-sm: 6px;
+  --rv-r: 10px;
+  --rv-r-lg: 14px;
+  --rv-r-xl: 18px;
+
+  --rv-shadow-1: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 1px rgba(15, 23, 42, 0.03);
+  --rv-shadow-2: 0 4px 12px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+
+  --rv-drag-handle-color: rgba(15, 23, 42, 0.18);
+
+  font-family:
+    'Archivo',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+  color: var(--rv-text);
+  background: var(--rv-bg);
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.45;
+}
+
+.review-workspace .mono {
+  font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.review-workspace .rv-btn {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--rv-text);
+  background: var(--rv-surface);
+  border: 1px solid var(--rv-border-strong);
+  border-radius: var(--rv-r);
+  padding: 6px 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition:
+    background 0.12s,
+    border-color 0.12s;
+}
+.review-workspace .rv-btn:hover {
+  background: var(--rv-surface-2);
+}
+
+.review-workspace .rv-progress {
+  width: 220px;
+  height: 8px;
+  background: var(--rv-divider);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+.review-workspace .rv-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--rv-primary);
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+.review-workspace .rv-kbd {
+  font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--rv-text-2);
+  background: var(--rv-surface);
+  border: 1px solid var(--rv-border-strong);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 1px 5px;
+  line-height: 1.3;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+/* Tag pills */
+.review-workspace .rv-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.review-workspace .rv-tag.success {
+  background: var(--rv-success-tint);
+  color: #156c3d;
+  border-color: rgba(24, 160, 88, 0.18);
+}
+.review-workspace .rv-tag.warn {
+  background: var(--rv-warn-tint);
+  color: #946800;
+  border-color: rgba(217, 158, 11, 0.22);
+}
+.review-workspace .rv-tag.error {
+  background: var(--rv-error-tint);
+  color: #9b1f3a;
+  border-color: rgba(208, 48, 80, 0.18);
+}
+.review-workspace .rv-tag.info {
+  background: var(--rv-primary-tint);
+  color: #1453ad;
+  border-color: rgba(32, 128, 240, 0.18);
+}
+.review-workspace .rv-tag.neutral {
+  background: var(--rv-surface-2);
+  color: var(--rv-text-2);
+  border-color: var(--rv-border);
+}
+
+/* Icon button */
+.review-workspace .rv-iconbtn {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--rv-border-strong);
+  background: var(--rv-surface);
+  color: var(--rv-text-2);
+  border-radius: var(--rv-r);
+  cursor: pointer;
+}
+.review-workspace .rv-iconbtn:hover {
+  background: var(--rv-surface-2);
+  color: var(--rv-text);
+}
+
+/* Striped photo placeholder */
+.review-workspace .rv-placeholder {
+  position: relative;
+  background:
+    repeating-linear-gradient(135deg, rgba(31, 41, 55, 0.06) 0 6px, rgba(31, 41, 55, 0.1) 6px 12px),
+    linear-gradient(180deg, #d8dde4 0%, #c4cad3 100%);
+  color: var(--rv-text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: var(--rv-r);
+  overflow: hidden;
+}
+
+.review-workspace .rv-scroll-fade {
+  position: relative;
+  overflow: hidden;
+}
+.review-workspace .rv-scroll-fade::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 32px;
+  background: linear-gradient(180deg, transparent, var(--rv-surface));
+  pointer-events: none;
+}
+
+/* Attribute card with state styling */
+.review-workspace .rv-attr {
+  position: relative;
+  background: var(--rv-surface);
+  border: 1px solid var(--rv-border);
+  border-radius: var(--rv-r-lg);
+  transition:
+    border-color 0.12s,
+    box-shadow 0.12s;
+}
+.review-workspace .rv-attr.is-editing {
+  border-color: var(--rv-primary);
+  box-shadow: 0 0 0 3px var(--rv-primary-tint);
+}
+.review-workspace .rv-attr.is-saved {
+  border-color: rgba(24, 160, 88, 0.35);
+  background: linear-gradient(180deg, var(--rv-success-tint) 0%, var(--rv-surface) 60%);
+}
+.review-workspace .rv-attr.is-dirty {
+  border-color: rgba(217, 158, 11, 0.45);
+}
+.review-workspace .rv-attr.is-error {
+  border-color: var(--rv-error);
+  box-shadow: 0 0 0 2px var(--rv-error-tint);
+}
+/* Keyboard focus on a card — brings attention without entering edit yet */
+.review-workspace .rv-attr:focus-visible {
+  outline: none;
+  border-color: var(--rv-primary);
+  box-shadow: 0 0 0 2px var(--rv-primary-tint);
+}
+/* Active section wrapper — soft highlight on icon tile + label */
+.review-workspace [data-active-section='true'] .rv-attrs__section-icon,
+.review-workspace [data-active-section='true'] .rv-section-group__icon {
+  background: var(--rv-primary-tint);
+  color: var(--rv-primary);
+  border-color: rgba(32, 128, 240, 0.25);
+}
+.review-workspace [data-active-section='true'] .rv-attrs__section-title,
+.review-workspace [data-active-section='true'] .rv-section-group__label {
+  color: var(--rv-primary);
+}
+
+/* Generic card */
+.review-workspace .rv-card {
+  background: var(--rv-surface);
+  border: 1px solid var(--rv-border);
+  border-radius: var(--rv-r-lg);
+  box-shadow: var(--rv-shadow-1);
+}
+
+/* Input primitive */
+.review-workspace .rv-input {
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--rv-text);
+  background: var(--rv-surface);
+  border: 1px solid var(--rv-border-strong);
+  border-radius: var(--rv-r);
+  padding: 7px 10px;
+  outline: none;
+  transition:
+    border-color 0.12s,
+    box-shadow 0.12s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.review-workspace .rv-input:focus,
+.review-workspace .rv-input.is-editing {
+  border-color: var(--rv-primary);
+  box-shadow: 0 0 0 2px var(--rv-primary-tint);
+}
+.review-workspace .rv-input.is-error {
+  border-color: var(--rv-error);
+  box-shadow: 0 0 0 2px var(--rv-error-tint);
+}
+
+/* Crop image — fixed-size frame, object-fit contain. Rendered as a button so
+   it's keyboard-focusable and clickable to open the lightbox. */
+.review-workspace .rv-crop {
+  background: #000;
+  border: 1px solid var(--rv-border);
+  border-radius: var(--rv-r);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  padding: 0;
+  cursor: zoom-in;
+  position: relative;
+  transition:
+    border-color 0.12s,
+    transform 0.12s;
+}
+.review-workspace .rv-crop:hover:not(:disabled) {
+  border-color: var(--rv-primary);
+}
+.review-workspace .rv-crop:focus-visible {
+  outline: none;
+  border-color: var(--rv-primary);
+  box-shadow: 0 0 0 2px var(--rv-primary-tint);
+}
+.review-workspace .rv-crop:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.review-workspace .rv-crop img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.review-workspace .rv-crop__placeholder {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--rv-text-2);
+  background: rgba(255, 255, 255, 0.85);
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+
+/* btn variants */
+.review-workspace .rv-btn.primary {
+  background: var(--rv-primary);
+  border-color: var(--rv-primary);
+  color: #fff;
+}
+.review-workspace .rv-btn.primary:hover {
+  background: var(--rv-primary-strong);
+  border-color: var(--rv-primary-strong);
+}
+.review-workspace .rv-btn.ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--rv-text-2);
+}
+.review-workspace .rv-btn.ghost:hover {
+  background: var(--rv-surface-2);
+  color: var(--rv-text);
+}
+
+/* Swatch */
+.review-workspace .rv-sw {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  vertical-align: middle;
+}

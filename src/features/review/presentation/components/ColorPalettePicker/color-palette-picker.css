@@ -1,0 +1,30 @@
+.palette-trigger-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1px solid var(--n-border-color);
+}
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  padding: 8px;
+}
+.palette-grid__swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+}
+.palette-grid__swatch--active {
+  border-color: var(--n-primary-color);
+  box-shadow: 0 0 0 2px var(--n-primary-color-suppl);
+}
+.palette-grid__swatch--none {
+  background: linear-gradient(45deg, transparent 47%, #d03050 48%, #d03050 52%, transparent 53%)
+    #fff;
+  border: 1px dashed var(--n-border-color);
+}

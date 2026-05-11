@@ -3,7 +3,7 @@ import { keepPreviousData, useQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
-import type { IApiPagination } from '@/core/http/http-response.interface'
+import { toPagination } from '@/core/http/pagination'
 import { ORDER_QUERY_KEYS } from '../../constants/query-keys'
 import { toOrderListItems } from '../../mappers/order-list.mapper'
 import type { IApiOrderListItem } from '../../types/responses/order-list.response'
@@ -38,9 +38,14 @@ export function useOrdersListQuery(filters: Ref<IOrderListFilters>, limit = 20) 
         params,
       })
 
+      const items = toOrderListItems(response.data)
       return {
-        items: toOrderListItems(response.data),
-        pagination: response.meta.pagination as IApiPagination,
+        items,
+        pagination: toPagination(response.meta.pagination, {
+          page: filters.value.page,
+          limit,
+          itemsCount: items.length,
+        }),
       }
     },
     placeholderData: keepPreviousData,

@@ -1,0 +1,26 @@
+.shortcut-cheatsheet {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.shortcut-cheatsheet__group h4 {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+.shortcut-cheatsheet__group ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.shortcut-cheatsheet__group li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+.shortcut-cheatsheet__keys {
+  display: inline-flex;
+  gap: 2px;
+}

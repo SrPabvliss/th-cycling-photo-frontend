@@ -39,6 +39,7 @@ export const API_ROUTES = {
     FEATURED: (id: string) => `${EVENTS_BASE}/${id}/featured`,
     OPERATORS: (id: string) => `${EVENTS_BASE}/${id}/operators`,
     OPERATOR: (eventId: string, userId: string) => `${EVENTS_BASE}/${eventId}/operators/${userId}`,
+    REVIEW_QUEUE: (eventId: string) => `${EVENTS_BASE}/${eventId}/review-queue`,
     ASSETS: {
       GET_ALL: (id: string) => `${EVENTS_BASE}/${id}/assets`,
       PRESIGNED_URL: (id: string, assetType: string) =>
@@ -52,6 +53,7 @@ export const API_ROUTES = {
     BASE: PHOTOS_BASE,
     BY_EVENT: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos`,
     DETAIL: (id: string) => `${PHOTOS_BASE}/${id}`,
+    DETAIL_BY_SLUG: (slug: string) => `${PHOTOS_BASE}/detail/${slug}`,
     VIEW: (slug: string) => `${PHOTOS_BASE}/view/${slug}`,
     SEARCH: `${PHOTOS_BASE}/search`,
     UPLOAD: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos`,
@@ -68,6 +70,13 @@ export const API_ROUTES = {
     PARTICIPANTS_BY_PHOTO: (photoId: string) => `${PHOTOS_BASE}/${photoId}/participants`,
     RESUME_POINT: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/resume-point`,
     DOWNLOAD_MANIFEST: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/download-manifest`,
+    BIB_CORRECTIONS: (photoId: string, bibId: string) =>
+      `${PHOTOS_BASE}/${photoId}/bibs/${bibId}/corrections`,
+    COLOR_CORRECTIONS: (photoId: string, colorId: string) =>
+      `${PHOTOS_BASE}/${photoId}/colors/${colorId}/corrections`,
+    MARK_REVIEWED: (photoId: string) => `${PHOTOS_BASE}/${photoId}/reviewed`,
+    ADD_BIB: (photoId: string) => `${PHOTOS_BASE}/${photoId}/bibs`,
+    ADD_COLOR: (photoId: string) => `${PHOTOS_BASE}/${photoId}/colors`,
   },
   PHOTO_CATEGORIES: {
     GET_ALL: PHOTO_CATEGORIES_BASE,
@@ -155,7 +164,11 @@ export const API_ROUTES = {
   },
   OPERATOR: {
     BASE: OPERATOR_BASE,
-    DASHBOARD: `${OPERATOR_BASE}/dashboard`,
+    DASHBOARD_SUMMARY: `${OPERATOR_BASE}/dashboard/summary`,
+    DASHBOARD_EVENTS_ACTIVE: `${OPERATOR_BASE}/dashboard/events/active`,
+    DASHBOARD_EVENTS_COMPLETED: `${OPERATOR_BASE}/dashboard/events/completed`,
+    DASHBOARD_RECENT_ACTIVITY: `${OPERATOR_BASE}/dashboard/recent-activity`,
+    DASHBOARD_REVIEW_QUEUE: `${OPERATOR_BASE}/dashboard/review-queue`,
     RETOUCH_QUEUE: (eventId: string) => `${OPERATOR_BASE}/events/${eventId}/retouch-queue`,
   },
 } as const

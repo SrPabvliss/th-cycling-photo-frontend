@@ -3,7 +3,7 @@ import { keepPreviousData, useQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
-import type { IApiPagination } from '@/core/http/http-response.interface'
+import { toPagination } from '@/core/http/pagination'
 import { BUYER_QUERY_KEYS } from '../../constants/query-keys'
 import { toBuyerListItem } from '../../mappers/buyer-list.mapper'
 import type { IApiBuyerListItem } from '../../types/responses/buyer-list.response'
@@ -18,9 +18,14 @@ export function useBuyersListQuery(page: Ref<number>, search: Ref<string>, limit
       const response = await httpClient.get<IApiBuyerListItem[]>(API_ROUTES.BUYERS.GET_ALL, {
         params,
       })
+      const items = response.data.map(toBuyerListItem)
       return {
-        items: response.data.map(toBuyerListItem),
-        pagination: response.meta.pagination as IApiPagination,
+        items,
+        pagination: toPagination(response.meta.pagination, {
+          page: page.value,
+          limit,
+          itemsCount: items.length,
+        }),
       }
     },
     placeholderData: keepPreviousData,

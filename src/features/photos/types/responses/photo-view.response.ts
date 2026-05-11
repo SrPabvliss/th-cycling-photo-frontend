@@ -1,4 +1,4 @@
-import type { PhotoStatus } from './photo-list.response'
+import type { PhotoStatus } from '@/shared/types/photo-enums'
 
 export interface IApiPhotoView {
   eventSlug: string
@@ -7,9 +7,9 @@ export interface IApiPhotoView {
   fileSize: number
   mimeType: string
   status: string
-  unclassifiedReason: string | null
   uploadedAt: string
   processedAt: string | null
+  reviewedAt: string | null
 }
 
 export interface IPhotoView {
@@ -19,7 +19,7 @@ export interface IPhotoView {
   fileSize: number
   mimeType: string
   status: PhotoStatus
-  unclassifiedReason: string | null
   uploadedAt: Date
   processedAt: Date | null
+  reviewedAt: Date | null
 }

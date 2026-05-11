@@ -1,11 +1,36 @@
 import type {
-  IApiParticipantDetail,
-  IParticipantDetail,
-} from '@/features/classifications/types/responses/cyclist-detail.response'
+  AttributeSource,
+  BibStatus,
+  ColorRegion,
+  PhotoStatus,
+} from '@/shared/types/photo-enums'
 
-import type { PhotoStatus } from './photo-list.response'
+export interface IApiBibAttribute {
+  id: string
+  digits: string
+  status: BibStatus | null
+  confidence: number | null
+  source: AttributeSource
+  cropUrl: string | null
+  digitsOriginal: string
+  wasCorrected: boolean
+  correctedAt: string | null
+}
 
-/** API projection from GET /photos/:id — already camelCase from backend */
+export interface IApiColorAttribute {
+  id: string
+  region: ColorRegion
+  primaryColor: string
+  secondaryColor: string | null
+  confidence: number | null
+  source: AttributeSource
+  cropUrl: string | null
+  primaryColorOriginal: string
+  primaryWasCorrected: boolean
+  secondaryColorOriginal: string | null
+  secondaryWasCorrected: boolean
+}
+
 export interface IApiPhotoDetail {
   id: string
   eventId: string
@@ -19,18 +44,43 @@ export interface IApiPhotoDetail {
   width: number | null
   height: number | null
   status: string
-  unclassifiedReason: string | null
   retouchedImageUrl: string | null
   retouchedFileSize: number | null
   retouchedAt: string | null
-  classifiedAt: string | null
   capturedAt: string | null
   uploadedAt: string
   processedAt: string | null
-  detectedParticipants: IApiParticipantDetail[]
+  reviewedAt: string | null
+  bibs: IApiBibAttribute[]
+  colors: IApiColorAttribute[]
 }
 
-/** Frontend domain type with resolved CDN URL and parsed dates */
+export interface IBibAttribute {
+  id: string
+  digits: string
+  status: BibStatus | null
+  confidence: number | null
+  source: AttributeSource
+  cropUrl: string | null
+  digitsOriginal: string
+  wasCorrected: boolean
+  correctedAt: Date | null
+}
+
+export interface IColorAttribute {
+  id: string
+  region: ColorRegion
+  primaryColor: string
+  secondaryColor: string | null
+  confidence: number | null
+  source: AttributeSource
+  cropUrl: string | null
+  primaryColorOriginal: string
+  primaryWasCorrected: boolean
+  secondaryColorOriginal: string | null
+  secondaryWasCorrected: boolean
+}
+
 export interface IPhotoDetail {
   id: string
   eventId: string
@@ -44,13 +94,13 @@ export interface IPhotoDetail {
   width: number | null
   height: number | null
   status: PhotoStatus
-  unclassifiedReason: string | null
   retouchedImageUrl: string | null
   retouchedFileSize: number | null
   retouchedAt: Date | null
-  classifiedAt: Date | null
   capturedAt: Date | null
   uploadedAt: Date
   processedAt: Date | null
-  detectedParticipants: IParticipantDetail[]
+  reviewedAt: Date | null
+  bibs: IBibAttribute[]
+  colors: IColorAttribute[]
 }
