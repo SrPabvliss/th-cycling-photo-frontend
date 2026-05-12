@@ -21,6 +21,7 @@ export interface ShortcutHandlers {
   onToggleCompare: () => void
   onShowCheatsheet: () => void
   onExit: () => void
+  onToggleMode?: () => void
 }
 
 export function useWorkspaceKeyboard(handlers: ShortcutHandlers) {
@@ -86,6 +87,8 @@ export function useWorkspaceKeyboard(handlers: ShortcutHandlers) {
       Z: handlers.onResetZoom,
       c: handlers.onToggleCompare,
       C: handlers.onToggleCompare,
+      r: () => handlers.onToggleMode?.(),
+      R: () => handlers.onToggleMode?.(),
     }
     mapping[e.key]?.()
   }

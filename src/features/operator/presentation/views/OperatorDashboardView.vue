@@ -37,7 +37,7 @@ function goToReviewQueue() {
 }
 
 function goToRetouchQueue() {
-  router.push({ name: RETOUCH_ROUTE_NAMES.QUEUE })
+  router.push({ name: RETOUCH_ROUTE_NAMES.OPERATOR_WORKSPACE })
 }
 
 function goToEventReview(item: IOperatorActiveEvent) {
@@ -49,8 +49,8 @@ function goToEventReview(item: IOperatorActiveEvent) {
 
 function goToEventRetouch(item: IOperatorActiveEvent) {
   router.push({
-    name: RETOUCH_ROUTE_NAMES.QUEUE,
-    query: { eventSlug: item.event.slug },
+    name: RETOUCH_ROUTE_NAMES.EVENT_QUEUE,
+    params: { eventSlug: item.event.slug },
   })
 }
 </script>

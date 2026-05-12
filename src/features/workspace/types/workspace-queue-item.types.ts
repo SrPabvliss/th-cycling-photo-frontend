@@ -16,4 +16,6 @@ export interface IWorkspaceQueueItem {
   minBibConfidence: number | null
   bibsCount: number
   colorsCount: number
+  /** Optional: true when the photo has been retouched (used by the retouch workspace queue). */
+  isRetouched?: boolean
 }

@@ -7,6 +7,8 @@ function toRetouchQueueOrder(api: IApiRetouchQueueOrder): IRetouchQueueOrder {
   return {
     orderId: api.orderId,
     buyerName: api.buyerName,
+    eventId: api.eventId,
+    eventName: api.eventName,
     createdAt: new Date(api.createdAt),
     totalItems: api.totalItems,
     retouchedItems: api.retouchedItems,

@@ -120,3 +120,28 @@
 .rv-header__toggle[data-on='true'] .rv-header__toggle-thumb {
   left: 16px;
 }
+
+/* Retouch mode tile color chips */
+.rv-header__tile--retouch {
+  background: var(--rv-success);
+}
+.rv-header__tile--review {
+  background: var(--rv-primary);
+}
+
+/* Retouch pending counter */
+.rv-header__retouch-counter {
+  font-size: 12px;
+  color: var(--rv-text-2);
+  white-space: nowrap;
+}
+
+/* Retouch segmented control wrapper */
+.rv-header__retouch-toggle {
+  flex: 0 0 auto;
+}
+
+/* Inline kbd hint inside the segmented control labels */
+.rv-header__retouch-toggle-kbd {
+  margin-left: 6px;
+}

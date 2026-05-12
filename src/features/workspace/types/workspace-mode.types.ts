@@ -1,1 +1,1 @@
-export type WorkspaceMode = 'flow' | 'edit-one'
+export type WorkspaceMode = 'flow' | 'edit-one' | 'retouch'
