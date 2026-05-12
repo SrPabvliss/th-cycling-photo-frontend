@@ -6,6 +6,10 @@
 .workspace-shell--edit-one .workspace-shell__photo {
   flex: 1;
 }
+/* When no attrs slot is provided, the photo panel expands to fill the freed space. */
+.workspace-shell--no-attrs .workspace-shell__photo {
+  flex: 1;
+}
 .workspace-shell__queue {
   width: var(--rv-queue-width);
   border-right: 1px solid var(--rv-border);

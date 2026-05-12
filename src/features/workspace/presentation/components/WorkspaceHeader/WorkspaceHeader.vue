@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { NRadioGroup, NRadioButton } from 'naive-ui'
 
-type WorkspaceHeaderMode = 'multi' | 'single'
+type WorkspaceHeaderMode = 'multi' | 'single' | 'retouch'
 
 const props = withDefaults(
   defineProps<{
@@ -11,17 +12,31 @@ const props = withDefaults(
     totalCount?: number
     onlyPending?: boolean
     mode?: WorkspaceHeaderMode
+    retouchMode?: 'retouch' | 'review'
+    retouchScope?: 'pending' | 'all'
+    orderMeta?: {
+      orderId: string
+      buyerName: string
+      eventName: string
+      pendingCount: number
+      totalCount: number
+    } | null
   }>(),
   {
     mode: 'multi',
     reviewedCount: 0,
     totalCount: 0,
     onlyPending: false,
+    retouchMode: 'retouch',
+    retouchScope: 'pending',
+    orderMeta: null,
   },
 )
 
 const emit = defineEmits<{
   'update:onlyPending': [value: boolean]
+  'update:retouchMode': [value: 'retouch' | 'review']
+  'update:retouchScope': [value: 'pending' | 'all']
   'show-cheatsheet': []
   exit: []
 }>()
@@ -31,6 +46,9 @@ const progressPercent = computed(() =>
 )
 
 const isMulti = computed(() => props.mode === 'multi')
+const isRetouch = computed(() => props.mode === 'retouch')
+
+const shortOrderId = computed(() => props.orderMeta?.orderId.slice(0, 8) ?? '')
 </script>
 
 <template>
@@ -53,10 +71,23 @@ const isMulti = computed(() => props.mode === 'multi')
     </button>
 
     <div class="rv-header__brand">
-      <span class="rv-header__tile mono">tt</span>
-      <div>
+      <span
+        class="rv-header__tile mono"
+        :class="{
+          'rv-header__tile--retouch': isRetouch && retouchMode === 'retouch',
+          'rv-header__tile--review': isRetouch && retouchMode === 'review',
+        }"
+        >tt</span
+      >
+      <div v-if="!isRetouch">
         <div class="rv-header__title">Workspace de revisión</div>
         <div class="rv-header__subtitle mono">Eventos · {{ eventName }}</div>
+      </div>
+      <div v-else>
+        <div class="rv-header__title">Workspace de retoque</div>
+        <div v-if="orderMeta" class="rv-header__subtitle mono">
+          Orden #{{ shortOrderId }} · {{ orderMeta.buyerName }} · {{ orderMeta.eventName }}
+        </div>
       </div>
     </div>
 
@@ -89,6 +120,46 @@ const isMulti = computed(() => props.mode === 'multi')
       Solo no revisadas
       <span class="rv-kbd" style="margin-left: 4px">F</span>
     </label>
+
+    <template v-if="isRetouch">
+      <div v-if="orderMeta" class="rv-header__retouch-counter">
+        <span class="rv-header__progress-value">{{ orderMeta.pendingCount }}</span>
+        / {{ orderMeta.totalCount }} fotos
+      </div>
+      <NRadioGroup
+        :value="retouchScope"
+        name="retouch-scope"
+        aria-label="Mostrar · alternar con F"
+        size="small"
+        class="rv-header__retouch-toggle"
+        @update:value="(v) => emit('update:retouchScope', v as 'pending' | 'all')"
+      >
+        <NRadioButton value="pending">
+          Pendientes
+          <span class="rv-kbd rv-header__retouch-toggle-kbd">F</span>
+        </NRadioButton>
+        <NRadioButton value="all">
+          Todas
+          <span class="rv-kbd rv-header__retouch-toggle-kbd">F</span>
+        </NRadioButton>
+      </NRadioGroup>
+      <NRadioGroup
+        :value="retouchMode"
+        name="retouch-mode"
+        aria-label="Modo · alternar con R"
+        class="rv-header__retouch-toggle"
+        @update:value="(v) => emit('update:retouchMode', v as 'retouch' | 'review')"
+      >
+        <NRadioButton value="retouch">
+          Retoque
+          <span class="rv-kbd rv-header__retouch-toggle-kbd">R</span>
+        </NRadioButton>
+        <NRadioButton value="review">
+          Revisión
+          <span class="rv-kbd rv-header__retouch-toggle-kbd">R</span>
+        </NRadioButton>
+      </NRadioGroup>
+    </template>
 
     <button type="button" class="rv-btn" @click="emit('show-cheatsheet')">
       <svg

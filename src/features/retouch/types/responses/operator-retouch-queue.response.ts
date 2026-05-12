@@ -9,6 +9,8 @@ export interface IApiRetouchQueueItem {
 export interface IApiRetouchQueueOrder {
   orderId: string
   buyerName: string
+  eventId: string
+  eventName: string
   createdAt: string
   totalItems: number
   retouchedItems: number
@@ -30,6 +32,8 @@ export interface IRetouchQueueItem {
 export interface IRetouchQueueOrder {
   orderId: string
   buyerName: string
+  eventId: string
+  eventName: string
   createdAt: Date
   totalItems: number
   retouchedItems: number

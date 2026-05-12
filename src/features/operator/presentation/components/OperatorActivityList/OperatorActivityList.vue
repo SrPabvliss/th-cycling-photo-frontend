@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NEmpty, NIcon, NList, NListItem, NThing } from 'naive-ui'
+import { NEmpty, NIcon, NList, NListItem } from 'naive-ui'
 
 import { formatRelativeTime } from '@/shared/utils/date.utils'
 import { ACTIVITY_TYPE_ICONS } from '../../../constants/operator-activity'
@@ -20,22 +20,18 @@ defineProps<{
   />
   <NList v-else hoverable :show-divider="true" class="activity-list">
     <NListItem v-for="a in items" :key="a.id">
-      <NThing>
-        <template #avatar>
-          <span :class="['activity__icon', `activity__icon--${a.type}`]" aria-hidden="true">
-            <NIcon :component="ACTIVITY_TYPE_ICONS[a.type]" :size="14" />
-          </span>
-        </template>
-        <template #header>
-          <span class="activity__description">{{ a.description }}</span>
-        </template>
-        <template #header-extra>
-          <span class="activity__time">{{ formatRelativeTime(a.timestamp) }}</span>
-        </template>
-        <template #description>
+      <div class="activity-row">
+        <span :class="['activity__icon', `activity__icon--${a.type}`]" aria-hidden="true">
+          <NIcon :component="ACTIVITY_TYPE_ICONS[a.type]" :size="14" />
+        </span>
+        <div class="activity-row__body">
+          <div class="activity-row__line">
+            <span class="activity__description">{{ a.description }}</span>
+            <span class="activity__time">{{ formatRelativeTime(a.timestamp) }}</span>
+          </div>
           <span class="activity__meta">{{ a.eventName }}</span>
-        </template>
-      </NThing>
+        </div>
+      </div>
     </NListItem>
   </NList>
 </template>

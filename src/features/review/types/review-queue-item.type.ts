@@ -10,4 +10,5 @@ export interface IReviewQueueItem {
   minBibConfidence: number | null
   bibsCount: number
   colorsCount: number
+  isRetouched?: boolean
 }

@@ -10,12 +10,14 @@ const props = defineProps<{
 const emit = defineEmits<{ select: [slug: string] }>()
 
 const tagKind = computed<'success' | 'neutral' | 'error'>(() => {
+  if (props.item.isRetouched) return 'success'
   if (props.item.reviewedAt) return 'success'
   if (props.item.status === 'failed') return 'error'
   return 'neutral'
 })
 
 const tagLabel = computed(() => {
+  if (props.item.isRetouched) return 'retocada'
   if (props.item.reviewedAt) return 'revisada'
   if (props.item.status === 'failed') return 'error'
   return 'pendiente'

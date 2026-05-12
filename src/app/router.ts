@@ -12,7 +12,7 @@ import { deliveryRoutes } from '@/features/delivery/routes'
 import { orderRoutes } from '@/features/orders/routes'
 import { previewLinkRoutes } from '@/features/preview-links/routes'
 import { publicGalleryRoutes } from '@/features/public-gallery/routes'
-import { retouchRoutes } from '@/features/retouch/routes'
+import { retouchRoutes, retouchWorkspaceRoutes } from '@/features/retouch/routes'
 import { reviewRoutes } from '@/features/review/routes'
 import { buyerRoutes } from '@/features/buyers/routes'
 import { cartRoutes } from '@/features/cart/routes'
@@ -30,6 +30,7 @@ const router = createRouter({
     ...standaloneRoutes,
     ...reviewRoutes,
     ...operatorWorkspaceRoutes,
+    ...retouchWorkspaceRoutes,
     {
       path: '/',
       component: AppLayout,

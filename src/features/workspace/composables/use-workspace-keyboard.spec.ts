@@ -110,6 +110,20 @@ describe('useWorkspaceKeyboard', () => {
     document.body.removeChild(input)
   })
 
+  it('invokes onToggleMode when r is pressed', () => {
+    const onToggleMode = vi.fn()
+    setup({ onToggleMode })
+    fireKey('r')
+    expect(onToggleMode).toHaveBeenCalledOnce()
+  })
+
+  it('invokes onToggleMode when uppercase R is pressed', () => {
+    const onToggleMode = vi.fn()
+    setup({ onToggleMode })
+    fireKey('R')
+    expect(onToggleMode).toHaveBeenCalledOnce()
+  })
+
   it('Esc in input calls onCancelEdit', () => {
     const { handlers } = setup()
     const input = document.createElement('input')

@@ -1,5 +1,5 @@
 /* Reviewer workspace tokens — Variant B (paper-warm) + scoped primitives */
-.review-workspace {
+:is(.review-workspace, .retouch-workspace) {
   /* Layout vars */
   --rv-queue-width: 240px;
   --rv-attrs-width: 520px;
@@ -54,12 +54,12 @@
   line-height: 1.45;
 }
 
-.review-workspace .mono {
+:is(.review-workspace, .retouch-workspace) .mono {
   font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   font-variant-numeric: tabular-nums;
 }
 
-.review-workspace .rv-btn {
+:is(.review-workspace, .retouch-workspace) .rv-btn {
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
@@ -76,11 +76,11 @@
     background 0.12s,
     border-color 0.12s;
 }
-.review-workspace .rv-btn:hover {
+:is(.review-workspace, .retouch-workspace) .rv-btn:hover {
   background: var(--rv-surface-2);
 }
 
-.review-workspace .rv-progress {
+:is(.review-workspace, .retouch-workspace) .rv-progress {
   width: 220px;
   height: 8px;
   background: var(--rv-divider);
@@ -88,7 +88,7 @@
   overflow: hidden;
   position: relative;
 }
-.review-workspace .rv-progress > span {
+:is(.review-workspace, .retouch-workspace) .rv-progress > span {
   display: block;
   height: 100%;
   background: var(--rv-primary);
@@ -96,7 +96,7 @@
   transition: width 0.2s ease;
 }
 
-.review-workspace .rv-kbd {
+:is(.review-workspace, .retouch-workspace) .rv-kbd {
   font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   font-size: 10px;
   font-weight: 500;
@@ -112,7 +112,7 @@
 }
 
 /* Tag pills */
-.review-workspace .rv-tag {
+:is(.review-workspace, .retouch-workspace) .rv-tag {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -124,34 +124,34 @@
   white-space: nowrap;
   line-height: 1.4;
 }
-.review-workspace .rv-tag.success {
+:is(.review-workspace, .retouch-workspace) .rv-tag.success {
   background: var(--rv-success-tint);
   color: #156c3d;
   border-color: rgba(24, 160, 88, 0.18);
 }
-.review-workspace .rv-tag.warn {
+:is(.review-workspace, .retouch-workspace) .rv-tag.warn {
   background: var(--rv-warn-tint);
   color: #946800;
   border-color: rgba(217, 158, 11, 0.22);
 }
-.review-workspace .rv-tag.error {
+:is(.review-workspace, .retouch-workspace) .rv-tag.error {
   background: var(--rv-error-tint);
   color: #9b1f3a;
   border-color: rgba(208, 48, 80, 0.18);
 }
-.review-workspace .rv-tag.info {
+:is(.review-workspace, .retouch-workspace) .rv-tag.info {
   background: var(--rv-primary-tint);
   color: #1453ad;
   border-color: rgba(32, 128, 240, 0.18);
 }
-.review-workspace .rv-tag.neutral {
+:is(.review-workspace, .retouch-workspace) .rv-tag.neutral {
   background: var(--rv-surface-2);
   color: var(--rv-text-2);
   border-color: var(--rv-border);
 }
 
 /* Icon button */
-.review-workspace .rv-iconbtn {
+:is(.review-workspace, .retouch-workspace) .rv-iconbtn {
   width: 30px;
   height: 30px;
   display: inline-flex;
@@ -163,13 +163,13 @@
   border-radius: var(--rv-r);
   cursor: pointer;
 }
-.review-workspace .rv-iconbtn:hover {
+:is(.review-workspace, .retouch-workspace) .rv-iconbtn:hover {
   background: var(--rv-surface-2);
   color: var(--rv-text);
 }
 
 /* Striped photo placeholder */
-.review-workspace .rv-placeholder {
+:is(.review-workspace, .retouch-workspace) .rv-placeholder {
   position: relative;
   background:
     repeating-linear-gradient(135deg, rgba(31, 41, 55, 0.06) 0 6px, rgba(31, 41, 55, 0.1) 6px 12px),
@@ -183,11 +183,11 @@
   overflow: hidden;
 }
 
-.review-workspace .rv-scroll-fade {
+:is(.review-workspace, .retouch-workspace) .rv-scroll-fade {
   position: relative;
   overflow: hidden;
 }
-.review-workspace .rv-scroll-fade::after {
+:is(.review-workspace, .retouch-workspace) .rv-scroll-fade::after {
   content: '';
   position: absolute;
   left: 0;
@@ -199,7 +199,7 @@
 }
 
 /* Attribute card with state styling */
-.review-workspace .rv-attr {
+:is(.review-workspace, .retouch-workspace) .rv-attr {
   position: relative;
   background: var(--rv-surface);
   border: 1px solid var(--rv-border);
@@ -208,41 +208,41 @@
     border-color 0.12s,
     box-shadow 0.12s;
 }
-.review-workspace .rv-attr.is-editing {
+:is(.review-workspace, .retouch-workspace) .rv-attr.is-editing {
   border-color: var(--rv-primary);
   box-shadow: 0 0 0 3px var(--rv-primary-tint);
 }
-.review-workspace .rv-attr.is-saved {
+:is(.review-workspace, .retouch-workspace) .rv-attr.is-saved {
   border-color: rgba(24, 160, 88, 0.35);
   background: linear-gradient(180deg, var(--rv-success-tint) 0%, var(--rv-surface) 60%);
 }
-.review-workspace .rv-attr.is-dirty {
+:is(.review-workspace, .retouch-workspace) .rv-attr.is-dirty {
   border-color: rgba(217, 158, 11, 0.45);
 }
-.review-workspace .rv-attr.is-error {
+:is(.review-workspace, .retouch-workspace) .rv-attr.is-error {
   border-color: var(--rv-error);
   box-shadow: 0 0 0 2px var(--rv-error-tint);
 }
 /* Keyboard focus on a card — brings attention without entering edit yet */
-.review-workspace .rv-attr:focus-visible {
+:is(.review-workspace, .retouch-workspace) .rv-attr:focus-visible {
   outline: none;
   border-color: var(--rv-primary);
   box-shadow: 0 0 0 2px var(--rv-primary-tint);
 }
 /* Active section wrapper — soft highlight on icon tile + label */
-.review-workspace [data-active-section='true'] .rv-attrs__section-icon,
-.review-workspace [data-active-section='true'] .rv-section-group__icon {
+:is(.review-workspace, .retouch-workspace) [data-active-section='true'] .rv-attrs__section-icon,
+:is(.review-workspace, .retouch-workspace) [data-active-section='true'] .rv-section-group__icon {
   background: var(--rv-primary-tint);
   color: var(--rv-primary);
   border-color: rgba(32, 128, 240, 0.25);
 }
-.review-workspace [data-active-section='true'] .rv-attrs__section-title,
-.review-workspace [data-active-section='true'] .rv-section-group__label {
+:is(.review-workspace, .retouch-workspace) [data-active-section='true'] .rv-attrs__section-title,
+:is(.review-workspace, .retouch-workspace) [data-active-section='true'] .rv-section-group__label {
   color: var(--rv-primary);
 }
 
 /* Generic card */
-.review-workspace .rv-card {
+:is(.review-workspace, .retouch-workspace) .rv-card {
   background: var(--rv-surface);
   border: 1px solid var(--rv-border);
   border-radius: var(--rv-r-lg);
@@ -250,7 +250,7 @@
 }
 
 /* Input primitive */
-.review-workspace .rv-input {
+:is(.review-workspace, .retouch-workspace) .rv-input {
   font-family: inherit;
   font-size: 14px;
   color: var(--rv-text);
@@ -265,19 +265,19 @@
   width: 100%;
   box-sizing: border-box;
 }
-.review-workspace .rv-input:focus,
-.review-workspace .rv-input.is-editing {
+:is(.review-workspace, .retouch-workspace) .rv-input:focus,
+:is(.review-workspace, .retouch-workspace) .rv-input.is-editing {
   border-color: var(--rv-primary);
   box-shadow: 0 0 0 2px var(--rv-primary-tint);
 }
-.review-workspace .rv-input.is-error {
+:is(.review-workspace, .retouch-workspace) .rv-input.is-error {
   border-color: var(--rv-error);
   box-shadow: 0 0 0 2px var(--rv-error-tint);
 }
 
 /* Crop image — fixed-size frame, object-fit contain. Rendered as a button so
    it's keyboard-focusable and clickable to open the lightbox. */
-.review-workspace .rv-crop {
+:is(.review-workspace, .retouch-workspace) .rv-crop {
   background: #000;
   border: 1px solid var(--rv-border);
   border-radius: var(--rv-r);
@@ -293,25 +293,25 @@
     border-color 0.12s,
     transform 0.12s;
 }
-.review-workspace .rv-crop:hover:not(:disabled) {
+:is(.review-workspace, .retouch-workspace) .rv-crop:hover:not(:disabled) {
   border-color: var(--rv-primary);
 }
-.review-workspace .rv-crop:focus-visible {
+:is(.review-workspace, .retouch-workspace) .rv-crop:focus-visible {
   outline: none;
   border-color: var(--rv-primary);
   box-shadow: 0 0 0 2px var(--rv-primary-tint);
 }
-.review-workspace .rv-crop:disabled {
+:is(.review-workspace, .retouch-workspace) .rv-crop:disabled {
   cursor: not-allowed;
   opacity: 0.7;
 }
-.review-workspace .rv-crop img {
+:is(.review-workspace, .retouch-workspace) .rv-crop img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
   display: block;
 }
-.review-workspace .rv-crop__placeholder {
+:is(.review-workspace, .retouch-workspace) .rv-crop__placeholder {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 10px;
   letter-spacing: 0.04em;
@@ -322,27 +322,27 @@
 }
 
 /* btn variants */
-.review-workspace .rv-btn.primary {
+:is(.review-workspace, .retouch-workspace) .rv-btn.primary {
   background: var(--rv-primary);
   border-color: var(--rv-primary);
   color: #fff;
 }
-.review-workspace .rv-btn.primary:hover {
+:is(.review-workspace, .retouch-workspace) .rv-btn.primary:hover {
   background: var(--rv-primary-strong);
   border-color: var(--rv-primary-strong);
 }
-.review-workspace .rv-btn.ghost {
+:is(.review-workspace, .retouch-workspace) .rv-btn.ghost {
   background: transparent;
   border-color: transparent;
   color: var(--rv-text-2);
 }
-.review-workspace .rv-btn.ghost:hover {
+:is(.review-workspace, .retouch-workspace) .rv-btn.ghost:hover {
   background: var(--rv-surface-2);
   color: var(--rv-text);
 }
 
 /* Swatch */
-.review-workspace .rv-sw {
+:is(.review-workspace, .retouch-workspace) .rv-sw {
   display: inline-block;
   width: 14px;
   height: 14px;
