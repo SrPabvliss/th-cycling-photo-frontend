@@ -1,96 +1,79 @@
 .operator-dashboard {
+  padding: 24px 32px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px;
+  gap: 24px;
 }
 
-.operator-dashboard__error,
-.operator-dashboard__loading {
-  display: flex;
-  justify-content: center;
-  padding: 60px 0;
-  color: var(--tt-neutral-mid);
+.operator-dashboard > :deep(.page-header) {
+  margin-bottom: -12px;
 }
 
-.operator-dashboard__grid {
+.operator-dashboard__queues {
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
 }
 
+@media (min-width: 768px) {
+  .operator-dashboard__queues {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.operator-dashboard__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
 .operator-dashboard__main {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
   min-width: 0;
 }
 
 .operator-dashboard__aside {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
   min-width: 0;
-}
-
-.operator-dashboard__queues {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
 }
 
 .operator-dashboard__section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.operator-dashboard__section-head {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
+  gap: 12px;
 }
 
 .operator-dashboard__section-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--tt-neutral-dark);
+  font-size: 16px;
+  font-weight: 700;
+  color: #0a0a0a;
   margin: 0;
 }
 
 .operator-dashboard__events {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
-}
-
-.operator-dashboard__empty-card {
-  background: var(--tt-surface);
-  border: 1px solid var(--tt-neutral-light);
-  border-radius: 8px;
-  padding: 28px 16px;
+  gap: 16px;
 }
 
 .operator-dashboard__empty-hint {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--tt-neutral-mid);
 }
 
-@media (min-width: 640px) {
-  .operator-dashboard__queues {
-    grid-template-columns: 1fr 1fr;
-  }
+@media (min-width: 768px) {
   .operator-dashboard__events {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (min-width: 1024px) {
-  .operator-dashboard {
-    padding: 20px 24px;
-  }
   .operator-dashboard__grid {
-    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-columns: minmax(0, 1fr) 360px;
   }
   .operator-dashboard__events {
     grid-template-columns: repeat(3, 1fr);
@@ -99,6 +82,6 @@
 
 @media (min-width: 1400px) {
   .operator-dashboard__events {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }

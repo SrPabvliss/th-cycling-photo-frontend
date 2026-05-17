@@ -4,9 +4,12 @@ import type { IPhotoDetail } from '@/features/photos/types/responses/photo-detai
 import ReviewBibCard from '../ReviewBibCard/ReviewBibCard.vue'
 import ReviewSectionGroup from '../ReviewSectionGroup/ReviewSectionGroup.vue'
 import AddBibForm from '../AddBibForm/AddBibForm.vue'
-import CropLightbox from '../CropLightbox/CropLightbox.vue'
-import { CARD_NAV_KEY } from '../../../composables/keys'
-import { REVIEW_EVENTS, type IShowCropDetail } from '../../../constants/review-events'
+import WorkspaceCropLightbox from '@/features/workspace/presentation/components/WorkspaceCropLightbox/WorkspaceCropLightbox.vue'
+import { CARD_NAV_KEY } from '@/features/workspace/composables/keys'
+import {
+  WORKSPACE_EVENTS,
+  type IShowCropDetail,
+} from '@/features/workspace/constants/workspace-events'
 import { useWindowEvent } from '@/shared/composables/use-window-event'
 
 const props = defineProps<{ photo: IPhotoDetail }>()
@@ -80,8 +83,8 @@ function closeLightbox() {
   lightboxSrc.value = null
 }
 
-useWindowEvent(REVIEW_EVENTS.ADD_MANUAL, onAddManual)
-useWindowEvent(REVIEW_EVENTS.SHOW_CROP, onShowCrop)
+useWindowEvent(WORKSPACE_EVENTS.ADD_MANUAL, onAddManual)
+useWindowEvent(WORKSPACE_EVENTS.SHOW_CROP, onShowCrop)
 </script>
 
 <template>
@@ -211,7 +214,12 @@ useWindowEvent(REVIEW_EVENTS.SHOW_CROP, onShowCrop)
       </div>
     </div>
 
-    <CropLightbox v-if="lightboxSrc" :src="lightboxSrc" :alt="lightboxAlt" @close="closeLightbox" />
+    <WorkspaceCropLightbox
+      v-if="lightboxSrc"
+      :src="lightboxSrc"
+      :alt="lightboxAlt"
+      @close="closeLightbox"
+    />
   </aside>
 </template>
 

@@ -1,0 +1,35 @@
+.retouch-transition-modal {
+  max-width: 480px;
+  width: 100%;
+}
+
+.retouch-transition-modal__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.retouch-transition-modal__check {
+  color: var(--n-color-success, #18a058);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.retouch-transition-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.retouch-transition-modal__no-more {
+  color: var(--n-color-text-3, #999);
+  font-size: 0.9rem;
+}
+
+.retouch-transition-modal__footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}

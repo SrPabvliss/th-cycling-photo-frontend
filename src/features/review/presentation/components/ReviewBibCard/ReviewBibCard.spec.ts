@@ -9,8 +9,8 @@ vi.mock('../../../composables/mutations/use-apply-bib-correction', () => ({
   }),
 }))
 
-import { CARD_NAV_KEY } from '../../../composables/keys'
-import { useCardNavigation } from '../../../composables/use-card-navigation'
+import { CARD_NAV_KEY } from '@/features/workspace/composables/keys'
+import { useWorkspaceCardNavigation } from '@/features/workspace/composables/use-workspace-card-navigation'
 import ReviewBibCard from './ReviewBibCard.vue'
 import type { IBibAttribute } from '@/features/photos/types/responses/photo-detail.response'
 
@@ -29,7 +29,7 @@ const baseBib: IBibAttribute = {
 function mountWithProviders(bib: IBibAttribute) {
   const Comp = defineComponent({
     setup() {
-      provide(CARD_NAV_KEY, useCardNavigation())
+      provide(CARD_NAV_KEY, useWorkspaceCardNavigation())
       return () => h(ReviewBibCard, { bib, photoId: 'p-1', photoSlug: 'slug-1' })
     },
   })

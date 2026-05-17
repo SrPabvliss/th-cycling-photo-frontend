@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { NButton, NCard, NIcon, NProgress, NTooltip } from 'naive-ui'
+import { NButton, NFlex, NIcon, NProgress } from 'naive-ui'
 import {
+  CalendarOutline,
   CheckmarkCircleOutline,
   CheckmarkDoneOutline,
   ColorWandOutline,
@@ -16,7 +17,7 @@ const props = defineProps<{
   item: IOperatorActiveEvent
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   reviewClick: [item: IOperatorActiveEvent]
   retouchClick: [item: IOperatorActiveEvent]
 }>()
@@ -38,18 +39,24 @@ const coverStyle = computed(() =>
 </script>
 
 <template>
-  <NCard class="event-card" :bordered="true" content-style="padding: 0;">
+  <article class="event-card">
     <div class="event-card__cover" :style="coverStyle">
-      <span class="event-card__date">{{ formatDate(item.event.date) }}</span>
+      <span v-if="!item.event.coverUrl" class="event-card__cover-placeholder">
+        <NIcon :component="ImageOutline" :size="24" />
+      </span>
+      <div class="event-card__overlay">
+        <NIcon :component="CalendarOutline" :size="14" />
+        <span>{{ formatDate(item.event.date) }}</span>
+      </div>
     </div>
 
     <div class="event-card__body">
-      <div>
-        <div class="event-card__name">{{ item.event.name }}</div>
-        <div class="event-card__location">
-          <NIcon :component="LocationOutline" :size="11" />
+      <div class="event-card__header">
+        <h3 class="event-card__title">{{ item.event.name }}</h3>
+        <NFlex :size="6" align="center" class="event-card__meta">
+          <NIcon :component="LocationOutline" :size="14" />
           <span>{{ item.event.location }}</span>
-        </div>
+        </NFlex>
       </div>
 
       <div class="event-card__progress">
@@ -65,20 +72,13 @@ const coverStyle = computed(() =>
         <NProgress
           :percentage="reviewPct"
           :show-indicator="false"
-          :height="4"
+          :height="6"
           color="var(--tt-primary)"
-          rail-color="rgba(16,80,128,0.12)"
+          rail-color="rgba(16,80,128,0.1)"
         />
       </div>
 
       <div class="event-card__stats">
-        <div class="event-card__stat">
-          <NIcon :component="ImageOutline" :size="14" class="event-card__stat-icon" />
-          <div>
-            <div class="event-card__stat-label">Total</div>
-            <div class="event-card__stat-value">{{ item.event.totalPhotos }}</div>
-          </div>
-        </div>
         <div class="event-card__stat">
           <NIcon
             :component="CheckmarkDoneOutline"
@@ -103,42 +103,32 @@ const coverStyle = computed(() =>
         </div>
       </div>
 
-      <div v-if="allClear" class="event-card__clear">
-        <NIcon :component="CheckmarkCircleOutline" :size="14" />
-        Al día
-      </div>
-      <div v-else class="event-card__actions">
-        <NTooltip :disabled="item.stats.review.pendingPhotos > 0">
-          <template #trigger>
-            <NButton
-              size="small"
-              :disabled="item.stats.review.pendingPhotos === 0"
-              class="event-card__action"
-              @click="$emit('reviewClick', item)"
-            >
-              <template #icon><NIcon :component="CheckmarkDoneOutline" /></template>
-              Revisión
-            </NButton>
-          </template>
-          Sin fotos por revisar
-        </NTooltip>
-        <NTooltip :disabled="item.stats.retouch.pendingPhotos > 0">
-          <template #trigger>
-            <NButton
-              size="small"
-              :disabled="item.stats.retouch.pendingPhotos === 0"
-              class="event-card__action"
-              @click="$emit('retouchClick', item)"
-            >
-              <template #icon><NIcon :component="ColorWandOutline" /></template>
-              Retoque
-            </NButton>
-          </template>
-          Sin fotos por retocar
-        </NTooltip>
+      <div class="event-card__footer">
+        <div v-if="allClear" class="event-card__clear">
+          <NIcon :component="CheckmarkCircleOutline" :size="16" />
+          <span>Al día</span>
+        </div>
+        <NFlex v-else :size="8">
+          <NButton
+            block
+            :disabled="item.stats.review.pendingPhotos === 0"
+            @click="emit('reviewClick', item)"
+          >
+            <template #icon><NIcon :component="CheckmarkDoneOutline" /></template>
+            Revisión
+          </NButton>
+          <NButton
+            block
+            :disabled="item.stats.retouch.pendingPhotos === 0"
+            @click="emit('retouchClick', item)"
+          >
+            <template #icon><NIcon :component="ColorWandOutline" /></template>
+            Retoque
+          </NButton>
+        </NFlex>
       </div>
     </div>
-  </NCard>
+  </article>
 </template>
 
 <style scoped src="./operator-event-card.css" />

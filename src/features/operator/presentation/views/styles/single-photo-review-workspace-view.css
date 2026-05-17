@@ -1,0 +1,12 @@
+.single-photo-review {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.single-photo-review__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}

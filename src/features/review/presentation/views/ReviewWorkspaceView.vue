@@ -3,19 +3,18 @@ import { computed, provide, ref } from 'vue'
 import { NSpin } from 'naive-ui'
 import { useRouter } from 'vue-router'
 
-import { EVENT_ROUTE_NAMES } from '@/features/events/routes'
-import { useReviewWorkspace } from '../../composables/use-review-workspace'
-import { useKeyboardShortcuts } from '../../composables/use-keyboard-shortcuts'
-import { CARD_NAV_KEY } from '../../composables/keys'
-import WorkspaceShell from '../components/WorkspaceShell/WorkspaceShell.vue'
-import WorkspaceHeader from '../components/WorkspaceHeader/WorkspaceHeader.vue'
-import WorkspacePhotoPanel from '../components/WorkspacePhotoPanel/WorkspacePhotoPanel.vue'
-import MobileBottomBar from '../components/MobileBottomBar/MobileBottomBar.vue'
+import { useEventReviewWorkspace } from '../../composables/use-event-review-workspace'
+import { useWorkspaceKeyboard } from '@/features/workspace/composables/use-workspace-keyboard'
+import { CARD_NAV_KEY } from '@/features/workspace/composables/keys'
+import WorkspaceShell from '@/features/workspace/presentation/components/WorkspaceShell/WorkspaceShell.vue'
+import WorkspaceHeader from '@/features/workspace/presentation/components/WorkspaceHeader/WorkspaceHeader.vue'
+import WorkspacePhotoPanel from '@/features/workspace/presentation/components/WorkspacePhotoPanel/WorkspacePhotoPanel.vue'
+import WorkspaceMobileBottomBar from '@/features/workspace/presentation/components/WorkspaceMobileBottomBar/WorkspaceMobileBottomBar.vue'
 import ReviewQueuePanel from '../components/ReviewQueuePanel/ReviewQueuePanel.vue'
 import ReviewAttributesPanel from '../components/ReviewAttributesPanel/ReviewAttributesPanel.vue'
-import ShortcutCheatsheet from '../components/ShortcutCheatsheet/ShortcutCheatsheet.vue'
-import { REVIEW_EVENTS } from '../../constants/review-events'
-import type { CardSection } from '../../composables/use-card-navigation'
+import WorkspaceShortcutCheatsheet from '@/features/workspace/presentation/components/WorkspaceShortcutCheatsheet/WorkspaceShortcutCheatsheet.vue'
+import { WORKSPACE_EVENTS } from '@/features/workspace/constants/workspace-events'
+import type { CardSection } from '@/features/workspace/composables/use-workspace-card-navigation'
 
 const SECTION_TO_COMPARE_VIEW: Partial<Record<CardSection, 'original' | 'compare' | 'retouched'>> =
   {
@@ -24,7 +23,7 @@ const SECTION_TO_COMPARE_VIEW: Partial<Record<CardSection, 'original' | 'compare
     cyclist_clothes: 'retouched',
   }
 
-const ws = useReviewWorkspace()
+const ws = useEventReviewWorkspace()
 const router = useRouter()
 
 provide(CARD_NAV_KEY, ws.cardNav)
@@ -36,10 +35,10 @@ const photoPanelRef = ref<InstanceType<typeof WorkspacePhotoPanel>>()
 const eventName = computed(() => ws.eventSlug.value)
 
 function handleAddManual() {
-  window.dispatchEvent(new CustomEvent(REVIEW_EVENTS.ADD_MANUAL))
+  window.dispatchEvent(new CustomEvent(WORKSPACE_EVENTS.ADD_MANUAL))
 }
 
-useKeyboardShortcuts({
+useWorkspaceKeyboard({
   onSaveAdvance: () => ws.saveAndAdvance(),
   onSaveCard: () => {
     const active = document.activeElement as HTMLElement | null
@@ -60,7 +59,7 @@ useKeyboardShortcuts({
     }
   },
   onAddManual: handleAddManual,
-  onShowCrop: () => window.dispatchEvent(new CustomEvent(REVIEW_EVENTS.SHOW_CROP)),
+  onShowCrop: () => window.dispatchEvent(new CustomEvent(WORKSPACE_EVENTS.SHOW_CROP)),
   onTogglePending: () => {
     ws.onlyPending.value = !ws.onlyPending.value
   },
@@ -71,12 +70,7 @@ useKeyboardShortcuts({
   onShowCheatsheet: () => {
     ws.showCheatsheet.value = !ws.showCheatsheet.value
   },
-  onExit: () => {
-    router.push({
-      name: EVENT_ROUTE_NAMES.DETAIL,
-      params: { slug: ws.eventSlug.value },
-    })
-  },
+  onExit: () => router.back(),
 })
 </script>
 
@@ -90,6 +84,7 @@ useKeyboardShortcuts({
       :only-pending="ws.onlyPending.value"
       @update:only-pending="ws.onlyPending.value = $event"
       @show-cheatsheet="ws.showCheatsheet.value = true"
+      @exit="router.back()"
     />
 
     <WorkspaceShell :mobile-sheet="ws.mobileSheet.value" @close-sheet="ws.closeSheet()">
@@ -126,7 +121,7 @@ useKeyboardShortcuts({
       </template>
     </WorkspaceShell>
 
-    <MobileBottomBar
+    <WorkspaceMobileBottomBar
       :open-sheet="ws.mobileSheet.value"
       :pending-count="pendingPhotosCount"
       :photo-index="ws.currentIndex.value"
@@ -135,12 +130,12 @@ useKeyboardShortcuts({
       @open="ws.openSheet($event)"
     />
 
-    <ShortcutCheatsheet
+    <WorkspaceShortcutCheatsheet
       :show="ws.showCheatsheet.value"
       @update:show="ws.showCheatsheet.value = $event"
     />
   </div>
 </template>
 
-<style src="../review-tokens.css" />
+<style src="@/features/workspace/presentation/workspace-tokens.css" />
 <style scoped src="./review-workspace-view.css" />

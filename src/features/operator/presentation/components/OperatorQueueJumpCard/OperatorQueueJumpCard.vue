@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { NButton, NCard, NIcon, NTooltip } from 'naive-ui'
+import { NButton, NCard, NFlex, NIcon, NTooltip } from 'naive-ui'
 import { ArrowForwardOutline } from '@vicons/ionicons5'
 
 import { ACTIVITY_TYPE_ICONS, ACTIVITY_TYPE_LABELS } from '../../../constants/operator-activity'
@@ -26,16 +26,17 @@ const subtitle = computed(() => QUEUE_SUBTITLES[props.kind])
 </script>
 
 <template>
-  <NCard size="small" class="queue-jump" content-style="padding: 16px 18px;">
-    <div class="queue-jump__row">
-      <span class="queue-jump__icon" :class="`queue-jump__icon--${kind}`">
-        <NIcon :component="icon" :size="20" />
-      </span>
-
-      <div class="queue-jump__body">
-        <div class="queue-jump__title">{{ title }}</div>
-        <div class="queue-jump__sub">{{ subtitle }}</div>
-      </div>
+  <NCard>
+    <NFlex justify="space-between" align="center" :size="16" :wrap="false">
+      <NFlex align="center" :size="14" :wrap="false" style="min-width: 0; flex: 1">
+        <span :class="['queue-jump__icon', `queue-jump__icon--${kind}`]">
+          <NIcon :component="icon" :size="20" />
+        </span>
+        <div style="min-width: 0">
+          <h3 class="queue-jump__title">{{ title }}</h3>
+          <p class="queue-jump__sub">{{ subtitle }}</p>
+        </div>
+      </NFlex>
 
       <div class="queue-jump__counter">
         <div class="queue-jump__count">{{ count }}</div>
@@ -44,18 +45,18 @@ const subtitle = computed(() => QUEUE_SUBTITLES[props.kind])
 
       <NTooltip v-if="disabled" :disabled="!disabledHint">
         <template #trigger>
-          <NButton type="primary" size="small" disabled>
+          <NButton type="primary" disabled>
             Ir
             <template #icon><NIcon :component="ArrowForwardOutline" /></template>
           </NButton>
         </template>
         {{ disabledHint }}
       </NTooltip>
-      <NButton v-else type="primary" size="small" @click="$emit('click')">
+      <NButton v-else type="primary" @click="$emit('click')">
         Ir
         <template #icon><NIcon :component="ArrowForwardOutline" /></template>
       </NButton>
-    </div>
+    </NFlex>
   </NCard>
 </template>
 
