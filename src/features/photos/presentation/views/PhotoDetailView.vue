@@ -64,73 +64,72 @@ function goToReview() {
         </NResult>
       </div>
 
-      <!-- Content -->
+      <!-- 3-col layout: info | photo | detections (like review workspace) -->
       <template v-else-if="photo">
-        <div class="detail-grid">
-          <!-- Image -->
-          <NCard class="detail-grid__image-card">
-            <img :src="photo.imageUrl" :alt="photo.filename" class="detail-image" />
-          </NCard>
+        <div class="detail-layout">
+          <aside class="detail-layout__info">
+            <NFlex align="center" :size="6" wrap class="detail-info__tags">
+              <NTag :type="PHOTO_STATUS_CONFIG[photo.status].type" size="small" round>
+                {{ PHOTO_STATUS_CONFIG[photo.status].label }}
+              </NTag>
+              <NTag v-if="photo.reviewedAt" type="success" size="small" round>Revisada</NTag>
+            </NFlex>
 
-          <!-- Info panel -->
-          <NFlex vertical :size="16">
-            <NCard>
-              <template #header>
-                <NFlex align="center" :size="8">
-                  <span class="detail-info__title">{{ photo.filename }}</span>
-                  <NTag :type="PHOTO_STATUS_CONFIG[photo.status].type" size="small" round>
-                    {{ PHOTO_STATUS_CONFIG[photo.status].label }}
-                  </NTag>
-                  <NTag v-if="photo.reviewedAt" type="success" size="small" round> Revisada </NTag>
-                </NFlex>
-              </template>
+            <h3 class="detail-side__title">Información</h3>
 
-              <NFlex vertical :size="16">
-                <NFlex align="start" :size="12">
-                  <div class="detail-info__icon">
-                    <NIcon :component="ImageOutline" :size="18" />
-                  </div>
-                  <div>
-                    <p class="detail-info__label">Archivo</p>
-                    <p class="detail-info__value">
-                      {{ photo.mimeType }} · {{ formatFileSize(photo.fileSize) }}
-                    </p>
-                  </div>
-                </NFlex>
-
-                <NFlex align="start" :size="12">
-                  <div class="detail-info__icon">
-                    <NIcon :component="CalendarOutline" :size="18" />
-                  </div>
-                  <div>
-                    <p class="detail-info__label">Subida</p>
-                    <p class="detail-info__value">{{ formatRelativeTime(photo.uploadedAt) }}</p>
-                  </div>
-                </NFlex>
-
-                <NFlex v-if="photo.processedAt" align="start" :size="12">
-                  <div class="detail-info__icon">
-                    <NIcon :component="CalendarOutline" :size="18" />
-                  </div>
-                  <div>
-                    <p class="detail-info__label">Procesada</p>
-                    <p class="detail-info__value">{{ formatRelativeTime(photo.processedAt) }}</p>
-                  </div>
-                </NFlex>
+            <NFlex vertical :size="12">
+              <NFlex align="start" :size="10">
+                <div class="detail-info__icon">
+                  <NIcon :component="ImageOutline" :size="16" />
+                </div>
+                <div>
+                  <p class="detail-info__label">Archivo</p>
+                  <p class="detail-info__value">
+                    {{ photo.mimeType }} · {{ formatFileSize(photo.fileSize) }}
+                  </p>
+                </div>
               </NFlex>
-            </NCard>
-          </NFlex>
+
+              <NFlex align="start" :size="10">
+                <div class="detail-info__icon">
+                  <NIcon :component="CalendarOutline" :size="16" />
+                </div>
+                <div>
+                  <p class="detail-info__label">Subida</p>
+                  <p class="detail-info__value">{{ formatRelativeTime(photo.uploadedAt) }}</p>
+                </div>
+              </NFlex>
+
+              <NFlex v-if="photo.processedAt" align="start" :size="10">
+                <div class="detail-info__icon">
+                  <NIcon :component="CalendarOutline" :size="16" />
+                </div>
+                <div>
+                  <p class="detail-info__label">Procesada</p>
+                  <p class="detail-info__value">{{ formatRelativeTime(photo.processedAt) }}</p>
+                </div>
+              </NFlex>
+            </NFlex>
+          </aside>
+
+          <section class="detail-layout__photo">
+            <img :src="photo.imageUrl" :alt="photo.filename" class="detail-image" />
+          </section>
+
+          <aside class="detail-layout__detections">
+            <section class="detail-detections__section">
+              <h3 class="detail-side__title">Placas detectadas</h3>
+              <PhotoBibsGrid v-if="photo.bibs.length" :bibs="photo.bibs" />
+              <p v-else class="detail-side__empty">Sin placas detectadas.</p>
+            </section>
+
+            <section class="detail-detections__section">
+              <h3 class="detail-side__title">Colores detectados</h3>
+              <PhotoColorsList v-if="photo.colors.length" :colors="photo.colors" />
+              <p v-else class="detail-side__empty">Sin colores detectados.</p>
+            </section>
+          </aside>
         </div>
-
-        <section v-if="photo.bibs.length" class="detail-section">
-          <h2 class="detail-section__title">Placas detectadas</h2>
-          <PhotoBibsGrid :bibs="photo.bibs" />
-        </section>
-
-        <section v-if="photo.colors.length" class="detail-section">
-          <h2 class="detail-section__title">Colores detectados</h2>
-          <PhotoColorsList :colors="photo.colors" />
-        </section>
       </template>
     </div>
   </div>

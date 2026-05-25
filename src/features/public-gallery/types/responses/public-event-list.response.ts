@@ -2,10 +2,10 @@
 export interface IApiPublicEventListItem {
   slug: string
   name: string
-  date: string
+  startDate: string
+  endDate: string
   provinceName: string | null
   cantonName: string | null
-  isFeatured: boolean
   photoCount: number
   coverSlug: string | null
 }
@@ -14,10 +14,10 @@ export interface IApiPublicEventListItem {
 export interface IPublicEventListItem {
   slug: string
   name: string
-  date: Date
+  startDate: Date
+  endDate: Date
   provinceName: string | null
   cantonName: string | null
-  isFeatured: boolean
   photoCount: number
   coverSlug: string | null
 }

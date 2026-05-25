@@ -2,6 +2,7 @@ import { computed, type Ref } from 'vue'
 import { useInfiniteQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
+import { INTERNAL_IMAGE_QUERY_DEFAULTS } from '@/core/api/internal-image-query'
 import { httpClient } from '@/core/http/axios-client'
 import { toPagination } from '@/core/http/pagination'
 import { DASHBOARD_STALE_TIME } from '../../constants/operator-dashboard'
@@ -52,6 +53,7 @@ export function useOperatorReviewQueueQuery(
       last.pagination.page < last.pagination.totalPages
         ? ({ page: last.pagination.page + 1 } satisfies IPageParams)
         : undefined,
+    ...INTERNAL_IMAGE_QUERY_DEFAULTS,
     staleTime: DASHBOARD_STALE_TIME.VOLATILE,
     refetchOnWindowFocus: true,
   })

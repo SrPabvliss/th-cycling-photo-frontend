@@ -5,8 +5,8 @@ export interface IApiEventDetail {
   id: string
   slug: string
   name: string
-  description: string | null
-  date: string
+  startDate: string
+  endDate: string
   provinceName: string | null
   cantonName: string | null
   provinceId: number | null
@@ -14,7 +14,6 @@ export interface IApiEventDetail {
   coverImageUrl: string | null
   coverImageSlug: string | null
   status: string
-  isFeatured: boolean
   photoCount: number
   classifiedCount: number
   totalFileSize: number
@@ -27,8 +26,8 @@ export interface IEventDetail {
   id: string
   slug: string
   name: string
-  description: string | null
-  date: Date
+  startDate: Date
+  endDate: Date
   provinceName: string | null
   cantonName: string | null
   provinceId: number | null
@@ -36,7 +35,6 @@ export interface IEventDetail {
   coverImageUrl: string | null
   coverImageSlug: string | null
   status: EventStatus
-  isFeatured: boolean
   photoCount: number
   classifiedCount: number
   totalFileSize: number

@@ -11,8 +11,13 @@ import {
   ChevronBack,
 } from '@vicons/ionicons5'
 
+import { env } from '@/core/config/env'
 import { formatWhatsAppNumber } from '@/shared/utils/phone.utils'
-import { openWhatsApp, openWhatsAppWithTemplate } from '@/shared/utils/whatsapp.utils'
+import {
+  buildDeliveryTemplate,
+  buildPaymentInfoTemplate,
+  openWhatsApp,
+} from '@/shared/utils/whatsapp.utils'
 import { ORDER_STATUS } from '../../types/responses/order-list.response'
 import { useOrderDetailQuery } from '../../composables/queries/use-order-detail'
 import { useOrderActions } from '../../composables/use-order-actions'
@@ -44,14 +49,23 @@ function onCancel() {
 
 function onSendDeliveryWhatsApp() {
   if (!order.value?.deliveryLink) return
-  const deliveryUrl = `${window.location.origin}/delivery/${order.value.deliveryLink.token}`
-  const displayName = order.value.snapFirstName ?? order.value.userName
-  const msg = `¡Hola ${displayName}! ✅ Aquí tienes tus ${order.value.photos.length} fotos en alta calidad: ${deliveryUrl}. El link estará disponible por 7 días. ¡Gracias! 🎉`
-  if (order.value.snapWhatsapp) {
-    openWhatsApp(order.value.snapWhatsapp, msg)
-  } else {
-    openWhatsAppWithTemplate(msg)
-  }
+  const deliveryUrl = `${env.VITE_APP_BASE_URL}/delivery/${order.value.deliveryLink.token}`
+  const msg = buildDeliveryTemplate({
+    customerFirstName: order.value.snapFirstName ?? order.value.userName,
+    photoCount: order.value.photos.length,
+    deliveryUrl,
+  })
+  openWhatsApp(order.value.snapWhatsapp, msg)
+}
+
+function onSendPaymentInfo() {
+  if (!order.value) return
+  const msg = buildPaymentInfoTemplate({
+    customerFirstName: order.value.snapFirstName ?? order.value.userName,
+    photoCount: order.value.photos.length,
+    eventName: order.value.eventName,
+  })
+  openWhatsApp(order.value.snapWhatsapp, msg)
 }
 
 function onRegenerate() {
@@ -149,6 +163,14 @@ function onRegenerate() {
                   <span>{{ order.snapEmail }}</span>
                 </div>
               </div>
+            </div>
+
+            <div v-if="order.status === ORDER_STATUS.PENDING" class="od-side-card">
+              <div class="od-side-card__title">Comunicación</div>
+              <button class="od-status-btn od-status-btn--wa" @click="onSendPaymentInfo">
+                <NIcon :component="LogoWhatsapp" :size="13" />
+                Enviar info de pago
+              </button>
             </div>
 
             <div class="od-side-card">

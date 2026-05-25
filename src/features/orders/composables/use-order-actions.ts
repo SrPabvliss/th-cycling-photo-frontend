@@ -1,6 +1,6 @@
 import { useDialog, useMessage } from 'naive-ui'
 
-import { openWhatsApp, openWhatsAppWithTemplate } from '@/shared/utils/whatsapp.utils'
+import { openWhatsApp } from '@/shared/utils/whatsapp.utils'
 import { useConfirmPayment } from './mutations/use-confirm-payment'
 import { useSendDelivery } from './mutations/use-send-delivery'
 import { useCancelOrder } from './mutations/use-cancel-order'
@@ -43,11 +43,7 @@ export function useOrderActions() {
           positiveText: 'Enviar por WhatsApp',
           negativeText: 'Cerrar',
           onPositiveClick: () => {
-            if (snapWhatsapp) {
-              openWhatsApp(snapWhatsapp, result.whatsappTemplate)
-            } else {
-              openWhatsAppWithTemplate(result.whatsappTemplate)
-            }
+            openWhatsApp(snapWhatsapp, result.whatsappTemplate)
           },
         })
       },
@@ -78,11 +74,7 @@ export function useOrderActions() {
       positiveText: 'Enviar por WhatsApp',
       negativeText: 'Cerrar',
       onPositiveClick: () => {
-        if (snapWhatsapp) {
-          openWhatsApp(snapWhatsapp, result.whatsappTemplate)
-        } else {
-          openWhatsAppWithTemplate(result.whatsappTemplate)
-        }
+        openWhatsApp(snapWhatsapp, result.whatsappTemplate)
       },
     })
   }

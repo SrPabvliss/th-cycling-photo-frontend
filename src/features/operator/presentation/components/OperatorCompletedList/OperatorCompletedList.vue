@@ -34,7 +34,7 @@ defineProps<{
         </template>
         <template #description>
           <span class="completed__meta">
-            <span>{{ formatDate(item.event.date) }}</span>
+            <span>{{ formatDate(item.event.startDate) }}</span>
             <span class="completed__sep">·</span>
             <span class="completed__photos">
               <NIcon :component="ImageOutline" :size="12" />

@@ -22,7 +22,7 @@ import {
 
 import { usePhotoSelectionStore } from '../../stores/photo-selection.store'
 import { useCreatePreviewLink } from '../../composables/mutations/use-create-preview-link'
-import { openWhatsApp } from '../../composables/use-whatsapp'
+import { openWhatsApp } from '@/shared/utils/whatsapp.utils'
 import PageHeader from '@/shared/components/PageHeader.vue'
 import type { IPreviewLinkCreated } from '../../types/responses/preview-link-created.response'
 

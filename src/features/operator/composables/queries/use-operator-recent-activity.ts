@@ -2,6 +2,7 @@ import { computed, type Ref } from 'vue'
 import { keepPreviousData, useQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
+import { INTERNAL_IMAGE_QUERY_DEFAULTS } from '@/core/api/internal-image-query'
 import { httpClient } from '@/core/http/axios-client'
 import { toPagination } from '@/core/http/pagination'
 import { DASHBOARD_PAGE_SIZE, DASHBOARD_STALE_TIME } from '../../constants/operator-dashboard'
@@ -31,6 +32,7 @@ export function useOperatorRecentActivityQuery(
       }
     },
     placeholderData: keepPreviousData,
+    ...INTERNAL_IMAGE_QUERY_DEFAULTS,
     staleTime: DASHBOARD_STALE_TIME.VOLATILE,
     refetchOnWindowFocus: true,
   })

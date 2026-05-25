@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/vue-query'
 import { computed, type MaybeRefOrGetter, type Ref, toValue } from 'vue'
+import { refDebounced } from '@vueuse/core'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
@@ -12,14 +13,28 @@ const PHOTOS_PER_PAGE = 30
 export function usePublicEventPhotosInfinite(
   slug: MaybeRefOrGetter<string>,
   categoryId: Ref<number | null>,
+  bibNumber: Ref<string>,
+  bibMatch: Ref<'exact' | 'starts' | 'contains'>,
 ) {
+  const debouncedBib = refDebounced(bibNumber, 300)
+
   return useInfiniteQuery({
     queryKey: computed(() =>
-      PUBLIC_GALLERY_QUERY_KEYS.photos(toValue(slug), undefined, categoryId.value ?? undefined),
+      PUBLIC_GALLERY_QUERY_KEYS.photos(
+        toValue(slug),
+        undefined,
+        categoryId.value ?? undefined,
+        debouncedBib.value || undefined,
+        bibMatch.value,
+      ),
     ),
     queryFn: async ({ pageParam }) => {
       const params: Record<string, unknown> = { page: pageParam, limit: PHOTOS_PER_PAGE }
       if (categoryId.value) params.photoCategoryId = categoryId.value
+      if (debouncedBib.value) {
+        params.bibNumber = debouncedBib.value
+        params.bibMatch = bibMatch.value
+      }
 
       const response = await httpClient.get<IApiPublicPhoto[]>(
         API_ROUTES.PUBLIC_EVENTS.PHOTOS(toValue(slug)),

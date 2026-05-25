@@ -24,7 +24,12 @@ defineProps<{
         <NFlex :size="16" class="upload-event__meta">
           <NFlex :size="4" align="center">
             <NIcon :component="CalendarOutline" :size="13" />
-            <span>{{ formatDate(event.date) }}</span>
+            <span v-if="event.startDate.getTime() === event.endDate.getTime()">
+              {{ formatDate(event.startDate) }}
+            </span>
+            <span v-else>
+              {{ formatDate(event.startDate) }} – {{ formatDate(event.endDate) }}
+            </span>
           </NFlex>
           <NFlex :size="4" align="center">
             <NIcon :component="CameraOutline" :size="13" />

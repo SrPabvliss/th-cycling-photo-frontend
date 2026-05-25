@@ -141,13 +141,25 @@
   border-top: 1px solid #f3f4f6;
 }
 
+.event-card__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.event-card__action {
+  width: 100%;
+}
+
 .event-card__clear {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  font-size: 13px;
+  gap: 4px;
+  font-size: 11px;
   color: var(--tt-success);
   font-weight: 500;
-  padding: 6px 0;
+  padding: 6px 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }

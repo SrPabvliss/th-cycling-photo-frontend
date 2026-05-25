@@ -7,6 +7,20 @@ export const ORDER_STATUS = {
 
 export type OrderStatus = (typeof ORDER_STATUS)[keyof typeof ORDER_STATUS]
 
+export interface IApiOrderPreviewPhoto {
+  photoId: string
+  publicSlug: string
+  thumbnailUrl: string
+  filename: string
+}
+
+export interface IOrderPreviewPhoto {
+  photoId: string
+  publicSlug: string
+  thumbnailUrl: string
+  filename: string
+}
+
 /** API projection from GET /orders */
 export interface IApiOrderListItem {
   id: string
@@ -19,6 +33,7 @@ export interface IApiOrderListItem {
   eventName: string
   photoCount: number
   hasDeliveryLink: boolean
+  previewPhotos: IApiOrderPreviewPhoto[]
 }
 
 /** Frontend domain type with parsed dates and typed status */
@@ -33,4 +48,5 @@ export interface IOrderListItem {
   eventName: string
   photoCount: number
   hasDeliveryLink: boolean
+  previewPhotos: IOrderPreviewPhoto[]
 }

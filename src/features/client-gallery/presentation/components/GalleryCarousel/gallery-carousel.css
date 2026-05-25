@@ -52,7 +52,7 @@
   flex: 1;
   overflow: hidden;
   cursor: pointer;
-  background: #f3f4f6;
+  background: #0a0a0a;
   min-height: 0;
   height: 100%;
 }
@@ -168,7 +168,7 @@
   flex-shrink: 0;
   transition: border-color 0.15s;
   padding: 0;
-  background: #f3f4f6;
+  background: #0a0a0a;
 }
 
 .carousel__thumb--active {

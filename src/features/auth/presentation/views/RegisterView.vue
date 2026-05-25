@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { NCard } from 'naive-ui'
+import { NAlert, NCard } from 'naive-ui'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import TitanLogo from '@/core/layout/public/TitanLogo.vue'
 import { EVENTS_PATH } from '@/features/events/routes'
+import AuthModeTabs from '../components/AuthModeTabs/AuthModeTabs.vue'
 import { useAuth } from '../../composables/use-auth'
 import { toRegisterRequest } from '../../mappers/register-form.mapper'
 import type { IRegisterFormData } from '../../constants/register-form.schema'
@@ -14,11 +16,13 @@ const router = useRouter()
 const route = useRoute()
 const { register, isRegistering } = useAuth()
 
+const redirectQuery = computed(() => (route.query.redirect as string | undefined) ?? null)
+const showCheckoutNotice = computed(() => redirectQuery.value === '/checkout')
+
 async function handleSubmit(formData: IRegisterFormData) {
   try {
     await register(toRegisterRequest(formData))
-    const redirect = (route.query.redirect as string) || EVENTS_PATH
-    router.push(redirect)
+    router.push(redirectQuery.value ?? EVENTS_PATH)
   } catch {
     // Error toast shown by interceptor
   }
@@ -35,7 +39,13 @@ async function handleSubmit(formData: IRegisterFormData) {
           <p class="register-subtitle">Regístrate para solicitar tus fotos de competencia.</p>
         </div>
 
-        <RegisterForm :is-submitting="isRegistering" login-url="/login" @submit="handleSubmit" />
+        <AuthModeTabs mode="register" :redirect="redirectQuery" />
+
+        <NAlert v-if="showCheckoutNotice" type="info" :show-icon="true" style="margin-bottom: 16px">
+          Crea tu cuenta para completar tu pedido.
+        </NAlert>
+
+        <RegisterForm :is-submitting="isRegistering" @submit="handleSubmit" />
       </NCard>
     </div>
   </PublicLayout>
@@ -60,12 +70,13 @@ async function handleSubmit(formData: IRegisterFormData) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   margin-bottom: 28px;
 }
 
 .register-title {
-  margin: 8px 0 0;
+  /* Compensate for transparent padding inside the helmet PNG. */
+  margin: -8px 0 0;
   font-size: 26px;
   font-weight: 700;
   color: #1a1f2c;

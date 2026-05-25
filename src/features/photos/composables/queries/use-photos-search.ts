@@ -1,7 +1,8 @@
 import { computed, type Ref } from 'vue'
-import { keepPreviousData, useQuery } from '@tanstack/vue-query'
+import { useInfiniteQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
+import { INTERNAL_IMAGE_QUERY_DEFAULTS } from '@/core/api/internal-image-query'
 import { httpClient } from '@/core/http/axios-client'
 import { toPagination } from '@/core/http/pagination'
 import type { PhotoStatus } from '@/shared/types/photo-enums'
@@ -9,9 +10,12 @@ import { PHOTO_QUERY_KEYS } from '../../constants/query-keys'
 import { toPhotoListItems } from '../../mappers/photo-list.mapper'
 import type { IApiPhotoListItem } from '../../types/responses/photo-list.response'
 
+export type BibMatchMode = 'exact' | 'starts' | 'contains'
+
 export interface IPhotoSearchFilters {
   eventId: string
-  plateNumber?: number | null
+  plateNumber?: string | null
+  bibMatch?: BibMatchMode
   status?: PhotoStatus | null
   helmetColor?: string | null
   clothingColor?: string | null
@@ -19,35 +23,34 @@ export interface IPhotoSearchFilters {
   photoCategoryId?: number | null
 }
 
-export function usePhotosSearchQuery(
-  filters: Ref<IPhotoSearchFilters>,
-  page: Ref<number>,
-  limit = 20,
-) {
+interface IPageParams {
+  page: number
+}
+
+interface IPageResult {
+  items: ReturnType<typeof toPhotoListItems>
+  pagination: ReturnType<typeof toPagination>
+}
+
+export function usePhotosSearchInfiniteQuery(filters: Ref<IPhotoSearchFilters>, limit = 30) {
   const hasAdvancedFilters = computed(() => {
     const f = filters.value
     return !!(f.plateNumber || f.helmetColor || f.clothingColor || f.bikeColor)
   })
 
-  return useQuery({
-    queryKey: computed(() =>
-      PHOTO_QUERY_KEYS.search({
-        ...filters.value,
-        page: page.value,
-        limit,
-      }),
-    ),
-    queryFn: async () => {
+  return useInfiniteQuery({
+    queryKey: computed(() => PHOTO_QUERY_KEYS.search({ ...filters.value, limit })),
+    initialPageParam: { page: 1 } satisfies IPageParams,
+    queryFn: async ({ pageParam }: { pageParam: IPageParams }): Promise<IPageResult> => {
       const f = filters.value
-      const params: Record<string, unknown> = {
-        page: page.value,
-        limit,
-      }
+      const params: Record<string, unknown> = { page: pageParam.page, limit }
 
-      // Use /photos/search when advanced classification filters are active
       if (hasAdvancedFilters.value || f.status) {
         params.eventId = f.eventId
-        if (f.plateNumber) params.plateNumber = f.plateNumber
+        if (f.plateNumber) {
+          params.plateNumber = f.plateNumber
+          params.bibMatch = f.bibMatch ?? 'exact'
+        }
         if (f.status) params.status = f.status
         if (f.helmetColor) params.helmetColor = f.helmetColor
         if (f.clothingColor) params.clothingColor = f.clothingColor
@@ -56,35 +59,36 @@ export function usePhotosSearchQuery(
         const response = await httpClient.get<IApiPhotoListItem[]>(API_ROUTES.PHOTOS.SEARCH, {
           params,
         })
-        const items = toPhotoListItems(response.data)
         return {
-          items,
+          items: toPhotoListItems(response.data),
           pagination: toPagination(response.meta.pagination, {
-            page: page.value,
+            page: pageParam.page,
             limit,
-            itemsCount: items.length,
+            itemsCount: response.data.length,
           }),
         }
       }
 
-      // Default: event-scoped listing (supports photoCategoryId filter)
       if (f.photoCategoryId) params.photoCategoryId = f.photoCategoryId
 
       const response = await httpClient.get<IApiPhotoListItem[]>(
         API_ROUTES.PHOTOS.BY_EVENT(f.eventId),
         { params },
       )
-      const items = toPhotoListItems(response.data)
       return {
-        items,
+        items: toPhotoListItems(response.data),
         pagination: toPagination(response.meta.pagination, {
-          page: page.value,
+          page: pageParam.page,
           limit,
-          itemsCount: items.length,
+          itemsCount: response.data.length,
         }),
       }
     },
-    placeholderData: keepPreviousData,
+    getNextPageParam: (last) =>
+      last.pagination.page < last.pagination.totalPages
+        ? ({ page: last.pagination.page + 1 } satisfies IPageParams)
+        : undefined,
     enabled: computed(() => !!filters.value.eventId),
+    ...INTERNAL_IMAGE_QUERY_DEFAULTS,
   })
 }

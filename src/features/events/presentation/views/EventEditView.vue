@@ -10,7 +10,6 @@ import { useRemoveAssetsBatch } from '@/features/event-assets/composables/mutati
 import { usePhotoCategoriesQuery } from '@/features/photo-categories/composables/queries/use-photo-categories'
 import { useAssignPhotoCategoriesBatch } from '@/features/photo-categories/composables/mutations/use-assign-photo-categories-batch'
 import { useUnassignPhotoCategoriesBatch } from '@/features/photo-categories/composables/mutations/use-unassign-photo-categories-batch'
-import { useSetFeatured } from '../../composables/mutations/use-set-featured'
 import { useEventDetailQuery } from '../../composables/queries/use-event-detail'
 import { EVENT_ROUTE_NAMES } from '../../routes'
 import { useUpdateEvent } from '../../composables/mutations/use-update-event'
@@ -35,7 +34,6 @@ const { mutateAsync: uploadAssetsBatch } = useUploadAssetsBatch()
 const { mutateAsync: removeAssetsBatch } = useRemoveAssetsBatch()
 const { mutateAsync: assignCategoriesBatch } = useAssignPhotoCategoriesBatch()
 const { mutateAsync: unassignCategoriesBatch } = useUnassignPhotoCategoriesBatch()
-const { mutateAsync: setFeatured } = useSetFeatured()
 
 const initialData = computed<IEventFormData | undefined>(() => {
   if (!event.value) return undefined
@@ -75,15 +73,6 @@ async function handleSubmit(formData: IEventFormData, extra: IEventFormExtra) {
     }
   }
 
-  // Sync featured
-  if (
-    event.value &&
-    extra.isFeatured !== undefined &&
-    extra.isFeatured !== event.value.isFeatured
-  ) {
-    promises.push(setFeatured({ eventId: id.value, isFeatured: extra.isFeatured }))
-  }
-
   await Promise.all(promises)
 }
 </script>
@@ -111,7 +100,6 @@ async function handleSubmit(formData: IEventFormData, extra: IEventFormExtra) {
           v-else-if="event && initialData"
           :initial-data="initialData"
           :existing-assets="assets"
-          :initial-featured="event.isFeatured"
           :initial-category-ids="initialCategoryIds"
           :is-submitting="isUpdating"
           submit-label="Guardar Cambios"

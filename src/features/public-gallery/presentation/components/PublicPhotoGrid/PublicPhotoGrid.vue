@@ -1,32 +1,15 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useVirtualizer } from '@tanstack/vue-virtual'
-import { useWindowSize } from '@vueuse/core'
+import { useElementSize } from '@vueuse/core'
 import { NIcon } from 'naive-ui'
 import { CheckmarkCircle, AddCircleOutline } from '@vicons/ionicons5'
 
 import { getGalleryUrl } from '@/shared/utils/cdn.utils'
 import type { IPublicPhoto } from '../../../types/responses/public-photo.response'
 
-const ROW_HEIGHT = 240
 const GAP = 6
-
-const { width: windowWidth } = useWindowSize()
-
-const cols = computed(() => {
-  if (windowWidth.value < 640) return 2
-  if (windowWidth.value < 1024) return 3
-  return 4
-})
-
-function handleScroll() {
-  const el = parentRef.value
-  if (!el) return
-  const { scrollTop, scrollHeight, clientHeight } = el
-  if (scrollHeight - scrollTop - clientHeight < 300) {
-    emit('loadMore')
-  }
-}
+const ASPECT_RATIO = 4 / 3
 
 const props = defineProps<{
   photos: IPublicPhoto[]
@@ -40,6 +23,31 @@ const emit = defineEmits<{
 }>()
 
 const parentRef = ref<HTMLElement | null>(null)
+const { width: parentWidth } = useElementSize(parentRef)
+
+const cols = computed(() => {
+  if (parentWidth.value < 480) return 2
+  if (parentWidth.value < 900) return 3
+  if (parentWidth.value < 1280) return 4
+  return 5
+})
+
+const cellWidth = computed(() => {
+  if (parentWidth.value === 0) return 240
+  const totalGap = GAP * (cols.value - 1)
+  return Math.floor((parentWidth.value - totalGap) / cols.value)
+})
+
+const rowHeight = computed(() => Math.floor(cellWidth.value * ASPECT_RATIO))
+
+function handleScroll() {
+  const el = parentRef.value
+  if (!el) return
+  const { scrollTop, scrollHeight, clientHeight } = el
+  if (scrollHeight - scrollTop - clientHeight < 300) {
+    emit('loadMore')
+  }
+}
 
 const rowCount = computed(() => Math.ceil(props.photos.length / cols.value))
 
@@ -47,13 +55,17 @@ const rowVirtualizer = useVirtualizer(
   computed(() => ({
     count: rowCount.value,
     getScrollElement: () => parentRef.value,
-    estimateSize: () => ROW_HEIGHT + GAP,
+    estimateSize: () => rowHeight.value + GAP,
     overscan: 3,
   })),
 )
 
 const virtualRows = computed(() => rowVirtualizer.value.getVirtualItems())
 const totalSize = computed(() => rowVirtualizer.value.getTotalSize())
+
+watch([rowHeight, cols], () => {
+  rowVirtualizer.value.measure()
+})
 
 function getRowPhotos(rowIndex: number): IPublicPhoto[] {
   const start = rowIndex * cols.value
@@ -76,7 +88,7 @@ function getPhotoIndex(rowIndex: number, colIndex: number): number {
           top: `${virtualRow.start}px`,
           left: 0,
           right: 0,
-          height: `${ROW_HEIGHT}px`,
+          height: `${rowHeight}px`,
           display: 'grid',
           gridTemplateColumns: `repeat(${cols}, 1fr)`,
           gap: `${GAP}px`,
@@ -103,7 +115,7 @@ function getPhotoIndex(rowIndex: number, colIndex: number): number {
           >
             <NIcon
               :component="selectedIds.has(photo.id) ? CheckmarkCircle : AddCircleOutline"
-              :size="28"
+              :size="22"
             />
           </button>
         </div>

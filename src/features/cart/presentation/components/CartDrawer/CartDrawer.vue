@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { NButton, NDrawer, NDrawerContent, NEmpty, NFlex, NIcon } from 'naive-ui'
-import { CloseCircleOutline, CartOutline } from '@vicons/ionicons5'
+import { NAlert, NButton, NDrawer, NDrawerContent, NEmpty, NFlex, NIcon } from 'naive-ui'
+import { CloseCircleOutline, CartOutline, LogInOutline } from '@vicons/ionicons5'
 
 import { getGalleryUrl } from '@/shared/utils/cdn.utils'
+import { useAuth } from '@/features/auth/composables/use-auth'
 import { useCartStore } from '../../../stores/cart.store'
 import { useRemoveFromCart } from '../../../composables/mutations/use-remove-from-cart'
 
@@ -17,11 +18,17 @@ const emit = defineEmits<{
 
 const router = useRouter()
 const cartStore = useCartStore()
+const { isAuthenticated } = useAuth()
 const { mutate: removeFromCart } = useRemoveFromCart()
 
 function goToCheckout() {
   emit('update:show', false)
   router.push('/checkout')
+}
+
+function goToLogin() {
+  emit('update:show', false)
+  router.push({ path: '/login', query: { redirect: '/checkout' } })
 }
 </script>
 
@@ -59,7 +66,7 @@ function goToCheckout() {
       </template>
 
       <template v-if="cartStore.totalCount > 0" #footer>
-        <NFlex vertical :size="8" style="width: 100%">
+        <NFlex vertical :size="10" style="width: 100%">
           <div class="cart-summary">
             <span>Total:</span>
             <strong
@@ -68,9 +75,21 @@ function goToCheckout() {
               }}</strong
             >
           </div>
-          <NButton type="primary" block size="large" @click="goToCheckout">
-            Ir al checkout
-          </NButton>
+
+          <template v-if="isAuthenticated">
+            <NButton type="primary" block size="large" @click="goToCheckout">
+              Ir al checkout
+            </NButton>
+          </template>
+          <template v-else>
+            <NAlert type="info" :show-icon="true" style="font-size: 13px">
+              Inicia sesión para completar tu pedido.
+            </NAlert>
+            <NButton type="primary" block size="large" @click="goToLogin">
+              <template #icon><NIcon :component="LogInOutline" /></template>
+              Iniciar sesión para continuar
+            </NButton>
+          </template>
         </NFlex>
       </template>
     </NDrawerContent>

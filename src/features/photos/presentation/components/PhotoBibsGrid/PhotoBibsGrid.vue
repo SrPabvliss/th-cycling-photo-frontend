@@ -10,19 +10,26 @@ defineProps<{ bibs: IBibAttribute[] }>()
 
 <template>
   <div class="photo-bibs-grid">
-    <div v-for="bib in bibs" :key="bib.id" class="photo-bibs-grid__card">
+    <article
+      v-for="bib in bibs"
+      :key="bib.id"
+      class="photo-bib-card"
+      :class="{ 'photo-bib-card--manual': bib.source === 'reviewer' }"
+    >
       <AttributeCropImage
-        class="photo-bibs-grid__crop"
+        class="photo-bib-card__crop"
         :crop-url="bib.cropUrl"
         :alt="`Placa ${bib.digits}`"
       />
-      <div class="photo-bibs-grid__meta">
-        <span class="photo-bibs-grid__digits">{{ bib.digits }}</span>
-        <NTag :type="CONFIDENCE_TAG_TYPE[confidenceLevel(bib.confidence)]" size="small" round>
-          {{ CONFIDENCE_LABELS[confidenceLevel(bib.confidence)] }}
-        </NTag>
-        <span v-if="bib.source === 'reviewer'" class="photo-bibs-grid__manual">manual</span>
+      <div class="photo-bib-card__body">
+        <span class="photo-bib-card__digits">{{ bib.digits }}</span>
+        <div class="photo-bib-card__meta">
+          <NTag :type="CONFIDENCE_TAG_TYPE[confidenceLevel(bib.confidence)]" size="small" round>
+            {{ CONFIDENCE_LABELS[confidenceLevel(bib.confidence)] }}
+          </NTag>
+          <span v-if="bib.source === 'reviewer'" class="photo-bib-card__tag">manual</span>
+        </div>
       </div>
-    </div>
+    </article>
   </div>
 </template>

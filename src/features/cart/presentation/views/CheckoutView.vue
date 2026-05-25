@@ -1,18 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { NButton, NIcon } from 'naive-ui'
-import { ArrowBack, CheckmarkCircle, ChevronBack } from '@vicons/ionicons5'
+import { NAlert, NButton, NIcon } from 'naive-ui'
+import { ArrowBack, CheckmarkCircle, ChevronBack, LogoWhatsapp } from '@vicons/ionicons5'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { useAuth } from '@/features/auth/composables/use-auth'
 import { useCartStore } from '../../stores/cart.store'
 import { useMergeCart } from '../../composables/mutations/use-merge-cart'
 import { useCheckout } from '../../composables/mutations/use-checkout'
-import { useCheckoutStepper, type IEventFormData } from '../../composables/use-checkout-stepper'
-import type { ICheckoutEventItem, ICheckoutOrderResult } from '../../types/requests/cart.request'
-import CheckoutStepper from '../components/CheckoutStepper/CheckoutStepper.vue'
-import CheckoutEventSection from '../components/CheckoutEventSection/CheckoutEventSection.vue'
+import type { ICheckoutOrderResult } from '../../types/requests/cart.request'
+import CheckoutSummary from '../components/CheckoutSummary/CheckoutSummary.vue'
 
 const router = useRouter()
 const cartStore = useCartStore()
@@ -20,29 +18,9 @@ const { isAuthenticated } = useAuth()
 const { mutateAsync: mergeCart } = useMergeCart()
 const { mutateAsync: checkout, isPending: isCheckingOut } = useCheckout()
 
-const {
-  currentStep,
-  totalSteps,
-  currentGroup,
-  isLastStep,
-  getForm,
-  isStepComplete,
-  validateCurrent,
-  goNext,
-  goPrev,
-  handleTabClick,
-  eventForms,
-} = useCheckoutStepper()
-
-function handleFormUpdate(eventId: string, form: IEventFormData) {
-  eventForms.value.set(eventId, form)
-}
-
 const orderResults = ref<ICheckoutOrderResult[] | null>(null)
 
-async function handleCheckout() {
-  if (!validateCurrent()) return
-
+async function handleConfirm() {
   if (!isAuthenticated.value) {
     router.push({ path: '/login', query: { redirect: '/checkout' } })
     return
@@ -54,15 +32,7 @@ async function handleCheckout() {
     /* already merged */
   }
 
-  const items: ICheckoutEventItem[] = cartStore.groups.map((g) => {
-    const form = getForm(g.eventId)
-    return {
-      eventId: g.eventId,
-      bibNumber: form.bibNumber || undefined,
-      snapCategoryName: form.categoryName || undefined,
-    }
-  })
-
+  const items = cartStore.groups.map((g) => ({ eventId: g.eventId }))
   orderResults.value = await checkout({ items })
 }
 </script>
@@ -105,7 +75,7 @@ async function handleCheckout() {
       <div class="state-page__mountain" />
     </div>
 
-    <!-- Checkout wizard -->
+    <!-- Checkout summary -->
     <template v-else>
       <div class="cf-back-bar">
         <a class="cf-back-link" @click="router.back()">
@@ -121,36 +91,66 @@ async function handleCheckout() {
         <NButton type="primary" @click="router.push('/gallery')">Explorar eventos</NButton>
       </div>
 
-      <template v-else>
-        <CheckoutStepper
-          :groups="cartStore.groups"
-          :current-step="currentStep"
-          :is-step-complete="isStepComplete"
-          @tab-click="handleTabClick"
-        />
+      <section v-else class="checkout-summary">
+        <header class="checkout-summary__header">
+          <h1 class="checkout-summary__title">Resumen del pedido</h1>
+          <p class="checkout-summary__subtitle">
+            Revisa las fotos que vas a pedir. Si todo está bien, confirma tu pedido.
+          </p>
+        </header>
 
-        <CheckoutEventSection
-          v-if="currentGroup"
-          :group="currentGroup"
-          :form="getForm(currentGroup.eventId)"
-          :is-first="currentStep === 0"
-          :is-last="isLastStep"
-          :total-steps="totalSteps"
-          :is-checking-out="isCheckingOut"
-          @update:form="(f) => handleFormUpdate(currentGroup!.eventId, f)"
-          @prev="goPrev"
-          @next="goNext"
-          @checkout="handleCheckout"
-        />
-      </template>
+        <div class="checkout-summary__layout">
+          <div class="checkout-summary__main">
+            <CheckoutSummary
+              v-for="group in cartStore.groups"
+              :key="group.eventId"
+              :group="group"
+            />
+          </div>
+
+          <aside class="checkout-summary__aside">
+            <div class="checkout-summary__panel">
+              <NAlert type="info" :show-icon="true" class="checkout-summary__notice">
+                <template #icon>
+                  <NIcon :component="LogoWhatsapp" />
+                </template>
+                <strong>Nos contactaremos por WhatsApp</strong>
+                para coordinar el pago y la entrega de tus fotos.
+              </NAlert>
+
+              <dl class="checkout-summary__stats">
+                <div>
+                  <dt>Eventos</dt>
+                  <dd>{{ cartStore.groups.length }}</dd>
+                </div>
+                <div>
+                  <dt>Fotos</dt>
+                  <dd>{{ cartStore.totalCount }}</dd>
+                </div>
+              </dl>
+
+              <NButton
+                type="primary"
+                size="large"
+                block
+                :loading="isCheckingOut"
+                :disabled="isCheckingOut"
+                @click="handleConfirm"
+              >
+                Confirmar pedido
+              </NButton>
+
+              <NButton quaternary size="medium" block @click="router.push('/gallery')">
+                Seguir explorando
+              </NButton>
+            </div>
+          </aside>
+        </div>
+      </section>
     </template>
   </PublicLayout>
 </template>
 
-<style src="@/features/client-gallery/presentation/components/ContactForm/contact-form.css"></style>
-<style
-  src="@/features/client-gallery/presentation/components/OrderSummary/order-summary.css"
-></style>
 <style
   src="@/features/client-gallery/presentation/components/OrderConfirmation/order-confirmation.css"
 ></style>

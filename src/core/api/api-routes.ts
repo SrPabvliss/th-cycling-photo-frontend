@@ -78,6 +78,9 @@ export const API_ROUTES = {
     SET_RETOUCH_FLAG: (photoId: string) => `${PHOTOS_BASE}/${photoId}/retouch-flag`,
     ADD_BIB: (photoId: string) => `${PHOTOS_BASE}/${photoId}/bibs`,
     ADD_COLOR: (photoId: string) => `${PHOTOS_BASE}/${photoId}/colors`,
+    DELETE_BIB: (photoId: string, bibId: string) => `${PHOTOS_BASE}/${photoId}/bibs/${bibId}`,
+    DELETE_COLOR: (photoId: string, colorId: string) =>
+      `${PHOTOS_BASE}/${photoId}/colors/${colorId}`,
   },
   PHOTO_CATEGORIES: {
     GET_ALL: PHOTO_CATEGORIES_BASE,
@@ -92,6 +95,9 @@ export const API_ROUTES = {
   },
   PARTICIPANT_CATEGORIES: {
     GET_ALL: '/participant-categories',
+  },
+  EVENT_TYPES: {
+    GET_ALL: '/event-types',
   },
   CLASSIFICATIONS: {
     BASE: PARTICIPANTS_BASE,

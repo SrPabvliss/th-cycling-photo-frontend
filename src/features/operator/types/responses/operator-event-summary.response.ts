@@ -3,7 +3,8 @@ export interface IApiEventSummary {
   id: string
   slug: string
   name: string
-  date: string
+  startDate: string
+  endDate: string
   location: string
   coverUrl: string | null
   totalPhotos: number
@@ -14,7 +15,8 @@ export interface IEventSummary {
   id: string
   slug: string
   name: string
-  date: Date
+  startDate: Date
+  endDate: Date
   location: string
   coverUrl: string | null
   totalPhotos: number

@@ -2,6 +2,7 @@ import { computed, type Ref } from 'vue'
 import { useInfiniteQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
+import { INTERNAL_IMAGE_QUERY_DEFAULTS } from '@/core/api/internal-image-query'
 import { httpClient } from '@/core/http/axios-client'
 import { QUEUE_PAGINATION_DEFAULTS } from '../../constants/queue-pagination'
 import { REVIEW_QUERY_KEYS } from '../../constants/query-keys'
@@ -57,5 +58,6 @@ export function useReviewQueueQuery(
     getNextPageParam: (last: IReviewQueuePage) =>
       last.page < last.totalPages ? last.page + 1 : undefined,
     enabled: computed(() => !!eventSlug.value),
+    ...INTERNAL_IMAGE_QUERY_DEFAULTS,
   })
 }

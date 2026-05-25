@@ -25,7 +25,12 @@ const displayLocation = computed(() => formatLocation(props.event) ?? 'Sin ubica
         </div>
         <div>
           <p class="info-item__label">Fecha</p>
-          <p class="info-item__value">{{ formatDate(event.date) }}</p>
+          <p v-if="event.startDate.getTime() === event.endDate.getTime()" class="info-item__value">
+            {{ formatDate(event.startDate) }}
+          </p>
+          <p v-else class="info-item__value">
+            {{ formatDate(event.startDate) }} – {{ formatDate(event.endDate) }}
+          </p>
         </div>
       </NFlex>
       <NFlex align="start" :size="12">

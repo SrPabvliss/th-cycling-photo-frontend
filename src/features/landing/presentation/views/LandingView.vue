@@ -6,6 +6,9 @@ import { ArrowForward } from '@vicons/ionicons5'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import TitanLogo from '@/core/layout/public/TitanLogo.vue'
+import heroImage from '@/assets/brand/hero-downhill.webp'
+import aboutImage from '@/assets/brand/about-experience.webp'
+import ctaImage from '@/assets/brand/cta-explore.webp'
 import { usePublicEventsQuery } from '@/features/public-gallery/composables/queries/use-public-events'
 import { PUBLIC_GALLERY_ROUTE_NAMES } from '@/features/public-gallery/routes'
 import PublicEventCard from '@/features/public-gallery/presentation/components/PublicEventCard/PublicEventCard.vue'
@@ -13,8 +16,11 @@ import PublicEventCard from '@/features/public-gallery/presentation/components/P
 const router = useRouter()
 const { data: events } = usePublicEventsQuery()
 
-const featuredEvent = computed(() => events.value?.find((e) => e.isFeatured))
-const recentEvents = computed(() => events.value?.filter((e) => !e.isFeatured).slice(0, 3) ?? [])
+const recentEvents = computed(() =>
+  [...(events.value ?? [])]
+    .sort((a, b) => b.startDate.getTime() - a.startDate.getTime())
+    .slice(0, 3),
+)
 
 function handleEventClick(slug: string) {
   router.push({ name: PUBLIC_GALLERY_ROUTE_NAMES.EVENT_GALLERY, params: { slug } })
@@ -25,8 +31,17 @@ function handleEventClick(slug: string) {
   <PublicLayout>
     <!-- Hero Section -->
     <section class="hero">
+      <img
+        :src="heroImage"
+        alt=""
+        aria-hidden="true"
+        class="hero-bg"
+        fetchpriority="high"
+        decoding="async"
+      />
+      <div class="hero-overlay" />
       <div class="hero-content">
-        <TitanLogo :size="64" />
+        <TitanLogo :size="200" variant="full" />
         <h1 class="hero-title">
           Poderosos dioses que<br />
           gobiernan las montañas
@@ -41,14 +56,6 @@ function handleEventClick(slug: string) {
             <NIcon :component="ArrowForward" />
           </template>
         </NButton>
-      </div>
-    </section>
-
-    <!-- Featured event -->
-    <section v-if="featuredEvent" class="events-section">
-      <div class="events-inner">
-        <h2 class="events-section__title">Evento destacado</h2>
-        <PublicEventCard :event="featuredEvent" featured @click="handleEventClick" />
       </div>
     </section>
 
@@ -77,9 +84,14 @@ function handleEventClick(slug: string) {
     <section id="about" class="about">
       <div class="about-inner">
         <div class="about-image">
-          <div class="about-image-placeholder">
-            <span class="about-image-caption">Capturando la velocidad pura de los Andes.</span>
-          </div>
+          <img
+            :src="aboutImage"
+            alt="Ciclista de downhill ejecutando un truco aéreo"
+            class="about-image-photo"
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="about-image-caption">Capturando la velocidad pura de los Andes.</span>
         </div>
         <div class="about-text">
           <span class="about-label">11 AÑOS DE HISTORIA</span>
@@ -95,6 +107,14 @@ function handleEventClick(slug: string) {
 
     <!-- CTA Section -->
     <section id="cta" class="cta">
+      <img
+        :src="ctaImage"
+        alt=""
+        aria-hidden="true"
+        class="cta-bg"
+        loading="lazy"
+        decoding="async"
+      />
       <div class="cta-overlay">
         <h2 class="cta-title">Listo para encontrar tu carrera?</h2>
         <p class="cta-subtitle">

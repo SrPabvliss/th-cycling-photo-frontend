@@ -46,7 +46,7 @@ const coverStyle = computed(() =>
       </span>
       <div class="event-card__overlay">
         <NIcon :component="CalendarOutline" :size="14" />
-        <span>{{ formatDate(item.event.date) }}</span>
+        <span>{{ formatDate(item.event.startDate) }}</span>
       </div>
     </div>
 
@@ -104,28 +104,20 @@ const coverStyle = computed(() =>
       </div>
 
       <div class="event-card__footer">
-        <div v-if="allClear" class="event-card__clear">
-          <NIcon :component="CheckmarkCircleOutline" :size="16" />
-          <span>Al día</span>
-        </div>
-        <NFlex v-else :size="8">
-          <NButton
-            block
-            :disabled="item.stats.review.pendingPhotos === 0"
-            @click="emit('reviewClick', item)"
-          >
+        <div class="event-card__actions">
+          <NButton class="event-card__action" @click="emit('reviewClick', item)">
             <template #icon><NIcon :component="CheckmarkDoneOutline" /></template>
             Revisión
           </NButton>
-          <NButton
-            block
-            :disabled="item.stats.retouch.pendingPhotos === 0"
-            @click="emit('retouchClick', item)"
-          >
+          <NButton class="event-card__action" @click="emit('retouchClick', item)">
             <template #icon><NIcon :component="ColorWandOutline" /></template>
             Retoque
           </NButton>
-        </NFlex>
+        </div>
+        <div v-if="allClear" class="event-card__clear">
+          <NIcon :component="CheckmarkCircleOutline" :size="14" />
+          <span>Al día</span>
+        </div>
       </div>
     </div>
   </article>

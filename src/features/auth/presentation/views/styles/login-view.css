@@ -16,12 +16,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   margin-bottom: 32px;
 }
 
 .login-title {
-  margin: 8px 0 0;
+  /* Pull the title up to compensate for transparent padding inside the
+     helmet PNG — the optical gap was larger than the CSS gap. */
+  margin: -8px 0 0;
   font-size: 26px;
   font-weight: 700;
   color: #1a1f2c;

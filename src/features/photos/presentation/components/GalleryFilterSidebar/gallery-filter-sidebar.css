@@ -106,3 +106,30 @@
 .color-tag:hover {
   background: #e5e7eb;
 }
+
+.bib-match-group {
+  margin-top: 8px;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+}
+
+.bib-match-group :deep(.n-radio-button) {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.bib-match-group :deep(.n-radio-button__state-border),
+.bib-match-group :deep(.n-radio-button) {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.bib-match-group :deep(.n-radio-button) .n-radio__label,
+.bib-match-group :deep(.n-radio-button__label) {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

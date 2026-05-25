@@ -15,6 +15,7 @@
 
 .preview-photo {
   position: relative;
+  background: #0a0a0a;
   border-radius: 6px;
   overflow: hidden;
 }

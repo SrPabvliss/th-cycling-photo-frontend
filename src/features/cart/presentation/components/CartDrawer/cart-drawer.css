@@ -30,8 +30,9 @@
 
 .cart-thumb {
   aspect-ratio: 3/2;
+  background: #0a0a0a;
   border-radius: 6px;
-  overflow: visible;
+  overflow: hidden;
   position: relative;
 }
 
@@ -44,8 +45,8 @@
 
 .cart-thumb__remove {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: 4px;
+  right: 4px;
   background: #ef4444;
   border: 2px solid white;
   border-radius: 50%;

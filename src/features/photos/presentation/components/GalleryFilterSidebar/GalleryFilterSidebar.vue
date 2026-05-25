@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NButton, NFlex, NIcon, NInput, NTooltip } from 'naive-ui'
+import { NButton, NFlex, NIcon, NInput, NRadioButton, NRadioGroup, NTooltip } from 'naive-ui'
 import { SearchOutline } from '@vicons/ionicons5'
 
 import {
@@ -28,9 +28,12 @@ const STATUS_OPTIONS: Array<{ label: string; status: PhotoStatus | null }> = [
   { label: 'Fallidas', status: 'failed' },
 ]
 
+type BibMatchMode = 'exact' | 'starts' | 'contains'
+
 defineProps<{
   activeStatus: PhotoStatus | null
   plateNumber: string
+  bibMatch: BibMatchMode
   helmetColors: string[]
   clothingColors: string[]
   bikeColors: string[]
@@ -41,6 +44,7 @@ defineProps<{
 
 const emit = defineEmits<{
   'update:plateNumber': [value: string]
+  'update:bibMatch': [value: BibMatchMode]
   'update:activeStatus': [value: PhotoStatus | null]
   'update:photoCategoryId': [value: number | null]
   'update:helmetColors': [value: string[]]
@@ -60,7 +64,7 @@ function toggleColor(list: string[], color: string): string[] {
       <p class="filter-section__title">Buscar dorsal</p>
       <NInput
         :value="plateNumber"
-        placeholder="Ej. 127"
+        placeholder="Buscar por dorsal"
         clearable
         @update:value="emit('update:plateNumber', $event)"
       >
@@ -68,6 +72,16 @@ function toggleColor(list: string[], color: string): string[] {
           <NIcon :component="SearchOutline" :size="16" />
         </template>
       </NInput>
+      <NRadioGroup
+        :value="bibMatch"
+        size="small"
+        class="bib-match-group"
+        @update:value="emit('update:bibMatch', $event)"
+      >
+        <NRadioButton value="exact">Exacto</NRadioButton>
+        <NRadioButton value="starts">Empieza</NRadioButton>
+        <NRadioButton value="contains">Contiene</NRadioButton>
+      </NRadioGroup>
     </div>
 
     <div class="filter-section">

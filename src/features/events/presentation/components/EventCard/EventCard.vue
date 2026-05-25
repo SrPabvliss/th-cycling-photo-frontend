@@ -7,7 +7,6 @@ import {
   CameraOutline,
   CloudUploadOutline,
   ImageOutline,
-  Star,
 } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
@@ -35,11 +34,7 @@ const coverUrl = computed(() =>
 </script>
 
 <template>
-  <article
-    class="event-card"
-    :class="{ 'event-card--featured': event.isFeatured }"
-    @click="emit('view', event.slug)"
-  >
+  <article class="event-card" @click="emit('view', event.slug)">
     <!-- Cover -->
     <div class="event-card__cover">
       <img
@@ -78,12 +73,6 @@ const coverUrl = computed(() =>
         Sin portada — no visible al público
       </div>
 
-      <!-- Featured badge -->
-      <div v-if="event.isFeatured" class="event-card__featured-badge">
-        <NIcon :component="Star" :size="12" />
-        Destacado
-      </div>
-
       <!-- Photo count + size overlay -->
       <div v-if="event.photoCount > 0" class="event-card__overlay">
         <NIcon :component="CameraOutline" :size="14" />
@@ -107,7 +96,10 @@ const coverUrl = computed(() =>
 
         <NFlex :size="6" align="center" class="event-card__meta">
           <NIcon :component="CalendarOutline" :size="14" />
-          <span>{{ formatDate(event.date) }}</span>
+          <span v-if="event.startDate.getTime() === event.endDate.getTime()">
+            {{ formatDate(event.startDate) }}
+          </span>
+          <span v-else> {{ formatDate(event.startDate) }} – {{ formatDate(event.endDate) }} </span>
         </NFlex>
       </div>
 

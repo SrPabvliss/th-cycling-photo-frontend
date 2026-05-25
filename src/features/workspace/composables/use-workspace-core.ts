@@ -33,23 +33,52 @@ export function useReviewWorkspaceCore(
     () => queueItems.value.filter((it) => it.reviewedAt !== null).length,
   )
 
-  watch(
-    [queueItems, currentSlug],
-    ([items, slug]) => {
-      if (!slug && items.length > 0) {
-        const first = items[0]
-        if (first) currentSlug.value = first.publicSlug
-      }
-    },
-    { immediate: true },
-  )
-
   const photoSlug = computed(() => currentSlug.value ?? '')
   const photoQuery = usePhotoDetailBySlugQuery(photoSlug)
   const photo = computed(() => photoQuery.data.value ?? null)
 
   const currentIndex = computed(() =>
     queueItems.value.findIndex((it) => it.publicSlug === currentSlug.value),
+  )
+
+  const lastKnownIndex = ref<number>(-1)
+  watch(
+    currentIndex,
+    (idx) => {
+      if (idx >= 0) lastKnownIndex.value = idx
+    },
+    { immediate: true },
+  )
+
+  watch(
+    [queueItems, currentSlug, isQueuePending],
+    ([items, slug, queuePending]) => {
+      if (queuePending) return
+
+      if (items.length === 0) {
+        if (slug !== null) currentSlug.value = null
+        return
+      }
+
+      if (!slug) {
+        if (mode === 'edit-one') return
+        const first = items[0]
+        if (first) currentSlug.value = first.publicSlug
+        return
+      }
+
+      const found = items.some((it) => it.publicSlug === slug)
+      if (found) return
+
+      if (mode === 'edit-one') {
+        currentSlug.value = null
+        return
+      }
+
+      const target = items[lastKnownIndex.value] ?? items[items.length - 1] ?? items[0]
+      if (target) currentSlug.value = target.publicSlug
+    },
+    { immediate: true },
   )
   const hasPrev = computed(() => currentIndex.value > 0)
   const hasNext = computed(

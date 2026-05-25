@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { computed, type Ref } from 'vue'
 
 import { API_ROUTES } from '@/core/api/api-routes'
+import { INTERNAL_IMAGE_QUERY_DEFAULTS } from '@/core/api/internal-image-query'
 import { httpClient } from '@/core/http/axios-client'
 import type { PhotoStatus } from '@/shared/types/photo-enums'
 import { PHOTO_QUERY_KEYS } from '../../constants/query-keys'
@@ -21,5 +22,6 @@ export function usePhotoViewQuery(slug: Ref<string>) {
       } satisfies IPhotoView
     },
     enabled: computed(() => !!slug.value),
+    ...INTERNAL_IMAGE_QUERY_DEFAULTS,
   })
 }

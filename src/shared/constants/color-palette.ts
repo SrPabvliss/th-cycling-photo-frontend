@@ -13,7 +13,7 @@ export const COLOR_PALETTE = [
   'gris',
   'blanco',
   'dorado',
-  'beige',
+  'plateado',
 ] as const
 
 export type ColorName = (typeof COLOR_PALETTE)[number]
@@ -41,7 +41,7 @@ export const COLOR_PALETTE_HEX: Record<ColorName, string> = {
   gris: '#757575',
   blanco: '#FFFFFF',
   dorado: '#D4AF37',
-  beige: '#D6C4A3',
+  plateado: '#C0C0C0',
 }
 
 export const COLOR_PALETTE_LABELS: Record<ColorName, string> = {
@@ -59,5 +59,5 @@ export const COLOR_PALETTE_LABELS: Record<ColorName, string> = {
   gris: 'Gris',
   blanco: 'Blanco',
   dorado: 'Dorado',
-  beige: 'Beige',
+  plateado: 'Plateado',
 }

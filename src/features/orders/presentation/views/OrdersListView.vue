@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { NButton, NPagination, NResult, NSpin } from 'naive-ui'
+import { NButton, NPagination, NResult, NSpin, useMessage } from 'naive-ui'
+import { useQueryClient } from '@tanstack/vue-query'
 
 import PageHeader from '@/shared/components/PageHeader.vue'
+import { API_ROUTES } from '@/core/api/api-routes'
+import { env } from '@/core/config/env'
+import { httpClient } from '@/core/http/axios-client'
 import {
   openWhatsApp,
-  openWhatsAppWithTemplate,
-  buildPaymentTemplate,
+  buildPaymentInfoTemplate,
+  buildDeliveryTemplate,
 } from '@/shared/utils/whatsapp.utils'
 import {
   useOrdersListQuery,
@@ -15,6 +19,9 @@ import {
 } from '../../composables/queries/use-orders-list'
 import { useOrdersStatsQuery } from '../../composables/queries/use-orders-stats'
 import { useOrderActions } from '../../composables/use-order-actions'
+import { ORDER_QUERY_KEYS } from '../../constants/query-keys'
+import { toOrderDetail } from '../../mappers/order-detail.mapper'
+import type { IApiOrderDetail } from '../../types/responses/order-detail.response'
 import type { OrderStatus, IOrderListItem } from '../../types/responses/order-list.response'
 import { ORDER_ROUTE_NAMES } from '../../routes'
 import OrderStatsCards from '../components/OrderStatsCards/OrderStatsCards.vue'
@@ -23,6 +30,8 @@ import OrderFilters from '../components/OrderFilters/OrderFilters.vue'
 import OrderCard from '../components/OrderCard/OrderCard.vue'
 
 const router = useRouter()
+const message = useMessage()
+const queryClient = useQueryClient()
 
 const ORDERS_PER_PAGE = 15
 
@@ -56,18 +65,39 @@ function handleView(id: string) {
   router.push({ name: ORDER_ROUTE_NAMES.DETAIL, params: { id } })
 }
 
-function handleSendWhatsApp(order: IOrderListItem) {
+function handleSendPaymentInfo(order: IOrderListItem) {
   const firstName = order.userName.split(' ')[0] ?? order.userName
-  const template = buildPaymentTemplate({
+  const template = buildPaymentInfoTemplate({
     customerFirstName: firstName,
     photoCount: order.photoCount,
     eventName: order.eventName,
   })
-  if (order.snapWhatsapp) {
-    openWhatsApp(order.snapWhatsapp, template)
-  } else {
-    openWhatsAppWithTemplate(template)
+  openWhatsApp(order.snapWhatsapp, template)
+}
+
+async function handleResendDelivery(order: IOrderListItem) {
+  // Card only carries hasDeliveryLink boolean. Fetch detail to get the
+  // token (cached by TanStack Query, so repeat clicks are free).
+  const detail = await queryClient.fetchQuery({
+    queryKey: ORDER_QUERY_KEYS.detail(order.id),
+    queryFn: async () => {
+      const response = await httpClient.get<IApiOrderDetail>(API_ROUTES.ORDERS.GET_BY_ID(order.id))
+      return toOrderDetail(response.data)
+    },
+  })
+
+  if (!detail.deliveryLink) {
+    message.error('No se encontró el enlace de descarga.')
+    return
   }
+
+  const deliveryUrl = `${env.VITE_APP_BASE_URL}/delivery/${detail.deliveryLink.token}`
+  const template = buildDeliveryTemplate({
+    customerFirstName: detail.snapFirstName ?? detail.userName,
+    photoCount: detail.photos.length,
+    deliveryUrl,
+  })
+  openWhatsApp(order.snapWhatsapp, template)
 }
 </script>
 
@@ -122,7 +152,8 @@ function handleSendWhatsApp(order: IOrderListItem) {
             @view="handleView"
             @confirm-payment="handleConfirmPayment"
             @send-delivery="handleSendDelivery"
-            @send-whats-app="handleSendWhatsApp"
+            @send-payment-info="handleSendPaymentInfo"
+            @resend-delivery="handleResendDelivery"
             @regenerate="handleRegenerate"
           />
         </div>

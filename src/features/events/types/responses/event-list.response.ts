@@ -8,13 +8,13 @@ export interface IApiEventListItem {
   id: string
   slug: string
   name: string
-  date: string
+  startDate: string
+  endDate: string
   provinceName: string | null
   cantonName: string | null
   coverImageUrl: string | null
   coverImageSlug: string | null
   status: string
-  isFeatured: boolean
   photoCount: number
   totalFileSize: number
 }
@@ -24,13 +24,13 @@ export interface IEventListItem {
   id: string
   slug: string
   name: string
-  date: Date
+  startDate: Date
+  endDate: Date
   provinceName: string | null
   cantonName: string | null
   coverImageUrl: string | null
   coverImageSlug: string | null
   status: EventStatus
-  isFeatured: boolean
   photoCount: number
   totalFileSize: number
 }
