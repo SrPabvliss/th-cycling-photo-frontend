@@ -10,7 +10,8 @@ describe('toOperatorActiveEvent', () => {
         id: 'e-1',
         slug: 'evento-uno',
         name: 'Evento Uno',
-        date: '2026-04-01',
+        startDate: '2026-04-01',
+        endDate: '2026-04-02',
         location: 'Quito',
         coverUrl: 'https://cdn.test/x.jpg',
         totalPhotos: 100,
@@ -23,8 +24,9 @@ describe('toOperatorActiveEvent', () => {
 
     const result = toOperatorActiveEvent(api)
 
-    expect(result.event.date).toBeInstanceOf(Date)
-    expect(result.event.date.getUTCFullYear()).toBe(2026)
+    expect(result.event.startDate).toBeInstanceOf(Date)
+    expect(result.event.startDate.getUTCFullYear()).toBe(2026)
+    expect(result.event.endDate).toBeInstanceOf(Date)
     expect(result.event).toMatchObject({
       id: 'e-1',
       slug: 'evento-uno',

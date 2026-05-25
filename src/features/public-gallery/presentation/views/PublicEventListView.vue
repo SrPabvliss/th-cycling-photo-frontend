@@ -11,8 +11,9 @@ import PublicEventCard from '../components/PublicEventCard/PublicEventCard.vue'
 const router = useRouter()
 const { data: events, isPending } = usePublicEventsQuery()
 
-const featuredEvent = computed(() => events.value?.find((e) => e.isFeatured))
-const otherEvents = computed(() => events.value?.filter((e) => !e.isFeatured) ?? [])
+const sortedEvents = computed(() =>
+  [...(events.value ?? [])].sort((a, b) => b.startDate.getTime() - a.startDate.getTime()),
+)
 
 function handleEventClick(slug: string) {
   router.push({ name: PUBLIC_GALLERY_ROUTE_NAMES.EVENT_GALLERY, params: { slug } })
@@ -31,26 +32,14 @@ function handleEventClick(slug: string) {
         <NSpin size="large" />
       </div>
 
-      <template v-else-if="events && events.length > 0">
-        <!-- Featured -->
+      <div v-else-if="sortedEvents.length > 0" class="pel__grid">
         <PublicEventCard
-          v-if="featuredEvent"
-          :event="featuredEvent"
-          featured
-          class="pel__featured"
+          v-for="event in sortedEvents"
+          :key="event.slug"
+          :event="event"
           @click="handleEventClick"
         />
-
-        <!-- Grid -->
-        <div v-if="otherEvents.length > 0" class="pel__grid">
-          <PublicEventCard
-            v-for="event in otherEvents"
-            :key="event.slug"
-            :event="event"
-            @click="handleEventClick"
-          />
-        </div>
-      </template>
+      </div>
 
       <NEmpty v-else description="No hay eventos disponibles" class="pel__empty" />
     </div>

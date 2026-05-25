@@ -4,11 +4,10 @@ import type { IApiPublicEventAsset, IPublicEventAsset } from './public-event-lis
 export interface IApiPublicEventDetail {
   slug: string
   name: string
-  description: string | null
-  date: string
+  startDate: string
+  endDate: string
   provinceName: string | null
   cantonName: string | null
-  isFeatured: boolean
   photoCount: number
   assets: IApiPublicEventAsset[]
   photoCategories: IApiPublicPhotoCategory[]
@@ -23,11 +22,10 @@ export interface IApiPublicPhotoCategory {
 export interface IPublicEventDetail {
   slug: string
   name: string
-  description: string | null
-  date: Date
+  startDate: Date
+  endDate: Date
   provinceName: string | null
   cantonName: string | null
-  isFeatured: boolean
   photoCount: number
   assets: IPublicEventAsset[]
   photoCategories: IPublicPhotoCategory[]

@@ -46,7 +46,7 @@ const coverStyle = computed(() =>
       </span>
       <div class="event-card__overlay">
         <NIcon :component="CalendarOutline" :size="14" />
-        <span>{{ formatDate(item.event.date) }}</span>
+        <span>{{ formatDate(item.event.startDate) }}</span>
       </div>
     </div>
 

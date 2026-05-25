@@ -10,7 +10,8 @@ describe('toOperatorCompletedEvent', () => {
         id: 'e-1',
         slug: 'evento-uno',
         name: 'Evento Uno',
-        date: '2026-04-01',
+        startDate: '2026-04-01',
+        endDate: '2026-04-02',
         location: 'Quito',
         coverUrl: null,
         totalPhotos: 200,
@@ -23,7 +24,8 @@ describe('toOperatorCompletedEvent', () => {
 
     const result = toOperatorCompletedEvent(api)
 
-    expect(result.event.date).toBeInstanceOf(Date)
+    expect(result.event.startDate).toBeInstanceOf(Date)
+    expect(result.event.endDate).toBeInstanceOf(Date)
     expect(result.stats.completedAt).toBeInstanceOf(Date)
     expect(result.stats.completedAt?.toISOString()).toBe('2026-04-15T12:00:00.000Z')
     expect(result.stats.totalRetouched).toBe(30)
@@ -35,7 +37,8 @@ describe('toOperatorCompletedEvent', () => {
         id: 'e-2',
         slug: 'evento-dos',
         name: 'Evento Dos',
-        date: '2026-04-01',
+        startDate: '2026-04-01',
+        endDate: '2026-04-01',
         location: 'Quito',
         coverUrl: null,
         totalPhotos: 0,

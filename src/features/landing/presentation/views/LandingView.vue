@@ -13,8 +13,11 @@ import PublicEventCard from '@/features/public-gallery/presentation/components/P
 const router = useRouter()
 const { data: events } = usePublicEventsQuery()
 
-const featuredEvent = computed(() => events.value?.find((e) => e.isFeatured))
-const recentEvents = computed(() => events.value?.filter((e) => !e.isFeatured).slice(0, 3) ?? [])
+const recentEvents = computed(() =>
+  [...(events.value ?? [])]
+    .sort((a, b) => b.startDate.getTime() - a.startDate.getTime())
+    .slice(0, 3),
+)
 
 function handleEventClick(slug: string) {
   router.push({ name: PUBLIC_GALLERY_ROUTE_NAMES.EVENT_GALLERY, params: { slug } })
@@ -41,14 +44,6 @@ function handleEventClick(slug: string) {
             <NIcon :component="ArrowForward" />
           </template>
         </NButton>
-      </div>
-    </section>
-
-    <!-- Featured event -->
-    <section v-if="featuredEvent" class="events-section">
-      <div class="events-inner">
-        <h2 class="events-section__title">Evento destacado</h2>
-        <PublicEventCard :event="featuredEvent" featured @click="handleEventClick" />
       </div>
     </section>
 

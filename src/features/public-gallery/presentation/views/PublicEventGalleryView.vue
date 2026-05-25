@@ -100,7 +100,12 @@ const heroUrl = computed(() => {
             </button>
             <h1 class="gallery-hero__title">{{ event.name }}</h1>
             <p class="gallery-hero__meta">
-              {{ formatDate(event.date) }}
+              <template v-if="event.startDate.getTime() === event.endDate.getTime()">
+                {{ formatDate(event.startDate) }}
+              </template>
+              <template v-else>
+                {{ formatDate(event.startDate) }} – {{ formatDate(event.endDate) }}
+              </template>
               <span v-if="event.cantonName || event.provinceName">
                 · {{ [event.cantonName, event.provinceName].filter(Boolean).join(', ') }}
               </span>

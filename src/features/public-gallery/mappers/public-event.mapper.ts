@@ -12,10 +12,10 @@ export function toPublicEventListItem(api: IApiPublicEventListItem): IPublicEven
   return {
     slug: api.slug,
     name: api.name,
-    date: parseDateOnly(api.date),
+    startDate: parseDateOnly(api.startDate),
+    endDate: parseDateOnly(api.endDate),
     provinceName: api.provinceName,
     cantonName: api.cantonName,
-    isFeatured: api.isFeatured,
     photoCount: api.photoCount,
     coverSlug: api.coverSlug,
   }
@@ -25,11 +25,10 @@ export function toPublicEventDetail(api: IApiPublicEventDetail): IPublicEventDet
   return {
     slug: api.slug,
     name: api.name,
-    description: api.description,
-    date: parseDateOnly(api.date),
+    startDate: parseDateOnly(api.startDate),
+    endDate: parseDateOnly(api.endDate),
     provinceName: api.provinceName,
     cantonName: api.cantonName,
-    isFeatured: api.isFeatured,
     photoCount: api.photoCount,
     assets: api.assets,
     photoCategories: api.photoCategories,

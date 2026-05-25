@@ -36,7 +36,11 @@ const router = useRouter()
           </NTag>
         </NFlex>
         <p class="gallery-header__subtitle">
-          {{ formatDate(event.date) }} · {{ event.photoCount }} fotos
+          <span v-if="event.startDate.getTime() === event.endDate.getTime()">
+            {{ formatDate(event.startDate) }}
+          </span>
+          <span v-else> {{ formatDate(event.startDate) }} – {{ formatDate(event.endDate) }} </span>
+          · {{ event.photoCount }} fotos
         </p>
       </div>
     </NFlex>

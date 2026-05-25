@@ -93,6 +93,9 @@ export const API_ROUTES = {
   PARTICIPANT_CATEGORIES: {
     GET_ALL: '/participant-categories',
   },
+  EVENT_TYPES: {
+    GET_ALL: '/event-types',
+  },
   CLASSIFICATIONS: {
     BASE: PARTICIPANTS_BASE,
     PARTICIPANTS_BY_PHOTO: (photoId: string) => `${PHOTOS_BASE}/${photoId}/participants`,

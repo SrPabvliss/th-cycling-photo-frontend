@@ -1,8 +1,8 @@
 export interface IEventFormData {
   name: string
-  description: string
-  date: number | null
+  startDate: number | null
+  endDate: number | null
   provinceId: number | null
   cantonId: number | null
-  eventTypeId: number | null
+  eventTypeId: number
 }
