@@ -5,8 +5,6 @@ export interface IAddToCartRequest {
 
 export interface ICheckoutEventItem {
   eventId: string
-  bibNumber?: string
-  snapCategoryName?: string
 }
 
 export interface ICheckoutRequest {
