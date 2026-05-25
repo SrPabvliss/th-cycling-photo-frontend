@@ -7,20 +7,24 @@
 
 .grid-cell {
   position: relative;
+  background: #0a0a0a;
+  background-clip: padding-box;
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
-  border: 3px solid transparent;
-  transition: border-color 0.15s;
+  border: 1px solid transparent;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .grid-cell:hover {
-  border-color: rgba(0, 0, 0, 0.15);
+  border-color: rgba(0, 0, 0, 0.25);
 }
 
 .grid-cell--selected {
   border-color: #18a058;
-  box-shadow: 0 0 0 1px #18a058;
+  box-shadow: 0 0 0 2px #18a058;
 }
 
 .grid-cell__img {
@@ -37,8 +41,8 @@
   background: rgba(0, 0, 0, 0.5);
   border: none;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -79,6 +83,6 @@
   }
 
   .grid-cell {
-    border-width: 2px;
+    border-width: 1px;
   }
 }

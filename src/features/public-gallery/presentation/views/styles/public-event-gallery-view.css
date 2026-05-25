@@ -66,25 +66,6 @@
   padding: 20px 16px 20px;
 }
 
-.gallery-categories {
-  margin-bottom: 20px;
-}
-
-.public-gallery-search {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  margin: 16px 0 0;
-  max-width: 360px;
-}
-
-.public-gallery-bib-match {
-  margin-top: 8px;
-  display: flex;
-  width: 100%;
-}
-
-.public-gallery-bib-match :deep(.n-radio-button) {
-  flex: 1;
-  text-align: center;
+.gallery-filter-bar {
+  margin-bottom: 16px;
 }

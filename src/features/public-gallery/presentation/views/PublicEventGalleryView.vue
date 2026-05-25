@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NEmpty, NIcon, NFlex, NInput, NRadioButton, NRadioGroup, NSpin } from 'naive-ui'
-import { ArrowBack, Search } from '@vicons/ionicons5'
+import { NEmpty, NIcon, NSpin } from 'naive-ui'
+import { ArrowBack } from '@vicons/ionicons5'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { formatDate } from '@/shared/utils/date.utils'
@@ -15,6 +15,7 @@ import { usePublicEventPhotosInfinite } from '../../composables/queries/use-publ
 import { PUBLIC_GALLERY_ROUTE_NAMES } from '../../routes'
 import PublicPhotoGrid from '../components/PublicPhotoGrid/PublicPhotoGrid.vue'
 import PhotoLightbox from '../components/PhotoLightbox/PhotoLightbox.vue'
+import PublicGalleryFilterBar from '../components/PublicGalleryFilterBar/PublicGalleryFilterBar.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -84,7 +85,7 @@ const heroUrl = computed(() => {
 </script>
 
 <template>
-  <PublicLayout>
+  <PublicLayout :hide-footer="true">
     <div v-if="isEventPending" class="gallery-loading">
       <NSpin size="large" />
     </div>
@@ -118,40 +119,16 @@ const heroUrl = computed(() => {
       </div>
 
       <div class="gallery-body">
-        <!-- Category pills -->
-        <NFlex v-if="event.photoCategories.length > 0" :size="8" wrap class="gallery-categories">
-          <NButton
-            :type="activeCategoryId === null ? 'primary' : 'default'"
-            size="small"
-            round
-            @click="activeCategoryId = null"
-          >
-            Todas
-          </NButton>
-          <NButton
-            v-for="cat in event.photoCategories"
-            :key="cat.id"
-            :type="activeCategoryId === cat.id ? 'primary' : 'default'"
-            size="small"
-            round
-            @click="activeCategoryId = cat.id"
-          >
-            {{ cat.name }}
-          </NButton>
-        </NFlex>
-
-        <div class="public-gallery-search">
-          <NInput v-model:value="bibNumber" placeholder="Buscar por dorsal" clearable size="large">
-            <template #prefix>
-              <NIcon :component="Search" />
-            </template>
-          </NInput>
-          <NRadioGroup v-model:value="bibMatch" size="small" class="public-gallery-bib-match">
-            <NRadioButton value="exact">Exacto</NRadioButton>
-            <NRadioButton value="starts">Empieza con</NRadioButton>
-            <NRadioButton value="contains">Contiene</NRadioButton>
-          </NRadioGroup>
-        </div>
+        <PublicGalleryFilterBar
+          class="gallery-filter-bar"
+          :categories="event.photoCategories"
+          :selected-category-id="activeCategoryId"
+          :bib-number="bibNumber"
+          :bib-match="bibMatch"
+          @update:selected-category-id="activeCategoryId = $event"
+          @update:bib-number="bibNumber = $event"
+          @update:bib-match="bibMatch = $event"
+        />
 
         <!-- Photo grid -->
         <div v-if="isPhotosPending && allPhotos.length === 0" class="gallery-loading--tight">
