@@ -43,6 +43,7 @@ const {
   page,
   activeStatus,
   plateNumber,
+  bibMatch,
   helmetColors,
   clothingColors,
   bikeColors,
@@ -155,6 +156,7 @@ onUnmounted(() => {
           <GalleryFilterSidebar
             :active-status="activeStatus"
             :plate-number="plateNumber"
+            :bib-match="bibMatch"
             :helmet-colors="helmetColors"
             :clothing-colors="clothingColors"
             :bike-colors="bikeColors"
@@ -162,6 +164,7 @@ onUnmounted(() => {
             :categories="categories ?? []"
             :has-active-filters="hasActiveFilters"
             @update:plate-number="plateNumber = $event"
+            @update:bib-match="bibMatch = $event"
             @update:active-status="
               (s) => {
                 activeStatus = s
@@ -180,6 +183,7 @@ onUnmounted(() => {
             @clear-filters="
               () => {
                 plateNumber = ''
+                bibMatch = 'exact'
                 helmetColors = []
                 clothingColors = []
                 bikeColors = []
