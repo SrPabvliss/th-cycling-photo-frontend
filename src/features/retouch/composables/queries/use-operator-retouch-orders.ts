@@ -1,5 +1,5 @@
 import { computed, ref, type Ref } from 'vue'
-import { useQuery, keepPreviousData } from '@tanstack/vue-query'
+import { useInfiniteQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
@@ -8,26 +8,38 @@ import { RETOUCH_QUERY_KEYS } from '../../constants/retouch-query-keys'
 import { toOperatorRetouchOrdersList } from '../../mappers/operator-retouch-orders.mapper'
 import type {
   IApiOperatorRetouchOrder,
-  IOperatorRetouchOrdersPage,
+  IOperatorRetouchOrder,
   TRetouchOrderScope,
 } from '../../types/responses/operator-retouch-orders.response'
 
-const DEFAULT_LIMIT = 20
+const PAGE_LIMIT = 30
 
-export function useOperatorRetouchOrdersQuery(
-  page: Ref<number> = ref(1),
-  limit: Ref<number> = ref(DEFAULT_LIMIT),
+interface IPageParams {
+  page: number
+}
+
+export interface IOperatorRetouchOrdersInfinitePage {
+  items: IOperatorRetouchOrder[]
+  pagination: ReturnType<typeof toPagination>
+}
+
+export function useOperatorRetouchOrdersInfiniteQuery(
   scope: Ref<TRetouchOrderScope> = ref('pending'),
   eventSlug: Ref<string | null> = ref(null),
 ) {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: computed(() =>
-      RETOUCH_QUERY_KEYS.operatorOrders(page.value, limit.value, scope.value, eventSlug.value),
+      RETOUCH_QUERY_KEYS.operatorOrders(PAGE_LIMIT, scope.value, eventSlug.value),
     ),
-    queryFn: async (): Promise<IOperatorRetouchOrdersPage> => {
+    initialPageParam: { page: 1 } satisfies IPageParams,
+    queryFn: async ({
+      pageParam,
+    }: {
+      pageParam: IPageParams
+    }): Promise<IOperatorRetouchOrdersInfinitePage> => {
       const params: Record<string, unknown> = {
-        page: page.value,
-        limit: limit.value,
+        page: pageParam.page,
+        limit: PAGE_LIMIT,
         scope: scope.value,
       }
       if (eventSlug.value) params.eventSlug = eventSlug.value
@@ -37,19 +49,18 @@ export function useOperatorRetouchOrdersQuery(
         { params },
       )
       const items = toOperatorRetouchOrdersList(response.data)
-      const pagination = toPagination(response.meta.pagination, {
-        page: page.value,
-        limit: limit.value,
-        itemsCount: items.length,
-      })
       return {
         items,
-        total: pagination.total,
-        page: pagination.page,
-        limit: pagination.limit,
-        totalPages: pagination.totalPages,
+        pagination: toPagination(response.meta.pagination, {
+          page: pageParam.page,
+          limit: PAGE_LIMIT,
+          itemsCount: items.length,
+        }),
       }
     },
-    placeholderData: keepPreviousData,
+    getNextPageParam: (last) =>
+      last.pagination.page < last.pagination.totalPages
+        ? ({ page: last.pagination.page + 1 } satisfies IPageParams)
+        : undefined,
   })
 }

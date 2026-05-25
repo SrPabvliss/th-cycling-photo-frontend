@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NFlex, NPagination, NSelect } from 'naive-ui'
+import { NFlex, NSelect } from 'naive-ui'
 
 import type { TReviewQueueStatusFilter } from '../../../types/review-queue-status-filter'
 
@@ -18,14 +18,11 @@ defineProps<{
   status: TReviewQueueStatusFilter
   selectedEventSlug: string | null
   eventOptions: Array<{ label: string; value: string }>
-  page: number
-  pageCount: number
 }>()
 
 defineEmits<{
   'update:status': [value: TReviewQueueStatusFilter]
   'update:selectedEventSlug': [value: string]
-  'update:page': [page: number]
 }>()
 </script>
 
@@ -55,15 +52,6 @@ defineEmits<{
         @update:value="$emit('update:selectedEventSlug', $event)"
       />
     </NFlex>
-
-    <NPagination
-      v-if="pageCount > 1"
-      :page="page"
-      :page-count="pageCount"
-      size="small"
-      :page-slot="7"
-      @update:page="$emit('update:page', $event)"
-    />
   </section>
 </template>
 
