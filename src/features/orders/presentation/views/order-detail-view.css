@@ -190,6 +190,18 @@
   opacity: 1;
 }
 
+.od-status-btn--wa {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #16a34a;
+}
+
+.od-status-btn--wa:hover:not(:disabled) {
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #15803d;
+}
+
 /* Notes */
 .od-notes {
   background: #f9fafb;
