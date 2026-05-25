@@ -25,7 +25,7 @@ const emit = defineEmits<{
   view: [id: string]
   confirmPayment: [id: string]
   sendDelivery: [id: string]
-  sendWhatsApp: [order: IOrderListItem]
+  sendPaymentInfo: [order: IOrderListItem]
   regenerate: [id: string]
 }>()
 
@@ -96,14 +96,16 @@ const overflowCount = computed(() =>
 
       <!-- Actions -->
       <div class="oc__actions">
-        <button
-          v-if="order.status === ORDER_STATUS.PENDING"
-          class="oc__btn oc__btn--confirm"
-          @click.stop="emit('confirmPayment', order.id)"
-        >
-          <NIcon :component="CheckmarkOutline" :size="13" />
-          Confirmar pago
-        </button>
+        <template v-if="order.status === ORDER_STATUS.PENDING">
+          <button class="oc__btn oc__btn--wa" @click.stop="emit('sendPaymentInfo', order)">
+            <NIcon :component="LogoWhatsapp" :size="13" />
+            Info de pago
+          </button>
+          <button class="oc__btn oc__btn--confirm" @click.stop="emit('confirmPayment', order.id)">
+            <NIcon :component="CheckmarkOutline" :size="13" />
+            Confirmar pago
+          </button>
+        </template>
 
         <button
           v-else-if="order.status === ORDER_STATUS.PAID"
@@ -112,15 +114,6 @@ const overflowCount = computed(() =>
         >
           <NIcon :component="SendOutline" :size="13" />
           Enviar fotos
-        </button>
-
-        <button
-          v-else-if="order.status === ORDER_STATUS.DELIVERED && order.hasDeliveryLink"
-          class="oc__btn oc__btn--wa"
-          @click.stop="emit('sendWhatsApp', order)"
-        >
-          <NIcon :component="LogoWhatsapp" :size="13" />
-          Reenviar enlace
         </button>
 
         <button

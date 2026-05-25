@@ -4,11 +4,7 @@ import { useRouter } from 'vue-router'
 import { NButton, NPagination, NResult, NSpin } from 'naive-ui'
 
 import PageHeader from '@/shared/components/PageHeader.vue'
-import {
-  openWhatsApp,
-  openWhatsAppWithTemplate,
-  buildPaymentTemplate,
-} from '@/shared/utils/whatsapp.utils'
+import { openWhatsApp, buildPaymentInfoTemplate } from '@/shared/utils/whatsapp.utils'
 import {
   useOrdersListQuery,
   type IOrderListFilters,
@@ -56,18 +52,14 @@ function handleView(id: string) {
   router.push({ name: ORDER_ROUTE_NAMES.DETAIL, params: { id } })
 }
 
-function handleSendWhatsApp(order: IOrderListItem) {
+function handleSendPaymentInfo(order: IOrderListItem) {
   const firstName = order.userName.split(' ')[0] ?? order.userName
-  const template = buildPaymentTemplate({
+  const template = buildPaymentInfoTemplate({
     customerFirstName: firstName,
     photoCount: order.photoCount,
     eventName: order.eventName,
   })
-  if (order.snapWhatsapp) {
-    openWhatsApp(order.snapWhatsapp, template)
-  } else {
-    openWhatsAppWithTemplate(template)
-  }
+  openWhatsApp(order.snapWhatsapp, template)
 }
 </script>
 
@@ -122,7 +114,7 @@ function handleSendWhatsApp(order: IOrderListItem) {
             @view="handleView"
             @confirm-payment="handleConfirmPayment"
             @send-delivery="handleSendDelivery"
-            @send-whats-app="handleSendWhatsApp"
+            @send-payment-info="handleSendPaymentInfo"
             @regenerate="handleRegenerate"
           />
         </div>

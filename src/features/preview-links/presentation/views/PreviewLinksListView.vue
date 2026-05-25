@@ -22,7 +22,7 @@ import { useEventDetailQuery } from '@/features/events/composables/queries/use-e
 import PageHeader from '@/shared/components/PageHeader.vue'
 import { formatDate, formatRelativeTime } from '@/shared/utils/date.utils'
 import { usePreviewLinksListQuery } from '../../composables/queries/use-preview-links-list'
-import { openWhatsApp } from '../../composables/use-whatsapp'
+import { openWhatsApp } from '@/shared/utils/whatsapp.utils'
 import type {
   IPreviewLinkListItem,
   PreviewLinkStatus,
