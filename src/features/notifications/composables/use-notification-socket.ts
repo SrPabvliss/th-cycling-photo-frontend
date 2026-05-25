@@ -35,11 +35,11 @@ export function useNotificationSocket() {
       entries.slice(0, 100).forEach((id) => processedIds.delete(id))
     }
 
-    // Update badge instantly
-    notificationStore.incrementUnread()
-
-    // Invalidate notification list cache
+    // Refetch both list and unread-count from server. Avoid optimistic
+    // incrementUnread — backend now scopes pushes per recipient, so badge
+    // and list must stay in sync with the server truth.
     queryClient.invalidateQueries({ queryKey: NOTIFICATION_QUERY_KEYS.list() })
+    queryClient.invalidateQueries({ queryKey: NOTIFICATION_QUERY_KEYS.unreadCount() })
 
     // Invalidate orders cache for order-related events
     if (payload.type.startsWith('order.')) {
@@ -59,17 +59,14 @@ export function useNotificationSocket() {
     message.info(payload.message, { duration: 5000 })
   }
 
-  // Active WebSocket events — only listen for events that need real-time push.
-  // Enable additional events when multi-admin support is needed:
-  //   'preview:viewed'  → someone viewed a preview link
-  //   'order:paid'      → admin confirmed payment (self-action, not useful for single admin)
-  //   'order:delivered'  → admin sent delivery (self-action, not useful for single admin)
+  // Backend now scopes pushes per recipient and excludes the actor, so
+  // self-action events no longer hit the user who performed them.
   const WS_EVENTS = [
     'order:created',
     'order:paid',
     'order:retouch_completed',
-    // 'preview:viewed',
-    // 'order:delivered',
+    'order:delivered',
+    'preview:viewed',
   ] as const
 
   function setupListeners() {
