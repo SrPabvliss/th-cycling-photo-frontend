@@ -2,6 +2,7 @@ import { computed, ref, type Ref } from 'vue'
 import { useInfiniteQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
+import { INTERNAL_IMAGE_QUERY_DEFAULTS } from '@/core/api/internal-image-query'
 import { httpClient } from '@/core/http/axios-client'
 import { toPagination } from '@/core/http/pagination'
 import { RETOUCH_QUERY_KEYS } from '../../constants/retouch-query-keys'
@@ -62,5 +63,6 @@ export function useOperatorRetouchOrdersInfiniteQuery(
       last.pagination.page < last.pagination.totalPages
         ? ({ page: last.pagination.page + 1 } satisfies IPageParams)
         : undefined,
+    ...INTERNAL_IMAGE_QUERY_DEFAULTS,
   })
 }

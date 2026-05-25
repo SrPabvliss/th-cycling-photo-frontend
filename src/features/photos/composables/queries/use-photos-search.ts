@@ -2,6 +2,7 @@ import { computed, type Ref } from 'vue'
 import { useInfiniteQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
+import { INTERNAL_IMAGE_QUERY_DEFAULTS } from '@/core/api/internal-image-query'
 import { httpClient } from '@/core/http/axios-client'
 import { toPagination } from '@/core/http/pagination'
 import type { PhotoStatus } from '@/shared/types/photo-enums'
@@ -88,5 +89,6 @@ export function usePhotosSearchInfiniteQuery(filters: Ref<IPhotoSearchFilters>, 
         ? ({ page: last.pagination.page + 1 } satisfies IPageParams)
         : undefined,
     enabled: computed(() => !!filters.value.eventId),
+    ...INTERNAL_IMAGE_QUERY_DEFAULTS,
   })
 }
