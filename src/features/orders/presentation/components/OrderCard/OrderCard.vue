@@ -26,6 +26,7 @@ const emit = defineEmits<{
   confirmPayment: [id: string]
   sendDelivery: [id: string]
   sendPaymentInfo: [order: IOrderListItem]
+  resendDelivery: [order: IOrderListItem]
   regenerate: [id: string]
 }>()
 
@@ -114,6 +115,15 @@ const overflowCount = computed(() =>
         >
           <NIcon :component="SendOutline" :size="13" />
           Enviar fotos
+        </button>
+
+        <button
+          v-else-if="order.status === ORDER_STATUS.DELIVERED && order.hasDeliveryLink"
+          class="oc__btn oc__btn--wa"
+          @click.stop="emit('resendDelivery', order)"
+        >
+          <NIcon :component="LogoWhatsapp" :size="13" />
+          Reenviar enlace
         </button>
 
         <button
