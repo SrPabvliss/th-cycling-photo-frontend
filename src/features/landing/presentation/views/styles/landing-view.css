@@ -191,3 +191,81 @@
 .cta-button:hover {
   background: rgba(255, 255, 255, 0.1) !important;
 }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero {
+    padding: 64px 20px;
+  }
+
+  .hero-title {
+    font-size: 30px;
+  }
+
+  .hero-subtitle {
+    font-size: 16px;
+  }
+
+  .events-section {
+    padding: 32px 16px;
+  }
+
+  .events-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .about {
+    padding: 48px 16px;
+  }
+
+  .about-inner {
+    flex-direction: column;
+    gap: 24px;
+    align-items: stretch;
+  }
+
+  .about-image {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  .about-image-placeholder {
+    height: 220px;
+  }
+
+  .about-text {
+    padding-top: 0;
+  }
+
+  .about-title {
+    font-size: 22px;
+  }
+
+  .about-features {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .cta {
+    padding: 56px 20px;
+  }
+
+  .cta-title {
+    font-size: 24px;
+  }
+
+  .cta-subtitle {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 48px 16px;
+  }
+
+  .hero-title {
+    font-size: 26px;
+  }
+}

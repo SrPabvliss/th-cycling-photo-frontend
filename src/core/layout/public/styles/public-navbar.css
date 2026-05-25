@@ -13,6 +13,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 16px 32px;
+  gap: 16px;
 }
 
 .public-navbar-brand {
@@ -40,6 +41,7 @@
   color: #4b5563;
   text-decoration: none;
   transition: color 0.15s;
+  cursor: pointer;
 }
 
 .public-navbar-link:hover {
@@ -53,4 +55,104 @@
 
 .public-navbar-link--accent:hover {
   color: #005080;
+}
+
+/* Mobile-only buttons (hidden on desktop) */
+.public-navbar-mobile-btn,
+.public-navbar-mobile-cart {
+  display: none;
+  background: transparent;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  color: #1a1f2c;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile menu drawer */
+.public-navbar-menu {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.public-navbar-menu__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.public-navbar-menu__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.public-navbar-menu__close {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  color: #1a1f2c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.public-navbar-menu__nav {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0;
+}
+
+.public-navbar-menu__link {
+  display: block;
+  padding: 14px 20px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1a1f2c;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.public-navbar-menu__link:hover {
+  background: #f3f4f6;
+}
+
+.public-navbar-menu__link--accent {
+  color: #105080;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .public-navbar-inner {
+    padding: 12px 16px;
+    justify-content: space-between;
+  }
+
+  .public-navbar-mobile-btn,
+  .public-navbar-mobile-cart {
+    display: inline-flex;
+  }
+
+  .public-navbar-brand {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .public-navbar-title {
+    font-size: 16px;
+  }
+
+  .public-navbar-links {
+    display: none;
+  }
 }

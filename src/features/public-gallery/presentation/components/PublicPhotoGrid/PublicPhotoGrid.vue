@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useVirtualizer } from '@tanstack/vue-virtual'
 import { useElementSize } from '@vueuse/core'
 import { NIcon } from 'naive-ui'
@@ -62,6 +62,10 @@ const rowVirtualizer = useVirtualizer(
 
 const virtualRows = computed(() => rowVirtualizer.value.getVirtualItems())
 const totalSize = computed(() => rowVirtualizer.value.getTotalSize())
+
+watch([rowHeight, cols], () => {
+  rowVirtualizer.value.measure()
+})
 
 function getRowPhotos(rowIndex: number): IPublicPhoto[] {
   const start = rowIndex * cols.value

@@ -79,7 +79,7 @@ function toggleColor(list: string[], color: string): string[] {
         @update:value="emit('update:bibMatch', $event)"
       >
         <NRadioButton value="exact">Exacto</NRadioButton>
-        <NRadioButton value="starts">Empieza con</NRadioButton>
+        <NRadioButton value="starts">Empieza</NRadioButton>
         <NRadioButton value="contains">Contiene</NRadioButton>
       </NRadioGroup>
     </div>
