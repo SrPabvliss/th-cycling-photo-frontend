@@ -2,6 +2,7 @@ import { computed, type Ref } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
+import { INTERNAL_IMAGE_QUERY_DEFAULTS } from '@/core/api/internal-image-query'
 import { httpClient } from '@/core/http/axios-client'
 import { ORDER_QUERY_KEYS } from '../../constants/query-keys'
 import { toOrderDetail } from '../../mappers/order-detail.mapper'
@@ -15,5 +16,6 @@ export function useOrderDetailQuery(id: Ref<string>) {
       return toOrderDetail(response.data)
     },
     enabled: computed(() => !!id.value),
+    ...INTERNAL_IMAGE_QUERY_DEFAULTS,
   })
 }

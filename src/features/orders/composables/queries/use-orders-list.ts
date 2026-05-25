@@ -2,6 +2,7 @@ import { computed, type Ref } from 'vue'
 import { keepPreviousData, useQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
+import { INTERNAL_IMAGE_QUERY_DEFAULTS } from '@/core/api/internal-image-query'
 import { httpClient } from '@/core/http/axios-client'
 import { toPagination } from '@/core/http/pagination'
 import { ORDER_QUERY_KEYS } from '../../constants/query-keys'
@@ -49,5 +50,6 @@ export function useOrdersListQuery(filters: Ref<IOrderListFilters>, limit = 20) 
       }
     },
     placeholderData: keepPreviousData,
+    ...INTERNAL_IMAGE_QUERY_DEFAULTS,
   })
 }

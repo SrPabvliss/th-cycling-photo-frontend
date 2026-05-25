@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { computed, type Ref } from 'vue'
 
 import { API_ROUTES } from '@/core/api/api-routes'
+import { INTERNAL_IMAGE_QUERY_DEFAULTS } from '@/core/api/internal-image-query'
 import { httpClient } from '@/core/http/axios-client'
 import { PHOTO_QUERY_KEYS } from '../../constants/query-keys'
 import { toPhotoDetail } from '../../mappers/photo-detail.mapper'
@@ -17,5 +18,6 @@ export function usePhotoDetailBySlugQuery(slug: Ref<string>) {
       return toPhotoDetail(data)
     },
     enabled: computed(() => !!slug.value),
+    ...INTERNAL_IMAGE_QUERY_DEFAULTS,
   })
 }
