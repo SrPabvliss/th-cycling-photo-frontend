@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { NButton, NEmpty, NGrid, NGridItem, NResult, NSpin } from 'naive-ui'
 
 import PageHeader from '@/shared/components/PageHeader.vue'
+import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import { useOperatorActiveEventsQuery } from '@/features/operator/composables/queries/use-operator-active-events'
 import { useOperatorReviewQueueQuery } from '@/features/operator/composables/queries/use-operator-review-queue'
 import { OPERATOR_PATH, OPERATOR_ROUTE_NAMES } from '../../routes'
@@ -18,7 +19,6 @@ const router = useRouter()
 const routeEventSlug = computed(() => route.params.eventSlug as string)
 const selectedEventSlug = ref<string | null>(routeEventSlug.value)
 const status = ref<TReviewQueueStatusFilter>('all')
-const currentPage = ref<number>(1)
 
 const reviewQueue = useOperatorReviewQueueQuery(selectedEventSlug, status)
 
@@ -26,10 +26,6 @@ const allItems = computed(() => (reviewQueue.data.value?.pages ?? []).flatMap((p
 const totalItems = computed(() => {
   const pages = reviewQueue.data.value?.pages
   return pages?.[pages.length - 1]?.pagination.total ?? 0
-})
-const totalPages = computed(() => {
-  const pages = reviewQueue.data.value?.pages
-  return pages?.[pages.length - 1]?.pagination.totalPages ?? 1
 })
 const currentEventName = computed(() => allItems.value[0]?.event.name ?? 'Cola de revisión')
 
@@ -43,16 +39,16 @@ const eventOptions = computed(() =>
   })),
 )
 
+const sentinel = useInfiniteScrollTrigger(() => reviewQueue.fetchNextPage(), {
+  isBusy: computed(() => reviewQueue.isFetchingNextPage.value),
+  canLoadMore: computed(() => reviewQueue.hasNextPage.value ?? false),
+})
+
 function handleEventChange(slug: string) {
   router.push({
     name: OPERATOR_ROUTE_NAMES.EVENT_REVIEW_QUEUE,
     params: { eventSlug: slug },
   })
-}
-
-function handleStatusChange(value: TReviewQueueStatusFilter) {
-  status.value = value
-  currentPage.value = 1
 }
 
 function handleCardClick(item: IOperatorReviewQueueItem) {
@@ -67,13 +63,6 @@ function startReview() {
     name: OPERATOR_ROUTE_NAMES.EVENT_REVIEW_WORKSPACE,
     params: { eventSlug: routeEventSlug.value },
   })
-}
-
-function handlePageChange(page: number) {
-  currentPage.value = page
-  if (page > 1 && reviewQueue.hasNextPage.value) {
-    reviewQueue.fetchNextPage()
-  }
 }
 </script>
 
@@ -92,11 +81,8 @@ function handlePageChange(page: number) {
         :status="status"
         :selected-event-slug="selectedEventSlug"
         :event-options="eventOptions"
-        :page="currentPage"
-        :page-count="totalPages"
-        @update:status="handleStatusChange"
+        @update:status="(value) => (status = value)"
         @update:selected-event-slug="handleEventChange"
-        @update:page="handlePageChange"
       />
 
       <NSpin :show="reviewQueue.isPending.value">
@@ -109,11 +95,23 @@ function handlePageChange(page: number) {
           v-else-if="!reviewQueue.isPending.value && allItems.length === 0"
           description="No hay fotos que coincidan con el filtro"
         />
-        <NGrid v-else :cols="4" :x-gap="12" :y-gap="12" responsive="screen">
-          <NGridItem v-for="item in allItems" :key="item.id">
-            <OperatorReviewCard :item="item" @click="handleCardClick" />
-          </NGridItem>
-        </NGrid>
+        <template v-else>
+          <NGrid :cols="4" :x-gap="12" :y-gap="12" responsive="screen">
+            <NGridItem v-for="item in allItems" :key="item.id">
+              <OperatorReviewCard :item="item" @click="handleCardClick" />
+            </NGridItem>
+          </NGrid>
+          <div ref="sentinel" class="queue-sentinel" aria-hidden="true" />
+          <div v-if="reviewQueue.isFetchingNextPage.value" class="queue-loading-more">
+            <NSpin :size="20" /> <span>Cargando más...</span>
+          </div>
+          <div
+            v-else-if="!reviewQueue.hasNextPage.value && allItems.length > 0"
+            class="queue-end-marker"
+          >
+            <span>—— fin de la cola ——</span>
+          </div>
+        </template>
       </NSpin>
     </div>
   </div>

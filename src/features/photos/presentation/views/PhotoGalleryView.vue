@@ -10,9 +10,9 @@ import {
   NGridItem,
   NIcon,
   NModal,
-  NPagination,
   NResult,
   NSelect,
+  NSpin,
 } from 'naive-ui'
 import { CloseOutline } from '@vicons/ionicons5'
 
@@ -20,7 +20,8 @@ import { useEventDetailQuery } from '@/features/events/composables/queries/use-e
 import { usePhotoCategoriesQuery } from '@/features/photo-categories/composables/queries/use-photo-categories'
 import { useBulkAssignCategory } from '@/features/photo-categories/composables/mutations/use-bulk-assign-category'
 import { usePhotoSelectionStore } from '@/features/preview-links/stores/photo-selection.store'
-import { usePhotosSearchQuery } from '../../composables/queries/use-photos-search'
+import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
+import { usePhotosSearchInfiniteQuery } from '../../composables/queries/use-photos-search'
 import { useGalleryFilters } from '../../composables/use-gallery-filters'
 import { usePhotoSelection } from '../../composables/use-photo-selection'
 import { PHOTO_ROUTE_NAMES } from '../../routes'
@@ -34,13 +35,12 @@ const router = useRouter()
 const selectionStore = usePhotoSelectionStore()
 
 const slug = computed(() => router.currentRoute.value.params.slug as string)
-const PHOTOS_PER_PAGE = 8
+const PHOTOS_PER_PAGE = 30
 
 const { data: event } = useEventDetailQuery(slug)
 const eventId = computed(() => event.value?.id ?? '')
 
 const {
-  page,
   activeStatus,
   plateNumber,
   bibMatch,
@@ -58,12 +58,15 @@ const {
   data: photosData,
   isPending,
   isError,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
   refetch,
-} = usePhotosSearchQuery(filters, page, PHOTOS_PER_PAGE)
+} = usePhotosSearchInfiniteQuery(filters, PHOTOS_PER_PAGE)
 
-const pageCount = computed(() => photosData.value?.pagination?.totalPages ?? 0)
-const totalResults = computed(() => photosData.value?.pagination?.total ?? 0)
-const items = computed(() => photosData.value?.items)
+const allItems = computed(() => photosData.value?.pages.flatMap((p) => p.items) ?? [])
+const totalResults = computed(() => photosData.value?.pages[0]?.pagination.total ?? 0)
+const visibleItems = computed(() => (allItems.value.length > 0 ? allItems.value : undefined))
 
 const {
   visiblePhotoIds,
@@ -73,7 +76,12 @@ const {
   handlePhotoSelect,
   toggleSelectAllVisible,
   selectAllMatchingResults,
-} = usePhotoSelection(items, totalResults, filters)
+} = usePhotoSelection(visibleItems, totalResults, filters)
+
+const sentinel = useInfiniteScrollTrigger(() => fetchNextPage(), {
+  isBusy: computed(() => isFetchingNextPage.value),
+  canLoadMore: computed(() => hasNextPage.value ?? false),
+})
 
 function handlePhotoClick(slug: string) {
   router.push({ name: PHOTO_ROUTE_NAMES.DETAIL, params: { slug } })
@@ -153,52 +161,43 @@ onUnmounted(() => {
         </PhotoGalleryHeader>
 
         <div class="gallery-layout">
-          <GalleryFilterSidebar
-            :active-status="activeStatus"
-            :plate-number="plateNumber"
-            :bib-match="bibMatch"
-            :helmet-colors="helmetColors"
-            :clothing-colors="clothingColors"
-            :bike-colors="bikeColors"
-            :photo-category-id="photoCategoryId"
-            :categories="categories ?? []"
-            :has-active-filters="hasActiveFilters"
-            @update:plate-number="plateNumber = $event"
-            @update:bib-match="bibMatch = $event"
-            @update:active-status="
-              (s) => {
-                activeStatus = s
-                page = 1
-              }
-            "
-            @update:photo-category-id="
-              (id) => {
-                photoCategoryId = id
-                page = 1
-              }
-            "
-            @update:helmet-colors="helmetColors = $event"
-            @update:clothing-colors="clothingColors = $event"
-            @update:bike-colors="bikeColors = $event"
-            @clear-filters="
-              () => {
-                plateNumber = ''
-                bibMatch = 'exact'
-                helmetColors = []
-                clothingColors = []
-                bikeColors = []
-                activeStatus = null
-                photoCategoryId = null
-                page = 1
-              }
-            "
-          />
+          <div class="gallery-content__sidebar">
+            <GalleryFilterSidebar
+              :active-status="activeStatus"
+              :plate-number="plateNumber"
+              :bib-match="bibMatch"
+              :helmet-colors="helmetColors"
+              :clothing-colors="clothingColors"
+              :bike-colors="bikeColors"
+              :photo-category-id="photoCategoryId"
+              :categories="categories ?? []"
+              :has-active-filters="hasActiveFilters"
+              @update:plate-number="plateNumber = $event"
+              @update:bib-match="bibMatch = $event"
+              @update:active-status="(s) => (activeStatus = s)"
+              @update:photo-category-id="(id) => (photoCategoryId = id)"
+              @update:helmet-colors="helmetColors = $event"
+              @update:clothing-colors="clothingColors = $event"
+              @update:bike-colors="bikeColors = $event"
+              @clear-filters="
+                () => {
+                  plateNumber = ''
+                  bibMatch = 'exact'
+                  helmetColors = []
+                  clothingColors = []
+                  bikeColors = []
+                  activeStatus = null
+                  photoCategoryId = null
+                }
+              "
+            />
+          </div>
 
-          <div class="gallery-main">
+          <div class="gallery-content__main gallery-main">
             <div class="gallery-toolbar">
               <NFlex :size="12" align="center">
                 <NCheckbox
-                  v-if="selectionStore.isSelectionMode && photosData && photosData.items.length > 0"
+                  v-if="selectionStore.isSelectionMode && allItems.length > 0"
                   :checked="allVisibleSelected"
                   @update:checked="toggleSelectAllVisible"
                 >
@@ -214,19 +213,10 @@ onUnmounted(() => {
                   {{ totalResults }} foto{{ totalResults !== 1 ? 's' : '' }}
                 </span>
               </NFlex>
-
-              <NPagination
-                v-if="pageCount > 1"
-                :page="page"
-                :page-count="pageCount"
-                size="small"
-                :page-slot="7"
-                @update:page="(p: number) => (page = p)"
-              />
             </div>
 
             <div v-if="showSelectAllBanner" class="select-all-banner">
-              Las {{ visiblePhotoIds.length }} fotos de esta página están seleccionadas.
+              Las {{ visiblePhotoIds.length }} fotos cargadas están seleccionadas.
               <button
                 class="select-all-banner__action"
                 :disabled="isSelectingAll"
@@ -241,12 +231,12 @@ onUnmounted(() => {
             </div>
 
             <div class="gallery-scroll">
-              <div v-if="photosData && photosData.items.length === 0" class="empty-container">
+              <div v-if="!isPending && allItems.length === 0" class="empty-container">
                 <NEmpty description="No hay fotos que coincidan con los filtros" />
               </div>
 
               <NGrid v-else :cols="4" :x-gap="12" :y-gap="12">
-                <NGridItem v-for="photo in photosData?.items" :key="photo.id">
+                <NGridItem v-for="photo in allItems" :key="photo.id">
                   <PhotoCard
                     :photo="photo"
                     :selectable="selectionStore.isSelectionMode"
@@ -256,6 +246,14 @@ onUnmounted(() => {
                   />
                 </NGridItem>
               </NGrid>
+
+              <div ref="sentinel" class="gallery-sentinel" aria-hidden="true" />
+              <div v-if="isFetchingNextPage" class="gallery-loading-more">
+                <NSpin :size="20" /> <span>Cargando más...</span>
+              </div>
+              <div v-else-if="!hasNextPage && allItems.length > 0" class="gallery-end-marker">
+                <span>—— fin del catálogo ——</span>
+              </div>
             </div>
           </div>
         </div>

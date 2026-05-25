@@ -3,7 +3,7 @@ import type {
   IRetouchQueueOrder,
 } from '../types/responses/operator-retouch-queue.response'
 
-function toRetouchQueueOrder(api: IApiRetouchQueueOrder): IRetouchQueueOrder {
+export function toRetouchQueueOrder(api: IApiRetouchQueueOrder): IRetouchQueueOrder {
   return {
     orderId: api.orderId,
     buyerName: api.buyerName,

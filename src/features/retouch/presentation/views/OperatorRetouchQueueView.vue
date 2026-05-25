@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { NGrid, NGridItem, NSpin } from 'naive-ui'
 
+import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import { useOperatorRetouchOrdersListSource } from '../../composables/queue-sources/use-retouch-orders-list-source'
 import { useOperatorActiveEventsQuery } from '@/features/operator/composables/queries/use-operator-active-events'
 import { useOperatorCompletedEventsQuery } from '@/features/operator/composables/queries/use-operator-completed-events'
@@ -21,10 +22,8 @@ const router = useRouter()
 
 const scope = ref<TRetouchOrderScope>('pending')
 const selectedEventSlug = ref<string | null>(null)
-const currentPage = ref(1)
-const pageSize = ref(20)
 
-const source = useOperatorRetouchOrdersListSource(currentPage, pageSize, scope, selectedEventSlug)
+const source = useOperatorRetouchOrdersListSource(scope, selectedEventSlug)
 
 const eventsPage = ref(1)
 const activeEventsQuery = useOperatorActiveEventsQuery(eventsPage)
@@ -63,12 +62,10 @@ const handleCardClick = (order: IOperatorRetouchOrder) => goWorkspace(order.orde
 
 const handleScopeChange = (value: TRetouchOrderScope) => {
   scope.value = value
-  currentPage.value = 1
 }
 
 const handleEventChange = (value: string | null) => {
   selectedEventSlug.value = value
-  currentPage.value = 1
 }
 
 const isPendingScope = computed(() => scope.value === 'pending')
@@ -89,6 +86,11 @@ const emptyMessage = computed(() =>
     ? 'Aún no hay órdenes completadas en este criterio'
     : 'No hay órdenes pendientes de retoque',
 )
+
+const sentinel = useInfiniteScrollTrigger(() => source.fetchNextPage(), {
+  isBusy: computed(() => source.isFetchingNextPage.value),
+  canLoadMore: computed(() => source.hasNextPage.value),
+})
 </script>
 
 <template>
@@ -109,11 +111,8 @@ const emptyMessage = computed(() =>
         :scope="scope"
         :selected-event-slug="selectedEventSlug"
         :event-options="eventOptions"
-        :page="currentPage"
-        :page-count="source.totalPages.value"
         @update:scope="handleScopeChange"
         @update:selected-event-slug="handleEventChange"
-        @update:page="(p) => (currentPage = p)"
       />
 
       <NSpin :show="source.isPending.value">
@@ -122,25 +121,40 @@ const emptyMessage = computed(() =>
           :title="emptyMessage"
           @go-dashboard="goDashboard"
         />
-        <NGrid v-else :cols="4" :x-gap="12" :y-gap="12" responsive="screen">
-          <NGridItem v-for="(order, index) in source.orders.value" :key="order.orderId">
-            <RetouchOrderCard
-              :order-id="order.orderId"
-              :buyer-name="order.buyerName"
-              :event-name="order.eventName"
-              show-event-badge
-              :created-at="order.createdAt"
-              :pending-photos-count="order.pendingPhotosCount"
-              :total-photos-count="order.totalPhotosCount"
-              :retouched-photos-count="order.retouchedPhotosCount"
-              :thumbs="
-                order.previewPhotos.map((p) => ({ thumbnailUrl: p.thumbnailUrl, alt: p.filename }))
-              "
-              :is-first="isPendingScope && currentPage === 1 && index === 0"
-              @click="handleCardClick(order)"
-            />
-          </NGridItem>
-        </NGrid>
+        <template v-else>
+          <NGrid :cols="4" :x-gap="12" :y-gap="12" responsive="screen">
+            <NGridItem v-for="(order, index) in source.orders.value" :key="order.orderId">
+              <RetouchOrderCard
+                :order-id="order.orderId"
+                :buyer-name="order.buyerName"
+                :event-name="order.eventName"
+                show-event-badge
+                :created-at="order.createdAt"
+                :pending-photos-count="order.pendingPhotosCount"
+                :total-photos-count="order.totalPhotosCount"
+                :retouched-photos-count="order.retouchedPhotosCount"
+                :thumbs="
+                  order.previewPhotos.map((p) => ({
+                    thumbnailUrl: p.thumbnailUrl,
+                    alt: p.filename,
+                  }))
+                "
+                :is-first="isPendingScope && index === 0"
+                @click="handleCardClick(order)"
+              />
+            </NGridItem>
+          </NGrid>
+          <div ref="sentinel" class="queue-sentinel" aria-hidden="true" />
+          <div v-if="source.isFetchingNextPage.value" class="queue-loading-more">
+            <NSpin :size="20" /> <span>Cargando más órdenes...</span>
+          </div>
+          <div
+            v-else-if="!source.hasNextPage.value && source.orders.value.length > 0"
+            class="queue-end-marker"
+          >
+            <span>—— sin más órdenes ——</span>
+          </div>
+        </template>
       </NSpin>
     </div>
   </div>

@@ -2,7 +2,7 @@
   padding: 24px 32px;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 48px);
+  height: calc(100vh - var(--app-nav-h, 48px));
   overflow: hidden;
 }
 
@@ -17,18 +17,34 @@
 
 .gallery-layout {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: var(--gallery-sidebar-w, 260px) 1fr;
   gap: 24px;
   flex: 1;
   min-height: 0;
   overflow: hidden;
 }
 
+.gallery-content__sidebar {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 8px;
+  position: sticky;
+  top: 0;
+}
+
+.gallery-content__main {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 4px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .gallery-main {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  overflow: hidden;
 }
 
 .gallery-toolbar {
@@ -74,7 +90,23 @@
 
 .gallery-scroll {
   flex: 1;
-  overflow-y: auto;
+  min-height: 0;
+}
+
+.gallery-sentinel {
+  width: 100%;
+  height: 1px;
+}
+
+.gallery-loading-more,
+.gallery-end-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  color: var(--tt-neutral-mid, #6b7280);
+  font-size: 13px;
 }
 
 .selection-count {

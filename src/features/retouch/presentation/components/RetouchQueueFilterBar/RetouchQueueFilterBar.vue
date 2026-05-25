@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NFlex, NPagination, NSelect } from 'naive-ui'
+import { NFlex, NSelect } from 'naive-ui'
 
 import type { TRetouchOrderScope } from '../../../types/responses/operator-retouch-orders.response'
 
@@ -17,14 +17,11 @@ defineProps<{
   scope: TRetouchOrderScope
   selectedEventSlug?: string | null
   eventOptions?: Array<{ label: string; value: string }>
-  page: number
-  pageCount: number
 }>()
 
 defineEmits<{
   'update:scope': [value: TRetouchOrderScope]
   'update:selectedEventSlug': [value: string | null]
-  'update:page': [page: number]
 }>()
 </script>
 
@@ -57,15 +54,6 @@ defineEmits<{
         />
       </template>
     </NFlex>
-
-    <NPagination
-      v-if="pageCount > 1"
-      :page="page"
-      :page-count="pageCount"
-      size="small"
-      :page-slot="7"
-      @update:page="$emit('update:page', $event)"
-    />
   </section>
 </template>
 
