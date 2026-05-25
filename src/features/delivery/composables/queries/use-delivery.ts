@@ -7,6 +7,12 @@ import { DELIVERY_QUERY_KEYS } from '../../constants/query-keys'
 import { toDeliveryData } from '../../mappers/delivery-data.mapper'
 import type { IApiDeliveryData } from '../../types/responses/delivery-data.response'
 
+// Backend signs B2 download URLs with a 1-hour TTL. Refetch before that to
+// avoid serving expired links to a tab the user left open.
+const PRESIGNED_TTL_MS = 60 * 60 * 1000
+const STALE_BUFFER_MS = 15 * 60 * 1000
+const REFETCH_BUFFER_MS = 10 * 60 * 1000
+
 export function useDeliveryQuery(token: Ref<string>) {
   const query = useQuery({
     queryKey: computed(() => DELIVERY_QUERY_KEYS.delivery(token.value)),
@@ -19,6 +25,9 @@ export function useDeliveryQuery(token: Ref<string>) {
     },
     enabled: computed(() => !!token.value),
     retry: false,
+    staleTime: PRESIGNED_TTL_MS - STALE_BUFFER_MS,
+    refetchInterval: PRESIGNED_TTL_MS - REFETCH_BUFFER_MS,
+    refetchIntervalInBackground: true,
   })
 
   const isExpired = computed(() => {
