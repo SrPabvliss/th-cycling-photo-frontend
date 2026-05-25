@@ -1,36 +1,73 @@
 /* Hero */
 .hero {
+  position: relative;
   display: flex;
   justify-content: center;
-  padding: 120px 32px;
-  background: #fff;
+  align-items: center;
+  min-height: 88vh;
+  padding: 96px 32px;
+  overflow: hidden;
+  background: #0a0f1a;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Keep the rider in frame even when the viewport gets very wide / very
+     narrow; downhill action is in the upper-left third of the photo. */
+  object-position: 35% 40%;
+  z-index: 0;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  /* "Negro azulado" — dark navy that reads almost-black but keeps a
+     faint brand-blue tint. Heavy enough to give text/logo high contrast
+     while letting the rider silhouette remain visible. */
+  background: linear-gradient(
+    180deg,
+    rgba(8, 18, 36, 0.78) 0%,
+    rgba(6, 14, 28, 0.85) 50%,
+    rgba(3, 8, 18, 0.94) 100%
+  );
 }
 
 .hero-content {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 16px;
+  gap: 18px;
+  max-width: 760px;
 }
 
 .hero-title {
-  margin: 8px 0 0;
-  font-size: 42px;
-  font-weight: 700;
-  color: #1a1f2c;
-  line-height: 1.2;
+  margin: 4px 0 0;
+  font-size: 46px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
 }
 
 .hero-subtitle {
   margin: 0;
   font-size: 18px;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
 }
 
 .hero-accent {
-  color: #105080;
-  font-weight: 500;
+  color: #7fb7e0;
+  font-weight: 600;
 }
 
 /* Events sections */
@@ -81,23 +118,31 @@
 }
 
 .about-image {
+  position: relative;
   flex: 0 0 380px;
+  height: 420px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0a0f1a;
 }
 
-.about-image-placeholder {
-  position: relative;
+.about-image-photo {
   width: 100%;
-  height: 420px;
-  background: linear-gradient(180deg, #4b5563 0%, #1f2937 100%);
-  border-radius: 12px;
-  display: flex;
-  align-items: flex-end;
-  padding: 20px;
+  height: 100%;
+  object-fit: cover;
+  /* Center on the rider doing the trick (upper-mid of the frame). */
+  object-position: 50% 35%;
+  display: block;
 }
 
 .about-image-caption {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 16px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
 }
 
 .about-text {
@@ -155,13 +200,43 @@
 
 /* CTA */
 .cta {
-  background:
-    linear-gradient(rgba(26, 31, 44, 0.85), rgba(26, 31, 44, 0.9)),
-    linear-gradient(135deg, #374151, #1f2937);
-  padding: 80px 32px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 560px;
+  padding: 96px 32px;
+  background: #0a0f1a;
+  overflow: hidden;
+}
+
+.cta-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Frame the rider doing the trick — sits slightly above center. */
+  object-position: 50% 30%;
+  z-index: 0;
+}
+
+.cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    rgba(8, 18, 36, 0.78) 0%,
+    rgba(6, 14, 28, 0.85) 50%,
+    rgba(3, 8, 18, 0.92) 100%
+  );
 }
 
 .cta-overlay {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -195,7 +270,17 @@
 /* Responsive */
 @media (max-width: 768px) {
   .hero {
+    min-height: 72vh;
     padding: 64px 20px;
+  }
+
+  .hero-bg {
+    /* Recenter on the rider for narrower viewports. */
+    object-position: 42% 35%;
+  }
+
+  .hero-content {
+    gap: 14px;
   }
 
   .hero-title {
@@ -228,10 +313,7 @@
   .about-image {
     flex: 0 0 auto;
     width: 100%;
-  }
-
-  .about-image-placeholder {
-    height: 220px;
+    height: 260px;
   }
 
   .about-text {
@@ -248,7 +330,12 @@
   }
 
   .cta {
+    min-height: 460px;
     padding: 56px 20px;
+  }
+
+  .cta-bg {
+    object-position: 50% 35%;
   }
 
   .cta-title {
@@ -262,6 +349,7 @@
 
 @media (max-width: 480px) {
   .hero {
+    min-height: 65vh;
     padding: 48px 16px;
   }
 

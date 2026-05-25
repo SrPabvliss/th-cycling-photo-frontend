@@ -70,12 +70,13 @@ async function handleSubmit(formData: IRegisterFormData) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   margin-bottom: 28px;
 }
 
 .register-title {
-  margin: 8px 0 0;
+  /* Compensate for transparent padding inside the helmet PNG. */
+  margin: -8px 0 0;
   font-size: 26px;
   font-weight: 700;
   color: #1a1f2c;
