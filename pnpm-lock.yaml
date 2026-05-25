@@ -37,6 +37,9 @@ importers:
       p-retry:
         specifier: ^7.1.1
         version: 7.1.1
+      photoswipe:
+        specifier: ^5.4.4
+        version: 5.4.4
       pinia:
         specifier: ^3.0.4
         version: 3.0.4(typescript@5.9.3)(vue@3.5.28(typescript@5.9.3))
@@ -3434,6 +3437,13 @@ packages:
         integrity: sha512-LjgdTytVFXeUgtHZr9WYViYSM/g8MkcTPYDlPa3cDqMirHjKiSZPYd6DoL7pK8AJQr+uWkQvCjHNdiMqsrJs+g==,
       }
 
+  photoswipe@5.4.4:
+    resolution:
+      {
+        integrity: sha512-WNFHoKrkZNnvFFhbHL93WDkW3ifwVOXSW3w1UuZZelSmgXpIGiZSNlZJq37rR8YejqME2rHs9EhH9ZvlvFH2NA==,
+      }
+    engines: { node: '>= 0.12.0' }
+
   picocolors@1.1.1:
     resolution:
       {
@@ -6356,6 +6366,8 @@ snapshots:
   perfect-debounce@1.0.0: {}
 
   perfect-debounce@2.1.0: {}
+
+  photoswipe@5.4.4: {}
 
   picocolors@1.1.1: {}
 
