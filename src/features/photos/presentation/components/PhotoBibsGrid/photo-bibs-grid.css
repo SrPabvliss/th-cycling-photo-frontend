@@ -1,36 +1,67 @@
 .photo-bibs-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 16px;
-}
-.photo-bibs-grid__card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid var(--tt-neutral-border, #e5e5e5);
+  gap: 10px;
+}
+
+.photo-bib-card {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  align-items: center;
+  transition: border-color 0.15s;
+}
+
+.photo-bib-card:hover {
+  border-color: #d4d4d8;
+}
+
+.photo-bib-card--manual {
+  border-color: rgba(24, 160, 88, 0.4);
+  background: rgba(24, 160, 88, 0.03);
+}
+
+.photo-bib-card__crop {
+  width: 88px;
+  height: 64px;
   border-radius: 8px;
-  background: var(--tt-neutral-surface, #fff);
+  overflow: hidden;
 }
-.photo-bibs-grid__crop {
-  width: 100%;
-  height: 100px;
+
+.photo-bib-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
 }
-.photo-bibs-grid__meta {
+
+.photo-bib-card__digits {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #0a0a0a;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.photo-bib-card__meta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
-.photo-bibs-grid__digits {
-  font-size: 18px;
-  font-weight: 600;
-}
-.photo-bibs-grid__manual {
-  font-size: 11px;
+
+.photo-bib-card__tag {
+  font-size: 10px;
   text-transform: uppercase;
-  color: var(--tt-neutral-mid, #888);
-  border: 1px solid currentColor;
+  letter-spacing: 0.04em;
+  color: #18a058;
+  background: rgba(24, 160, 88, 0.1);
   padding: 2px 6px;
   border-radius: 4px;
+  font-weight: 600;
 }

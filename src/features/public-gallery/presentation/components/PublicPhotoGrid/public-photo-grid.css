@@ -77,12 +77,20 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (hover: none), (max-width: 768px) {
   .virtual-grid {
     height: calc(100vh - 300px);
   }
 
   .grid-cell {
     border-width: 1px;
+  }
+
+  .grid-cell__select {
+    opacity: 1;
+  }
+
+  .grid-cell__select:not(.grid-cell__select--active) {
+    background: rgba(0, 0, 0, 0.65);
   }
 }

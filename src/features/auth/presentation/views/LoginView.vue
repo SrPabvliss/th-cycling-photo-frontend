@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useForm } from '@tanstack/vue-form'
-import { NFormItem, NInput, NButton, NCard, NCheckbox, NIcon } from 'naive-ui'
+import { NAlert, NFormItem, NInput, NButton, NCard, NIcon } from 'naive-ui'
 import { MailOutline, LockClosedOutline } from '@vicons/ionicons5'
 
 import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
 import { getHomePath } from '@/core/auth/role-config'
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import TitanLogo from '@/core/layout/public/TitanLogo.vue'
+import AuthModeTabs from '../components/AuthModeTabs/AuthModeTabs.vue'
 import { useAuth } from '../../composables/use-auth'
 import { LOGIN_FORM_DEFAULTS, loginFormSchema } from '../../constants/login-form.schema'
 
@@ -16,18 +17,17 @@ const router = useRouter()
 const route = useRoute()
 const { login, isLoggingIn } = useAuth()
 
-const rememberMe = ref(false)
+const redirectQuery = computed(() => (route.query.redirect as string | undefined) ?? null)
+const showCheckoutNotice = computed(() => redirectQuery.value === '/checkout')
 
 const form = useForm({
   defaultValues: LOGIN_FORM_DEFAULTS,
   onSubmit: async ({ value }) => {
     try {
       const user = await login(value)
-      const redirect = route.query.redirect as string | undefined
-      router.push(redirect ?? getHomePath(user.role))
+      router.push(redirectQuery.value ?? getHomePath(user.role))
     } catch {
       // Error toast is shown by error interceptor
-      // Form preserves email field value
     }
   },
 })
@@ -39,9 +39,15 @@ const form = useForm({
       <NCard class="login-card">
         <div class="login-header">
           <TitanLogo :size="56" />
-          <h1 class="login-title">Bienvenido de nuevo</h1>
-          <p class="login-subtitle">Acceso interno para administradores y clasificadores.</p>
+          <h1 class="login-title">Bienvenido</h1>
+          <p class="login-subtitle">Accede a tu cuenta o crea una nueva.</p>
         </div>
+
+        <AuthModeTabs mode="login" :redirect="redirectQuery" />
+
+        <NAlert v-if="showCheckoutNotice" type="info" :show-icon="true" style="margin-bottom: 16px">
+          Inicia sesión para completar tu pedido.
+        </NAlert>
 
         <form
           @submit="
@@ -60,8 +66,8 @@ const form = useForm({
             }"
           >
             <template v-slot="{ field }">
-              <NFormItem label="Correo electronico" required v-bind="fieldStatus(field)">
-                <NInput placeholder="correo@titantv.com" v-bind="fieldInput(field)">
+              <NFormItem label="Correo electrónico" required v-bind="fieldStatus(field)">
+                <NInput placeholder="correo@ejemplo.com" v-bind="fieldInput(field)">
                   <template #prefix>
                     <NIcon :component="MailOutline" color="#9CA3AF" />
                   </template>
@@ -78,13 +84,7 @@ const form = useForm({
             }"
           >
             <template v-slot="{ field }">
-              <NFormItem required v-bind="fieldStatus(field)">
-                <template #label>
-                  <div class="login-password-label">
-                    <span>Contrasena</span>
-                    <a href="#" class="login-forgot" @click.prevent>Olvidaste tu contrasena?</a>
-                  </div>
-                </template>
+              <NFormItem label="Contraseña" required v-bind="fieldStatus(field)">
                 <NInput
                   type="password"
                   show-password-on="click"
@@ -102,10 +102,6 @@ const form = useForm({
             </template>
           </form.Field>
 
-          <NCheckbox v-model:checked="rememberMe" class="login-remember">
-            Recordarme por 30 dias
-          </NCheckbox>
-
           <form.Subscribe>
             <template v-slot="{ canSubmit }">
               <NButton
@@ -117,16 +113,11 @@ const form = useForm({
                 attr-type="submit"
                 class="login-submit"
               >
-                Iniciar sesion
+                Iniciar sesión
               </NButton>
             </template>
           </form.Subscribe>
         </form>
-
-        <p class="login-create-account">
-          ¿No tienes cuenta?
-          <RouterLink to="/register">Crear cuenta</RouterLink>
-        </p>
       </NCard>
     </div>
   </PublicLayout>

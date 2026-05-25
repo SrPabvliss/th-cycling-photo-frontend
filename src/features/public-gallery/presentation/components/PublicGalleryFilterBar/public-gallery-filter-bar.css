@@ -63,16 +63,29 @@
 }
 
 @media (max-width: 639px) {
+  .pgfb {
+    padding: 10px 12px;
+    top: 72px;
+  }
+
   .pgfb__row--search {
     flex-direction: column;
     align-items: stretch;
   }
 
   .pgfb__input {
+    flex: 0 0 auto;
     max-width: 100%;
+    width: 100%;
   }
 
   .pgfb__match {
+    width: 100%;
+    display: flex;
+  }
+
+  .pgfb__match :deep(.n-radio-group) {
+    display: flex;
     width: 100%;
   }
 

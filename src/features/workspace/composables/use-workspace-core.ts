@@ -51,8 +51,10 @@ export function useReviewWorkspaceCore(
   )
 
   watch(
-    [queueItems, currentSlug],
-    ([items, slug]) => {
+    [queueItems, currentSlug, isQueuePending],
+    ([items, slug, queuePending]) => {
+      if (queuePending) return
+
       if (items.length === 0) {
         if (slug !== null) currentSlug.value = null
         return
