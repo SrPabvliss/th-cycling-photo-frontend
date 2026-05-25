@@ -157,6 +157,7 @@ const heroUrl = computed(() => {
       :selected-ids="selectedIds"
       @update:show="showLightbox = $event"
       @toggle="toggleSelect"
+      @load-more="handleLoadMore"
     />
   </PublicLayout>
 </template>
