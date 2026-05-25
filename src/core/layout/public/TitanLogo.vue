@@ -1,33 +1,57 @@
 <script setup lang="ts">
-withDefaults(
+import helmetUrl from '@/assets/brand/titan-helmet.webp'
+import emblemUrl from '@/assets/brand/titan-helmet-tv.webp'
+import fullUrl from '@/assets/brand/titan-logo-full.webp'
+
+export type TitanLogoVariant = 'helmet' | 'emblem' | 'full'
+
+const props = withDefaults(
   defineProps<{
     size?: number
+    variant?: TitanLogoVariant
   }>(),
-  { size: 48 },
+  { size: 48, variant: 'helmet' },
 )
+
+const SOURCES: Record<TitanLogoVariant, string> = {
+  helmet: helmetUrl,
+  emblem: emblemUrl,
+  full: fullUrl,
+}
+
+const ASPECT: Record<TitanLogoVariant, number> = {
+  helmet: 1280 / 1262,
+  emblem: 1280 / 1262,
+  full: 2222 / 2831,
+}
+
+const ALT: Record<TitanLogoVariant, string> = {
+  helmet: 'Titan TV',
+  emblem: 'Titan TV',
+  full: 'Titan TV',
+}
+
+const src = SOURCES[props.variant]
+const width = props.variant === 'full' ? Math.round(props.size * ASPECT.full) : props.size
+const height = props.variant === 'full' ? props.size : Math.round(props.size / ASPECT.helmet)
 </script>
 
 <template>
-  <svg
-    :width="size"
-    :height="size"
-    viewBox="0 0 48 48"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <!-- Rounded dark background -->
-    <rect width="48" height="48" rx="12" fill="#1A1F2C" />
-    <!-- Helmet base -->
-    <path
-      d="M14 30C14 30 15 32 24 32C33 32 34 30 34 30V27C34 27 33 28 24 28C15 28 14 27 14 27V30Z"
-      fill="white"
-    />
-    <!-- Helmet dome -->
-    <path
-      d="M16 27C16 22 19 18 24 18C29 18 32 22 32 27C32 27 29 28 24 28C19 28 16 27 16 27Z"
-      fill="white"
-    />
-    <!-- Helmet ridge -->
-    <rect x="22" y="12" width="4" height="8" rx="2" fill="#105080" />
-  </svg>
+  <img
+    :src="src"
+    :alt="ALT[variant]"
+    :width="width"
+    :height="height"
+    class="titan-logo"
+    decoding="async"
+    draggable="false"
+  />
 </template>
+
+<style scoped>
+.titan-logo {
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+</style>

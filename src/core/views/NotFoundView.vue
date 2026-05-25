@@ -18,7 +18,7 @@ const route = useRoute()
     :error-info="`Codigo de error: 404_NOT_FOUND | Ruta: ${route.fullPath}`"
   >
     <template #icon>
-      <TitanLogo :size="80" />
+      <TitanLogo :size="100" variant="emblem" />
     </template>
     <template #actions>
       <NButton type="primary" size="large" @click="router.push('/')">
