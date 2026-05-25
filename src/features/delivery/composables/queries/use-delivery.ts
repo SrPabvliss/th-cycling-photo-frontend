@@ -7,11 +7,16 @@ import { DELIVERY_QUERY_KEYS } from '../../constants/query-keys'
 import { toDeliveryData } from '../../mappers/delivery-data.mapper'
 import type { IApiDeliveryData } from '../../types/responses/delivery-data.response'
 
-// Backend signs B2 download URLs with a 1-hour TTL. Refetch before that to
-// avoid serving expired links to a tab the user left open.
-const PRESIGNED_TTL_MS = 60 * 60 * 1000
-const STALE_BUFFER_MS = 15 * 60 * 1000
-const REFETCH_BUFFER_MS = 10 * 60 * 1000
+// Backend signs B2 download URLs with a 1-hour TTL. The backend also caps
+// total accesses per delivery token at 50 (server-side anti-sharing). We
+// therefore refresh on-demand instead of on a timer:
+//   - staleTime = 45min: query is fresh well within the 1h URL lifetime
+//   - refetchOnWindowFocus + refetchOnMount: customer returning to the
+//     tab after >45min triggers a refetch and gets fresh URLs before
+//     clicking download
+// This keeps the per-token access count tied to actual visits rather
+// than a polling interval, leaving plenty of headroom under the 50-cap.
+const STALE_MS = 45 * 60 * 1000
 
 export function useDeliveryQuery(token: Ref<string>) {
   const query = useQuery({
@@ -25,9 +30,9 @@ export function useDeliveryQuery(token: Ref<string>) {
     },
     enabled: computed(() => !!token.value),
     retry: false,
-    staleTime: PRESIGNED_TTL_MS - STALE_BUFFER_MS,
-    refetchInterval: PRESIGNED_TTL_MS - REFETCH_BUFFER_MS,
-    refetchIntervalInBackground: true,
+    staleTime: STALE_MS,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   })
 
   const isExpired = computed(() => {
