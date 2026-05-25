@@ -62,7 +62,7 @@ function navigateToGallery() {
       </div>
 
       <template v-else-if="event">
-        <EventDetailHeader :event="event" :event-id="id" :event-slug="slug" />
+        <EventDetailHeader :event="event" :event-slug="slug" />
 
         <div class="dashboard-grid">
           <NFlex vertical :size="24">

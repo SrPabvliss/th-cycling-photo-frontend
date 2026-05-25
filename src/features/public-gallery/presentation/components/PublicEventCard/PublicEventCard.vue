@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { NIcon } from 'naive-ui'
-import { CameraOutline, LocationOutline, CalendarOutline, Star } from '@vicons/ionicons5'
+import { CameraOutline, LocationOutline, CalendarOutline } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
 import { getAssetPresetUrl } from '@/shared/utils/cdn.utils'
@@ -9,7 +9,6 @@ import type { IPublicEventListItem } from '../../../types/responses/public-event
 
 const props = defineProps<{
   event: IPublicEventListItem
-  featured?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -24,21 +23,17 @@ const location = computed(() => {
   const parts = [props.event.cantonName, props.event.provinceName].filter(Boolean)
   return parts.join(', ') || null
 })
+
+const isSingleDay = computed(
+  () => props.event.startDate.getTime() === props.event.endDate.getTime(),
+)
 </script>
 
 <template>
-  <article
-    class="pub-event-card"
-    :class="{ 'pub-event-card--featured': featured }"
-    @click="emit('click', event.slug)"
-  >
+  <article class="pub-event-card" @click="emit('click', event.slug)">
     <div class="pub-event-card__cover">
       <img v-if="coverUrl" :src="coverUrl" :alt="event.name" loading="lazy" />
       <div v-else class="pub-event-card__cover-placeholder" />
-      <div v-if="featured" class="pub-event-card__featured-badge">
-        <NIcon :component="Star" :size="12" />
-        Destacado
-      </div>
       <div class="pub-event-card__overlay">
         <NIcon :component="CameraOutline" :size="14" />
         {{ event.photoCount }} fotos
@@ -53,7 +48,10 @@ const location = computed(() => {
         </span>
         <span>
           <NIcon :component="CalendarOutline" :size="13" />
-          {{ formatDate(event.date) }}
+          <template v-if="isSingleDay">{{ formatDate(event.startDate) }}</template>
+          <template v-else>
+            {{ formatDate(event.startDate) }} – {{ formatDate(event.endDate) }}
+          </template>
         </span>
       </div>
     </div>

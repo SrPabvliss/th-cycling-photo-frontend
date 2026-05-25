@@ -11,15 +11,14 @@ import {
   NIcon,
   NInput,
   NSelect,
-  NSwitch,
 } from 'naive-ui'
-import { ArrowForward, StarOutline } from '@vicons/ionicons5'
+import { ArrowForward } from '@vicons/ionicons5'
 
 import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
 import { useProvincesQuery } from '@/features/locations/composables/queries/use-provinces'
 import { useCantonsQuery } from '@/features/locations/composables/queries/use-cantons'
+import { useEventTypesQuery } from '@/features/event-types/composables/queries/use-event-types'
 import { useLocalAssetPreviews } from '@/features/event-assets/composables/use-local-asset-previews'
-import type { EventAssetType } from '@/features/event-assets/types/asset-type'
 import type { IEventAsset } from '@/features/event-assets/types/responses/event-asset.response'
 import AssetUploadZone from '@/features/event-assets/presentation/components/AssetUploadZone/AssetUploadZone.vue'
 import EventCategoryPicker from '@/features/photo-categories/presentation/components/EventCategoryPicker/EventCategoryPicker.vue'
@@ -28,10 +27,9 @@ import { EVENT_FORM_DEFAULTS, eventFormSchema } from '../../../constants/event-f
 import type { IEventFormData } from '../../../types/event-form.types'
 
 export interface IEventFormExtra {
-  assetFiles?: Map<EventAssetType, File>
-  assetRemovals?: EventAssetType[]
+  assetFiles?: Map<'cover_image', File>
+  assetRemovals?: 'cover_image'[]
   categoryIds?: number[]
-  isFeatured?: boolean
 }
 
 const props = defineProps<{
@@ -40,7 +38,6 @@ const props = defineProps<{
   submitLabel?: string
   hideAssetUpload?: boolean
   existingAssets?: IEventAsset[]
-  initialFeatured?: boolean
   initialCategoryIds?: number[]
 }>()
 
@@ -52,19 +49,18 @@ const emit = defineEmits<{
 const form = useForm({
   defaultValues: props.initialData ?? EVENT_FORM_DEFAULTS,
   onSubmit: async ({ value }) => {
-    const removals = assetPreviews.getPendingRemovals()
+    const removals = assetPreviews.getPendingRemovals() as 'cover_image'[]
+    const files = assetPreviews.getPendingFiles() as Map<'cover_image', File> | undefined
     emit('submit', value, {
-      assetFiles: assetPreviews.getPendingFiles(),
+      assetFiles: files,
       assetRemovals: removals.length > 0 ? removals : undefined,
       categoryIds: selectedCategoryIds.value.length > 0 ? selectedCategoryIds.value : undefined,
-      isFeatured: isFeatured.value || undefined,
     })
   },
 })
 
 const assetPreviews = useLocalAssetPreviews(() => props.existingAssets)
 const selectedCategoryIds = ref<number[]>(props.initialCategoryIds ?? [])
-const isFeatured = ref(props.initialFeatured ?? false)
 
 const { mutateAsync: createCategory } = useCreatePhotoCategory()
 
@@ -77,6 +73,7 @@ const selectedProvinceId = ref<number | null>(props.initialData?.provinceId ?? n
 
 const { data: provinces, isPending: isLoadingProvinces } = useProvincesQuery()
 const { data: cantons, isFetching: isLoadingCantons } = useCantonsQuery(selectedProvinceId)
+const { data: eventTypes, isPending: isLoadingEventTypes } = useEventTypesQuery()
 
 const provinceOptions = computed(
   () => provinces.value?.map((p) => ({ label: p.name, value: p.id })) ?? [],
@@ -84,6 +81,10 @@ const provinceOptions = computed(
 
 const cantonOptions = computed(
   () => cantons.value?.map((c) => ({ label: c.name, value: c.id })) ?? [],
+)
+
+const eventTypeOptions = computed(
+  () => eventTypes.value?.map((t) => ({ label: t.name, value: t.id })) ?? [],
 )
 </script>
 
@@ -119,21 +120,69 @@ const cantonOptions = computed(
         </form.Field>
 
         <form.Field
-          name="date"
+          name="eventTypeId"
           :validators="{
-            onBlur: eventFormSchema.shape.date,
-            onSubmit: eventFormSchema.shape.date,
+            onChange: eventFormSchema.shape.eventTypeId,
+            onSubmit: eventFormSchema.shape.eventTypeId,
           }"
         >
           <template v-slot="{ field }">
-            <NFormItem label="Fecha" required v-bind="fieldStatus(field)">
-              <NDatePicker
-                type="date"
-                placeholder="Seleccionar fecha"
-                style="width: 100%"
-                v-bind="fieldInput(field)"
+            <NFormItem label="Tipo de evento" required v-bind="fieldStatus(field)">
+              <NSelect
+                placeholder="Selecciona tipo de evento"
+                :options="eventTypeOptions"
+                :loading="isLoadingEventTypes"
+                :value="field.state.value"
+                filterable
+                @update:value="(val: number) => field.handleChange(val)"
+                @blur="field.handleBlur"
               />
             </NFormItem>
+          </template>
+        </form.Field>
+
+        <form.Field name="startDate">
+          <template v-slot="{ field: startField }">
+            <form.Field name="endDate">
+              <template v-slot="{ field: endField }">
+                <NFormItem
+                  label="Fechas del evento"
+                  required
+                  :validation-status="
+                    (startField.state.meta.isTouched && !startField.state.meta.isValid) ||
+                    (endField.state.meta.isTouched && !endField.state.meta.isValid)
+                      ? 'error'
+                      : undefined
+                  "
+                >
+                  <NDatePicker
+                    type="daterange"
+                    clearable
+                    style="width: 100%"
+                    format="dd-MMM-yyyy"
+                    start-placeholder="Fecha inicio"
+                    end-placeholder="Fecha fin"
+                    :value="
+                      startField.state.value !== null && endField.state.value !== null
+                        ? [startField.state.value, endField.state.value]
+                        : null
+                    "
+                    @update:value="
+                      (value: [number, number] | null) => {
+                        form.setFieldValue('startDate', value?.[0] ?? null)
+                        form.setFieldValue('endDate', value?.[1] ?? null)
+                      }
+                    "
+                    @blur="
+                      () => {
+                        startField.handleBlur()
+                        endField.handleBlur()
+                      }
+                    "
+                  />
+                </NFormItem>
+              </template>
+            </form.Field>
           </template>
         </form.Field>
 
@@ -153,7 +202,6 @@ const cantonOptions = computed(
                       (val: number | null) => {
                         field.handleChange(val)
                         selectedProvinceId = val
-                        form.setFieldValue('cantonId', null)
                       }
                     "
                     @blur="field.handleBlur"
@@ -180,21 +228,6 @@ const cantonOptions = computed(
             </form.Field>
           </NGridItem>
         </NGrid>
-
-        <form.Field name="description">
-          <template v-slot="{ field }">
-            <NFormItem label="Descripción">
-              <NInput
-                type="textarea"
-                placeholder="Descripción opcional del evento"
-                :rows="3"
-                :maxlength="1000"
-                show-count
-                v-bind="fieldInput(field)"
-              />
-            </NFormItem>
-          </template>
-        </form.Field>
       </NFlex>
 
       <div class="form-divider" />
@@ -205,19 +238,6 @@ const cantonOptions = computed(
           @update:selected-ids="selectedCategoryIds = $event"
           @create-new="handleCreateNewCategory"
         />
-
-        <NFlex align="center" justify="space-between" class="featured-toggle">
-          <div>
-            <NFlex align="center" :size="6">
-              <NIcon :component="StarOutline" :size="16" color="var(--tt-neutral-mid)" />
-              <span class="featured-toggle__label">Marcar como destacado</span>
-            </NFlex>
-            <p class="featured-toggle__hint">
-              Se mostrará como evento principal en la galería. Solo uno puede estar destacado.
-            </p>
-          </div>
-          <NSwitch v-model:value="isFeatured" />
-        </NFlex>
       </NFlex>
     </div>
 
@@ -230,28 +250,6 @@ const cantonOptions = computed(
           @upload="(file) => assetPreviews.addFile('cover_image', file)"
           @remove="assetPreviews.removeFile('cover_image')"
         />
-
-        <AssetUploadZone
-          asset-type="hero_image"
-          :current-url="assetPreviews.getAssetUrl('hero_image')"
-          @upload="(file) => assetPreviews.addFile('hero_image', file)"
-          @remove="assetPreviews.removeFile('hero_image')"
-        />
-
-        <div class="assets-pair">
-          <AssetUploadZone
-            asset-type="event_logo"
-            :current-url="assetPreviews.getAssetUrl('event_logo')"
-            @upload="(file) => assetPreviews.addFile('event_logo', file)"
-            @remove="assetPreviews.removeFile('event_logo')"
-          />
-          <AssetUploadZone
-            asset-type="poster"
-            :current-url="assetPreviews.getAssetUrl('poster')"
-            @upload="(file) => assetPreviews.addFile('poster', file)"
-            @remove="assetPreviews.removeFile('poster')"
-          />
-        </div>
       </div>
     </div>
 

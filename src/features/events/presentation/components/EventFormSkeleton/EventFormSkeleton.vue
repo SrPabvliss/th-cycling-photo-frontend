@@ -21,14 +21,24 @@ import { NCard, NFlex, NGrid, NGridItem, NSkeleton } from 'naive-ui'
               <NSkeleton text style="width: 220px; margin-top: 6px" />
             </div>
             <div>
-              <NSkeleton text style="width: 80px; margin-bottom: 10px" />
+              <NSkeleton text style="width: 140px; margin-bottom: 10px" />
               <NSkeleton height="34px" :sharp="false" />
             </div>
+            <NGrid :cols="2" :x-gap="16">
+              <NGridItem>
+                <NSkeleton text style="width: 80px; margin-bottom: 10px" />
+                <NSkeleton height="34px" :sharp="false" />
+              </NGridItem>
+              <NGridItem>
+                <NSkeleton text style="width: 80px; margin-bottom: 10px" />
+                <NSkeleton height="34px" :sharp="false" />
+              </NGridItem>
+            </NGrid>
           </NFlex>
         </NGridItem>
         <NGridItem>
-          <NSkeleton text style="width: 50px; margin-bottom: 10px" />
-          <NSkeleton height="34px" :sharp="false" />
+          <NSkeleton text style="width: 80px; margin-bottom: 10px" />
+          <NSkeleton height="180px" :sharp="false" />
         </NGridItem>
       </NGrid>
     </div>
