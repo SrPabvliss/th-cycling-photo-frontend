@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref } from 'vue'
+import { NIcon, useDialog } from 'naive-ui'
+import { TrashOutline } from '@vicons/ionicons5'
 import type { IBibAttribute } from '@/features/photos/types/responses/photo-detail.response'
 import { useApplyBibCorrection } from '../../../composables/mutations/use-apply-bib-correction'
+import { useDeletePhotoBib } from '../../../composables/mutations/use-delete-photo-bib'
 import { useAsyncSaveState } from '@/shared/composables/use-async-save-state'
 import { useBibConfidence } from '../../../composables/use-bib-confidence'
 import { useWorkspaceCropLightbox } from '@/features/workspace/composables/use-workspace-crop-lightbox'
@@ -14,6 +17,8 @@ const props = defineProps<{
 }>()
 
 const applyBibCorrection = useApplyBibCorrection()
+const deleteBib = useDeletePhotoBib()
+const dialog = useDialog()
 const lightbox = useWorkspaceCropLightbox()
 const save = useAsyncSaveState()
 const cardEl = ref<HTMLElement>()
@@ -70,6 +75,23 @@ function openCropLightbox() {
   lightbox.open(props.bib.cropUrl, `Placa ${props.bib.digits}`)
 }
 
+function confirmDelete() {
+  dialog.warning({
+    title: 'Eliminar placa',
+    content: `¿Eliminar la placa "${props.bib.digits}"? Esta acción puede deshacerse contactando soporte.`,
+    positiveText: 'Eliminar',
+    negativeText: 'Cancelar',
+    positiveButtonProps: { type: 'error' },
+    onPositiveClick: () => {
+      deleteBib.mutate({
+        photoId: props.photoId,
+        bibId: props.bib.id,
+        photoSlug: props.photoSlug,
+      })
+    },
+  })
+}
+
 function onInputKey(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     e.stopPropagation()
@@ -116,6 +138,15 @@ const errorMessage = save.errorMessage
             {{ confidenceLabel }} · <span class="mono">{{ confidencePct }}</span>
           </span>
           <span v-if="isManual" class="rv-tag info">manual</span>
+          <button
+            type="button"
+            class="rv-bib-card__delete"
+            :disabled="deleteBib.isPending.value"
+            title="Eliminar placa"
+            @click.stop="confirmDelete"
+          >
+            <NIcon :component="TrashOutline" :size="16" />
+          </button>
         </div>
 
         <input
