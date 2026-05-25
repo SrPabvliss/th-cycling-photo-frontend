@@ -1,25 +1,98 @@
 .oc {
   background: #fff;
   border: 1px solid #e5e7eb;
-  border-radius: 10px;
+  border-left-width: 4px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  overflow: hidden;
+  height: 100%;
+  transition:
+    box-shadow 0.15s,
+    transform 0.15s;
+}
+
+.oc:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+  transform: translateY(-1px);
+}
+
+/* Status-driven left borders (persist on hover) */
+.oc--pending {
+  border-left-color: #f0a020;
+}
+.oc--paid {
+  border-left-color: #2080f0;
+}
+.oc--delivered {
+  border-left-color: #18a058;
+}
+.oc--cancelled {
+  border-left-color: #d03050;
+}
+
+/* Thumbs */
+.oc__thumbs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  padding: 3px;
+  background: #f6f4ef;
+}
+
+.oc__thumb {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: #0a0a0a;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.oc__thumb--placeholder {
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(16, 80, 128, 0.04) 0 6px,
+    rgba(16, 80, 128, 0.07) 6px 12px
+  );
+  color: rgba(16, 80, 128, 0.35);
+}
+
+.oc__thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.oc__thumb-img[data-loaded='true'] {
+  opacity: 1;
+}
+
+.oc__thumb-overflow {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Body */
+.oc__body {
+  flex: 1;
   padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  cursor: pointer;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
-}
-
-.oc:hover {
-  border-color: #d1d5db;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.oc--new {
-  border-left: 3px solid #f0a020;
-  border-radius: 0 10px 10px 0;
 }
 
 /* Top row */
@@ -43,8 +116,9 @@
   flex-shrink: 0;
 }
 
-/* Meta */
+/* Meta — flex:1 pushes actions to bottom for equal alignment */
 .oc__meta {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -67,7 +141,7 @@
 .oc__chip {
   font-size: 11px;
   padding: 1px 8px;
-  border-radius: 4px;
+  border-radius: 999px;
   background: #f3f4f6;
   border: 1px solid #e5e7eb;
   color: #6b7280;
@@ -78,8 +152,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding-top: 8px;
+  padding-top: 10px;
   border-top: 1px solid #f0f1f3;
+  margin-top: auto;
 }
 
 .oc__btn {
@@ -88,8 +163,8 @@
   justify-content: center;
   gap: 6px;
   flex: 1;
-  padding: 7px 10px;
-  border-radius: 7px;
+  padding: 8px 12px;
+  border-radius: 999px;
   border: 1px solid #e5e7eb;
   background: #fff;
   color: #374151;
@@ -136,7 +211,7 @@
   width: 32px;
   height: 32px;
   flex-shrink: 0;
-  border-radius: 7px;
+  border-radius: 999px;
   border: 1px solid #e5e7eb;
   background: #fff;
   color: #9ca3af;
