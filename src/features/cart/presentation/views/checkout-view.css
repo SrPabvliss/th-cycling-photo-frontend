@@ -1,3 +1,43 @@
+/* Back bar (was inherited from contact-form.css, now scoped here) */
+.cf-back-bar {
+  padding: 12px 2rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.cf-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #9ca3af;
+  cursor: pointer;
+}
+
+.cf-back-link:hover {
+  color: #1a1f2c;
+}
+
+.cf-breadcrumb-sep {
+  color: #d1d5db;
+  font-size: 12px;
+}
+
+.cf-breadcrumb-cur {
+  font-size: 12px;
+  color: #1a1f2c;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .cf-back-bar {
+    padding: 12px 1rem;
+  }
+}
+
 .checkout-empty {
   display: flex;
   flex-direction: column;
@@ -42,4 +82,34 @@
   font-size: 14px;
   font-weight: 700;
   color: #18a058;
+}
+
+.checkout-summary {
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px 24px 48px;
+  box-sizing: border-box;
+}
+.checkout-summary__header {
+  margin-bottom: 24px;
+}
+.checkout-summary__title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+.checkout-summary__subtitle {
+  color: var(--cf-color-muted, #6b7280);
+  margin: 0;
+}
+.checkout-summary__notice {
+  margin: 24px 0;
+}
+.checkout-summary__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
 }
