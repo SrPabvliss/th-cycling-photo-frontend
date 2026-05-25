@@ -11,6 +11,7 @@ import {
   ChevronBack,
 } from '@vicons/ionicons5'
 
+import { env } from '@/core/config/env'
 import { formatWhatsAppNumber } from '@/shared/utils/phone.utils'
 import {
   buildDeliveryTemplate,
@@ -48,7 +49,7 @@ function onCancel() {
 
 function onSendDeliveryWhatsApp() {
   if (!order.value?.deliveryLink) return
-  const deliveryUrl = `${window.location.origin}/delivery/${order.value.deliveryLink.token}`
+  const deliveryUrl = `${env.VITE_APP_BASE_URL}/delivery/${order.value.deliveryLink.token}`
   const msg = buildDeliveryTemplate({
     customerFirstName: order.value.snapFirstName ?? order.value.userName,
     photoCount: order.value.photos.length,

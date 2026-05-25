@@ -6,6 +6,7 @@ import { useQueryClient } from '@tanstack/vue-query'
 
 import PageHeader from '@/shared/components/PageHeader.vue'
 import { API_ROUTES } from '@/core/api/api-routes'
+import { env } from '@/core/config/env'
 import { httpClient } from '@/core/http/axios-client'
 import {
   openWhatsApp,
@@ -90,7 +91,7 @@ async function handleResendDelivery(order: IOrderListItem) {
     return
   }
 
-  const deliveryUrl = `${window.location.origin}/delivery/${detail.deliveryLink.token}`
+  const deliveryUrl = `${env.VITE_APP_BASE_URL}/delivery/${detail.deliveryLink.token}`
   const template = buildDeliveryTemplate({
     customerFirstName: detail.snapFirstName ?? detail.userName,
     photoCount: detail.photos.length,

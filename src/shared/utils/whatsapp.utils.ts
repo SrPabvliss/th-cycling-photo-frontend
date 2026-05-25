@@ -41,17 +41,6 @@ export function openWhatsAppWithTemplate(template: string): void {
 }
 
 /**
- * Builds the payment coordination template for pending orders.
- */
-export function buildPaymentTemplate(data: {
-  customerFirstName: string
-  photoCount: number
-  eventName: string
-}): string {
-  return `¡Hola ${data.customerFirstName}! Recibimos tu selección de ${data.photoCount} fotos del evento "${data.eventName}". Te escribimos para coordinar el pago. ¿Cómo prefieres realizarlo?`
-}
-
-/**
  * Builds the payment-info template with bank details and an editable price
  * placeholder. The operator fills the price inside WhatsApp before sending.
  *
