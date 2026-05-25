@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
+import { NIcon, useDialog } from 'naive-ui'
+import { TrashOutline } from '@vicons/ionicons5'
 import type { IColorAttribute } from '@/features/photos/types/responses/photo-detail.response'
 import {
   asColorName,
@@ -8,8 +10,10 @@ import {
   COLOR_PALETTE_LABELS,
   type ColorName,
 } from '@/shared/constants/color-palette'
+import { COLOR_REGION_LABELS } from '@/shared/types/photo-enums'
 import type { ColorRegion } from '../../../types/color-region.type'
 import { useApplyColorCorrection } from '../../../composables/mutations/use-apply-color-correction'
+import { useDeletePhotoColor } from '../../../composables/mutations/use-delete-photo-color'
 import { useAsyncSaveState } from '@/shared/composables/use-async-save-state'
 import { useWorkspaceCropLightbox } from '@/features/workspace/composables/use-workspace-crop-lightbox'
 import { useGridKeyboardNav } from '@/shared/composables/use-grid-keyboard-nav'
@@ -24,6 +28,8 @@ const props = defineProps<{
 }>()
 
 const applyColorCorrection = useApplyColorCorrection()
+const deleteColor = useDeletePhotoColor()
+const dialog = useDialog()
 const lightbox = useWorkspaceCropLightbox()
 const save = useAsyncSaveState()
 const cardEl = ref<HTMLElement>()
@@ -147,6 +153,24 @@ function openCropLightbox() {
   lightbox.open(props.color.cropUrl, cyclistLabelComputed.value)
 }
 
+function confirmDelete() {
+  const region = COLOR_REGION_LABELS[props.region].toLowerCase()
+  dialog.warning({
+    title: 'Eliminar color',
+    content: `¿Eliminar el color de ${region}?`,
+    positiveText: 'Eliminar',
+    negativeText: 'Cancelar',
+    positiveButtonProps: { type: 'error' },
+    onPositiveClick: () => {
+      deleteColor.mutate({
+        photoId: props.photoId,
+        colorId: props.color.id,
+        photoSlug: props.photoSlug,
+      })
+    },
+  })
+}
+
 function getColorLabel(name: ColorName | null): string {
   if (!name) return 'ninguno'
   return COLOR_PALETTE_LABELS[name] ?? name
@@ -206,6 +230,15 @@ const cyclistLabelComputed = computed(() => props.cyclistLabel ?? 'Ciclista')
             </svg>
             corregido
           </span>
+          <button
+            type="button"
+            class="rv-color-card__delete"
+            :disabled="deleteColor.isPending.value"
+            title="Eliminar color"
+            @click.stop="confirmDelete"
+          >
+            <NIcon :component="TrashOutline" :size="16" />
+          </button>
         </div>
 
         <div class="rv-color-card__pickers">

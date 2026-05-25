@@ -139,3 +139,28 @@
   gap: 8px;
   margin-top: 10px;
 }
+.rv-color-card__delete {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 4px;
+  color: var(--rv-text-3, #9ca3af);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+.rv-color-card__delete:hover {
+  background: rgba(208, 48, 80, 0.08);
+  color: var(--rv-error, #d03050);
+  border-color: rgba(208, 48, 80, 0.3);
+}
+.rv-color-card__delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
