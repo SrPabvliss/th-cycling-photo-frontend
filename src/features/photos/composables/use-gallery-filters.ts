@@ -1,8 +1,9 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { refDebounced } from '@vueuse/core'
 
 import { usePhotoSelectionStore } from '@/features/preview-links/stores/photo-selection.store'
-import type { IPhotoSearchFilters } from '../composables/queries/use-photos-search'
+import type { BibMatchMode, IPhotoSearchFilters } from '../composables/queries/use-photos-search'
 import type { PhotoStatus } from '../types/responses/photo-list.response'
 
 export function useGalleryFilters(eventId: () => string) {
@@ -12,6 +13,8 @@ export function useGalleryFilters(eventId: () => string) {
   const page = ref(1)
   const activeStatus = ref<PhotoStatus | null>(null)
   const plateNumber = ref('')
+  const debouncedPlateNumber = refDebounced(plateNumber, 300)
+  const bibMatch = ref<BibMatchMode>('exact')
   const helmetColors = ref<string[]>([])
   const clothingColors = ref<string[]>([])
   const bikeColors = ref<string[]>([])
@@ -31,7 +34,8 @@ export function useGalleryFilters(eventId: () => string) {
 
   const filters = computed<IPhotoSearchFilters>(() => ({
     eventId: eventId(),
-    plateNumber: plateNumber.value ? Number(plateNumber.value) : null,
+    plateNumber: debouncedPlateNumber.value ? debouncedPlateNumber.value : null,
+    bibMatch: bibMatch.value,
     status: activeStatus.value,
     helmetColor: helmetColors.value.length > 0 ? helmetColors.value.join(',') : null,
     clothingColor: clothingColors.value.length > 0 ? clothingColors.value.join(',') : null,
@@ -42,7 +46,7 @@ export function useGalleryFilters(eventId: () => string) {
   const hasActiveFilters = computed(
     () =>
       !!(
-        plateNumber.value ||
+        debouncedPlateNumber.value ||
         activeStatus.value ||
         helmetColors.value.length ||
         clothingColors.value.length ||
@@ -58,6 +62,7 @@ export function useGalleryFilters(eventId: () => string) {
 
   function clearFilters() {
     plateNumber.value = ''
+    bibMatch.value = 'exact'
     helmetColors.value = []
     clothingColors.value = []
     bikeColors.value = []
@@ -74,6 +79,7 @@ export function useGalleryFilters(eventId: () => string) {
     page,
     activeStatus,
     plateNumber,
+    bibMatch,
     helmetColors,
     clothingColors,
     bikeColors,

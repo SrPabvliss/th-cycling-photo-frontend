@@ -23,5 +23,5 @@ export const ENGLISH_TO_SPANISH_COLOR: Record<string, string> = {
   grey: 'gris',
   white: 'blanco',
   gold: 'dorado',
-  beige: 'beige',
+  silver: 'plateado',
 }

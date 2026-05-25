@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NEmpty, NIcon, NFlex, NSpin } from 'naive-ui'
-import { ArrowBack } from '@vicons/ionicons5'
+import { NButton, NEmpty, NIcon, NFlex, NInput, NRadioButton, NRadioGroup, NSpin } from 'naive-ui'
+import { ArrowBack, Search } from '@vicons/ionicons5'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { formatDate } from '@/shared/utils/date.utils'
@@ -23,6 +23,8 @@ const slug = computed(() => route.params.slug as string)
 const { data: event, isPending: isEventPending } = usePublicEventDetailQuery(slug)
 
 const activeCategoryId = ref<number | null>(null)
+const bibNumber = ref('')
+const bibMatch = ref<'exact' | 'starts' | 'contains'>('exact')
 
 const {
   data: infiniteData,
@@ -30,7 +32,7 @@ const {
   fetchNextPage,
   hasNextPage,
   isFetchingNextPage,
-} = usePublicEventPhotosInfinite(slug, activeCategoryId)
+} = usePublicEventPhotosInfinite(slug, activeCategoryId, bibNumber, bibMatch)
 
 const allPhotos = computed(() => infiniteData.value?.pages.flatMap((p) => p.items) ?? [])
 
@@ -137,6 +139,19 @@ const heroUrl = computed(() => {
             {{ cat.name }}
           </NButton>
         </NFlex>
+
+        <div class="public-gallery-search">
+          <NInput v-model:value="bibNumber" placeholder="Buscar por dorsal" clearable size="large">
+            <template #prefix>
+              <NIcon :component="Search" />
+            </template>
+          </NInput>
+          <NRadioGroup v-model:value="bibMatch" size="small" class="public-gallery-bib-match">
+            <NRadioButton value="exact">Exacto</NRadioButton>
+            <NRadioButton value="starts">Empieza con</NRadioButton>
+            <NRadioButton value="contains">Contiene</NRadioButton>
+          </NRadioGroup>
+        </div>
 
         <!-- Photo grid -->
         <div v-if="isPhotosPending && allPhotos.length === 0" class="gallery-loading--tight">

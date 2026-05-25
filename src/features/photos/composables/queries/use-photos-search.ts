@@ -9,9 +9,12 @@ import { PHOTO_QUERY_KEYS } from '../../constants/query-keys'
 import { toPhotoListItems } from '../../mappers/photo-list.mapper'
 import type { IApiPhotoListItem } from '../../types/responses/photo-list.response'
 
+export type BibMatchMode = 'exact' | 'starts' | 'contains'
+
 export interface IPhotoSearchFilters {
   eventId: string
-  plateNumber?: number | null
+  plateNumber?: string | null
+  bibMatch?: BibMatchMode
   status?: PhotoStatus | null
   helmetColor?: string | null
   clothingColor?: string | null
@@ -47,7 +50,10 @@ export function usePhotosSearchQuery(
       // Use /photos/search when advanced classification filters are active
       if (hasAdvancedFilters.value || f.status) {
         params.eventId = f.eventId
-        if (f.plateNumber) params.plateNumber = f.plateNumber
+        if (f.plateNumber) {
+          params.plateNumber = f.plateNumber
+          params.bibMatch = f.bibMatch ?? 'exact'
+        }
         if (f.status) params.status = f.status
         if (f.helmetColor) params.helmetColor = f.helmetColor
         if (f.clothingColor) params.clothingColor = f.clothingColor

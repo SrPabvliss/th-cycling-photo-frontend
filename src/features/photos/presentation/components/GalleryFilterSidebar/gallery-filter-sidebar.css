@@ -106,3 +106,14 @@
 .color-tag:hover {
   background: #e5e7eb;
 }
+
+.bib-match-group {
+  margin-top: 8px;
+  display: flex;
+  width: 100%;
+}
+
+.bib-match-group :deep(.n-radio-button) {
+  flex: 1;
+  text-align: center;
+}
