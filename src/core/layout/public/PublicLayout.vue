@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import PublicNavbar from './PublicNavbar.vue'
 import PublicFooter from './PublicFooter.vue'
+
+withDefaults(defineProps<{ hideFooter?: boolean }>(), { hideFooter: false })
 </script>
 
 <template>
@@ -9,7 +11,7 @@ import PublicFooter from './PublicFooter.vue'
     <main class="public-layout-content">
       <slot />
     </main>
-    <PublicFooter />
+    <PublicFooter v-if="!hideFooter" />
   </div>
 </template>
 

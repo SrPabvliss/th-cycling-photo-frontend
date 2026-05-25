@@ -93,33 +93,58 @@ async function handleConfirm() {
 
       <section v-else class="checkout-summary">
         <header class="checkout-summary__header">
-          <h1 class="checkout-summary__title">Confirmar pedido</h1>
+          <h1 class="checkout-summary__title">Resumen del pedido</h1>
           <p class="checkout-summary__subtitle">
-            Revisá las fotos seleccionadas y confirmá. Te contactaremos por WhatsApp.
+            Revisa las fotos que vas a pedir. Si todo está bien, confirma tu pedido.
           </p>
         </header>
 
-        <CheckoutSummary v-for="group in cartStore.groups" :key="group.eventId" :group="group" />
+        <div class="checkout-summary__layout">
+          <div class="checkout-summary__main">
+            <CheckoutSummary
+              v-for="group in cartStore.groups"
+              :key="group.eventId"
+              :group="group"
+            />
+          </div>
 
-        <NAlert type="info" :show-icon="true" class="checkout-summary__notice">
-          <template #icon>
-            <NIcon :component="LogoWhatsapp" />
-          </template>
-          Coordinaremos el pago y la entrega por WhatsApp después de confirmar tu pedido.
-        </NAlert>
+          <aside class="checkout-summary__aside">
+            <div class="checkout-summary__panel">
+              <NAlert type="info" :show-icon="true" class="checkout-summary__notice">
+                <template #icon>
+                  <NIcon :component="LogoWhatsapp" />
+                </template>
+                <strong>Nos contactaremos por WhatsApp</strong>
+                para coordinar el pago y la entrega de tus fotos.
+              </NAlert>
 
-        <div class="checkout-summary__actions">
-          <NButton :disabled="isCheckingOut" @click="router.push('/gallery')">
-            Seguir explorando
-          </NButton>
-          <NButton
-            type="primary"
-            :loading="isCheckingOut"
-            :disabled="isCheckingOut"
-            @click="handleConfirm"
-          >
-            Confirmar pedido
-          </NButton>
+              <dl class="checkout-summary__stats">
+                <div>
+                  <dt>Eventos</dt>
+                  <dd>{{ cartStore.groups.length }}</dd>
+                </div>
+                <div>
+                  <dt>Fotos</dt>
+                  <dd>{{ cartStore.totalCount }}</dd>
+                </div>
+              </dl>
+
+              <NButton
+                type="primary"
+                size="large"
+                block
+                :loading="isCheckingOut"
+                :disabled="isCheckingOut"
+                @click="handleConfirm"
+              >
+                Confirmar pedido
+              </NButton>
+
+              <NButton quaternary size="medium" block @click="router.push('/gallery')">
+                Seguir explorando
+              </NButton>
+            </div>
+          </aside>
         </div>
       </section>
     </template>

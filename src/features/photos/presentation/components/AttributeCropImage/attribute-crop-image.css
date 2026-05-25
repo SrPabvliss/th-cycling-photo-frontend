@@ -4,7 +4,7 @@
   justify-content: center;
   border-radius: 6px;
   overflow: hidden;
-  background: var(--tt-neutral-bg, #f5f5f5);
+  background: #0a0a0a;
 }
 .attribute-crop-image__img {
   width: 100%;
