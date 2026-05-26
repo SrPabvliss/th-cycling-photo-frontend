@@ -61,10 +61,10 @@ function toggleColor(list: string[], color: string): string[] {
 <template>
   <aside class="filter-sidebar">
     <div class="filter-section">
-      <p class="filter-section__title">Buscar dorsal</p>
+      <p class="filter-section__title">Buscar placa</p>
       <NInput
         :value="plateNumber"
-        placeholder="Buscar por dorsal"
+        placeholder="Buscar por placa"
         clearable
         @update:value="emit('update:plateNumber', $event)"
       >

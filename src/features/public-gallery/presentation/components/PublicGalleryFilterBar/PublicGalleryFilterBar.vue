@@ -51,7 +51,7 @@ const emit = defineEmits<{
     <div class="pgfb__row pgfb__row--search">
       <NInput
         :value="bibNumber"
-        placeholder="Buscar por dorsal"
+        placeholder="Buscar por placa"
         clearable
         size="medium"
         class="pgfb__input"
