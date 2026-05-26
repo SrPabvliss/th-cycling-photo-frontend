@@ -101,7 +101,7 @@ const form = useForm({
           <div class="cf-field">
             <form.Field name="bibNumber">
               <template v-slot="{ field }">
-                <NFormItem label="Número de dorsal">
+                <NFormItem label="Número de placa">
                   <NInput placeholder="Ej. 127" v-bind="fieldInput(field)" />
                 </NFormItem>
               </template>

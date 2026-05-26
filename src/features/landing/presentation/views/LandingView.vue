@@ -118,8 +118,8 @@ function handleEventClick(slug: string) {
       <div class="cta-overlay">
         <h2 class="cta-title">Listo para encontrar tu carrera?</h2>
         <p class="cta-subtitle">
-          Busca por tu numero de dorsal, color de casco o marca de bicicleta para encontrar todas
-          tus fotos profesionales de los ultimos eventos.
+          Busca por tu numero de placa, color de casco o marca de bicicleta para encontrar todas tus
+          fotos profesionales de los ultimos eventos.
         </p>
         <NButton size="large" ghost class="cta-button" @click="router.push('/gallery')">
           Buscar en la biblioteca
