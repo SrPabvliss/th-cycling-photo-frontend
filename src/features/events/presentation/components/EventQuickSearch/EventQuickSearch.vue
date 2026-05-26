@@ -25,7 +25,7 @@ function handleQuickSearch() {
 </script>
 
 <template>
-  <NCard title="Buscar por placa" size="small">
+  <NCard title="Buscar por número de placa" size="small">
     <template #header-extra>
       <span class="search-hint">Busca fotos por número de placa</span>
     </template>
