@@ -9,11 +9,12 @@ export const PUBLIC_GALLERY_QUERY_KEYS = {
     categoryId?: number,
     bibNumber?: string,
     bibMatch?: 'exact' | 'starts' | 'contains',
+    section?: 'matched' | 'no_bib',
   ) =>
     [
       API_ROUTES.PUBLIC_EVENTS.BASE,
       'photos',
       eventId,
-      { page, categoryId, bibNumber, bibMatch },
+      { page, categoryId, bibNumber, bibMatch, section },
     ] as const,
 } as const
