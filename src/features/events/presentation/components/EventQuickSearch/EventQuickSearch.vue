@@ -25,9 +25,9 @@ function handleQuickSearch() {
 </script>
 
 <template>
-  <NCard title="Buscar por dorsal" size="small">
+  <NCard title="Buscar por número de placa" size="small">
     <template #header-extra>
-      <span class="search-hint">Busca fotos por número de dorsal</span>
+      <span class="search-hint">Busca fotos por número de placa</span>
     </template>
     <form class="quick-search-form" @submit.prevent="handleQuickSearch">
       <NInput
