@@ -3,9 +3,9 @@ import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { NAlert, NCard } from 'naive-ui'
 
+import { getHomePath } from '@/core/auth/role-config'
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import TitanLogo from '@/core/layout/public/TitanLogo.vue'
-import { EVENTS_PATH } from '@/features/events/routes'
 import AuthModeTabs from '../components/AuthModeTabs/AuthModeTabs.vue'
 import { useAuth } from '../../composables/use-auth'
 import { toRegisterRequest } from '../../mappers/register-form.mapper'
@@ -21,8 +21,8 @@ const showCheckoutNotice = computed(() => redirectQuery.value === '/checkout')
 
 async function handleSubmit(formData: IRegisterFormData) {
   try {
-    await register(toRegisterRequest(formData))
-    router.push(redirectQuery.value ?? EVENTS_PATH)
+    const user = await register(toRegisterRequest(formData))
+    router.push(redirectQuery.value ?? getHomePath(user.role))
   } catch {
     // Error toast shown by interceptor
   }
