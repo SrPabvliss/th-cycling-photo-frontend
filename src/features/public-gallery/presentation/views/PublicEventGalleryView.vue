@@ -11,8 +11,12 @@ import { useCartStore } from '@/features/cart/stores/cart.store'
 import { useAddToCart } from '@/features/cart/composables/mutations/use-add-to-cart'
 import { useRemoveFromCart } from '@/features/cart/composables/mutations/use-remove-from-cart'
 import { usePublicEventDetailQuery } from '../../composables/queries/use-public-event-detail'
-import { usePublicEventPhotosInfinite } from '../../composables/queries/use-public-event-photos'
+import {
+  usePublicEventNoBibPhotosInfinite,
+  usePublicEventPhotosInfinite,
+} from '../../composables/queries/use-public-event-photos'
 import { PUBLIC_GALLERY_ROUTE_NAMES } from '../../routes'
+import PhotoGridSection from '../components/PhotoGridSection/PhotoGridSection.vue'
 import PublicPhotoGrid from '../components/PublicPhotoGrid/PublicPhotoGrid.vue'
 import PhotoLightbox from '../components/PhotoLightbox/PhotoLightbox.vue'
 import PublicGalleryFilterBar from '../components/PublicGalleryFilterBar/PublicGalleryFilterBar.vue'
@@ -27,6 +31,11 @@ const activeCategoryId = ref<number | null>(null)
 const bibNumber = ref('')
 const bibMatch = ref<'exact' | 'starts' | 'contains'>('exact')
 
+const bibSearchActive = computed(() => !!bibNumber.value.trim())
+
+// Matched stream (also serves as the default "all photos" stream when no
+// bib search is active). The backend swaps semantics based on whether
+// bibNumber is included in the params.
 const {
   data: infiniteData,
   isPending: isPhotosPending,
@@ -35,7 +44,28 @@ const {
   isFetchingNextPage,
 } = usePublicEventPhotosInfinite(slug, activeCategoryId, bibNumber, bibMatch)
 
-const allPhotos = computed(() => infiniteData.value?.pages.flatMap((p) => p.items) ?? [])
+// Companion "no bib detected" stream — only enabled while the user is
+// searching by bib so the rider can find themselves when OCR missed the
+// plate. Has its own pagination so each section can grow independently.
+const {
+  data: noBibInfiniteData,
+  fetchNextPage: fetchNextNoBibPage,
+  hasNextPage: hasNextNoBibPage,
+  isFetchingNextPage: isFetchingNextNoBibPage,
+} = usePublicEventNoBibPhotosInfinite(slug, activeCategoryId, bibNumber)
+
+const matchedPhotos = computed(() => infiniteData.value?.pages.flatMap((p) => p.items) ?? [])
+const noBibPhotos = computed(() => noBibInfiniteData.value?.pages.flatMap((p) => p.items) ?? [])
+
+// Lightbox should navigate through both sections in order: matched
+// first, then no_bib. When inactive only the main stream is shown.
+const allPhotos = computed(() =>
+  bibSearchActive.value ? [...matchedPhotos.value, ...noBibPhotos.value] : matchedPhotos.value,
+)
+
+const showNoBibSection = computed(
+  () => bibSearchActive.value && (noBibPhotos.value.length > 0 || isFetchingNextNoBibPage.value),
+)
 
 // --- Cart-based selection ---
 const cartStore = useCartStore()
@@ -72,6 +102,12 @@ function openPreview(index: number) {
 function handleLoadMore() {
   if (hasNextPage.value && !isFetchingNextPage.value) {
     fetchNextPage()
+  }
+}
+
+function handleLoadMoreNoBib() {
+  if (hasNextNoBibPage.value && !isFetchingNextNoBibPage.value) {
+    fetchNextNoBibPage()
   }
 }
 
@@ -130,11 +166,62 @@ const heroUrl = computed(() => {
           @update:bib-match="bibMatch = $event"
         />
 
-        <!-- Photo grid -->
         <div v-if="isPhotosPending && allPhotos.length === 0" class="gallery-loading--tight">
           <NSpin />
         </div>
 
+        <!-- Bib search mode: two physically separate sections so the rider
+             can scan their matched photos first, then optionally browse
+             the photos where no bib was detected. -->
+        <template v-else-if="bibSearchActive">
+          <section class="gallery-section">
+            <p v-if="matchedPhotos.length === 0" class="gallery-section__empty">
+              No encontramos fotos donde se vea esa placa.
+            </p>
+            <PhotoGridSection
+              v-else
+              :photos="matchedPhotos"
+              :selected-ids="selectedIds"
+              :base-index="0"
+              :has-more="hasNextPage"
+              :is-loading-more="isFetchingNextPage"
+              @toggle="toggleSelect"
+              @preview="openPreview"
+              @load-more="handleLoadMore"
+            />
+          </section>
+
+          <div v-if="showNoBibSection" class="gallery-divider">
+            <div class="gallery-divider__line" />
+            <div class="gallery-divider__msg">
+              <strong>También puedes buscarte aquí.</strong>
+              <span>Mostramos fotos donde no detectamos placa.</span>
+            </div>
+            <div class="gallery-divider__line" />
+          </div>
+
+          <section v-if="showNoBibSection" class="gallery-section">
+            <PhotoGridSection
+              :photos="noBibPhotos"
+              :selected-ids="selectedIds"
+              :base-index="matchedPhotos.length"
+              :has-more="hasNextNoBibPage"
+              :is-loading-more="isFetchingNextNoBibPage"
+              @toggle="toggleSelect"
+              @preview="openPreview"
+              @load-more="handleLoadMoreNoBib"
+            />
+          </section>
+
+          <NEmpty
+            v-if="matchedPhotos.length === 0 && !showNoBibSection"
+            description="No encontramos resultados"
+            style="padding: 40px 0"
+          />
+        </template>
+
+        <!-- Default mode (no bib search): keep the existing virtualized
+             grid for performance on full-event browsing. -->
         <template v-else-if="allPhotos.length > 0">
           <PublicPhotoGrid
             :photos="allPhotos"
