@@ -1,40 +1,25 @@
-export const COUNTRY_CODE = '+593'
+import utils from 'intl-tel-input/utils'
+
+const FORMAT = { E164: 0, INTERNATIONAL: 1, NATIONAL: 2, RFC3966: 3 } as const
 
 /**
- * Strips non-digit characters, removes country code prefix (593) and leading 0.
- * "+593984198999" → "984198999", "0991234567" → "991234567", "99 123 4567" → "991234567"
- */
-export function cleanPhoneDigits(raw: string): string {
-  const digits = raw.replace(/\D/g, '')
-  if (digits.startsWith('593') && digits.length > 9) return digits.slice(3)
-  return digits.startsWith('0') ? digits.slice(1) : digits
-}
-
-/**
- * Builds a full WhatsApp number: "+593991234567"
- */
-export function buildWhatsAppNumber(raw: string): string {
-  const digits = cleanPhoneDigits(raw)
-  if (!digits) return ''
-  return `${COUNTRY_CODE}${digits}`
-}
-
-/**
- * Formats a WhatsApp number for display: "+593 99 123 4567"
+ * Display internacional segun pais detectado en E.164.
+ * Input asumido E.164 ("+573170672897"). Si parse falla, passthrough.
  */
 export function formatWhatsAppNumber(raw: string): string {
-  const d = cleanPhoneDigits(raw)
-  if (!d) return ''
-  const parts = [COUNTRY_CODE]
-  if (d.length <= 2) parts.push(d)
-  else if (d.length <= 5) parts.push(d.slice(0, 2), d.slice(2))
-  else parts.push(d.slice(0, 2), d.slice(2, 5), d.slice(5))
-  return parts.join(' ')
+  if (!raw) return ''
+  return utils.formatNumber(raw, undefined, FORMAT.INTERNATIONAL) || raw
 }
 
 /**
- * Validates that a phone input has enough digits (≥7 after cleaning).
+ * E.164 normalizado para construir wa.me / api.whatsapp.com links.
  */
+export function buildWhatsAppNumber(raw: string): string {
+  if (!raw) return ''
+  return utils.formatNumber(raw, undefined, FORMAT.E164) || raw
+}
+
 export function isPhoneValid(raw: string): boolean {
-  return cleanPhoneDigits(raw).length >= 7
+  if (!raw) return false
+  return utils.isValidNumber(raw, undefined)
 }
