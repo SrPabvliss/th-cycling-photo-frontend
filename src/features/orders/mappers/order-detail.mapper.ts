@@ -33,6 +33,7 @@ export function toOrderDetail(api: IApiOrderDetail): IOrderDetail {
     status: api.status as OrderStatus,
     notes: api.notes,
     createdAt: new Date(api.createdAt),
+    notifiedAt: api.notifiedAt ? new Date(api.notifiedAt) : null,
     paidAt: api.paidAt ? new Date(api.paidAt) : null,
     deliveredAt: api.deliveredAt ? new Date(api.deliveredAt) : null,
     cancelledAt: api.cancelledAt ? new Date(api.cancelledAt) : null,

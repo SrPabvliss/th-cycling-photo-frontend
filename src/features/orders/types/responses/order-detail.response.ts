@@ -29,6 +29,7 @@ export interface IApiOrderDetail {
   status: string
   notes: string | null
   createdAt: string
+  notifiedAt: string | null
   paidAt: string | null
   deliveredAt: string | null
   cancelledAt: string | null
@@ -64,6 +65,7 @@ export interface IOrderDetail {
   status: OrderStatus
   notes: string | null
   createdAt: Date
+  notifiedAt: Date | null
   paidAt: Date | null
   deliveredAt: Date | null
   cancelledAt: Date | null

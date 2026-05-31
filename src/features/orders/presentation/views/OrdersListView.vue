@@ -8,11 +8,7 @@ import PageHeader from '@/shared/components/PageHeader.vue'
 import { API_ROUTES } from '@/core/api/api-routes'
 import { env } from '@/core/config/env'
 import { httpClient } from '@/core/http/axios-client'
-import {
-  openWhatsApp,
-  buildPaymentInfoTemplate,
-  buildDeliveryTemplate,
-} from '@/shared/utils/whatsapp.utils'
+import { openWhatsApp, buildDeliveryTemplate } from '@/shared/utils/whatsapp.utils'
 import {
   useOrdersListQuery,
   type IOrderListFilters,
@@ -45,7 +41,8 @@ const filters = ref<IOrderListFilters>({
 const { data, isPending, isError, refetch } = useOrdersListQuery(filters, ORDERS_PER_PAGE)
 const { data: stats } = useOrdersStatsQuery()
 
-const { handleConfirmPayment, handleSendDelivery, handleRegenerate } = useOrderActions()
+const { handleConfirmPayment, handleNotifyPaymentInfo, handleSendDelivery, handleRegenerate } =
+  useOrderActions()
 
 const activeStatus = computed(() => filters.value.status as OrderStatus | null)
 
@@ -66,13 +63,7 @@ function handleView(id: string) {
 }
 
 function handleSendPaymentInfo(order: IOrderListItem) {
-  const firstName = order.userName.split(' ')[0] ?? order.userName
-  const template = buildPaymentInfoTemplate({
-    customerFirstName: firstName,
-    photoCount: order.photoCount,
-    eventName: order.eventName,
-  })
-  openWhatsApp(order.snapWhatsapp, template)
+  handleNotifyPaymentInfo(order)
 }
 
 async function handleResendDelivery(order: IOrderListItem) {

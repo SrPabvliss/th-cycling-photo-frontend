@@ -6,6 +6,7 @@ function toOrderListItem(api: IApiOrderListItem): IOrderListItem {
     id: api.id,
     status: api.status as OrderStatus,
     createdAt: new Date(api.createdAt),
+    notifiedAt: api.notifiedAt ? new Date(api.notifiedAt) : null,
     paidAt: api.paidAt ? new Date(api.paidAt) : null,
     deliveredAt: api.deliveredAt ? new Date(api.deliveredAt) : null,
     userName: api.userName,

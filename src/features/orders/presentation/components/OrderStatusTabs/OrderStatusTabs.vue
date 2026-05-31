@@ -1,9 +1,17 @@
 <script setup lang="ts">
 import { NTag } from 'naive-ui'
 
-import type { OrderStatus } from '../../../types/responses/order-list.response'
+import { ORDER_STATUS, type OrderStatus } from '../../../types/responses/order-list.response'
 import type { IOrderStats } from '../../../types/responses/order-stats.response'
 import { ORDER_FILTER_TABS } from '../../../constants/status-config'
+
+const STATUS_TO_STATS_KEY: Record<OrderStatus, keyof IOrderStats> = {
+  [ORDER_STATUS.PENDING]: 'pendingCount',
+  [ORDER_STATUS.PAYMENT_INFO_SENT]: 'paymentInfoSentCount',
+  [ORDER_STATUS.PAID]: 'paidCount',
+  [ORDER_STATUS.DELIVERED]: 'deliveredCount',
+  [ORDER_STATUS.CANCELLED]: 'cancelledCount',
+}
 
 defineProps<{
   activeStatus: OrderStatus | null
@@ -17,7 +25,7 @@ const emit = defineEmits<{
 function getCount(status: OrderStatus | null, stats: IOrderStats | undefined): number | null {
   if (!stats) return null
   if (!status) return stats.totalOrders
-  return stats[`${status}Count` as keyof IOrderStats] as number
+  return stats[STATUS_TO_STATS_KEY[status]] as number
 }
 </script>
 
