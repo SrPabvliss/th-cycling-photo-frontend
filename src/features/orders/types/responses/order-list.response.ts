@@ -1,5 +1,6 @@
 export const ORDER_STATUS = {
   PENDING: 'pending',
+  PAYMENT_INFO_SENT: 'payment_info_sent',
   PAID: 'paid',
   DELIVERED: 'delivered',
   CANCELLED: 'cancelled',
@@ -26,6 +27,7 @@ export interface IApiOrderListItem {
   id: string
   status: string
   createdAt: string
+  notifiedAt: string | null
   paidAt: string | null
   deliveredAt: string | null
   userName: string
@@ -41,6 +43,7 @@ export interface IOrderListItem {
   id: string
   status: OrderStatus
   createdAt: Date
+  notifiedAt: Date | null
   paidAt: Date | null
   deliveredAt: Date | null
   userName: string

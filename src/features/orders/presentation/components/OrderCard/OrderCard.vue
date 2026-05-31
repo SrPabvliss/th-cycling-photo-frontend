@@ -97,10 +97,14 @@ const overflowCount = computed(() =>
 
       <!-- Actions -->
       <div class="oc__actions">
-        <template v-if="order.status === ORDER_STATUS.PENDING">
+        <template
+          v-if="
+            order.status === ORDER_STATUS.PENDING || order.status === ORDER_STATUS.PAYMENT_INFO_SENT
+          "
+        >
           <button class="oc__btn oc__btn--wa" @click.stop="emit('sendPaymentInfo', order)">
             <NIcon :component="LogoWhatsapp" :size="13" />
-            Info de pago
+            {{ order.status === ORDER_STATUS.PAYMENT_INFO_SENT ? 'Reenviar info' : 'Info de pago' }}
           </button>
           <button class="oc__btn oc__btn--confirm" @click.stop="emit('confirmPayment', order.id)">
             <NIcon :component="CheckmarkOutline" :size="13" />

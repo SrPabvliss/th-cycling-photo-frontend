@@ -20,6 +20,9 @@
 
 /* Status-driven left borders (persist on hover) */
 .oc--pending {
+  border-left-color: #d03050;
+}
+.oc--payment_info_sent {
   border-left-color: #f0a020;
 }
 .oc--paid {
@@ -29,7 +32,7 @@
   border-left-color: #18a058;
 }
 .oc--cancelled {
-  border-left-color: #d03050;
+  border-left-color: #909399;
 }
 
 /* Thumbs */

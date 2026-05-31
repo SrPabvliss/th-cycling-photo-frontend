@@ -12,9 +12,13 @@ defineProps<{
       <span class="stat-card__num">{{ stats?.totalOrders ?? '-' }}</span>
       <span class="stat-card__label">Total pedidos</span>
     </div>
-    <div class="stat-card stat-card--warning">
+    <div class="stat-card stat-card--error">
       <span class="stat-card__num">{{ stats?.pendingCount ?? '-' }}</span>
       <span class="stat-card__label">Pendientes</span>
+    </div>
+    <div class="stat-card stat-card--warning">
+      <span class="stat-card__num">{{ stats?.paymentInfoSentCount ?? '-' }}</span>
+      <span class="stat-card__label">Info enviada</span>
     </div>
     <div class="stat-card stat-card--info">
       <span class="stat-card__num">{{ stats?.paidCount ?? '-' }}</span>
