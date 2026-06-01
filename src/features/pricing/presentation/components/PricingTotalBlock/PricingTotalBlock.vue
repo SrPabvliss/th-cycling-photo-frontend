@@ -46,7 +46,7 @@ const { data: tiersData } = usePricingTiersQuery()
               :currency="tiersData.currency"
             />
             <p class="pricing-total__popover-hint">
-              Mientras más fotos compres, menos pagas por foto.
+              Mientras más fotos compres, menos pagas por fotografía.
             </p>
           </div>
         </NPopover>

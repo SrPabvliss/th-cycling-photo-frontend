@@ -1,5 +1,6 @@
 .order-filters {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -10,4 +11,19 @@
 
 .order-filters__event {
   max-width: 280px;
+}
+
+@media (max-width: 767px) {
+  .order-filters {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 6px;
+    margin-bottom: 0;
+  }
+
+  .order-filters__search,
+  .order-filters__event {
+    max-width: 100%;
+    width: 100%;
+  }
 }

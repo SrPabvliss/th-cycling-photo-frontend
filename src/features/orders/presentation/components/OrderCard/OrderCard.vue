@@ -2,7 +2,6 @@
 import { computed } from 'vue'
 import { NIcon } from 'naive-ui'
 import {
-  CameraOutline,
   CheckmarkCircleOutline,
   CheckmarkDoneOutline,
   CheckmarkOutline,
@@ -16,17 +15,44 @@ import {
 } from '@vicons/ionicons5'
 
 import { formatRelativeTime, isRecent } from '@/shared/utils/date.utils'
-import { formatWhatsAppNumber } from '@/shared/utils/phone.utils'
-import { openWhatsApp } from '@/shared/utils/whatsapp.utils'
 import { formatCurrency } from '@/features/pricing/utils/format-currency'
 import { ORDER_STATUS, type IOrderListItem } from '../../../types/responses/order-list.response'
 import { ORDER_STATUS_CONFIG } from '../../../constants/status-config'
 
 const MAX_THUMBS = 3
 
-const props = defineProps<{
-  order: IOrderListItem
-}>()
+const props = withDefaults(
+  defineProps<{
+    /** Order data to render. */
+    order: IOrderListItem
+    /**
+     * 1-based position of this order within its customer group.
+     * Used together with `groupTotal` to render the "X de N" badge.
+     * Default: 1 (treated as single-order group).
+     */
+    groupPosition?: number
+    /**
+     * Total amount of orders in this customer's group.
+     * When > 1, the "X de N" badge is rendered.
+     * Default: 1 (no badge).
+     */
+    groupTotal?: number
+    /**
+     * Marks this order as the latest one for the customer.
+     * When true AND `groupTotal > 1`, the "Última" pill is rendered.
+     * Default: true.
+     */
+    isLatestForCustomer?: boolean
+  }>(),
+  {
+    groupPosition: 1,
+    groupTotal: 1,
+    isLatestForCustomer: true,
+  },
+)
+
+const showGroupBadge = computed(() => props.groupTotal > 1)
+const showLatestBadge = computed(() => props.isLatestForCustomer && props.groupTotal > 1)
 
 const emit = defineEmits<{
   view: [id: string]
@@ -60,19 +86,7 @@ const statusIcon = computed(() => {
   }
 })
 
-const formattedPhone = computed(() =>
-  props.order.snapWhatsapp ? formatWhatsAppNumber(props.order.snapWhatsapp) : null,
-)
-
-const initials = computed(() => {
-  const parts = props.order.userName.trim().split(/\s+/)
-  const first = parts[0]?.[0] ?? ''
-  const last = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? '') : ''
-  return (first + last).toUpperCase() || '?'
-})
-
 const visibleThumbs = computed(() => props.order.previewPhotos.slice(0, MAX_THUMBS))
-const placeholderCount = computed(() => Math.max(0, MAX_THUMBS - visibleThumbs.value.length))
 const overflowCount = computed(() =>
   props.order.photoCount > MAX_THUMBS ? props.order.photoCount - MAX_THUMBS : 0,
 )
@@ -108,10 +122,6 @@ const currentStepIndex = computed(() => {
 })
 
 const showTimeline = computed(() => props.order.status !== ORDER_STATUS.CANCELLED)
-
-function onPhoneClick() {
-  openWhatsApp(props.order.snapWhatsapp, '')
-}
 </script>
 
 <template>
@@ -123,48 +133,18 @@ function onPhoneClick() {
         <span class="oc__header-label">{{ statusConfig.label }}</span>
       </div>
       <div class="oc__header-right">
+        <span v-if="showGroupBadge" class="oc__group-position">
+          <span v-if="showLatestBadge" class="oc__group-position-star">★ Última · </span>
+          <span>{{ groupPosition }} de {{ groupTotal }}</span>
+        </span>
         <span v-if="isNew" class="oc__new-badge">Nuevo</span>
         <span class="oc__header-time">{{ formatRelativeTime(order.createdAt) }}</span>
       </div>
     </header>
 
-    <!-- Body -->
-    <div class="oc__body">
-      <div class="oc__body-row">
-        <div class="oc__body-left">
-          <div class="oc__avatar" :title="order.userName">{{ initials }}</div>
-          <div class="oc__identity">
-            <div class="oc__name">{{ order.userName }}</div>
-            <a
-              v-if="formattedPhone"
-              class="oc__phone"
-              :href="`https://api.whatsapp.com/send?phone=${(order.snapWhatsapp ?? '').replace(/[^\d]/g, '')}`"
-              target="_blank"
-              rel="noopener noreferrer"
-              @click.stop="onPhoneClick"
-            >
-              <NIcon :component="LogoWhatsapp" :size="13" color="#25D366" />
-              <span>{{ formattedPhone }}</span>
-            </a>
-          </div>
-        </div>
-
-        <div class="oc__body-right">
-          <span class="oc__subtotal-label">SUBTOTAL</span>
-          <div v-if="order.subtotal !== null" class="oc__subtotal-value">
-            {{ formatCurrency(order.subtotal, order.snapCurrency) }}
-          </div>
-          <div v-else class="oc__subtotal-value oc__subtotal-value--empty">—</div>
-        </div>
-      </div>
-
-      <div class="oc__chips">
-        <span class="oc__chip">{{ order.eventName }}</span>
-        <span class="oc__chip">{{ order.photoCount }} fotos</span>
-      </div>
-
-      <!-- Thumbs strip -->
-      <div class="oc__thumbs">
+    <!-- Body principal: thumbs izq · (precio + barra progreso) der -->
+    <div :class="['oc__body', `oc__body--${order.status}`]">
+      <div v-if="visibleThumbs.length > 0" class="oc__thumbs">
         <div v-for="(thumb, index) in visibleThumbs" :key="thumb.photoId" class="oc__thumb">
           <img
             :src="thumb.thumbnailUrl"
@@ -178,34 +158,39 @@ function onPhoneClick() {
             <span>+{{ overflowCount }}</span>
           </div>
         </div>
-        <template v-for="n in placeholderCount" :key="`p-${n}`">
-          <div class="oc__thumb oc__thumb--placeholder">
-            <NIcon :component="CameraOutline" :size="20" />
-          </div>
-        </template>
+      </div>
+
+      <div class="oc__info">
+        <div v-if="order.subtotal !== null" class="oc__subtotal-value">
+          {{ formatCurrency(order.subtotal, order.snapCurrency) }}
+        </div>
+        <div v-else class="oc__subtotal-value oc__subtotal-value--empty">—</div>
+
+        <div
+          v-if="showTimeline"
+          class="oc__progress"
+          role="progressbar"
+          :aria-valuemin="0"
+          :aria-valuemax="timelineSteps.length"
+          :aria-valuenow="currentStepIndex + 1"
+          :aria-label="`Avance: ${currentStepIndex + 1} de ${timelineSteps.length}`"
+        >
+          <span
+            v-for="step in timelineSteps"
+            :key="step.key"
+            :class="['oc__progress-seg', { 'oc__progress-seg--reached': step.reached }]"
+          />
+        </div>
       </div>
     </div>
 
-    <!-- Progress timeline -->
-    <ol v-if="showTimeline" class="oc__timeline">
-      <li
-        v-for="(step, idx) in timelineSteps"
-        :key="step.key"
-        :class="[
-          'oc__step',
-          {
-            'oc__step--reached': step.reached,
-            'oc__step--current': idx === currentStepIndex,
-            'oc__step--has-line': idx < timelineSteps.length - 1,
-            'oc__step--line-reached':
-              idx < timelineSteps.length - 1 && !!timelineSteps[idx + 1]?.reached,
-          },
-        ]"
-      >
-        <span class="oc__step-dot" />
-        <span class="oc__step-label">{{ step.label }}</span>
-      </li>
-    </ol>
+    <!-- Meta inferior: evento abraza su contenido, fotos fijo -->
+    <div class="oc__meta">
+      <span class="oc__chip oc__chip--event" :title="order.eventName">{{ order.eventName }}</span>
+      <span class="oc__chip oc__chip--photos">
+        {{ order.photoCount }} {{ order.photoCount === 1 ? 'foto' : 'fotos' }}
+      </span>
+    </div>
 
     <!-- Actions -->
     <div class="oc__actions">

@@ -1,0 +1,38 @@
+/*
+ * Centralized breakpoints (TIT-6 admin Orders rework)
+ *
+ * Single source of truth for the four responsive ranges used across the app.
+ * The custom properties on :root are documentation/illustration only — CSS
+ * custom properties are NOT usable inside @media queries directly. Consumers
+ * must hardcode the same px values in their @media rules.
+ *
+ * Example usage in a feature stylesheet:
+ *
+ *   @media (max-width: 479px) {
+ *     .my-grid { grid-template-columns: 1fr; }
+ *   }
+ *
+ *   @media (min-width: 480px) and (max-width: 767px) {
+ *     .my-stats { grid-template-columns: repeat(2, 1fr); }
+ *   }
+ *
+ * Ranges:
+ *
+ * | Range              | Label             | Use                                                                |
+ * | ------------------ | ----------------- | ------------------------------------------------------------------ |
+ * | < 480px            | strict mobile     | 1 col grid, 1 col stats, stack vertical filters, select tabs       |
+ * | 480px - 767px      | mobile / phablet  | 1 col grid, 2 col stats                                            |
+ * | 768px - 1023px     | tablet            | 2 col grid, 4 col stats compactas                                  |
+ * | >= 1024px          | desktop           | actual: 3 col grid, 4 col stats, row filters                       |
+ *
+ * Boundary semantics:
+ *   --bp-mobile  : upper bound (exclusive) of strict mobile range
+ *   --bp-phablet : upper bound (exclusive) of mobile/phablet range
+ *   --bp-tablet  : upper bound (exclusive) of tablet range / desktop floor
+ */
+
+:root {
+  --bp-mobile: 480px;
+  --bp-phablet: 768px;
+  --bp-tablet: 1024px;
+}
