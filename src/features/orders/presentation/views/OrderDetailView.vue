@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NIcon, NResult, NSpin } from 'naive-ui'
+import { NButton, NIcon, NResult, NSpin, useMessage } from 'naive-ui'
 import {
   LogoWhatsapp,
   MailOutline,
@@ -20,6 +20,7 @@ import {
 } from '@/shared/utils/whatsapp.utils'
 import { ORDER_STATUS } from '../../types/responses/order-list.response'
 import { useOrderDetailQuery } from '../../composables/queries/use-order-detail'
+import { useNotifyPaymentInfo } from '../../composables/mutations/use-notify-payment-info'
 import { useOrderActions } from '../../composables/use-order-actions'
 import { ORDERS_PATH } from '../../routes'
 import OrderHeroCard from '../components/OrderHeroCard/OrderHeroCard.vue'
@@ -32,8 +33,10 @@ const router = useRouter()
 const orderId = computed(() => route.params.id as string)
 const { data: order, isPending, isError, refetch } = useOrderDetailQuery(orderId)
 
+const message = useMessage()
 const { handleConfirmPayment, handleSendDelivery, handleCancel, handleRegenerate, isRegenerating } =
   useOrderActions()
+const { mutateAsync: notifyPaymentInfo } = useNotifyPaymentInfo()
 
 function onConfirmPayment() {
   if (order.value) handleConfirmPayment(order.value.id)
@@ -58,12 +61,20 @@ function onSendDeliveryWhatsApp() {
   openWhatsApp(order.value.snapWhatsapp, msg)
 }
 
-function onSendPaymentInfo() {
+async function onSendPaymentInfo() {
   if (!order.value) return
+  try {
+    await notifyPaymentInfo(order.value.id)
+  } catch {
+    message.error('No se pudo registrar el envío. Intenta de nuevo.')
+    return
+  }
   const msg = buildPaymentInfoTemplate({
     customerFirstName: order.value.snapFirstName ?? order.value.userName,
     photoCount: order.value.photos.length,
     eventName: order.value.eventName,
+    totalPrice: order.value.subtotal,
+    currency: order.value.snapCurrency,
   })
   openWhatsApp(order.value.snapWhatsapp, msg)
 }
@@ -165,11 +176,21 @@ function onRegenerate() {
               </div>
             </div>
 
-            <div v-if="order.status === ORDER_STATUS.PENDING" class="od-side-card">
+            <div
+              v-if="
+                order.status === ORDER_STATUS.PENDING ||
+                order.status === ORDER_STATUS.PAYMENT_INFO_SENT
+              "
+              class="od-side-card"
+            >
               <div class="od-side-card__title">Comunicación</div>
               <button class="od-status-btn od-status-btn--wa" @click="onSendPaymentInfo">
                 <NIcon :component="LogoWhatsapp" :size="13" />
-                Enviar info de pago
+                {{
+                  order.status === ORDER_STATUS.PAYMENT_INFO_SENT
+                    ? 'Reenviar info de pago'
+                    : 'Enviar info de pago'
+                }}
               </button>
             </div>
 
@@ -182,15 +203,22 @@ function onRegenerate() {
                     {
                       'od-status-btn--current':
                         order.status !== ORDER_STATUS.PENDING &&
+                        order.status !== ORDER_STATUS.PAYMENT_INFO_SENT &&
                         order.status !== ORDER_STATUS.CANCELLED,
                     },
                   ]"
-                  :disabled="order.status !== ORDER_STATUS.PENDING"
+                  :disabled="
+                    order.status !== ORDER_STATUS.PENDING &&
+                    order.status !== ORDER_STATUS.PAYMENT_INFO_SENT
+                  "
                   @click="onConfirmPayment"
                 >
                   <NIcon :component="CheckmarkOutline" :size="13" />
                   {{
-                    order.status === ORDER_STATUS.PENDING ? 'Confirmar pago' : 'Pago confirmado ✓'
+                    order.status === ORDER_STATUS.PENDING ||
+                    order.status === ORDER_STATUS.PAYMENT_INFO_SENT
+                      ? 'Confirmar pago'
+                      : 'Pago confirmado ✓'
                   }}
                 </button>
                 <button
@@ -210,7 +238,10 @@ function onRegenerate() {
                     'od-status-btn--cancel',
                     { 'od-status-btn--current-cancel': order.status === ORDER_STATUS.CANCELLED },
                   ]"
-                  :disabled="order.status !== ORDER_STATUS.PENDING"
+                  :disabled="
+                    order.status !== ORDER_STATUS.PENDING &&
+                    order.status !== ORDER_STATUS.PAYMENT_INFO_SENT
+                  "
                   @click="onCancel"
                 >
                   <NIcon :component="CloseOutline" :size="13" />

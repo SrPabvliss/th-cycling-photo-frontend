@@ -18,8 +18,11 @@
   transform: translateY(-1px);
 }
 
-/* Status-driven left borders (persist on hover) */
+/* Status-driven left borders */
 .oc--pending {
+  border-left-color: #d03050;
+}
+.oc--payment_info_sent {
   border-left-color: #f0a020;
 }
 .oc--paid {
@@ -29,24 +32,279 @@
   border-left-color: #18a058;
 }
 .oc--cancelled {
-  border-left-color: #d03050;
+  border-left-color: #909399;
 }
 
-/* Thumbs */
+/* ──────────── Header strip ──────────── */
+.oc__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 14px;
+  border-bottom: 1px solid #f0f1f3;
+  font-size: 12px;
+}
+
+.oc__header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.oc__header-label {
+  font-size: 12px;
+}
+
+.oc__header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.oc__header-time {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.oc__new-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #fff;
+  color: #15803d;
+  border: 1.5px solid #16a34a;
+  line-height: 1.4;
+}
+
+/* Posición en el grupo — texto inline, no pill. "★ Última · 1 de 5" o solo "2 de 5" */
+.oc__group-position {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tt-primary, #105080);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.oc__group-position-star {
+  color: var(--tt-primary, #105080);
+}
+
+/* Per-status tinting — saturado para destacar estado de un vistazo */
+.oc__header--pending {
+  background: rgba(208, 48, 80, 0.18);
+  color: #9a1a32;
+}
+.oc__header--payment_info_sent {
+  background: rgba(240, 160, 32, 0.22);
+  color: #8a540d;
+}
+.oc__header--paid {
+  background: rgba(32, 128, 240, 0.18);
+  color: #1456b5;
+}
+.oc__header--delivered {
+  background: rgba(24, 160, 88, 0.2);
+  color: #0e6837;
+}
+.oc__header--cancelled {
+  background: rgba(144, 147, 153, 0.22);
+  color: #494e57;
+}
+
+/* ──────────── Body ──────────── */
+.oc__body {
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.oc__info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  align-items: flex-end;
+}
+
+/* Barra slim de progreso — color del estado */
+.oc__progress {
+  display: flex;
+  width: 100%;
+  gap: 3px;
+  height: 6px;
+}
+
+.oc__progress-seg {
+  flex: 1;
+  border-radius: 3px;
+  background: #e5e7eb;
+  transition: background 0.2s;
+}
+
+.oc__body--pending .oc__progress-seg--reached {
+  background: #d03050;
+}
+.oc__body--payment_info_sent .oc__progress-seg--reached {
+  background: #f0a020;
+}
+.oc__body--paid .oc__progress-seg--reached {
+  background: #2080f0;
+}
+.oc__body--delivered .oc__progress-seg--reached {
+  background: #18a058;
+}
+.oc__body--cancelled .oc__progress-seg--reached {
+  background: #909399;
+}
+
+/* Meta inferior: event chip + N fotos */
+.oc__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-top: 1px solid #f0f1f3;
+  min-width: 0;
+}
+
+.oc__meta .oc__chip--event {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.oc__meta .oc__chip--photos {
+  flex: 0 0 auto;
+}
+
+.oc__body-left {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+}
+
+.oc__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--tt-primary, #105080);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.oc__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.oc__name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1f2c;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.oc__phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #4b5563;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.oc__phone:hover {
+  color: #16a34a;
+  text-decoration: underline;
+}
+
+.oc__body-right {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.oc__subtotal-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #9ca3af;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.oc__subtotal-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--tt-primary, #105080);
+  line-height: 1.05;
+  white-space: nowrap;
+}
+
+.oc__subtotal-value--empty {
+  color: #c7cbd1;
+}
+
+/* Chips */
+.oc__chips {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.oc__chip {
+  font-size: 11px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  color: #6b7280;
+}
+
+/* Thumbs strip — evidencia compacta, columna izq del body */
 .oc__thumbs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 3px;
-  padding: 3px;
-  background: #f6f4ef;
+  grid-template-columns: repeat(3, 48px);
+  gap: 4px;
+  align-self: start;
 }
 
 .oc__thumb {
   position: relative;
-  aspect-ratio: 1 / 1;
+  width: 48px;
+  height: 48px;
   overflow: hidden;
   background: #0a0a0a;
-  border-radius: 8px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -86,74 +344,80 @@
   font-weight: 700;
 }
 
-/* Body */
-.oc__body {
-  flex: 1;
-  padding: 14px 16px;
+/* ──────────── Timeline ──────────── */
+.oc__timeline {
+  list-style: none;
+  margin: 0;
+  padding: 14px 16px 6px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid #f0f1f3;
+}
+
+.oc__step {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-/* Top row */
-.oc__top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.oc__name {
-  font-size: 13px;
-  font-weight: 600;
-  color: #1a1f2c;
-  line-height: 1.3;
-}
-
-.oc__badges {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-/* Meta — flex:1 pushes actions to bottom for equal alignment */
-.oc__meta {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.oc__phone {
-  display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 12px;
-  color: #6b7280;
+  gap: 6px;
+  font-size: 10.5px;
+  color: #9ca3af;
+  text-align: center;
 }
 
-.oc__chips {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
+.oc__step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #d1d5db;
+  z-index: 1;
 }
 
-.oc__chip {
-  font-size: 11px;
-  padding: 1px 8px;
-  border-radius: 999px;
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  color: #6b7280;
+.oc__step-label {
+  line-height: 1.2;
 }
 
-/* Actions */
+/* Connecting line: drawn from each step's right edge to the next dot */
+.oc__step--has-line::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: calc(50% + 8px);
+  right: calc(-50% + 8px);
+  height: 2px;
+  background: #e5e7eb;
+  z-index: 0;
+}
+
+.oc__step--line-reached::after {
+  background: var(--tt-primary, #105080);
+}
+
+.oc__step--reached {
+  color: #4b5563;
+}
+
+.oc__step--reached .oc__step-dot {
+  background: var(--tt-primary, #105080);
+  border-color: var(--tt-primary, #105080);
+}
+
+.oc__step--current {
+  color: #1a1f2c;
+  font-weight: 600;
+}
+
+.oc__step--current .oc__step-dot {
+  box-shadow: 0 0 0 4px rgba(16, 80, 128, 0.15);
+}
+
+/* ──────────── Actions ──────────── */
 .oc__actions {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding-top: 10px;
-  border-top: 1px solid #f0f1f3;
+  padding: 10px 16px 14px;
   margin-top: auto;
 }
 
@@ -225,4 +489,69 @@
 .oc__icon-btn:hover {
   border-color: #d1d5db;
   color: #374151;
+}
+
+/* ──────────── Responsive polish (TIT-6) ──────────── */
+
+/* Mobile / small tablet: ensure tap targets ≥ 44×44 px */
+@media (max-width: 767px) {
+  .oc__header {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+
+  .oc__header-right {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    row-gap: 4px;
+  }
+
+  .oc__name {
+    font-size: 15px;
+    /* Wrap long names instead of cutting them */
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .oc__phone {
+    font-size: 14px;
+    min-height: 44px;
+    padding: 6px 0;
+  }
+
+  .oc__actions {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .oc__btn {
+    min-height: 44px;
+    font-size: 13px;
+    padding: 8px 10px;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .oc__icon-btn {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+}
+
+/* Very small screens: keep 1 row, allow text to shrink */
+@media (max-width: 479px) {
+  .oc__actions {
+    padding: 8px 12px 12px;
+    gap: 4px;
+  }
+
+  .oc__btn {
+    font-size: 12px;
+    padding: 8px 8px;
+  }
+
+  .oc__subtotal-value {
+    font-size: 22px;
+  }
 }

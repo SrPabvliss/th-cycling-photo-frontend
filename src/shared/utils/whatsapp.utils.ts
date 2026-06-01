@@ -53,13 +53,20 @@ export function buildPaymentInfoTemplate(data: {
   customerFirstName: string
   photoCount: number
   eventName: string
+  totalPrice: number | null
+  currency: string | null
 }): string {
+  const priceLine =
+    data.totalPrice === null
+      ? 'El valor a pagar es de $[ESCRIBE EL PRECIO AQUÍ].'
+      : `El valor a pagar es de ${formatCurrencyPlain(data.totalPrice, data.currency)}.`
+
   const lines = [
     `Hola ${data.customerFirstName},`,
     '',
     `Recibimos tu orden de ${data.photoCount} fotos del evento "${data.eventName}".`,
     '',
-    'El valor a pagar es de $[ESCRIBE EL PRECIO AQUÍ].',
+    priceLine,
     '',
     'Datos para realizar el pago:',
     `- Banco: ${PAYMENT_INFO.bankName}`,
@@ -72,6 +79,12 @@ export function buildPaymentInfoTemplate(data: {
     'Gracias.',
   ]
   return lines.join('\n')
+}
+
+function formatCurrencyPlain(value: number, currency: string | null): string {
+  const code = currency ?? 'USD'
+  const symbol = code === 'USD' ? '$' : `${code} `
+  return `${symbol}${value.toFixed(2)}`
 }
 
 /**

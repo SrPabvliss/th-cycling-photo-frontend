@@ -4,6 +4,7 @@ export function toOrderStats(api: IApiOrderStats): IOrderStats {
   return {
     totalOrders: api.totalOrders,
     pendingCount: api.pendingCount,
+    paymentInfoSentCount: api.paymentInfoSentCount,
     paidCount: api.paidCount,
     deliveredCount: api.deliveredCount,
     cancelledCount: api.cancelledCount,

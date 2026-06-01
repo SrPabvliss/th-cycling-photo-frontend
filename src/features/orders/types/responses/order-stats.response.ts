@@ -2,6 +2,7 @@
 export interface IApiOrderStats {
   totalOrders: number
   pendingCount: number
+  paymentInfoSentCount: number
   paidCount: number
   deliveredCount: number
   cancelledCount: number
@@ -11,6 +12,7 @@ export interface IApiOrderStats {
 export interface IOrderStats {
   totalOrders: number
   pendingCount: number
+  paymentInfoSentCount: number
   paidCount: number
   deliveredCount: number
   cancelledCount: number

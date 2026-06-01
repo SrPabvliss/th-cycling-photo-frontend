@@ -29,6 +29,7 @@ export interface IApiOrderDetail {
   status: string
   notes: string | null
   createdAt: string
+  notifiedAt: string | null
   paidAt: string | null
   deliveredAt: string | null
   cancelledAt: string | null
@@ -39,6 +40,8 @@ export interface IApiOrderDetail {
   snapEmail: string | null
   previewLinkToken: string | null
   eventName: string
+  subtotal: string | null
+  snapCurrency: string | null
   photos: IApiOrderDetailPhoto[]
   deliveryLink: IApiOrderDetailDeliveryLink | null
   retouchProgress?: { total: number; retouched: number }
@@ -64,6 +67,7 @@ export interface IOrderDetail {
   status: OrderStatus
   notes: string | null
   createdAt: Date
+  notifiedAt: Date | null
   paidAt: Date | null
   deliveredAt: Date | null
   cancelledAt: Date | null
@@ -74,6 +78,8 @@ export interface IOrderDetail {
   snapEmail: string | null
   previewLinkToken: string | null
   eventName: string
+  subtotal: number | null
+  snapCurrency: string | null
   photos: IOrderDetailPhoto[]
   deliveryLink: IOrderDetailDeliveryLink | null
   retouchProgress?: { total: number; retouched: number }

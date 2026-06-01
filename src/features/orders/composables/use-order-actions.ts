@@ -1,16 +1,19 @@
 import { useDialog, useMessage } from 'naive-ui'
 
-import { openWhatsApp } from '@/shared/utils/whatsapp.utils'
+import { buildPaymentInfoTemplate, openWhatsApp } from '@/shared/utils/whatsapp.utils'
 import { useConfirmPayment } from './mutations/use-confirm-payment'
+import { useNotifyPaymentInfo } from './mutations/use-notify-payment-info'
 import { useSendDelivery } from './mutations/use-send-delivery'
 import { useCancelOrder } from './mutations/use-cancel-order'
 import { useRegenerateDelivery } from './mutations/use-regenerate-delivery'
+import type { IOrderListItem } from '../types/responses/order-list.response'
 
 export function useOrderActions() {
   const dialog = useDialog()
   const message = useMessage()
 
   const { mutateAsync: confirmPayment } = useConfirmPayment()
+  const { mutateAsync: notifyPaymentInfo } = useNotifyPaymentInfo()
   const { mutateAsync: sendDelivery } = useSendDelivery()
   const { mutateAsync: cancelOrder } = useCancelOrder()
   const { mutateAsync: regenerateDelivery, isPending: isRegenerating } = useRegenerateDelivery()
@@ -79,8 +82,27 @@ export function useOrderActions() {
     })
   }
 
+  async function handleNotifyPaymentInfo(order: IOrderListItem) {
+    try {
+      await notifyPaymentInfo(order.id)
+    } catch {
+      message.error('No se pudo registrar el envío. Intenta de nuevo.')
+      return
+    }
+    const firstName = order.userName.split(' ')[0] ?? order.userName
+    const template = buildPaymentInfoTemplate({
+      customerFirstName: firstName,
+      photoCount: order.photoCount,
+      eventName: order.eventName,
+      totalPrice: order.subtotal,
+      currency: order.snapCurrency,
+    })
+    openWhatsApp(order.snapWhatsapp, template)
+  }
+
   return {
     handleConfirmPayment,
+    handleNotifyPaymentInfo,
     handleSendDelivery,
     handleCancel,
     handleRegenerate,

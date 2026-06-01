@@ -122,3 +122,143 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Mobile hamburger button (hidden on desktop) */
+.app-nav-mobile-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  color: #1a1f2c;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Mobile drawer menu */
+.app-nav-menu {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.app-nav-menu__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.app-nav-menu__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.app-nav-menu__close {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  color: #1a1f2c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.app-nav-menu__nav {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 0;
+}
+
+.app-nav-menu__link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  min-height: 44px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1a1f2c;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+  background: transparent;
+}
+
+.app-nav-menu__link:hover {
+  background: #f3f4f6;
+}
+
+.app-nav-menu__link.router-link-active {
+  color: #105080;
+  background: #f0f6ff;
+  border-left-color: #105080;
+}
+
+.app-nav-menu__link--disabled {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+.app-nav-menu__link--button {
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-left: 3px solid transparent;
+  font-family: inherit;
+  color: #ef4444;
+}
+
+.app-nav-menu__link--button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 767px) {
+  .app-nav {
+    padding: 0 12px;
+    gap: 8px;
+    position: relative;
+  }
+
+  .app-nav-mobile-btn {
+    display: inline-flex;
+  }
+
+  .app-nav-brand {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: auto;
+  }
+
+  .app-nav-title {
+    font-size: 14px;
+  }
+
+  .app-nav-center {
+    margin-left: 0;
+  }
+
+  .app-nav-right {
+    margin-left: auto;
+    gap: 8px;
+  }
+
+  .app-nav-user-info {
+    display: none;
+  }
+}
