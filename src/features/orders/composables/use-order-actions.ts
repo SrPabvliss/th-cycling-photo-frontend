@@ -94,6 +94,8 @@ export function useOrderActions() {
       customerFirstName: firstName,
       photoCount: order.photoCount,
       eventName: order.eventName,
+      totalPrice: order.subtotal,
+      currency: order.snapCurrency,
     })
     openWhatsApp(order.snapWhatsapp, template)
   }

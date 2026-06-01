@@ -13,6 +13,7 @@ const PARTICIPANTS_BASE = '/participants'
 const COUNTRIES_BASE = '/countries'
 const PHOTO_CATEGORIES_BASE = '/photo-categories'
 const OPERATOR_BASE = '/operator'
+const PRICING_BASE = '/pricing'
 
 export const API_ROUTES = {
   AUTH: {
@@ -180,5 +181,10 @@ export const API_ROUTES = {
     RETOUCH_QUEUE: (eventId: string) => `${OPERATOR_BASE}/events/${eventId}/retouch-queue`,
     RETOUCH_ORDERS: `${OPERATOR_BASE}/retouch/orders`,
     RETOUCH_ORDER_DETAIL: (orderId: string) => `${OPERATOR_BASE}/retouch/orders/${orderId}`,
+  },
+  PRICING: {
+    BASE: PRICING_BASE,
+    PREVIEW: `${PRICING_BASE}/preview`,
+    TIERS: `${PRICING_BASE}/tiers`,
   },
 } as const

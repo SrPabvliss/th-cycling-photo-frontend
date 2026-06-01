@@ -7,6 +7,8 @@ import { getGalleryUrl } from '@/shared/utils/cdn.utils'
 import { useAuth } from '@/features/auth/composables/use-auth'
 import { useCartStore } from '../../../stores/cart.store'
 import { useRemoveFromCart } from '../../../composables/mutations/use-remove-from-cart'
+import { useCartPricing } from '@/features/cart/composables/use-cart-pricing'
+import PricingTotalBlock from '@/features/pricing/presentation/components/PricingTotalBlock/PricingTotalBlock.vue'
 
 defineProps<{
   show: boolean
@@ -20,6 +22,7 @@ const router = useRouter()
 const cartStore = useCartStore()
 const { isAuthenticated } = useAuth()
 const { mutate: removeFromCart } = useRemoveFromCart()
+const cartPricing = useCartPricing()
 
 function goToCheckout() {
   emit('update:show', false)
@@ -67,13 +70,25 @@ function goToLogin() {
 
       <template v-if="cartStore.totalCount > 0" #footer>
         <NFlex vertical :size="10" style="width: 100%">
-          <div class="cart-summary">
-            <span>Total:</span>
-            <strong
-              >{{ cartStore.totalCount }} fotos de {{ cartStore.eventCount }} evento{{
-                cartStore.eventCount !== 1 ? 's' : ''
-              }}</strong
-            >
+          <div
+            v-if="cartStore.totalCount > 0 && cartPricing.preview.value"
+            class="cart-drawer__pricing"
+          >
+            <PricingTotalBlock
+              :quantity="cartPricing.preview.value.quantity"
+              :subtotal="cartPricing.preview.value.subtotal"
+              :unit-price="cartPricing.preview.value.unitPrice"
+              :currency="cartPricing.currency.value"
+              :next-tier="cartPricing.preview.value.nextTier"
+              :photos-to-next-tier="cartPricing.preview.value.photosToNextTier"
+              :is-loading="cartPricing.isLoading.value"
+            />
+          </div>
+          <div
+            v-else-if="cartPricing.isLoading.value"
+            class="cart-drawer__pricing cart-drawer__pricing--loading"
+          >
+            Calculando precio…
           </div>
 
           <template v-if="isAuthenticated">

@@ -44,6 +44,8 @@ export function toOrderDetail(api: IApiOrderDetail): IOrderDetail {
     snapEmail: api.snapEmail,
     previewLinkToken: api.previewLinkToken,
     eventName: api.eventName,
+    subtotal: api.subtotal === null ? null : Number(api.subtotal),
+    snapCurrency: api.snapCurrency,
     photos: api.photos.map(toOrderDetailPhoto),
     deliveryLink: api.deliveryLink ? toOrderDetailDeliveryLink(api.deliveryLink) : null,
     retouchProgress: api.retouchProgress,

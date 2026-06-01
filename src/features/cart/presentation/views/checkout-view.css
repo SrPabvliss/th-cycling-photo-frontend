@@ -148,6 +148,10 @@
   margin: 0;
 }
 
+.checkout-summary__divider {
+  margin: 4px 0 !important;
+}
+
 .checkout-summary__stats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -176,4 +180,20 @@
   font-weight: 700;
   margin: 0;
   font-variant-numeric: tabular-nums;
+}
+
+.checkout-summary__totals {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checkout-summary__totals-meta {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.checkout-summary__totals-loading {
+  font-size: 14px;
+  color: #6b7280;
 }

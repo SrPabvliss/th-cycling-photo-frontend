@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { NAlert, NButton, NIcon } from 'naive-ui'
+import { NAlert, NButton, NDivider, NIcon } from 'naive-ui'
 import { ArrowBack, CheckmarkCircle, ChevronBack, LogoWhatsapp } from '@vicons/ionicons5'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
@@ -11,12 +11,15 @@ import { useMergeCart } from '../../composables/mutations/use-merge-cart'
 import { useCheckout } from '../../composables/mutations/use-checkout'
 import type { ICheckoutOrderResult } from '../../types/requests/cart.request'
 import CheckoutSummary from '../components/CheckoutSummary/CheckoutSummary.vue'
+import { useCartPricing } from '../../composables/use-cart-pricing'
+import PricingTotalBlock from '@/features/pricing/presentation/components/PricingTotalBlock/PricingTotalBlock.vue'
 
 const router = useRouter()
 const cartStore = useCartStore()
 const { isAuthenticated } = useAuth()
 const { mutateAsync: mergeCart } = useMergeCart()
 const { mutateAsync: checkout, isPending: isCheckingOut } = useCheckout()
+const cartPricing = useCartPricing()
 
 const orderResults = ref<ICheckoutOrderResult[] | null>(null)
 
@@ -118,23 +121,28 @@ async function handleConfirm() {
                 para coordinar el pago y la entrega de tus fotos.
               </NAlert>
 
-              <dl class="checkout-summary__stats">
-                <div>
-                  <dt>Eventos</dt>
-                  <dd>{{ cartStore.groups.length }}</dd>
-                </div>
-                <div>
-                  <dt>Fotos</dt>
-                  <dd>{{ cartStore.totalCount }}</dd>
-                </div>
-              </dl>
+              <NDivider class="checkout-summary__divider" />
+
+              <div class="checkout-summary__totals">
+                <PricingTotalBlock
+                  v-if="cartPricing.preview.value"
+                  :quantity="cartPricing.preview.value.quantity"
+                  :subtotal="cartPricing.preview.value.subtotal"
+                  :unit-price="cartPricing.preview.value.unitPrice"
+                  :currency="cartPricing.currency.value"
+                  :next-tier="cartPricing.preview.value.nextTier"
+                  :photos-to-next-tier="cartPricing.preview.value.photosToNextTier"
+                  :is-loading="cartPricing.isLoading.value"
+                />
+                <div v-else class="checkout-summary__totals-loading">Calculando precio…</div>
+              </div>
 
               <NButton
                 type="primary"
                 size="large"
                 block
                 :loading="isCheckingOut"
-                :disabled="isCheckingOut"
+                :disabled="isCheckingOut || cartPricing.isLoading.value"
                 @click="handleConfirm"
               >
                 Confirmar pedido
