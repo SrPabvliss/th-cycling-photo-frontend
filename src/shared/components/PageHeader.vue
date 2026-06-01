@@ -94,4 +94,46 @@ function handleBack() {
   gap: 8px;
   flex-shrink: 0;
 }
+
+/* Tablet: ligera compresión */
+@media (max-width: 767px) {
+  .page-header {
+    margin-bottom: 12px;
+    gap: 10px;
+  }
+
+  .page-header__title {
+    font-size: 18px;
+  }
+
+  .page-header__subtitle {
+    font-size: 12px;
+  }
+}
+
+/* Mobile estricto: header en 1 sola fila compacta, sin subtítulo */
+@media (max-width: 479px) {
+  .page-header {
+    margin-bottom: 8px;
+    gap: 8px;
+  }
+
+  .page-header__left {
+    gap: 8px;
+  }
+
+  .page-header__back {
+    width: 32px;
+    height: 32px;
+  }
+
+  .page-header__title {
+    font-size: 16px;
+    line-height: 1.25;
+  }
+
+  .page-header__subtitle {
+    display: none;
+  }
+}
 </style>

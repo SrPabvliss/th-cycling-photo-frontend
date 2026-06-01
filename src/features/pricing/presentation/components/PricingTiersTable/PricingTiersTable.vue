@@ -16,7 +16,7 @@ function rangeLabel(t: IPricingTier): string {
     <thead>
       <tr>
         <th>Fotos</th>
-        <th>Precio por foto</th>
+        <th>Precio por fotografía</th>
       </tr>
     </thead>
     <tbody>

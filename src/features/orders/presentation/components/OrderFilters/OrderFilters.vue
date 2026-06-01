@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { NInput, NSelect, NIcon } from 'naive-ui'
 import { SearchOutline } from '@vicons/ionicons5'
-import { useDebounceFn } from '@vueuse/core'
+import { useDebounceFn, useMediaQuery } from '@vueuse/core'
 
 import { useEventsDropdownQuery } from '../../../composables/queries/use-events-dropdown'
 
@@ -29,6 +29,9 @@ watch(
 const { options: eventOptions, isLoading: loadingEvents } =
   useEventsDropdownQuery(debouncedEventSearch)
 
+const isMobile = useMediaQuery('(max-width: 767px)')
+const inputSize = computed<'small' | 'medium'>(() => (isMobile.value ? 'medium' : 'small'))
+
 const localSearch = ref('')
 
 watch(
@@ -43,7 +46,7 @@ watch(
       v-model:value="localSearch"
       placeholder="Buscar por nombre o WhatsApp..."
       clearable
-      size="small"
+      :size="inputSize"
       class="order-filters__search"
     >
       <template #prefix>
@@ -57,7 +60,7 @@ watch(
       clearable
       filterable
       remote
-      size="small"
+      :size="inputSize"
       :options="eventOptions"
       :loading="loadingEvents"
       class="order-filters__event"

@@ -1,0 +1,96 @@
+.order-customer-separator {
+  grid-column: 1 / -1;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #e2e5ea;
+  border: 1px solid #b8bcc4;
+  border-radius: 12px;
+  margin-top: 12px;
+  color: #1a1f2c;
+}
+
+.order-customer-separator__avatar {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #105080;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.order-customer-separator__identity {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.order-customer-separator__name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1f2c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.order-customer-separator__phone {
+  font-size: 12px;
+  color: #4b5563;
+  margin-top: 2px;
+}
+
+.order-customer-separator__count {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 31, 44, 0.18);
+  background: rgba(255, 255, 255, 0.55);
+  font-size: 12px;
+  font-weight: 500;
+  color: #1a1f2c;
+  white-space: nowrap;
+}
+
+/* Primer separator del listado sin margin-top extra */
+.order-customer-separator:first-child {
+  margin-top: 0;
+}
+
+@media (max-width: 479px) {
+  .order-customer-separator {
+    padding: 10px 12px;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .order-customer-separator__avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+
+  .order-customer-separator__name {
+    font-size: 14px;
+  }
+
+  .order-customer-separator__phone {
+    font-size: 11px;
+  }
+
+  .order-customer-separator__count {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+}

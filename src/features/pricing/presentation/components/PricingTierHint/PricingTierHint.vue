@@ -15,7 +15,7 @@ const message = computed(() => {
   if (!props.nextTier || !props.photosToNextTier) return null
   const n = props.photosToNextTier
   const price = formatCurrency(props.nextTier.pricePerPhoto, props.currency)
-  return `Lleva ${n} más y paga solo ${price} por foto`
+  return `Lleva ${n} más y paga solo ${price} por fotografía`
 })
 </script>
 

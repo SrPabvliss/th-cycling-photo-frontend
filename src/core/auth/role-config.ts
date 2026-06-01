@@ -22,7 +22,7 @@ export interface IRoleConfig {
 
 const ROLE_CONFIGS: Record<UserRole, IRoleConfig> = {
   [USER_ROLES.ADMIN]: {
-    homePath: EVENTS_PATH,
+    homePath: ORDERS_PATH,
     label: 'Administrador',
     navLinks: [
       { label: 'Eventos', to: EVENTS_PATH },

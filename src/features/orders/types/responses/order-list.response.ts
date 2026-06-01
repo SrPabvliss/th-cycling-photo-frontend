@@ -31,6 +31,11 @@ export interface IApiOrderListItem {
   paidAt: string | null
   deliveredAt: string | null
   userName: string
+  userId: string
+  customerFirstName: string | null
+  customerLastName: string | null
+  customerEmail: string
+  customerPrimaryPhone: string | null
   snapWhatsapp: string | null
   eventName: string
   photoCount: number
@@ -49,6 +54,11 @@ export interface IOrderListItem {
   paidAt: Date | null
   deliveredAt: Date | null
   userName: string
+  userId: string
+  customerFirstName: string | null
+  customerLastName: string | null
+  customerEmail: string
+  customerPrimaryPhone: string | null
   snapWhatsapp: string | null
   eventName: string
   photoCount: number

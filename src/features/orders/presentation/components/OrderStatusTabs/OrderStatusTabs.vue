@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { NTag } from 'naive-ui'
-
 import { ORDER_STATUS, type OrderStatus } from '../../../types/responses/order-list.response'
 import type { IOrderStats } from '../../../types/responses/order-stats.response'
 import { ORDER_FILTER_TABS } from '../../../constants/status-config'
+
+type TabVariant = 'all' | 'error' | 'warning' | 'info' | 'success' | 'neutral'
 
 const STATUS_TO_STATS_KEY: Record<OrderStatus, keyof IOrderStats> = {
   [ORDER_STATUS.PENDING]: 'pendingCount',
@@ -11,6 +11,14 @@ const STATUS_TO_STATS_KEY: Record<OrderStatus, keyof IOrderStats> = {
   [ORDER_STATUS.PAID]: 'paidCount',
   [ORDER_STATUS.DELIVERED]: 'deliveredCount',
   [ORDER_STATUS.CANCELLED]: 'cancelledCount',
+}
+
+const STATUS_TO_VARIANT: Record<OrderStatus, TabVariant> = {
+  [ORDER_STATUS.PENDING]: 'error',
+  [ORDER_STATUS.PAYMENT_INFO_SENT]: 'warning',
+  [ORDER_STATUS.PAID]: 'info',
+  [ORDER_STATUS.DELIVERED]: 'success',
+  [ORDER_STATUS.CANCELLED]: 'neutral',
 }
 
 defineProps<{
@@ -27,20 +35,31 @@ function getCount(status: OrderStatus | null, stats: IOrderStats | undefined): n
   if (!status) return stats.totalOrders
   return stats[STATUS_TO_STATS_KEY[status]] as number
 }
+
+function getVariant(status: OrderStatus | null): TabVariant {
+  return status === null ? 'all' : STATUS_TO_VARIANT[status]
+}
 </script>
 
 <template>
-  <div class="status-tabs">
+  <div class="status-tabs" role="tablist">
     <button
       v-for="tab in ORDER_FILTER_TABS"
       :key="tab.label"
-      :class="['status-tab', { 'status-tab--active': activeStatus === tab.status }]"
+      role="tab"
+      :aria-selected="activeStatus === tab.status"
+      :class="[
+        'status-tab',
+        `status-tab--${getVariant(tab.status)}`,
+        { 'status-tab--active': activeStatus === tab.status },
+      ]"
       @click="emit('update:activeStatus', tab.status)"
     >
-      {{ tab.label }}
-      <NTag v-if="getCount(tab.status, stats) !== null" size="small" :bordered="false" round>
+      <span v-if="getVariant(tab.status) !== 'all'" class="status-tab__dot" aria-hidden="true" />
+      <span class="status-tab__label">{{ tab.label }}</span>
+      <span v-if="getCount(tab.status, stats) !== null" class="status-tab__count">
         {{ getCount(tab.status, stats) }}
-      </NTag>
+      </span>
     </button>
   </div>
 </template>

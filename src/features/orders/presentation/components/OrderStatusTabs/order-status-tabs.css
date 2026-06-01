@@ -1,8 +1,12 @@
+/* =====================================================================
+ * Default (>=480px): tabs estilo underline
+ * ===================================================================== */
 .status-tabs {
   display: flex;
   gap: 4px;
   border-bottom: 1px solid #e5e7eb;
   margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
 .status-tab {
@@ -17,7 +21,10 @@
   border: none;
   border-bottom: 2px solid transparent;
   cursor: pointer;
-  transition: all 0.15s;
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    background 0.15s;
   font-family: inherit;
   margin-bottom: -1px;
 }
@@ -29,4 +36,131 @@
 .status-tab--active {
   color: #105080;
   border-bottom-color: #105080;
+}
+
+.status-tab__dot {
+  display: none;
+}
+
+.status-tab--error.status-tab--active .status-tab__dot,
+.status-tab--warning.status-tab--active .status-tab__dot,
+.status-tab--info.status-tab--active .status-tab__dot,
+.status-tab--success.status-tab--active .status-tab__dot,
+.status-tab--neutral.status-tab--active .status-tab__dot {
+  display: inline-block;
+}
+
+.status-tab__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #4b5563;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.status-tab--active .status-tab__count {
+  background: rgba(16, 80, 128, 0.12);
+  color: #105080;
+}
+
+/* =====================================================================
+ * <480px: chips horizontales deslizables
+ * ===================================================================== */
+@media (max-width: 479px) {
+  .status-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    border-bottom: none;
+    margin: 0;
+    padding: 2px 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+
+  .status-tabs::-webkit-scrollbar {
+    height: 4px;
+  }
+  .status-tabs::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 999px;
+  }
+  .status-tabs::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .status-tab {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 0;
+    font-size: 13px;
+    min-height: 36px;
+    color: #4b5563;
+  }
+
+  .status-tab:hover {
+    color: #1a1f2c;
+    background: #f9fafb;
+  }
+
+  .status-tab__dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .status-tab--error .status-tab__dot {
+    background: #d03050;
+  }
+  .status-tab--warning .status-tab__dot {
+    background: #f0a020;
+  }
+  .status-tab--info .status-tab__dot {
+    background: #2080f0;
+  }
+  .status-tab--success .status-tab__dot {
+    background: #18a058;
+  }
+  .status-tab--neutral .status-tab__dot {
+    background: #9ca3af;
+  }
+
+  .status-tab--active {
+    background: #ffffff;
+    color: #1a1f2c;
+    border-color: #1a1f2c;
+    border-bottom-color: #1a1f2c;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    font-weight: 600;
+  }
+
+  .status-tab--all.status-tab--active {
+    border-color: #105080;
+    color: #105080;
+  }
+
+  .status-tab__count {
+    background: #f3f4f6;
+    color: #4b5563;
+  }
+
+  .status-tab--active .status-tab__count {
+    background: rgba(26, 31, 44, 0.08);
+    color: #1a1f2c;
+  }
 }
