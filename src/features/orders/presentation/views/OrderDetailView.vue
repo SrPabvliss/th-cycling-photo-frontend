@@ -73,6 +73,8 @@ async function onSendPaymentInfo() {
     customerFirstName: order.value.snapFirstName ?? order.value.userName,
     photoCount: order.value.photos.length,
     eventName: order.value.eventName,
+    totalPrice: order.value.subtotal,
+    currency: order.value.snapCurrency,
   })
   openWhatsApp(order.value.snapWhatsapp, msg)
 }

@@ -14,6 +14,8 @@ function toOrderListItem(api: IApiOrderListItem): IOrderListItem {
     eventName: api.eventName,
     photoCount: api.photoCount,
     hasDeliveryLink: api.hasDeliveryLink,
+    subtotal: api.subtotal === null ? null : Number(api.subtotal),
+    snapCurrency: api.snapCurrency,
     previewPhotos: api.previewPhotos.map((p) => ({
       photoId: p.photoId,
       publicSlug: p.publicSlug,

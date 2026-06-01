@@ -35,6 +35,8 @@ export interface IApiOrderListItem {
   eventName: string
   photoCount: number
   hasDeliveryLink: boolean
+  subtotal: string | null
+  snapCurrency: string | null
   previewPhotos: IApiOrderPreviewPhoto[]
 }
 
@@ -51,5 +53,7 @@ export interface IOrderListItem {
   eventName: string
   photoCount: number
   hasDeliveryLink: boolean
+  subtotal: number | null
+  snapCurrency: string | null
   previewPhotos: IOrderPreviewPhoto[]
 }

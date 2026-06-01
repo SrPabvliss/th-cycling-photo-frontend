@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { NTag } from 'naive-ui'
 
 import { formatDate, formatRelativeTime } from '@/shared/utils/date.utils'
+import { formatCurrency } from '@/features/pricing/utils/format-currency'
 import type { IOrderDetail } from '../../../types/responses/order-detail.response'
 import { ORDER_STATUS_CONFIG } from '../../../constants/status-config'
 
@@ -45,6 +46,12 @@ const displayName = computed(() => {
       </NTag>
     </div>
     <div class="od-hero__stats">
+      <div class="od-hstat">
+        <div class="od-hstat__label">Total a cobrar</div>
+        <div class="od-hstat__val od-hstat__val--big">
+          {{ order.subtotal === null ? '—' : formatCurrency(order.subtotal, order.snapCurrency) }}
+        </div>
+      </div>
       <div class="od-hstat">
         <div class="od-hstat__label">Fotos compradas</div>
         <div class="od-hstat__val od-hstat__val--big">{{ order.photos.length }}</div>

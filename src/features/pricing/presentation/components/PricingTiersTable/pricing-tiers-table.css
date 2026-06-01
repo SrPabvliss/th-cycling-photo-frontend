@@ -1,0 +1,22 @@
+.pt-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14px;
+}
+
+.pt-table th,
+.pt-table td {
+  padding: 6px 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.pt-table thead th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+  text-align: left;
+}
+
+.pt-table th:last-child,
+.pt-table td:last-child {
+  text-align: right;
+}
