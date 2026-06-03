@@ -54,3 +54,37 @@ export function isRecent(date: Date, hours = 24): boolean {
   threshold.setHours(threshold.getHours() - hours)
   return date > threshold
 }
+
+/**
+ * Returns the number of days in a given month. Falls back to 31 when year/month are unknown.
+ */
+export function daysInMonth(year: number | null, month: number | null): number {
+  if (year == null || month == null) return 31
+  return new Date(year, month, 0).getDate()
+}
+
+/**
+ * Confirms (year, month, day) corresponds to a real calendar date.
+ * Rejects values like (2026, 2, 31) that JS would otherwise roll forward.
+ */
+export function isValidCalendarDate(year: number, month: number, day: number): boolean {
+  const d = new Date(year, month - 1, day)
+  return d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day
+}
+
+/**
+ * Calculates current age in full years from a birth date triple.
+ * Accounts for whether the birthday has already occurred this year.
+ */
+export function calculateAge(
+  year: number,
+  month: number,
+  day: number,
+  today: Date = new Date(),
+): number {
+  let age = today.getFullYear() - year
+  const hasHadBirthday =
+    today.getMonth() > month - 1 || (today.getMonth() === month - 1 && today.getDate() >= day)
+  if (!hasHadBirthday) age--
+  return age
+}
