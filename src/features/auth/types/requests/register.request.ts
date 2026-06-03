@@ -1,3 +1,5 @@
+export type Gender = 'female' | 'male' | 'other' | 'prefer_not_to_say'
+
 export interface IRegisterRequest {
   email: string
   password: string
@@ -7,4 +9,6 @@ export interface IRegisterRequest {
   countryId: number
   provinceId?: number
   cantonId?: number
+  birthDate?: string // ISO YYYY-MM-DD
+  gender?: Gender
 }

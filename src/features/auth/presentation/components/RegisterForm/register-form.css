@@ -10,6 +10,12 @@
   gap: 12px;
 }
 
+.register-form__row--3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
 .register-form__phone :deep(.iti) {
   width: 100%;
 }
@@ -60,5 +66,9 @@
 @media (max-width: 480px) {
   .register-form__row {
     grid-template-columns: 1fr;
+  }
+
+  .register-form__row--3 {
+    grid-template-columns: 1fr 1fr;
   }
 }
