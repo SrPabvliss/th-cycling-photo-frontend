@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, ref, watch, type Ref } from 'vue'
 import { useForm } from '@tanstack/vue-form'
 import { NButton, NFormItem, NGrid, NGridItem, NIcon, NInput, NSelect } from 'naive-ui'
 import { PersonAddOutline } from '@vicons/ionicons5'
@@ -10,13 +10,20 @@ import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
 import { useCountriesQuery } from '@/features/locations/composables/queries/use-countries'
 import { useProvincesByCountryQuery } from '@/features/locations/composables/queries/use-provinces-by-country'
 import { useCantonsQuery } from '@/features/locations/composables/queries/use-cantons'
+import { useBirthDateFields } from '../../../composables/use-birth-date-fields'
+import { useCountryPhoneSync } from '../../../composables/use-country-phone-sync'
 import {
   REGISTER_FORM_DEFAULTS,
   registerFieldValidators as v,
   type IRegisterFormData,
 } from '../../../constants/register-form.schema'
-
-const ECUADOR_ISO = 'EC'
+import {
+  DEFAULT_COUNTRY_ISO,
+  GENDER_OPTIONS,
+  MONTH_OPTIONS,
+  PHONE_PRIORITY_ISOS,
+} from '../../../constants/register-form.options'
+import type { Gender } from '../../../types/requests/register.request'
 
 defineProps<{
   isSubmitting: boolean
@@ -34,25 +41,21 @@ const form = useForm({
   },
 })
 
-// --- Location (derived from form state, no duplicate refs) ---
 const { data: countries } = useCountriesQuery()
 
 const countryOptions = computed(
   () => countries.value?.map((c) => ({ label: c.name, value: c.id })) ?? [],
 )
 
-const selectedCountryId = computed(() => form.getFieldValue('countryId'))
-const selectedProvinceId = computed(() => form.getFieldValue('provinceId'))
+const selectedCountryId = form.useStore((s) => s.values.countryId)
+const selectedProvinceId = form.useStore((s) => s.values.provinceId)
 
-const isEcuador = computed(() => {
-  const cid = selectedCountryId.value
-  if (!cid || !countries.value) return false
-  return countries.value.find((c) => c.id === cid)?.isoCode === ECUADOR_ISO
-})
-
-const { data: provinces, isFetching: isLoadingProvinces } =
-  useProvincesByCountryQuery(selectedCountryId)
-const { data: cantons, isFetching: isLoadingCantons } = useCantonsQuery(selectedProvinceId)
+const { data: provinces, isFetching: isLoadingProvinces } = useProvincesByCountryQuery(
+  selectedCountryId as Ref<number | null>,
+)
+const { data: cantons, isFetching: isLoadingCantons } = useCantonsQuery(
+  selectedProvinceId as Ref<number | null>,
+)
 
 const provinceOptions = computed(
   () => provinces.value?.map((p) => ({ label: p.name, value: p.id })) ?? [],
@@ -61,12 +64,39 @@ const cantonOptions = computed(
   () => cantons.value?.map((c) => ({ label: c.name, value: c.id })) ?? [],
 )
 
-// Default Ecuador when countries load
+const hasRegions = computed(() => provinceOptions.value.length > 0)
+
+const selectedCountryIso = computed(() => {
+  const cid = selectedCountryId.value
+  if (!cid || !countries.value) return null
+  return countries.value.find((c) => c.id === cid)?.isoCode ?? null
+})
+
 watch(countries, (list) => {
   if (list && !form.getFieldValue('countryId')) {
-    const ec = list.find((c) => c.isoCode === ECUADOR_ISO)
+    const ec = list.find((c) => c.isoCode === DEFAULT_COUNTRY_ISO)
     if (ec) form.setFieldValue('countryId', ec.id)
   }
+})
+
+const telInputRef = ref<{ instance: { setCountry: (iso2: string) => void } } | null>(null)
+const isPhoneValid = ref(false)
+
+useCountryPhoneSync(selectedCountryIso, telInputRef)
+
+const selectedBirthYear = form.useStore((s) => s.values.birthYear)
+const selectedBirthMonth = form.useStore((s) => s.values.birthMonth)
+const selectedBirthDay = form.useStore((s) => s.values.birthDay)
+
+const {
+  yearOptions,
+  dayOptions,
+  validate: validateBirthDate,
+} = useBirthDateFields({
+  year: selectedBirthYear,
+  month: selectedBirthMonth,
+  day: selectedBirthDay,
+  onInvalidDay: () => form.setFieldValue('birthDay', null),
 })
 </script>
 
@@ -81,7 +111,6 @@ watch(countries, (list) => {
       }
     "
   >
-    <!-- Name -->
     <div class="register-form__row">
       <form.Field name="firstName" :validators="{ onBlur: v.firstName, onSubmit: v.firstName }">
         <template v-slot="{ field }">
@@ -100,7 +129,6 @@ watch(countries, (list) => {
       </form.Field>
     </div>
 
-    <!-- Email -->
     <form.Field name="email" :validators="{ onBlur: v.email, onSubmit: v.email }">
       <template v-slot="{ field }">
         <NFormItem label="Correo electrónico" required v-bind="fieldStatus(field)">
@@ -109,7 +137,6 @@ watch(countries, (list) => {
       </template>
     </form.Field>
 
-    <!-- Password + Confirm (linked via onChangeListenTo) -->
     <div class="register-form__row">
       <form.Field name="password" :validators="{ onBlur: v.password, onSubmit: v.password }">
         <template v-slot="{ field }">
@@ -153,56 +180,66 @@ watch(countries, (list) => {
       </form.Field>
     </div>
 
-    <!-- Phone (intl-tel-input → field.handleChange directly) -->
-    <form.Field name="phoneNumber" :validators="{ onSubmit: v.phoneNumber }">
-      <template v-slot="{ field }">
-        <NFormItem label="WhatsApp" required v-bind="fieldStatus(field)">
-          <div class="register-form__phone">
-            <IntlTelInput
-              :options="{
-                initialCountry: 'ec',
-                separateDialCode: true,
-                strictMode: true,
-                countryOrder: ['ec', 'co', 'pe', 'cl', 'ar', 'mx'],
-                i18n: { searchPlaceholder: 'Buscar país...' },
-              }"
-              :input-props="{ placeholder: 'Ej. 99 123 4567' }"
-              @change-number="(num: string) => field.handleChange(num)"
-              @change-validity="() => {}"
+    <div class="register-form__row">
+      <form.Field name="countryId" :validators="{ onSubmit: v.countryId }">
+        <template v-slot="{ field }">
+          <NFormItem label="País" required v-bind="fieldStatus(field)">
+            <NSelect
+              :options="countryOptions"
+              placeholder="Seleccionar país"
+              filterable
+              :value="field.state.value"
+              @update:value="
+                (val: number | null) => {
+                  field.handleChange(val)
+                  form.setFieldValue('provinceId', null)
+                  form.setFieldValue('cantonId', null)
+                }
+              "
+              @blur="field.handleBlur"
             />
-          </div>
-        </NFormItem>
-      </template>
-    </form.Field>
+          </NFormItem>
+        </template>
+      </form.Field>
 
-    <!-- Country -->
-    <form.Field name="countryId" :validators="{ onSubmit: v.countryId }">
-      <template v-slot="{ field }">
-        <NFormItem label="País" required v-bind="fieldStatus(field)">
-          <NSelect
-            :options="countryOptions"
-            placeholder="Seleccionar país"
-            filterable
-            :value="field.state.value"
-            @update:value="
-              (val: number | null) => {
-                field.handleChange(val)
-                form.setFieldValue('provinceId', null)
-                form.setFieldValue('cantonId', null)
-              }
-            "
-            @blur="field.handleBlur"
-          />
-        </NFormItem>
-      </template>
-    </form.Field>
+      <form.Field
+        name="phoneNumber"
+        :validators="{
+          onSubmit: ({ value }: { value: string }) => {
+            if (!value) return 'Ingresa tu número de WhatsApp'
+            if (!isPhoneValid) return 'Número inválido para el país seleccionado'
+            return undefined
+          },
+        }"
+      >
+        <template v-slot="{ field }">
+          <NFormItem label="WhatsApp" required v-bind="fieldStatus(field)">
+            <div class="register-form__phone">
+              <IntlTelInput
+                ref="telInputRef"
+                :options="{
+                  initialCountry: DEFAULT_COUNTRY_ISO.toLowerCase(),
+                  separateDialCode: true,
+                  strictMode: true,
+                  allowDropdown: false,
+                  countryOrder: PHONE_PRIORITY_ISOS,
+                  i18n: { searchPlaceholder: 'Buscar país...' },
+                }"
+                :input-props="{ placeholder: 'Ej. 99 123 4567' }"
+                @change-number="(num: string) => field.handleChange(num)"
+                @change-validity="(valid: boolean) => (isPhoneValid = valid)"
+              />
+            </div>
+          </NFormItem>
+        </template>
+      </form.Field>
+    </div>
 
-    <!-- Province + Canton (Ecuador only, cascading from form state) -->
-    <NGrid v-if="isEcuador" :cols="2" :x-gap="12">
+    <NGrid v-if="hasRegions" :cols="2" :x-gap="12">
       <NGridItem>
         <form.Field name="provinceId">
           <template v-slot="{ field }">
-            <NFormItem label="Provincia">
+            <NFormItem label="Región">
               <NSelect
                 :options="provinceOptions"
                 :loading="isLoadingProvinces"
@@ -225,7 +262,7 @@ watch(countries, (list) => {
       <NGridItem>
         <form.Field name="cantonId">
           <template v-slot="{ field }">
-            <NFormItem label="Cantón">
+            <NFormItem label="Ciudad">
               <NSelect
                 :options="cantonOptions"
                 :loading="isLoadingCantons"
@@ -241,7 +278,64 @@ watch(countries, (list) => {
       </NGridItem>
     </NGrid>
 
-    <!-- Submit -->
+    <div class="register-form__row register-form__row--3">
+      <form.Field name="birthDay" :validators="{ onSubmit: validateBirthDate }">
+        <template v-slot="{ field }">
+          <NFormItem label="Día" required v-bind="fieldStatus(field)">
+            <NSelect
+              :options="dayOptions"
+              placeholder="Día"
+              :value="field.state.value"
+              @update:value="(val: number | null) => field.handleChange(val)"
+              @blur="field.handleBlur"
+            />
+          </NFormItem>
+        </template>
+      </form.Field>
+      <form.Field name="birthMonth">
+        <template v-slot="{ field }">
+          <NFormItem label="Mes" required v-bind="fieldStatus(field)">
+            <NSelect
+              :options="MONTH_OPTIONS"
+              placeholder="Mes"
+              :value="field.state.value"
+              @update:value="(val: number | null) => field.handleChange(val)"
+              @blur="field.handleBlur"
+            />
+          </NFormItem>
+        </template>
+      </form.Field>
+      <form.Field name="birthYear">
+        <template v-slot="{ field }">
+          <NFormItem label="Año" required v-bind="fieldStatus(field)">
+            <NSelect
+              :options="yearOptions"
+              placeholder="Año"
+              filterable
+              :value="field.state.value"
+              @update:value="(val: number | null) => field.handleChange(val)"
+              @blur="field.handleBlur"
+            />
+          </NFormItem>
+        </template>
+      </form.Field>
+    </div>
+
+    <form.Field name="gender">
+      <template v-slot="{ field }">
+        <NFormItem label="Género" v-bind="fieldStatus(field)">
+          <NSelect
+            :options="GENDER_OPTIONS"
+            placeholder="Selecciona (opcional)"
+            clearable
+            :value="field.state.value"
+            @update:value="(val: Gender | null) => field.handleChange(val)"
+            @blur="field.handleBlur"
+          />
+        </NFormItem>
+      </template>
+    </form.Field>
+
     <form.Subscribe>
       <template v-slot="{ canSubmit }">
         <NButton
