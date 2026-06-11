@@ -23,18 +23,17 @@ export function useUploadAssetsBatch() {
           const { data: presigned } = await httpClient.post<IApiAssetPresignedUrl>(
             API_ROUTES.EVENTS.ASSETS.PRESIGNED_URL(eventId, assetType),
             { fileName: file.name, contentType: file.type },
-            { silent: true },
           )
 
           await b2UploadClient.put(presigned.url, file, {
             headers: { 'Content-Type': file.type },
           })
 
-          await httpClient.post(
-            API_ROUTES.EVENTS.ASSETS.CONFIRM(eventId, assetType),
-            { storageKey: presigned.objectKey, fileSize: file.size, mimeType: file.type },
-            { silent: true },
-          )
+          await httpClient.post(API_ROUTES.EVENTS.ASSETS.CONFIRM(eventId, assetType), {
+            storageKey: presigned.objectKey,
+            fileSize: file.size,
+            mimeType: file.type,
+          })
         }),
       )
       return eventId
