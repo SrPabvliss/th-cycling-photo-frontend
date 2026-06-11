@@ -12,7 +12,8 @@ import type { IPreviewPhoto } from '../../../types/responses/preview-data.respon
 
 defineProps<{
   eventName: string
-  eventDate: Date
+  startDate: Date
+  endDate: Date
   selectedPhotos: IPreviewPhoto[]
   photoCount: number
 }>()
@@ -40,7 +41,12 @@ defineProps<{
       </div>
       <div class="cf-event-row">
         <span class="cf-event-row__label">Fecha</span>
-        <span class="cf-event-row__value">{{ formatDate(eventDate) }}</span>
+        <span class="cf-event-row__value">
+          <template v-if="startDate.getTime() === endDate.getTime()">
+            {{ formatDate(startDate) }}
+          </template>
+          <template v-else>{{ formatDate(startDate) }} – {{ formatDate(endDate) }}</template>
+        </span>
       </div>
       <div class="cf-event-row cf-event-row--last">
         <span class="cf-event-row__label">Fotógrafo</span>

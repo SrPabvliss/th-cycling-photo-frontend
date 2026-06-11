@@ -9,7 +9,8 @@ export interface IApiPreviewPhoto {
 export interface IApiPreviewData {
   token: string
   eventName: string
-  eventDate: string
+  startDate: string
+  endDate: string
   status: string
   expiresAt: string
   photos: IApiPreviewPhoto[]
@@ -24,7 +25,8 @@ export interface IPreviewPhoto {
 export interface IPreviewData {
   token: string
   eventName: string
-  eventDate: Date
+  startDate: Date
+  endDate: Date
   status: PreviewStatus
   expiresAt: Date
   photos: IPreviewPhoto[]
