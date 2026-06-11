@@ -5,10 +5,9 @@ import { NGrid, NGridItem, NSpin } from 'naive-ui'
 
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import { useOperatorRetouchOrdersListSource } from '../../composables/queue-sources/use-retouch-orders-list-source'
-import { useOperatorActiveEventsQuery } from '@/features/operator/composables/queries/use-operator-active-events'
-import { useOperatorCompletedEventsQuery } from '@/features/operator/composables/queries/use-operator-completed-events'
+import { useEventsListQuery } from '@/features/events/composables/queries/use-events-list'
 import { RETOUCH_ROUTE_NAMES } from '../../constants/retouch-routes'
-import { OPERATOR_PATH, OPERATOR_ROUTE_NAMES } from '@/features/operator/routes'
+import { EVENTS_PATH } from '@/features/events/routes'
 import RetouchOrderCard from '../components/RetouchOrderCard/RetouchOrderCard.vue'
 import RetouchPageHeader from '../components/RetouchPageHeader/RetouchPageHeader.vue'
 import RetouchEmptyState from '../components/RetouchEmptyState/RetouchEmptyState.vue'
@@ -26,25 +25,14 @@ const selectedEventSlug = ref<string | null>(null)
 const source = useOperatorRetouchOrdersListSource(scope, selectedEventSlug)
 
 const eventsPage = ref(1)
-const activeEventsQuery = useOperatorActiveEventsQuery(eventsPage)
-const completedEventsQuery = useOperatorCompletedEventsQuery(eventsPage)
+const eventsListQuery = useEventsListQuery(eventsPage, 50)
 
-const eventOptions = computed(() => {
-  const active = (activeEventsQuery.data.value?.items ?? []).map((e) => ({
-    label: e.event.name,
-    value: e.event.slug,
-  }))
-  const completed = (completedEventsQuery.data.value?.items ?? []).map((e) => ({
-    label: e.event.name,
-    value: e.event.slug,
-  }))
-  const seen = new Set<string>()
-  return [...active, ...completed].filter((opt) => {
-    if (seen.has(opt.value)) return false
-    seen.add(opt.value)
-    return true
-  })
-})
+const eventOptions = computed(() =>
+  (eventsListQuery.data.value?.items ?? []).map((e) => ({
+    label: e.name,
+    value: e.slug,
+  })),
+)
 
 const goWorkspace = (orderId?: string) =>
   router.push({
@@ -52,7 +40,7 @@ const goWorkspace = (orderId?: string) =>
     query: orderId ? { orderId } : undefined,
   })
 
-const goDashboard = () => router.push({ name: OPERATOR_ROUTE_NAMES.DASHBOARD })
+const goDashboard = () => router.push(EVENTS_PATH)
 
 const totalPendingPhotos = computed(() =>
   source.orders.value.reduce((acc, o) => acc + o.pendingPhotosCount, 0),
@@ -101,7 +89,7 @@ const sentinel = useInfiniteScrollTrigger(() => source.fetchNextPage(), {
         :subtitle="headerSubtitle"
         :total-orders="source.total.value"
         :total-pending-photos="isPendingScope ? totalPendingPhotos : undefined"
-        :back-to="OPERATOR_PATH"
+        :back-to="EVENTS_PATH"
         :hide-start-cta="isCompletedScope"
         :start-disabled="source.orders.value.length === 0"
         @start="goWorkspace()"

@@ -2,7 +2,6 @@ import { useMutation, useQueryClient, type QueryClient } from '@tanstack/vue-que
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
-import { OPERATOR_QUERY_KEYS } from '@/features/operator/constants/operator-query-keys'
 import { PHOTO_QUERY_KEYS } from '@/features/photos/constants/query-keys'
 import { RETOUCH_QUERY_KEYS } from '../../constants/retouch-query-keys'
 import type { IConfirmRetouchedRequest } from '../../types/requests/confirm-retouched.request'
@@ -70,7 +69,7 @@ export function useUploadRetouched() {
       queryClient.invalidateQueries({ queryKey: PHOTO_QUERY_KEYS.detail(photoId) })
       queryClient.invalidateQueries({ queryKey: [API_ROUTES.PHOTOS.BASE, 'detail'] })
       queryClient.invalidateQueries({ queryKey: RETOUCH_QUERY_KEYS.baseAll() })
-      queryClient.invalidateQueries({ queryKey: OPERATOR_QUERY_KEYS.all() })
+      queryClient.invalidateQueries({ queryKey: [API_ROUTES.OPERATOR.BASE] })
     },
   })
 }
