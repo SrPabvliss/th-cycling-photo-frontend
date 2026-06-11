@@ -41,7 +41,7 @@ async function copyError() {
 <template>
   <ErrorPageLayout
     code="500"
-    title="Falla mecanica en la montana."
+    title="Falla mecánica en la montaña."
     description="Nuestros servidores tuvieron una caida inesperada. No te preocupes, esto es culpa nuestra, no tuya. Nuestros mecanicos ya estan solucionando el problema."
     :error-info="`Codigo de error: 500_INTERNAL_SERVER_ERROR | ID de incidente: ${incidentId}`"
   >

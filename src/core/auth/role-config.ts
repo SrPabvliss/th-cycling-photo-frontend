@@ -2,7 +2,6 @@ import { EVENTS_PATH } from '@/features/events/routes'
 import { ORDERS_PATH } from '@/features/orders/routes'
 import { RETOUCH_PATH } from '@/features/retouch/routes'
 import { BUYERS_PATH } from '@/features/buyers/routes'
-import { OPERATOR_PATH } from '@/features/operator/routes'
 import { LANDING_PATH } from '@/features/landing/routes'
 import { USER_ROLES, type UserRole } from './user-roles'
 
@@ -32,14 +31,11 @@ const ROLE_CONFIGS: Record<UserRole, IRoleConfig> = {
     ],
   },
   [USER_ROLES.OPERATOR]: {
-    homePath: OPERATOR_PATH,
+    homePath: EVENTS_PATH,
     label: 'Operador',
     navLinks: [
-      { label: 'Dashboard', to: OPERATOR_PATH },
-      { label: 'Eventos Asignados', disabled: true },
-      { label: 'Clasificación', disabled: true },
-      { label: 'Actividad', disabled: true },
-      { label: 'Configuración', disabled: true },
+      { label: 'Eventos', to: EVENTS_PATH },
+      { label: 'Retoque', to: RETOUCH_PATH },
     ],
   },
   [USER_ROLES.CUSTOMER]: {

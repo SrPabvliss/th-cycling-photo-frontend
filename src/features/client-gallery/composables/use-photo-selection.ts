@@ -11,6 +11,18 @@ export function usePhotoSelection(photos: Ref<IPreviewPhoto[] | undefined>) {
     () => photos.value?.filter((p) => selectedIds.value.has(p.id)) ?? [],
   )
 
+  const allSelected = computed(
+    () => (photos.value?.length ?? 0) > 0 && selectedCount.value === photos.value!.length,
+  )
+
+  function selectAll() {
+    selectedIds.value = new Set(photos.value?.map((p) => p.id) ?? [])
+  }
+
+  function clearSelection() {
+    selectedIds.value = new Set()
+  }
+
   function toggleSelect(id: string) {
     const next = new Set(selectedIds.value)
     if (next.has(id)) {
@@ -31,6 +43,9 @@ export function usePhotoSelection(photos: Ref<IPreviewPhoto[] | undefined>) {
     selectedIds,
     selectedCount,
     selectedPhotos,
+    allSelected,
+    selectAll,
+    clearSelection,
     toggleSelect,
     removeFromSelection,
   }

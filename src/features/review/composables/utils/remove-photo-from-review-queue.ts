@@ -1,15 +1,18 @@
 import type { QueryClient } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
-import type { IOperatorReviewQueueItem } from '@/features/operator/types/responses/operator-review-queue-item.response'
 
 interface IPaginationSnapshot {
   total: number
   [key: string]: unknown
 }
 
+interface IReviewQueueCacheItem {
+  publicSlug: string
+}
+
 interface IInfinitePage {
-  items: IOperatorReviewQueueItem[]
+  items: IReviewQueueCacheItem[]
   pagination: IPaginationSnapshot
 }
 
