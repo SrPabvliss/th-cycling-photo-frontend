@@ -12,14 +12,14 @@ export const retouchRoutes: RouteRecordRaw[] = [
   {
     path: RETOUCH_PATH,
     name: RETOUCH_ROUTE_NAMES.OPERATOR_QUEUE,
-    component: () => import('./presentation/views/OperatorRetouchQueueView.vue'),
-    meta: { requiresAuth: true, roles: [USER_ROLES.OPERATOR] },
+    component: () => import('./presentation/views/RetouchQueueView.vue'),
+    meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN, USER_ROLES.OPERATOR] },
   },
   {
-    path: '/operator/events/:eventSlug/retouch',
+    path: '/events/:eventSlug/retouch',
     name: RETOUCH_ROUTE_NAMES.EVENT_QUEUE,
     component: () => import('./presentation/views/EventRetouchQueueView.vue'),
-    meta: { requiresAuth: true, roles: [USER_ROLES.OPERATOR] },
+    meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN, USER_ROLES.OPERATOR] },
   },
 ]
 
@@ -31,13 +31,13 @@ export const retouchWorkspaceRoutes: RouteRecordRaw[] = [
   {
     path: `${RETOUCH_PATH}/workspace`,
     name: RETOUCH_ROUTE_NAMES.OPERATOR_WORKSPACE,
-    component: () => import('./presentation/views/OperatorRetouchWorkspaceView.vue'),
-    meta: { requiresAuth: true, roles: [USER_ROLES.OPERATOR] },
+    component: () => import('./presentation/views/RetouchWorkspaceView.vue'),
+    meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN, USER_ROLES.OPERATOR] },
   },
   {
-    path: '/operator/events/:eventSlug/retouch/workspace',
+    path: '/events/:eventSlug/retouch/workspace',
     name: RETOUCH_ROUTE_NAMES.EVENT_WORKSPACE,
-    component: () => import('./presentation/views/OperatorRetouchWorkspaceView.vue'),
-    meta: { requiresAuth: true, roles: [USER_ROLES.OPERATOR] },
+    component: () => import('./presentation/views/RetouchWorkspaceView.vue'),
+    meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN, USER_ROLES.OPERATOR] },
   },
 ]
