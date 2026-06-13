@@ -6,11 +6,18 @@ import { CloseCircleOutline } from '@vicons/ionicons5'
 import { getGalleryUrl } from '@/shared/utils/cdn.utils'
 import { formatDate } from '@/shared/utils/date.utils'
 import PhotoLightbox from '@/shared/components/PhotoLightbox/PhotoLightbox.vue'
+import PhotoPriceStrip from '@/features/pricing/presentation/components/PhotoPriceStrip/PhotoPriceStrip.vue'
 import { useLightbox } from '@/shared/composables/use-lightbox'
 import type { ICartGroup, ICartPhoto } from '../../../types/responses/cart.response'
 import { useRemoveFromCart } from '../../../composables/mutations/use-remove-from-cart'
 
-const props = defineProps<{ group: ICartGroup }>()
+const props = defineProps<{
+  group: ICartGroup
+  unitPrice: number
+  basePrice: number | null
+  currency: string
+  isLoading: boolean
+}>()
 
 const { mutate: removeFromCart } = useRemoveFromCart()
 
@@ -48,21 +55,29 @@ const eventDateLabel = computed(() => {
       <div
         v-for="(photo, index) in group.photos"
         :key="photo.id"
-        class="checkout-summary-card__thumb"
+        class="checkout-summary-card__cell"
       >
-        <img
-          :src="getGalleryUrl(photo.publicSlug)"
-          :alt="`Foto ${photo.id}`"
-          loading="lazy"
-          @click="openLightbox(group.photos, index)"
+        <div class="checkout-summary-card__thumb">
+          <img
+            :src="getGalleryUrl(photo.publicSlug)"
+            :alt="`Foto ${photo.id}`"
+            loading="lazy"
+            @click="openLightbox(group.photos, index)"
+          />
+          <button
+            class="checkout-summary-card__remove"
+            aria-label="Quitar foto"
+            @click.stop="removeFromCart(photo.id)"
+          >
+            <NIcon :component="CloseCircleOutline" :size="14" />
+          </button>
+        </div>
+        <PhotoPriceStrip
+          :unit-price="unitPrice"
+          :base-price="basePrice"
+          :currency="currency"
+          :is-loading="isLoading"
         />
-        <button
-          class="checkout-summary-card__remove"
-          aria-label="Quitar foto"
-          @click.stop="removeFromCart(photo.id)"
-        >
-          <NIcon :component="CloseCircleOutline" :size="14" />
-        </button>
       </div>
     </div>
 

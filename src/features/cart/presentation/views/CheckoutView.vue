@@ -108,6 +108,10 @@ async function handleConfirm() {
               v-for="group in cartStore.groups"
               :key="group.eventId"
               :group="group"
+              :unit-price="cartPricing.preview.value?.unitPrice ?? 0"
+              :base-price="cartPricing.basePrice.value"
+              :currency="cartPricing.currency.value"
+              :is-loading="cartPricing.isLoading.value"
             />
           </div>
 
@@ -126,10 +130,12 @@ async function handleConfirm() {
               <div class="checkout-summary__totals">
                 <PricingTotalBlock
                   v-if="cartPricing.preview.value"
+                  emphasis="soft"
                   :quantity="cartPricing.preview.value.quantity"
                   :subtotal="cartPricing.preview.value.subtotal"
                   :unit-price="cartPricing.preview.value.unitPrice"
                   :currency="cartPricing.currency.value"
+                  :tier="cartPricing.preview.value.tier"
                   :next-tier="cartPricing.preview.value.nextTier"
                   :photos-to-next-tier="cartPricing.preview.value.photosToNextTier"
                   :is-loading="cartPricing.isLoading.value"

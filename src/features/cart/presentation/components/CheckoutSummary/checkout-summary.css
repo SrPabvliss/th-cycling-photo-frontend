@@ -47,12 +47,24 @@
   gap: 10px;
 }
 
+/* Polaroid card: white frame + photo + price strip as the caption. */
+.checkout-summary-card__cell {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  padding: 6px 6px 0;
+  border: 1px solid rgba(10, 15, 20, 0.08);
+  border-radius: 2px;
+  box-shadow:
+    0 1px 3px rgba(10, 15, 20, 0.08),
+    0 5px 12px rgba(10, 15, 20, 0.06);
+}
+
 .checkout-summary-card__thumb {
+  position: relative;
   aspect-ratio: 1 / 1;
   overflow: hidden;
-  border-radius: 8px;
   background: #0a0a0a;
-  position: relative;
 }
 
 .checkout-summary-card__thumb img {
