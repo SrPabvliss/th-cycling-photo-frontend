@@ -43,8 +43,8 @@
 
 .checkout-summary-card__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
 }
 
 .checkout-summary-card__thumb {
@@ -52,6 +52,7 @@
   overflow: hidden;
   border-radius: 8px;
   background: #0a0a0a;
+  position: relative;
 }
 
 .checkout-summary-card__thumb img {
@@ -59,4 +60,28 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  cursor: zoom-in;
+}
+
+.checkout-summary-card__remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #ef4444;
+  border: 2px solid white;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  z-index: 1;
+  padding: 0;
+  transition: transform 0.15s;
+}
+
+.checkout-summary-card__remove:hover {
+  transform: scale(1.15);
 }

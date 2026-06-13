@@ -1,0 +1,74 @@
+/* Global (not scoped): PhotoSwipe renders this button in a body-level portal. */
+.pswp__button.pswp__cart-toggle {
+  width: auto !important;
+  min-width: 0;
+  height: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #18a058;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  padding: 8px 16px;
+  margin: 12px 12px 12px 0;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 16px rgba(24, 160, 88, 0.4);
+  transition:
+    background 0.15s,
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+
+.pswp__button.pswp__cart-toggle:hover {
+  background: #15803d;
+  transform: scale(1.04);
+  box-shadow: 0 6px 20px rgba(24, 160, 88, 0.55);
+}
+
+.pswp__button.pswp__cart-toggle .pswp__cart-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pswp__button.pswp__cart-toggle svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.pswp__button.pswp__cart-toggle .pswp__cart-label {
+  white-space: nowrap;
+}
+
+.pswp__button.pswp__cart-toggle[data-selected='true'] {
+  background: rgba(24, 160, 88, 0.15);
+  color: #18a058;
+  border-color: #18a058;
+  box-shadow: 0 2px 8px rgba(24, 160, 88, 0.25);
+}
+
+.pswp__button.pswp__cart-toggle[data-selected='true']:hover {
+  background: rgba(24, 160, 88, 0.25);
+}
+
+@media (max-width: 640px) {
+  .pswp__button.pswp__cart-toggle {
+    padding: 6px 12px;
+    font-size: 13px;
+    margin: 8px;
+  }
+
+  .pswp__button.pswp__cart-toggle .pswp__cart-label {
+    display: none;
+  }
+
+  .pswp__button.pswp__cart-toggle svg {
+    width: 22px;
+    height: 22px;
+  }
+}

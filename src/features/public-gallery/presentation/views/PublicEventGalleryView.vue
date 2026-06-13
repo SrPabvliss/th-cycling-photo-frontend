@@ -18,7 +18,7 @@ import {
 import { PUBLIC_GALLERY_ROUTE_NAMES } from '../../routes'
 import PhotoGridSection from '../components/PhotoGridSection/PhotoGridSection.vue'
 import PublicPhotoGrid from '../components/PublicPhotoGrid/PublicPhotoGrid.vue'
-import PhotoLightbox from '../components/PhotoLightbox/PhotoLightbox.vue'
+import PhotoLightbox from '@/shared/components/PhotoLightbox/PhotoLightbox.vue'
 import PublicGalleryFilterBar from '../components/PublicGalleryFilterBar/PublicGalleryFilterBar.vue'
 
 const route = useRoute()
@@ -242,6 +242,8 @@ const heroUrl = computed(() => {
       :initial-index="lightboxIndex"
       :show="showLightbox"
       :selected-ids="selectedIds"
+      actions="select"
+      :paginated="true"
       @update:show="showLightbox = $event"
       @toggle="toggleSelect"
       @load-more="handleLoadMore"

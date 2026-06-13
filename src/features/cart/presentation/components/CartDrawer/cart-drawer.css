@@ -24,8 +24,8 @@
 
 .cart-group__thumbs {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
 }
 
 .cart-thumb {
@@ -41,6 +41,7 @@
   height: 100%;
   object-fit: cover;
   border-radius: 6px;
+  cursor: zoom-in;
 }
 
 .cart-thumb__remove {
