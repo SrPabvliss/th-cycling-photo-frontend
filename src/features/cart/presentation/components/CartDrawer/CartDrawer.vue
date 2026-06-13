@@ -12,6 +12,7 @@ import { useCartStore } from '../../../stores/cart.store'
 import { useRemoveFromCart } from '../../../composables/mutations/use-remove-from-cart'
 import { useCartPricing } from '@/features/cart/composables/use-cart-pricing'
 import PricingTotalBlock from '@/features/pricing/presentation/components/PricingTotalBlock/PricingTotalBlock.vue'
+import PhotoPriceStrip from '@/features/pricing/presentation/components/PhotoPriceStrip/PhotoPriceStrip.vue'
 
 defineProps<{
   show: boolean
@@ -67,16 +68,25 @@ function goToLogin() {
             </div>
 
             <div class="cart-group__thumbs">
-              <div v-for="(photo, index) in group.photos" :key="photo.id" class="cart-thumb">
-                <img
-                  :src="getGalleryUrl(photo.publicSlug)"
-                  alt=""
-                  loading="lazy"
-                  @click="openLightbox(group.photos, index)"
+              <div v-for="(photo, index) in group.photos" :key="photo.id" class="cart-card">
+                <div class="cart-thumb">
+                  <img
+                    :src="getGalleryUrl(photo.publicSlug)"
+                    alt=""
+                    loading="lazy"
+                    @click="openLightbox(group.photos, index)"
+                  />
+                  <button class="cart-thumb__remove" @click.stop="removeFromCart(photo.id)">
+                    <NIcon :component="CloseCircleOutline" :size="12" />
+                  </button>
+                </div>
+                <PhotoPriceStrip
+                  v-if="cartPricing.preview.value"
+                  :unit-price="cartPricing.preview.value.unitPrice"
+                  :base-price="cartPricing.basePrice.value"
+                  :currency="cartPricing.currency.value"
+                  :is-loading="cartPricing.isLoading.value"
                 />
-                <button class="cart-thumb__remove" @click.stop="removeFromCart(photo.id)">
-                  <NIcon :component="CloseCircleOutline" :size="12" />
-                </button>
               </div>
             </div>
           </div>
@@ -94,6 +104,7 @@ function goToLogin() {
               :subtotal="cartPricing.preview.value.subtotal"
               :unit-price="cartPricing.preview.value.unitPrice"
               :currency="cartPricing.currency.value"
+              :tier="cartPricing.preview.value.tier"
               :next-tier="cartPricing.preview.value.nextTier"
               :photos-to-next-tier="cartPricing.preview.value.photosToNextTier"
               :is-loading="cartPricing.isLoading.value"
