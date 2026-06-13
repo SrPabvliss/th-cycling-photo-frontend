@@ -1,12 +1,25 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { NDivider } from 'naive-ui'
+import { NDivider, NIcon } from 'naive-ui'
+import { CloseCircleOutline } from '@vicons/ionicons5'
 
 import { getGalleryUrl } from '@/shared/utils/cdn.utils'
 import { formatDate } from '@/shared/utils/date.utils'
-import type { ICartGroup } from '../../../types/responses/cart.response'
+import PhotoLightbox from '@/shared/components/PhotoLightbox/PhotoLightbox.vue'
+import { useLightbox } from '@/shared/composables/use-lightbox'
+import type { ICartGroup, ICartPhoto } from '../../../types/responses/cart.response'
+import { useRemoveFromCart } from '../../../composables/mutations/use-remove-from-cart'
 
 const props = defineProps<{ group: ICartGroup }>()
+
+const { mutate: removeFromCart } = useRemoveFromCart()
+
+const {
+  photos: lightboxPhotos,
+  index: lightboxIndex,
+  show: showLightbox,
+  open: openLightbox,
+} = useLightbox<ICartPhoto>()
 
 const photoCount = computed(() => props.group.photos.length)
 const eventDateLabel = computed(() => {
@@ -32,10 +45,33 @@ const eventDateLabel = computed(() => {
     <NDivider class="checkout-summary-card__divider" />
 
     <div class="checkout-summary-card__grid">
-      <div v-for="photo in group.photos" :key="photo.id" class="checkout-summary-card__thumb">
-        <img :src="getGalleryUrl(photo.publicSlug)" :alt="`Foto ${photo.id}`" loading="lazy" />
+      <div
+        v-for="(photo, index) in group.photos"
+        :key="photo.id"
+        class="checkout-summary-card__thumb"
+      >
+        <img
+          :src="getGalleryUrl(photo.publicSlug)"
+          :alt="`Foto ${photo.id}`"
+          loading="lazy"
+          @click="openLightbox(group.photos, index)"
+        />
+        <button
+          class="checkout-summary-card__remove"
+          aria-label="Quitar foto"
+          @click.stop="removeFromCart(photo.id)"
+        >
+          <NIcon :component="CloseCircleOutline" :size="14" />
+        </button>
       </div>
     </div>
+
+    <PhotoLightbox
+      :photos="lightboxPhotos"
+      :initial-index="lightboxIndex"
+      :show="showLightbox"
+      @update:show="showLightbox = $event"
+    />
   </article>
 </template>
 
