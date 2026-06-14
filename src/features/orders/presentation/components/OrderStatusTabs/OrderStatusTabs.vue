@@ -34,7 +34,7 @@ const emit = defineEmits<{
 
 function getCount(status: OrderStatus | null, stats: IOrderStats | undefined): number | null {
   if (!stats) return null
-  if (!status) return stats.totalOrders
+  if (!status) return stats.activeOrders
   return stats[STATUS_TO_STATS_KEY[status]] as number
 }
 
