@@ -31,6 +31,9 @@
 .oc--delivered {
   border-left-color: #18a058;
 }
+.oc--gifted {
+  border-left-color: #7c3aed;
+}
 .oc--cancelled {
   border-left-color: #909399;
 }
@@ -115,6 +118,10 @@
   background: rgba(24, 160, 88, 0.2);
   color: #0e6837;
 }
+.oc__header--gifted {
+  background: rgba(124, 58, 237, 0.16);
+  color: #5b21b6;
+}
 .oc__header--cancelled {
   background: rgba(144, 147, 153, 0.22);
   color: #494e57;
@@ -163,6 +170,9 @@
 }
 .oc__body--delivered .oc__progress-seg--reached {
   background: #18a058;
+}
+.oc__body--gifted .oc__progress-seg--reached {
+  background: #7c3aed;
 }
 .oc__body--cancelled .oc__progress-seg--reached {
   background: #909399;
@@ -489,6 +499,18 @@
 .oc__icon-btn:hover {
   border-color: #d1d5db;
   color: #374151;
+}
+
+.oc__icon-btn--gift {
+  color: #7c3aed;
+  border-color: #ddd6fe;
+  background: #f5f3ff;
+}
+
+.oc__icon-btn--gift:hover {
+  border-color: #7c3aed;
+  background: #ede9fe;
+  color: #6d28d9;
 }
 
 /* ──────────── Responsive polish (TIT-6) ──────────── */

@@ -202,6 +202,29 @@
   color: #15803d;
 }
 
+.od-status-btn--gift {
+  background: #f5f3ff;
+  border-color: #ddd6fe;
+  color: #7c3aed;
+}
+
+.od-status-btn--gift:hover:not(:disabled) {
+  background: #ede9fe;
+  border-color: #c4b5fd;
+  color: #6d28d9;
+}
+
+.od-status-btn--current-gift {
+  background: #ede9fe;
+  border-color: #c4b5fd;
+  color: #6d28d9;
+  cursor: default;
+}
+
+.od-status-btn--current-gift:disabled {
+  opacity: 1;
+}
+
 /* Notes */
 .od-notes {
   background: #f9fafb;

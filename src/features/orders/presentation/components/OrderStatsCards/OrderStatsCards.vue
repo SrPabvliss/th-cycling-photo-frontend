@@ -10,7 +10,7 @@ interface IStatCard {
   key: string
   value: number
   label: string
-  variant: 'error' | 'warning' | 'info' | 'success'
+  variant: 'error' | 'warning' | 'info' | 'success' | 'gift'
 }
 
 const totalOrders = computed(() => props.stats?.totalOrders ?? 0)
@@ -39,6 +39,12 @@ const breakdown = computed<IStatCard[]>(() => [
     value: props.stats?.deliveredCount ?? 0,
     label: 'Entregados',
     variant: 'success',
+  },
+  {
+    key: 'gifted',
+    value: props.stats?.giftedCount ?? 0,
+    label: 'Regaladas',
+    variant: 'gift',
   },
 ])
 
