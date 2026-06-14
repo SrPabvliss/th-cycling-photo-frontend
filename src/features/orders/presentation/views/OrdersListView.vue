@@ -42,7 +42,8 @@ const filters = ref<IOrderListFilters>({
 
 const { data, isPending, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
   useOrdersListQuery(filters, ORDERS_PER_PAGE)
-const { data: stats } = useOrdersStatsQuery()
+const statsEventId = computed(() => filters.value.eventId)
+const { data: stats } = useOrdersStatsQuery(statsEventId)
 
 const {
   handleConfirmPayment,
