@@ -46,6 +46,7 @@
 .status-tab--warning.status-tab--active .status-tab__dot,
 .status-tab--info.status-tab--active .status-tab__dot,
 .status-tab--success.status-tab--active .status-tab__dot,
+.status-tab--gift.status-tab--active .status-tab__dot,
 .status-tab--neutral.status-tab--active .status-tab__dot {
   display: inline-block;
 }
@@ -135,6 +136,9 @@
   }
   .status-tab--success .status-tab__dot {
     background: #18a058;
+  }
+  .status-tab--gift .status-tab__dot {
+    background: #7c3aed;
   }
   .status-tab--neutral .status-tab__dot {
     background: #9ca3af;

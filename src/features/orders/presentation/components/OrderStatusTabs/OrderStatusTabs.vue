@@ -3,13 +3,14 @@ import { ORDER_STATUS, type OrderStatus } from '../../../types/responses/order-l
 import type { IOrderStats } from '../../../types/responses/order-stats.response'
 import { ORDER_FILTER_TABS } from '../../../constants/status-config'
 
-type TabVariant = 'all' | 'error' | 'warning' | 'info' | 'success' | 'neutral'
+type TabVariant = 'all' | 'error' | 'warning' | 'info' | 'success' | 'gift' | 'neutral'
 
 const STATUS_TO_STATS_KEY: Record<OrderStatus, keyof IOrderStats> = {
   [ORDER_STATUS.PENDING]: 'pendingCount',
   [ORDER_STATUS.PAYMENT_INFO_SENT]: 'paymentInfoSentCount',
   [ORDER_STATUS.PAID]: 'paidCount',
   [ORDER_STATUS.DELIVERED]: 'deliveredCount',
+  [ORDER_STATUS.GIFTED]: 'giftedCount',
   [ORDER_STATUS.CANCELLED]: 'cancelledCount',
 }
 
@@ -18,6 +19,7 @@ const STATUS_TO_VARIANT: Record<OrderStatus, TabVariant> = {
   [ORDER_STATUS.PAYMENT_INFO_SENT]: 'warning',
   [ORDER_STATUS.PAID]: 'info',
   [ORDER_STATUS.DELIVERED]: 'success',
+  [ORDER_STATUS.GIFTED]: 'gift',
   [ORDER_STATUS.CANCELLED]: 'neutral',
 }
 

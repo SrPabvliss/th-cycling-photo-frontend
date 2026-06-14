@@ -13,6 +13,9 @@
 .stat-card--success .stat-card__num {
   color: #18a058;
 }
+.stat-card--gift .stat-card__num {
+  color: #7c3aed;
+}
 
 /* =====================================================================
  * Default (>=480px): cards individuales. Bar oculta.
@@ -23,7 +26,7 @@
 
 .stats-row {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 10px;
   margin-bottom: 20px;
 }
@@ -128,6 +131,9 @@
   .stats-bar__segment--success {
     background: #18a058;
   }
+  .stats-bar__segment--gift {
+    background: #7c3aed;
+  }
 
   .stats-bar__legend {
     list-style: none;
@@ -164,6 +170,9 @@
   }
   .stats-bar__chip--success {
     background: #18a058;
+  }
+  .stats-bar__chip--gift {
+    background: #7c3aed;
   }
 
   .stats-bar__count {

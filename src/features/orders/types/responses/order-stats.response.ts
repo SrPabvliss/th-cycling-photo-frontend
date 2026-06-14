@@ -5,6 +5,7 @@ export interface IApiOrderStats {
   paymentInfoSentCount: number
   paidCount: number
   deliveredCount: number
+  giftedCount: number
   cancelledCount: number
 }
 
@@ -15,5 +16,6 @@ export interface IOrderStats {
   paymentInfoSentCount: number
   paidCount: number
   deliveredCount: number
+  giftedCount: number
   cancelledCount: number
 }

@@ -4,6 +4,7 @@ import { ORDER_STATUS, type OrderStatus } from '../types/responses/order-list.re
 export interface IStatusBadgeConfig {
   label: string
   type: 'default' | 'info' | 'warning' | 'success' | 'error'
+  color?: string
 }
 
 export const ORDER_STATUS_CONFIG: Record<OrderStatus, IStatusBadgeConfig> = {
@@ -11,6 +12,7 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, IStatusBadgeConfig> = {
   [ORDER_STATUS.PAYMENT_INFO_SENT]: { label: 'Info de pago enviada', type: 'warning' },
   [ORDER_STATUS.PAID]: { label: 'Pagado', type: 'info' },
   [ORDER_STATUS.DELIVERED]: { label: 'Entregado', type: 'success' },
+  [ORDER_STATUS.GIFTED]: { label: 'Regalada', type: 'default', color: '#7c3aed' },
   [ORDER_STATUS.CANCELLED]: { label: 'Cancelado', type: 'default' },
 }
 
@@ -31,5 +33,6 @@ export const ORDER_FILTER_TABS: IOrderFilterTab[] = [
   { label: 'Info enviada', status: ORDER_STATUS.PAYMENT_INFO_SENT },
   { label: 'Pagados', status: ORDER_STATUS.PAID },
   { label: 'Entregados', status: ORDER_STATUS.DELIVERED },
+  { label: 'Regaladas', status: ORDER_STATUS.GIFTED },
   { label: 'Cancelados', status: ORDER_STATUS.CANCELLED },
 ]

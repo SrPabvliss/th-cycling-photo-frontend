@@ -1,7 +1,10 @@
-import { useDialog, useMessage } from 'naive-ui'
+import { h } from 'vue'
+import { NIcon, useDialog, useMessage } from 'naive-ui'
+import { GiftOutline } from '@vicons/ionicons5'
 
 import { buildPaymentInfoTemplate, openWhatsApp } from '@/shared/utils/whatsapp.utils'
 import { useConfirmPayment } from './mutations/use-confirm-payment'
+import { useMarkGift } from './mutations/use-mark-gift'
 import { useNotifyPaymentInfo } from './mutations/use-notify-payment-info'
 import { useSendDelivery } from './mutations/use-send-delivery'
 import { useCancelOrder } from './mutations/use-cancel-order'
@@ -13,13 +16,14 @@ export function useOrderActions() {
   const message = useMessage()
 
   const { mutateAsync: confirmPayment } = useConfirmPayment()
+  const { mutateAsync: markGift } = useMarkGift()
   const { mutateAsync: notifyPaymentInfo } = useNotifyPaymentInfo()
   const { mutateAsync: sendDelivery } = useSendDelivery()
   const { mutateAsync: cancelOrder } = useCancelOrder()
   const { mutateAsync: regenerateDelivery, isPending: isRegenerating } = useRegenerateDelivery()
 
   function handleConfirmPayment(orderId: string) {
-    dialog.warning({
+    dialog.info({
       title: 'Confirmar pago',
       content: '¿Confirmas que el pago fue recibido?',
       positiveText: 'Confirmar pago',
@@ -31,8 +35,24 @@ export function useOrderActions() {
     })
   }
 
+  function handleMarkGift(orderId: string) {
+    dialog.create({
+      title: 'Marcar como regalo',
+      content:
+        '¿Seguro que deseas marcar este pedido como regalo? No se sumará a las ganancias del mes.',
+      icon: () => h(NIcon, { color: '#7c3aed' }, { default: () => h(GiftOutline) }),
+      positiveText: 'Marcar como regalo',
+      negativeText: 'Cancelar',
+      positiveButtonProps: { color: '#7c3aed', textColor: '#ffffff' },
+      onPositiveClick: async () => {
+        await markGift(orderId)
+        message.success('Pedido marcado como regalo')
+      },
+    })
+  }
+
   function handleSendDelivery(orderId: string, snapWhatsapp?: string) {
-    dialog.info({
+    dialog.success({
       title: 'Enviar fotos',
       content: '¿Generar el enlace de descarga y marcar como entregado?',
       positiveText: 'Enviar fotos',
@@ -102,6 +122,7 @@ export function useOrderActions() {
 
   return {
     handleConfirmPayment,
+    handleMarkGift,
     handleNotifyPaymentInfo,
     handleSendDelivery,
     handleCancel,
