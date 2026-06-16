@@ -13,6 +13,61 @@
 .stat-card--success .stat-card__num {
   color: #18a058;
 }
+.stat-card--gift .stat-card__num {
+  color: #7c3aed;
+}
+.stat-card--revenue .stat-card__num {
+  color: #0d9488;
+}
+
+/* Info affordance (mirrors pricing total block popover) */
+.stat-card__info {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: transparent;
+  color: #0d9488;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 0;
+  vertical-align: middle;
+  transition: background-color 0.15s ease;
+}
+
+.stat-card__info:hover,
+.stat-card__info:focus-visible {
+  background: rgba(13, 148, 136, 0.12);
+  outline: none;
+}
+
+.stat-card__popover {
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-card__popover-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.stat-card__popover-text {
+  margin: 0;
+  font-size: 12px;
+  color: #4b5563;
+  line-height: 1.4;
+}
+
+.stat-card__popover-hint {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+}
 
 /* =====================================================================
  * Default (>=480px): cards individuales. Bar oculta.
@@ -23,7 +78,7 @@
 
 .stats-row {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(7, 1fr);
   gap: 10px;
   margin-bottom: 20px;
 }
@@ -128,6 +183,9 @@
   .stats-bar__segment--success {
     background: #18a058;
   }
+  .stats-bar__segment--gift {
+    background: #7c3aed;
+  }
 
   .stats-bar__legend {
     list-style: none;
@@ -164,6 +222,9 @@
   }
   .stats-bar__chip--success {
     background: #18a058;
+  }
+  .stats-bar__chip--gift {
+    background: #7c3aed;
   }
 
   .stats-bar__count {

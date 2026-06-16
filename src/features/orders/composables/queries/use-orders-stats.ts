@@ -1,3 +1,4 @@
+import { computed, type Ref } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
@@ -6,11 +7,13 @@ import { ORDER_QUERY_KEYS } from '../../constants/query-keys'
 import { toOrderStats } from '../../mappers/order-stats.mapper'
 import type { IApiOrderStats } from '../../types/responses/order-stats.response'
 
-export function useOrdersStatsQuery() {
+/** Order stats, optionally scoped to a single event (null = all events). */
+export function useOrdersStatsQuery(eventId: Ref<string | null>) {
   return useQuery({
-    queryKey: ORDER_QUERY_KEYS.stats(),
+    queryKey: computed(() => ORDER_QUERY_KEYS.stats(eventId.value ?? undefined)),
     queryFn: async () => {
-      const response = await httpClient.get<IApiOrderStats>(API_ROUTES.ORDERS.STATS)
+      const params = eventId.value ? { eventId: eventId.value } : undefined
+      const response = await httpClient.get<IApiOrderStats>(API_ROUTES.ORDERS.STATS, { params })
       return toOrderStats(response.data)
     },
   })

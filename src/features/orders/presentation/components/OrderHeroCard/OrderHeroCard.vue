@@ -13,6 +13,13 @@ const props = defineProps<{
 
 const statusConfig = computed(() => ORDER_STATUS_CONFIG[props.order.status])
 
+// Soft color triplet from a custom hex, else fall back to NTag's semantic type.
+const tagColor = computed(() => {
+  const hex = statusConfig.value.color
+  if (!hex) return undefined
+  return { color: `${hex}1a`, textColor: hex, borderColor: `${hex}55` }
+})
+
 const initials = computed(() => {
   const first = props.order.snapFirstName?.[0] ?? ''
   const last = props.order.snapLastName?.[0] ?? ''
@@ -41,7 +48,7 @@ const displayName = computed(() => {
           </div>
         </div>
       </div>
-      <NTag :type="statusConfig.type" size="small" round :bordered="false">
+      <NTag :type="statusConfig.type" :color="tagColor" size="small" round :bordered="false">
         {{ statusConfig.label }}
       </NTag>
     </div>

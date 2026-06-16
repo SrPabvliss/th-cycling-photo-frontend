@@ -28,6 +28,13 @@ function goToReview() {
     query: { photo: photo.value.publicSlug },
   })
 }
+
+function handleEditReview() {
+  router.push({
+    name: REVIEW_ROUTE_NAMES.SINGLE_PHOTO,
+    params: { photoSlug: slug.value },
+  })
+}
 </script>
 
 <template>
@@ -37,6 +44,7 @@ function goToReview() {
         :title="photo?.filename ?? 'Detalle de Foto'"
         :back-to="'/events/' + (photo?.eventSlug ?? '') + '/photos'"
       >
+        <NButton type="primary" @click="handleEditReview">Editar revisión</NButton>
         <NButton v-if="photo?.eventSlug" type="primary" @click="goToReview">
           <template #icon><NIcon :component="CheckmarkDoneOutline" /></template>
           Revisar este evento

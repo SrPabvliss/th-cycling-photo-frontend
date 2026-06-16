@@ -38,8 +38,24 @@ const { data: preview, isPending, isExpired, isNotFound, isConverted } = usePrev
 const { mutateAsync: createOrder, isPending: isSubmitting } = useCreateOrder(token.value)
 
 const previewPhotos = computed(() => preview.value?.photos)
-const { selectedIds, selectedCount, selectedPhotos, toggleSelect, removeFromSelection } =
-  usePhotoSelection(previewPhotos)
+const {
+  selectedIds,
+  selectedCount,
+  selectedPhotos,
+  allSelected,
+  selectAll,
+  clearSelection,
+  toggleSelect,
+  removeFromSelection,
+} = usePhotoSelection(previewPhotos)
+
+function toggleSelectAll() {
+  if (allSelected.value) {
+    clearSelection()
+  } else {
+    selectAll()
+  }
+}
 
 const step = ref<ViewStep>('gallery')
 const submittedPhotoCount = ref(0)
@@ -110,7 +126,13 @@ async function handleSubmit(formData: IContactFormData) {
         <div class="cg-viewer-col">
           <div class="cg-event-header">
             <p class="cg-event-meta">
-              {{ formatDate(preview.eventDate) }} · {{ preview.photos.length }} fotos disponibles
+              <template v-if="preview.startDate.getTime() === preview.endDate.getTime()">
+                {{ formatDate(preview.startDate) }}
+              </template>
+              <template v-else>
+                {{ formatDate(preview.startDate) }} – {{ formatDate(preview.endDate) }}
+              </template>
+              · {{ preview.photos.length }} fotos disponibles
             </p>
             <h1 class="cg-event-title">Tus fotos de {{ preview.eventName }}</h1>
             <p class="cg-event-sub">
@@ -134,6 +156,17 @@ async function handleSubmit(formData: IContactFormData) {
               <span class="cg-panel__label">Tu selección</span>
               <span class="cg-panel__badge">{{ selectedCount }}</span>
             </div>
+
+            <NButton
+              v-if="preview.photos.length > 0"
+              text
+              type="primary"
+              size="small"
+              class="cg-select-all"
+              @click="toggleSelectAll"
+            >
+              {{ allSelected ? 'Deseleccionar todas' : 'Seleccionar todas' }}
+            </NButton>
 
             <div v-if="selectedPhotos.length > 0" class="cg-sel-grid">
               <div v-for="photo in selectedPhotos" :key="photo.id" class="cg-sel-slot">
@@ -219,7 +252,8 @@ async function handleSubmit(formData: IContactFormData) {
         <ContactForm
           :token="token"
           :event-name="preview.eventName"
-          :event-date="preview.eventDate"
+          :start-date="preview.startDate"
+          :end-date="preview.endDate"
           :selected-photos="selectedPhotos"
           :photo-count="selectedCount"
           :is-submitting="isSubmitting"

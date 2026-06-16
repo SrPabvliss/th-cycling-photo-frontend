@@ -7,6 +7,7 @@ import {
   MailOutline,
   CheckmarkOutline,
   CloseOutline,
+  GiftOutline,
   SendOutline,
   ChevronBack,
 } from '@vicons/ionicons5'
@@ -34,12 +35,22 @@ const orderId = computed(() => route.params.id as string)
 const { data: order, isPending, isError, refetch } = useOrderDetailQuery(orderId)
 
 const message = useMessage()
-const { handleConfirmPayment, handleSendDelivery, handleCancel, handleRegenerate, isRegenerating } =
-  useOrderActions()
+const {
+  handleConfirmPayment,
+  handleMarkGift,
+  handleSendDelivery,
+  handleCancel,
+  handleRegenerate,
+  isRegenerating,
+} = useOrderActions()
 const { mutateAsync: notifyPaymentInfo } = useNotifyPaymentInfo()
 
 function onConfirmPayment() {
   if (order.value) handleConfirmPayment(order.value.id)
+}
+
+function onMarkGift() {
+  if (order.value) handleMarkGift(order.value.id)
 }
 
 function onSendDelivery() {
@@ -161,7 +172,7 @@ function onRegenerate() {
               <div class="od-contact">
                 <div class="od-contact__row">
                   <div class="od-contact__icon od-contact__icon--wa">
-                    <NIcon :component="LogoWhatsapp" :size="13" />
+                    <NIcon :component="LogoWhatsapp" :size="16" />
                   </div>
                   <span>{{
                     order.snapWhatsapp ? formatWhatsAppNumber(order.snapWhatsapp) : '—'
@@ -169,7 +180,7 @@ function onRegenerate() {
                 </div>
                 <div v-if="order.snapEmail" class="od-contact__row">
                   <div class="od-contact__icon od-contact__icon--mail">
-                    <NIcon :component="MailOutline" :size="13" />
+                    <NIcon :component="MailOutline" :size="16" />
                   </div>
                   <span>{{ order.snapEmail }}</span>
                 </div>
@@ -185,12 +196,16 @@ function onRegenerate() {
             >
               <div class="od-side-card__title">Comunicación</div>
               <button class="od-status-btn od-status-btn--wa" @click="onSendPaymentInfo">
-                <NIcon :component="LogoWhatsapp" :size="13" />
+                <NIcon :component="LogoWhatsapp" :size="16" />
                 {{
                   order.status === ORDER_STATUS.PAYMENT_INFO_SENT
                     ? 'Reenviar info de pago'
                     : 'Enviar info de pago'
                 }}
+              </button>
+              <button class="od-status-btn od-status-btn--gift" @click="onMarkGift">
+                <NIcon :component="GiftOutline" :size="16" />
+                Enviar como regalo
               </button>
             </div>
 
@@ -198,6 +213,7 @@ function onRegenerate() {
               <div class="od-side-card__title">Estado del pedido</div>
               <div class="od-status-list">
                 <button
+                  v-if="order.status !== ORDER_STATUS.GIFTED"
                   :class="[
                     'od-status-btn',
                     {
@@ -213,7 +229,7 @@ function onRegenerate() {
                   "
                   @click="onConfirmPayment"
                 >
-                  <NIcon :component="CheckmarkOutline" :size="13" />
+                  <NIcon :component="CheckmarkOutline" :size="16" />
                   {{
                     order.status === ORDER_STATUS.PENDING ||
                     order.status === ORDER_STATUS.PAYMENT_INFO_SENT
@@ -222,15 +238,37 @@ function onRegenerate() {
                   }}
                 </button>
                 <button
+                  v-else
+                  class="od-status-btn od-status-btn--gift od-status-btn--current-gift"
+                  disabled
+                >
+                  <NIcon :component="GiftOutline" :size="18" />
+                  Regalado 🎁
+                </button>
+                <button
                   :class="[
                     'od-status-btn',
-                    { 'od-status-btn--current': order.status === ORDER_STATUS.DELIVERED },
+                    {
+                      'od-status-btn--current':
+                        order.status === ORDER_STATUS.DELIVERED ||
+                        (order.status === ORDER_STATUS.GIFTED && !!order.deliveredAt),
+                    },
                   ]"
-                  :disabled="order.status !== ORDER_STATUS.PAID"
+                  :disabled="
+                    !(
+                      order.status === ORDER_STATUS.PAID ||
+                      (order.status === ORDER_STATUS.GIFTED && !order.deliveredAt)
+                    )
+                  "
                   @click="onSendDelivery"
                 >
-                  <NIcon :component="SendOutline" :size="13" />
-                  {{ order.status === ORDER_STATUS.DELIVERED ? 'Entregado ✓' : 'Enviar fotos' }}
+                  <NIcon :component="SendOutline" :size="16" />
+                  {{
+                    order.status === ORDER_STATUS.DELIVERED ||
+                    (order.status === ORDER_STATUS.GIFTED && order.deliveredAt)
+                      ? 'Entregado ✓'
+                      : 'Enviar fotos'
+                  }}
                 </button>
                 <button
                   :class="[
@@ -239,12 +277,12 @@ function onRegenerate() {
                     { 'od-status-btn--current-cancel': order.status === ORDER_STATUS.CANCELLED },
                   ]"
                   :disabled="
-                    order.status !== ORDER_STATUS.PENDING &&
-                    order.status !== ORDER_STATUS.PAYMENT_INFO_SENT
+                    order.status === ORDER_STATUS.DELIVERED ||
+                    order.status === ORDER_STATUS.CANCELLED
                   "
                   @click="onCancel"
                 >
-                  <NIcon :component="CloseOutline" :size="13" />
+                  <NIcon :component="CloseOutline" :size="16" />
                   {{ order.status === ORDER_STATUS.CANCELLED ? 'Cancelado' : 'Cancelar pedido' }}
                 </button>
               </div>

@@ -6,7 +6,7 @@ import { NGrid, NGridItem, NSpin } from 'naive-ui'
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import { useEventRetouchOrdersListSource } from '../../composables/queue-sources/use-event-retouch-orders-source'
 import { RETOUCH_ROUTE_NAMES } from '../../constants/retouch-routes'
-import { OPERATOR_PATH, OPERATOR_ROUTE_NAMES } from '@/features/operator/routes'
+import { EVENTS_PATH } from '@/features/events/routes'
 import RetouchOrderCard from '../components/RetouchOrderCard/RetouchOrderCard.vue'
 import RetouchPageHeader from '../components/RetouchPageHeader/RetouchPageHeader.vue'
 import RetouchEmptyState from '../components/RetouchEmptyState/RetouchEmptyState.vue'
@@ -38,7 +38,8 @@ const goWorkspace = (orderId?: string) =>
     query: orderId ? { orderId } : undefined,
   })
 
-const goDashboard = () => router.push({ name: OPERATOR_ROUTE_NAMES.DASHBOARD })
+const eventDetailPath = computed(() => `${EVENTS_PATH}/${eventSlug.value}`)
+const goDashboard = () => router.push(eventDetailPath.value)
 
 const handleCardClick = (order: IRetouchQueueOrder) => goWorkspace(order.orderId)
 
@@ -72,7 +73,7 @@ const sentinel = useInfiniteScrollTrigger(() => source.fetchNextPage(), {
         :subtitle="headerSubtitle"
         :total-orders="source.total.value"
         :total-pending-photos="isPendingScope ? totalPendingPhotos : undefined"
-        :back-to="OPERATOR_PATH"
+        :back-to="eventDetailPath"
         :hide-start-cta="isCompletedScope"
         :start-disabled="source.orders.value.length === 0"
         @start="goWorkspace()"

@@ -7,6 +7,7 @@ import {
   CheckmarkOutline,
   CloseCircleOutline,
   EyeOutline,
+  GiftOutline,
   LogoWhatsapp,
   MailOutline,
   RefreshOutline,
@@ -57,6 +58,7 @@ const showLatestBadge = computed(() => props.isLatestForCustomer && props.groupT
 const emit = defineEmits<{
   view: [id: string]
   confirmPayment: [id: string]
+  markGift: [id: string]
   sendDelivery: [id: string]
   sendPaymentInfo: [order: IOrderListItem]
   resendDelivery: [order: IOrderListItem]
@@ -79,6 +81,8 @@ const statusIcon = computed(() => {
       return CheckmarkCircleOutline
     case ORDER_STATUS.DELIVERED:
       return CheckmarkDoneOutline
+    case ORDER_STATUS.GIFTED:
+      return GiftOutline
     case ORDER_STATUS.CANCELLED:
       return CloseCircleOutline
     default:
@@ -99,19 +103,21 @@ interface ITimelineStep {
 
 const timelineSteps = computed<ITimelineStep[]>(() => {
   const s = props.order.status
+  const isGift = s === ORDER_STATUS.GIFTED
   const infoReached =
     props.order.notifiedAt !== null ||
     s === ORDER_STATUS.PAYMENT_INFO_SENT ||
     s === ORDER_STATUS.PAID ||
-    s === ORDER_STATUS.DELIVERED
-  const paidReached =
-    props.order.paidAt !== null || s === ORDER_STATUS.PAID || s === ORDER_STATUS.DELIVERED
+    s === ORDER_STATUS.DELIVERED ||
+    isGift
+  const paidOrGiftReached =
+    isGift || props.order.paidAt !== null || s === ORDER_STATUS.PAID || s === ORDER_STATUS.DELIVERED
   const deliveredReached = props.order.deliveredAt !== null || s === ORDER_STATUS.DELIVERED
 
   return [
     { key: 'created', label: 'Creado', reached: true },
     { key: 'info', label: 'Info pago', reached: infoReached },
-    { key: 'paid', label: 'Pagado', reached: paidReached },
+    { key: 'paid', label: isGift ? 'Regalo' : 'Pagado', reached: paidOrGiftReached },
     { key: 'delivered', label: 'Entregado', reached: deliveredReached },
   ]
 })
@@ -129,7 +135,7 @@ const showTimeline = computed(() => props.order.status !== ORDER_STATUS.CANCELLE
     <!-- Header strip (status-tinted) -->
     <header :class="['oc__header', `oc__header--${order.status}`]">
       <div class="oc__header-left">
-        <NIcon :component="statusIcon" :size="14" />
+        <NIcon :component="statusIcon" :size="16" />
         <span class="oc__header-label">{{ statusConfig.label }}</span>
       </div>
       <div class="oc__header-right">
@@ -200,49 +206,67 @@ const showTimeline = computed(() => props.order.status !== ORDER_STATUS.CANCELLE
         "
       >
         <button class="oc__btn oc__btn--wa" @click.stop="emit('sendPaymentInfo', order)">
-          <NIcon :component="LogoWhatsapp" :size="13" />
+          <NIcon :component="LogoWhatsapp" :size="16" />
           {{ order.status === ORDER_STATUS.PAYMENT_INFO_SENT ? 'Reenviar info' : 'Info de pago' }}
         </button>
         <button class="oc__btn oc__btn--confirm" @click.stop="emit('confirmPayment', order.id)">
-          <NIcon :component="CheckmarkOutline" :size="13" />
+          <NIcon :component="CheckmarkOutline" :size="16" />
           Confirmar pago
+        </button>
+        <button
+          class="oc__icon-btn oc__icon-btn--gift"
+          title="Enviar como regalo"
+          aria-label="Enviar como regalo"
+          @click.stop="emit('markGift', order.id)"
+        >
+          <NIcon :component="GiftOutline" :size="19" />
         </button>
       </template>
 
       <button
-        v-else-if="order.status === ORDER_STATUS.PAID"
+        v-else-if="
+          order.status === ORDER_STATUS.PAID ||
+          (order.status === ORDER_STATUS.GIFTED && !order.deliveredAt)
+        "
         class="oc__btn oc__btn--send"
         @click.stop="emit('sendDelivery', order.id)"
       >
-        <NIcon :component="SendOutline" :size="13" />
+        <NIcon :component="SendOutline" :size="16" />
         Enviar fotos
       </button>
 
       <button
-        v-else-if="order.status === ORDER_STATUS.DELIVERED && order.hasDeliveryLink"
+        v-else-if="
+          (order.status === ORDER_STATUS.DELIVERED || order.status === ORDER_STATUS.GIFTED) &&
+          order.hasDeliveryLink
+        "
         class="oc__btn oc__btn--wa"
         @click.stop="emit('resendDelivery', order)"
       >
-        <NIcon :component="LogoWhatsapp" :size="13" />
+        <NIcon :component="LogoWhatsapp" :size="16" />
         Reenviar enlace
       </button>
 
       <button
-        v-else-if="order.status === ORDER_STATUS.DELIVERED && !order.hasDeliveryLink"
+        v-else-if="
+          (order.status === ORDER_STATUS.DELIVERED ||
+            (order.status === ORDER_STATUS.GIFTED && order.deliveredAt)) &&
+          !order.hasDeliveryLink
+        "
         class="oc__btn"
         @click.stop="emit('regenerate', order.id)"
       >
-        <NIcon :component="RefreshOutline" :size="13" />
+        <NIcon :component="RefreshOutline" :size="16" />
         Regenerar enlace
       </button>
 
       <button v-else class="oc__btn" @click.stop="emit('view', order.id)">
-        <NIcon :component="EyeOutline" :size="13" />
+        <NIcon :component="EyeOutline" :size="16" />
         Ver detalles
       </button>
 
       <button class="oc__icon-btn" @click.stop="emit('view', order.id)">
-        <NIcon :component="EyeOutline" :size="14" />
+        <NIcon :component="EyeOutline" :size="18" />
       </button>
     </div>
   </div>

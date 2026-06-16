@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { NIcon, NPopover } from 'naive-ui'
+import { InformationCircleOutline } from '@vicons/ionicons5'
 import type { IOrderStats } from '../../../types/responses/order-stats.response'
+import { formatCurrency } from '@/features/pricing/utils/format-currency'
 
 const props = defineProps<{
   stats: IOrderStats | undefined
@@ -10,10 +13,11 @@ interface IStatCard {
   key: string
   value: number
   label: string
-  variant: 'error' | 'warning' | 'info' | 'success'
+  variant: 'error' | 'warning' | 'info' | 'success' | 'gift'
 }
 
 const totalOrders = computed(() => props.stats?.totalOrders ?? 0)
+const totalRevenue = computed(() => formatCurrency(props.stats?.totalRevenue ?? 0, 'USD'))
 
 const breakdown = computed<IStatCard[]>(() => [
   {
@@ -40,6 +44,12 @@ const breakdown = computed<IStatCard[]>(() => [
     label: 'Entregados',
     variant: 'success',
   },
+  {
+    key: 'gifted',
+    value: props.stats?.giftedCount ?? 0,
+    label: 'Regaladas',
+    variant: 'gift',
+  },
 ])
 
 const breakdownSum = computed(() => breakdown.value.reduce((acc, item) => acc + item.value, 0))
@@ -57,6 +67,33 @@ const segments = computed(() =>
 <template>
   <!-- Desktop / tablet: cards individuales -->
   <div class="stats-row stats-row--cards">
+    <div class="stat-card stat-card--revenue">
+      <span class="stat-card__num">{{ totalRevenue }}</span>
+      <span class="stat-card__label">
+        Ingresos
+        <NPopover trigger="click" placement="top" :show-arrow="true">
+          <template #trigger>
+            <button
+              type="button"
+              class="stat-card__info"
+              aria-label="Cómo se calculan los ingresos"
+            >
+              <NIcon :component="InformationCircleOutline" :size="14" />
+            </button>
+          </template>
+          <div class="stat-card__popover">
+            <p class="stat-card__popover-title">Cómo se calculan los ingresos</p>
+            <p class="stat-card__popover-text">
+              Suma del subtotal de los pedidos pagados y entregados. No incluye pedidos pendientes,
+              con info enviada, regalados ni cancelados.
+            </p>
+            <p class="stat-card__popover-hint">
+              Al filtrar por un evento se muestran solo sus ingresos.
+            </p>
+          </div>
+        </NPopover>
+      </span>
+    </div>
     <div class="stat-card stat-card--total">
       <span class="stat-card__num">{{ totalOrders }}</span>
       <span class="stat-card__label">Total pedidos</span>
@@ -77,6 +114,33 @@ const segments = computed(() =>
     <div class="stats-bar__header">
       <span class="stats-bar__title">Total pedidos</span>
       <span class="stats-bar__total">{{ totalOrders }}</span>
+    </div>
+    <div class="stats-bar__header stats-bar__header--revenue">
+      <span class="stats-bar__title">
+        Ingresos
+        <NPopover trigger="click" placement="top" :show-arrow="true">
+          <template #trigger>
+            <button
+              type="button"
+              class="stat-card__info"
+              aria-label="Cómo se calculan los ingresos"
+            >
+              <NIcon :component="InformationCircleOutline" :size="14" />
+            </button>
+          </template>
+          <div class="stat-card__popover">
+            <p class="stat-card__popover-title">Cómo se calculan los ingresos</p>
+            <p class="stat-card__popover-text">
+              Suma del subtotal de los pedidos pagados y entregados. No incluye pedidos pendientes,
+              con info enviada, regalados ni cancelados.
+            </p>
+            <p class="stat-card__popover-hint">
+              Al filtrar por un evento se muestran solo sus ingresos.
+            </p>
+          </div>
+        </NPopover>
+      </span>
+      <span class="stats-bar__total">{{ totalRevenue }}</span>
     </div>
     <div class="stats-bar__track" :aria-label="`Distribución de ${totalOrders} pedidos`">
       <div

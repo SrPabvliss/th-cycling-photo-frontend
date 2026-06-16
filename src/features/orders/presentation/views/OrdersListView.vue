@@ -42,10 +42,16 @@ const filters = ref<IOrderListFilters>({
 
 const { data, isPending, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
   useOrdersListQuery(filters, ORDERS_PER_PAGE)
-const { data: stats } = useOrdersStatsQuery()
+const statsEventId = computed(() => filters.value.eventId)
+const { data: stats } = useOrdersStatsQuery(statsEventId)
 
-const { handleConfirmPayment, handleNotifyPaymentInfo, handleSendDelivery, handleRegenerate } =
-  useOrderActions()
+const {
+  handleConfirmPayment,
+  handleMarkGift,
+  handleNotifyPaymentInfo,
+  handleSendDelivery,
+  handleRegenerate,
+} = useOrderActions()
 
 const activeStatus = computed(() => filters.value.status as OrderStatus | null)
 
@@ -165,6 +171,7 @@ async function handleResendDelivery(order: IOrderListItem) {
               :is-latest-for-customer="row.isLatestForCustomer"
               @view="handleView"
               @confirm-payment="handleConfirmPayment"
+              @mark-gift="handleMarkGift"
               @send-delivery="handleSendDelivery"
               @send-payment-info="handleSendPaymentInfo"
               @resend-delivery="handleResendDelivery"

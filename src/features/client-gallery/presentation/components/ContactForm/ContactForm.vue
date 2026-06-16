@@ -16,7 +16,8 @@ import OrderSummary from '../OrderSummary/OrderSummary.vue'
 defineProps<{
   token: string
   eventName: string
-  eventDate: Date
+  startDate: Date
+  endDate: Date
   selectedPhotos: IPreviewPhoto[]
   photoCount: number
   isSubmitting: boolean
@@ -57,7 +58,8 @@ const form = useForm({
       <!-- LEFT: Summary -->
       <OrderSummary
         :event-name="eventName"
-        :event-date="eventDate"
+        :start-date="startDate"
+        :end-date="endDate"
         :selected-photos="selectedPhotos"
         :photo-count="photoCount"
       />

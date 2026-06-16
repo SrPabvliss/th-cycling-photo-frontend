@@ -5,7 +5,7 @@ import { useMessage } from 'naive-ui'
 import { USER_ROLES } from '@/core/auth/user-roles'
 import { connectSocket, disconnectSocket, getSocket } from '@/core/socket/socket-client'
 import { useAuthStore } from '@/features/auth/stores/auth.store'
-import { OPERATOR_QUERY_KEYS } from '@/features/operator/constants/operator-query-keys'
+import { API_ROUTES } from '@/core/api/api-routes'
 import { ORDER_QUERY_KEYS } from '@/features/orders/constants/query-keys'
 import { NOTIFICATION_QUERY_KEYS } from '../constants/query-keys'
 import { useNotificationStore } from '../stores/notification.store'
@@ -52,7 +52,7 @@ export function useNotificationSocket() {
       role === USER_ROLES.OPERATOR &&
       (payload.type === 'order.paid' || payload.type === 'order.retouch_completed')
     ) {
-      queryClient.invalidateQueries({ queryKey: OPERATOR_QUERY_KEYS.all() })
+      queryClient.invalidateQueries({ queryKey: [API_ROUTES.OPERATOR.BASE] })
     }
 
     // Show toast

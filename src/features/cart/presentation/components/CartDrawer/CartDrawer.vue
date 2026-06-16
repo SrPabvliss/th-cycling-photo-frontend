@@ -4,11 +4,15 @@ import { NAlert, NButton, NDrawer, NDrawerContent, NEmpty, NFlex, NIcon } from '
 import { CloseCircleOutline, CartOutline, LogInOutline } from '@vicons/ionicons5'
 
 import { getGalleryUrl } from '@/shared/utils/cdn.utils'
+import PhotoLightbox from '@/shared/components/PhotoLightbox/PhotoLightbox.vue'
+import { useLightbox } from '@/shared/composables/use-lightbox'
+import type { ICartPhoto } from '../../../types/responses/cart.response'
 import { useAuth } from '@/features/auth/composables/use-auth'
 import { useCartStore } from '../../../stores/cart.store'
 import { useRemoveFromCart } from '../../../composables/mutations/use-remove-from-cart'
 import { useCartPricing } from '@/features/cart/composables/use-cart-pricing'
 import PricingTotalBlock from '@/features/pricing/presentation/components/PricingTotalBlock/PricingTotalBlock.vue'
+import PhotoPriceStrip from '@/features/pricing/presentation/components/PhotoPriceStrip/PhotoPriceStrip.vue'
 
 defineProps<{
   show: boolean
@@ -24,6 +28,13 @@ const { isAuthenticated } = useAuth()
 const { mutate: removeFromCart } = useRemoveFromCart()
 const cartPricing = useCartPricing()
 
+const {
+  photos: lightboxPhotos,
+  index: lightboxIndex,
+  show: showLightbox,
+  open: openLightbox,
+} = useLightbox<ICartPhoto>()
+
 function goToCheckout() {
   emit('update:show', false)
   router.push('/checkout')
@@ -36,7 +47,7 @@ function goToLogin() {
 </script>
 
 <template>
-  <NDrawer :show="show" :width="380" placement="right" @update:show="emit('update:show', $event)">
+  <NDrawer :show="show" :width="420" placement="right" @update:show="emit('update:show', $event)">
     <NDrawerContent title="Tu carrito" closable>
       <NEmpty
         v-if="cartStore.totalCount === 0"
@@ -57,11 +68,25 @@ function goToLogin() {
             </div>
 
             <div class="cart-group__thumbs">
-              <div v-for="photo in group.photos" :key="photo.id" class="cart-thumb">
-                <img :src="getGalleryUrl(photo.publicSlug)" alt="" />
-                <button class="cart-thumb__remove" @click="removeFromCart(photo.id)">
-                  <NIcon :component="CloseCircleOutline" :size="12" />
-                </button>
+              <div v-for="(photo, index) in group.photos" :key="photo.id" class="cart-card">
+                <div class="cart-thumb">
+                  <img
+                    :src="getGalleryUrl(photo.publicSlug)"
+                    alt=""
+                    loading="lazy"
+                    @click="openLightbox(group.photos, index)"
+                  />
+                  <button class="cart-thumb__remove" @click.stop="removeFromCart(photo.id)">
+                    <NIcon :component="CloseCircleOutline" :size="12" />
+                  </button>
+                </div>
+                <PhotoPriceStrip
+                  v-if="cartPricing.preview.value"
+                  :unit-price="cartPricing.preview.value.unitPrice"
+                  :base-price="cartPricing.basePrice.value"
+                  :currency="cartPricing.currency.value"
+                  :is-loading="cartPricing.isLoading.value"
+                />
               </div>
             </div>
           </div>
@@ -79,6 +104,7 @@ function goToLogin() {
               :subtotal="cartPricing.preview.value.subtotal"
               :unit-price="cartPricing.preview.value.unitPrice"
               :currency="cartPricing.currency.value"
+              :tier="cartPricing.preview.value.tier"
               :next-tier="cartPricing.preview.value.nextTier"
               :photos-to-next-tier="cartPricing.preview.value.photosToNextTier"
               :is-loading="cartPricing.isLoading.value"
@@ -109,6 +135,13 @@ function goToLogin() {
       </template>
     </NDrawerContent>
   </NDrawer>
+
+  <PhotoLightbox
+    :photos="lightboxPhotos"
+    :initial-index="lightboxIndex"
+    :show="showLightbox"
+    @update:show="showLightbox = $event"
+  />
 </template>
 
 <style scoped src="./cart-drawer.css" />

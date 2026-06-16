@@ -132,6 +132,7 @@ export const API_ROUTES = {
     STATS: `${ORDERS_BASE}/stats`,
     NOTIFY_PAYMENT_INFO: (id: string) => `${ORDERS_BASE}/${id}/notify-payment-info`,
     CONFIRM_PAYMENT: (id: string) => `${ORDERS_BASE}/${id}/confirm-payment`,
+    GIFT: (id: string) => `${ORDERS_BASE}/${id}/gift`,
     CANCEL: (id: string) => `${ORDERS_BASE}/${id}/cancel`,
     SEND_DELIVERY: (id: string) => `${ORDERS_BASE}/${id}/send-delivery`,
     REGENERATE_DELIVERY: (id: string) => `${ORDERS_BASE}/${id}/regenerate-delivery`,
