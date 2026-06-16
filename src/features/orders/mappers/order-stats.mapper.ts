@@ -10,5 +10,6 @@ export function toOrderStats(api: IApiOrderStats): IOrderStats {
     deliveredCount: api.deliveredCount,
     giftedCount: api.giftedCount,
     cancelledCount: api.cancelledCount,
+    totalRevenue: Number(api.totalRevenue),
   }
 }

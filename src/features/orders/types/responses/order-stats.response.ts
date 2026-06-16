@@ -8,6 +8,8 @@ export interface IApiOrderStats {
   deliveredCount: number
   giftedCount: number
   cancelledCount: number
+  /** Decimal string, e.g. "1234.50" */
+  totalRevenue: string
 }
 
 /** Frontend domain type (identical — no transformation needed) */
@@ -20,4 +22,6 @@ export interface IOrderStats {
   deliveredCount: number
   giftedCount: number
   cancelledCount: number
+  /** Numeric revenue (USD assumed) */
+  totalRevenue: number
 }
