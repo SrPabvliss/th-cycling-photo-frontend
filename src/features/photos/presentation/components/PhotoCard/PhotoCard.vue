@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { NFlex, NIcon, NTag } from 'naive-ui'
-import { CalendarOutline, CheckmarkCircle } from '@vicons/ionicons5'
+import { CalendarOutline, CheckmarkCircle, TrashOutline } from '@vicons/ionicons5'
 
 import { formatRelativeTime } from '@/shared/utils/date.utils'
 import { PHOTO_STATUS_CONFIG } from '../../../constants/status-config'
@@ -10,11 +10,14 @@ const props = defineProps<{
   photo: IPhotoListItem
   selectable?: boolean
   selected?: boolean
+  deletable?: boolean
+  deleting?: boolean
 }>()
 
 const emit = defineEmits<{
   click: [slug: string]
   select: [id: string]
+  delete: [id: string]
 }>()
 
 function handleClick() {
@@ -66,6 +69,16 @@ function handleCheckboxClick(e: MouseEvent) {
       <div v-if="props.photo.reviewedAt" class="photo-card__classified-badge">
         <NIcon :component="CheckmarkCircle" :size="20" color="#18a058" />
       </div>
+      <button
+        v-if="deletable"
+        type="button"
+        class="photo-card__delete"
+        title="Eliminar foto"
+        :disabled="deleting"
+        @click.stop="emit('delete', props.photo.id)"
+      >
+        <NIcon :component="TrashOutline" :size="18" />
+      </button>
     </div>
 
     <div class="photo-card__body">

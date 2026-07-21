@@ -1,24 +1,55 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NCard, NFlex, NIcon, NResult, NTag } from 'naive-ui'
-import { CalendarOutline, CheckmarkDoneOutline, ImageOutline } from '@vicons/ionicons5'
+import { NButton, NCard, NFlex, NIcon, NResult, NTag, useDialog } from 'naive-ui'
+import {
+  CalendarOutline,
+  CheckmarkDoneOutline,
+  ImageOutline,
+  TrashOutline,
+} from '@vicons/ionicons5'
 
 import { REVIEW_ROUTE_NAMES } from '@/features/review/routes'
 
 import { formatRelativeTime } from '@/shared/utils/date.utils'
 import { formatFileSize } from '@/shared/utils/format.utils'
 import PageHeader from '@/shared/components/PageHeader.vue'
+import { useDeletePhoto } from '../../composables/mutations/use-delete-photo'
 import { usePhotoDetailBySlugQuery } from '../../composables/queries/use-photo-detail-by-slug'
+import { PHOTO_ROUTE_NAMES } from '../../routes'
 import { PHOTO_STATUS_CONFIG } from '../../constants/status-config'
 import PhotoBibsGrid from '../components/PhotoBibsGrid/PhotoBibsGrid.vue'
 import PhotoColorsList from '../components/PhotoColorsList/PhotoColorsList.vue'
 
 const route = useRoute()
 const router = useRouter()
+const dialog = useDialog()
 const slug = computed(() => route.params.slug as string)
 
 const { data: photo, isPending, isError, refetch } = usePhotoDetailBySlugQuery(slug)
+const { mutate: deletePhoto, isPending: isDeleting } = useDeletePhoto()
+
+function handleDelete() {
+  if (!photo.value) return
+  const id = photo.value.id
+  const eventSlug = photo.value.eventSlug
+  dialog.warning({
+    title: 'Eliminar foto',
+    content: '¿Eliminar esta foto? Esta acción no se puede deshacer.',
+    positiveText: 'Eliminar',
+    negativeText: 'Cancelar',
+    positiveButtonProps: { type: 'error' },
+    onPositiveClick: () => {
+      deletePhoto(
+        { id },
+        {
+          onSuccess: () =>
+            router.push({ name: PHOTO_ROUTE_NAMES.GALLERY, params: { slug: eventSlug } }),
+        },
+      )
+    },
+  })
+}
 
 function goToReview() {
   if (!photo.value?.eventSlug) return
@@ -118,6 +149,19 @@ function handleEditReview() {
                 </div>
               </NFlex>
             </NFlex>
+
+            <div class="detail-info__danger">
+              <NButton
+                quaternary
+                type="error"
+                size="small"
+                :loading="isDeleting"
+                @click="handleDelete"
+              >
+                <template #icon><NIcon :component="TrashOutline" /></template>
+                Eliminar foto
+              </NButton>
+            </div>
           </aside>
 
           <section class="detail-layout__photo">
