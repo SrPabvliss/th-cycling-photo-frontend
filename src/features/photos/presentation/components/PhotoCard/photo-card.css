@@ -83,6 +83,41 @@
   height: 24px;
 }
 
+.photo-card__delete {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  z-index: 2;
+  transition:
+    opacity 0.15s,
+    background 0.15s;
+}
+
+.photo-card:hover .photo-card__delete {
+  opacity: 1;
+}
+
+.photo-card__delete:hover {
+  background: var(--tt-error, #d03050);
+}
+
+.photo-card__delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .photo-card__body {
   padding: 12px;
 }

@@ -82,6 +82,7 @@ export const API_ROUTES = {
     DELETE_BIB: (photoId: string, bibId: string) => `${PHOTOS_BASE}/${photoId}/bibs/${bibId}`,
     DELETE_COLOR: (photoId: string, colorId: string) =>
       `${PHOTOS_BASE}/${photoId}/colors/${colorId}`,
+    DELETE: (id: string) => `${PHOTOS_BASE}/${id}`,
   },
   PHOTO_CATEGORIES: {
     GET_ALL: PHOTO_CATEGORIES_BASE,
