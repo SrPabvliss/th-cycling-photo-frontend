@@ -13,12 +13,14 @@ import {
   NResult,
   NSelect,
   NSpin,
+  useDialog,
 } from 'naive-ui'
 import { CloseOutline } from '@vicons/ionicons5'
 
 import { useEventDetailQuery } from '@/features/events/composables/queries/use-event-detail'
 import { usePhotoCategoriesQuery } from '@/features/photo-categories/composables/queries/use-photo-categories'
 import { useBulkAssignCategory } from '@/features/photo-categories/composables/mutations/use-bulk-assign-category'
+import { useDeletePhoto } from '../../composables/mutations/use-delete-photo'
 import { usePhotoSelectionStore } from '@/features/preview-links/stores/photo-selection.store'
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import { usePhotosSearchInfiniteQuery } from '../../composables/queries/use-photos-search'
@@ -32,7 +34,9 @@ import GalleryFilterSidebar from '../components/GalleryFilterSidebar/GalleryFilt
 import PhotoSelectionBar from '../components/PhotoSelectionBar/PhotoSelectionBar.vue'
 
 const router = useRouter()
+const dialog = useDialog()
 const selectionStore = usePhotoSelectionStore()
+const { mutate: deletePhoto } = useDeletePhoto()
 
 const slug = computed(() => router.currentRoute.value.params.slug as string)
 const PHOTOS_PER_PAGE = 30
@@ -89,6 +93,33 @@ function handlePhotoClick(slug: string) {
 
 function handleGeneratePreview() {
   router.push({ name: 'preview-links-create', params: { eventId: eventId.value } })
+}
+
+const deletingIds = ref(new Set<string>())
+
+function handlePhotoDelete(id: string) {
+  if (deletingIds.value.has(id)) return
+  dialog.warning({
+    title: 'Eliminar foto',
+    content: '¿Eliminar esta foto? Esta acción no se puede deshacer.',
+    positiveText: 'Eliminar',
+    negativeText: 'Cancelar',
+    positiveButtonProps: { type: 'error' },
+    onPositiveClick: () => {
+      deletingIds.value = new Set(deletingIds.value).add(id)
+      deletePhoto(
+        { id },
+        {
+          onSuccess: () => selectionStore.deselectPhotos([id]),
+          onSettled: () => {
+            const next = new Set(deletingIds.value)
+            next.delete(id)
+            deletingIds.value = next
+          },
+        },
+      )
+    },
+  })
 }
 
 const showCategoryModal = ref(false)
@@ -241,8 +272,11 @@ onUnmounted(() => {
                     :photo="photo"
                     :selectable="selectionStore.isSelectionMode"
                     :selected="selectionStore.isSelected(photo.id)"
+                    :deletable="true"
+                    :deleting="deletingIds.has(photo.id)"
                     @click="handlePhotoClick"
                     @select="handlePhotoSelect"
+                    @delete="handlePhotoDelete"
                   />
                 </NGridItem>
               </NGrid>
