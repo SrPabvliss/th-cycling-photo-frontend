@@ -12,6 +12,7 @@ import TitanLogo from '@/core/layout/public/TitanLogo.vue'
 import AuthModeTabs from '../components/AuthModeTabs/AuthModeTabs.vue'
 import { useAuth } from '../../composables/use-auth'
 import { LOGIN_FORM_DEFAULTS, loginFormSchema } from '../../constants/login-form.schema'
+import { AUTH_ROUTE_NAMES } from '../../routes'
 
 const router = useRouter()
 const route = useRoute()
@@ -118,6 +119,12 @@ const form = useForm({
             </template>
           </form.Subscribe>
         </form>
+
+        <p class="login-forgot">
+          <RouterLink :to="{ name: AUTH_ROUTE_NAMES.FORGOT_PASSWORD }">
+            ¿Olvidaste tu contraseña?
+          </RouterLink>
+        </p>
       </NCard>
     </div>
   </PublicLayout>
