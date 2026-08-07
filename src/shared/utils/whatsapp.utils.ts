@@ -73,6 +73,7 @@ export function buildPaymentInfoTemplate(data: {
     `- Tipo de cuenta: ${PAYMENT_INFO.accountType}`,
     `- Número: ${PAYMENT_INFO.accountNumber}`,
     `- Titular: ${PAYMENT_INFO.accountHolder}`,
+    `- Cédula: ${PAYMENT_INFO.accountHolderId}`,
     '',
     'Cuando realices el pago, por favor envíanos el comprobante por este medio.',
     '',
@@ -95,5 +96,5 @@ export function buildDeliveryTemplate(data: {
   photoCount: number
   deliveryUrl: string
 }): string {
-  return `Hola ${data.customerFirstName}, tu pago fue confirmado. Aquí tienes tus ${data.photoCount} fotos en alta calidad: ${data.deliveryUrl}. El link estará disponible por 7 días. ¡Gracias!`
+  return `¡Muchas gracias ${data.customerFirstName}! Tu pago fue confirmado. Aquí tienes tus ${data.photoCount} fotos en alta calidad: ${data.deliveryUrl}. El link estará disponible por 7 días. ¡Gracias!`
 }
