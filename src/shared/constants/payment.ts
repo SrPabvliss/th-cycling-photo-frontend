@@ -8,4 +8,5 @@ export const PAYMENT_INFO = {
   accountType: 'Cuenta de ahorro transaccional',
   accountNumber: '3740360400',
   accountHolder: 'Franklin Villacrés',
+  accountHolderId: '1802727816',
 } as const
