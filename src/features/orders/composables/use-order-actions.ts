@@ -9,7 +9,16 @@ import { useNotifyPaymentInfo } from './mutations/use-notify-payment-info'
 import { useSendDelivery } from './mutations/use-send-delivery'
 import { useCancelOrder } from './mutations/use-cancel-order'
 import { useRegenerateDelivery } from './mutations/use-regenerate-delivery'
+import { buildConversionMessage } from '../utils/conversion-message'
+import { useConvertToGift } from './mutations/use-convert-to-gift'
+import { useConvertToSale } from './mutations/use-convert-to-sale'
 import type { IOrderListItem } from '../types/responses/order-list.response'
+
+interface IConvertibleOrder {
+  id: string
+  subtotal: number | null
+  snapCurrency: string | null
+}
 
 export function useOrderActions() {
   const dialog = useDialog()
@@ -21,6 +30,8 @@ export function useOrderActions() {
   const { mutateAsync: sendDelivery } = useSendDelivery()
   const { mutateAsync: cancelOrder } = useCancelOrder()
   const { mutateAsync: regenerateDelivery, isPending: isRegenerating } = useRegenerateDelivery()
+  const { mutateAsync: convertToSale, isPending: isConvertingToSale } = useConvertToSale()
+  const { mutateAsync: convertToGift, isPending: isConvertingToGift } = useConvertToGift()
 
   function handleConfirmPayment(orderId: string) {
     dialog.info({
@@ -47,6 +58,34 @@ export function useOrderActions() {
       onPositiveClick: async () => {
         await markGift(orderId)
         message.success('Pedido marcado como regalo')
+      },
+    })
+  }
+
+  function handleConvertToSale(order: IConvertibleOrder) {
+    dialog.info({
+      title: 'Cambiar a venta',
+      content: buildConversionMessage('sale', order.subtotal, order.snapCurrency),
+      positiveText: 'Cambiar a venta',
+      negativeText: 'Cancelar',
+      onPositiveClick: async () => {
+        await convertToSale(order.id)
+        message.success('Pedido cambiado a venta')
+      },
+    })
+  }
+
+  function handleConvertToGift(order: IConvertibleOrder) {
+    dialog.create({
+      title: 'Cambiar a regalo',
+      content: buildConversionMessage('gift', order.subtotal, order.snapCurrency),
+      icon: () => h(NIcon, { color: '#7c3aed' }, { default: () => h(GiftOutline) }),
+      positiveText: 'Cambiar a regalo',
+      negativeText: 'Cancelar',
+      positiveButtonProps: { color: '#7c3aed', textColor: '#ffffff' },
+      onPositiveClick: async () => {
+        await convertToGift(order.id)
+        message.success('Pedido cambiado a regalo')
       },
     })
   }
@@ -123,10 +162,14 @@ export function useOrderActions() {
   return {
     handleConfirmPayment,
     handleMarkGift,
+    handleConvertToSale,
+    handleConvertToGift,
     handleNotifyPaymentInfo,
     handleSendDelivery,
     handleCancel,
     handleRegenerate,
     isRegenerating,
+    isConvertingToSale,
+    isConvertingToGift,
   }
 }
