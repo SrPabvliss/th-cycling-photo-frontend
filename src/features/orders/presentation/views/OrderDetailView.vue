@@ -38,10 +38,14 @@ const message = useMessage()
 const {
   handleConfirmPayment,
   handleMarkGift,
+  handleConvertToSale,
+  handleConvertToGift,
   handleSendDelivery,
   handleCancel,
   handleRegenerate,
   isRegenerating,
+  isConvertingToSale,
+  isConvertingToGift,
 } = useOrderActions()
 const { mutateAsync: notifyPaymentInfo } = useNotifyPaymentInfo()
 
@@ -51,6 +55,26 @@ function onConfirmPayment() {
 
 function onMarkGift() {
   if (order.value) handleMarkGift(order.value.id)
+}
+
+function onConvertToSale() {
+  if (order.value) {
+    handleConvertToSale({
+      id: order.value.id,
+      subtotal: order.value.subtotal,
+      snapCurrency: order.value.snapCurrency,
+    })
+  }
+}
+
+function onConvertToGift() {
+  if (order.value) {
+    handleConvertToGift({
+      id: order.value.id,
+      subtotal: order.value.subtotal,
+      snapCurrency: order.value.snapCurrency,
+    })
+  }
 }
 
 function onSendDelivery() {
@@ -237,14 +261,23 @@ function onRegenerate() {
                       : 'Pago confirmado ✓'
                   }}
                 </button>
-                <button
-                  v-else
-                  class="od-status-btn od-status-btn--gift od-status-btn--current-gift"
-                  disabled
-                >
-                  <NIcon :component="GiftOutline" :size="18" />
-                  Regalado 🎁
-                </button>
+                <template v-else>
+                  <button
+                    class="od-status-btn od-status-btn--gift od-status-btn--current-gift"
+                    disabled
+                  >
+                    <NIcon :component="GiftOutline" :size="18" />
+                    Regalado 🎁
+                  </button>
+                  <button
+                    class="od-status-btn"
+                    :disabled="isConvertingToSale"
+                    @click="onConvertToSale"
+                  >
+                    <NIcon :component="CheckmarkOutline" :size="16" />
+                    Cambiar a venta
+                  </button>
+                </template>
                 <button
                   :class="[
                     'od-status-btn',
@@ -271,6 +304,17 @@ function onRegenerate() {
                   }}
                 </button>
                 <button
+                  v-if="
+                    order.status === ORDER_STATUS.PAID || order.status === ORDER_STATUS.DELIVERED
+                  "
+                  class="od-status-btn od-status-btn--gift"
+                  :disabled="isConvertingToGift"
+                  @click="onConvertToGift"
+                >
+                  <NIcon :component="GiftOutline" :size="16" />
+                  Cambiar a regalo
+                </button>
+                <button
                   :class="[
                     'od-status-btn',
                     'od-status-btn--cancel',
@@ -278,7 +322,8 @@ function onRegenerate() {
                   ]"
                   :disabled="
                     order.status === ORDER_STATUS.DELIVERED ||
-                    order.status === ORDER_STATUS.CANCELLED
+                    order.status === ORDER_STATUS.CANCELLED ||
+                    !!order.deliveredAt
                   "
                   @click="onCancel"
                 >
