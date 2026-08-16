@@ -15,6 +15,8 @@ export interface IRegisterFormData {
   birthMonth: number | null
   birthYear: number | null
   gender: Gender | null
+  acceptedTerms: boolean
+  guardianConsent: boolean
 }
 
 export const REGISTER_FORM_DEFAULTS: IRegisterFormData = {
@@ -31,6 +33,8 @@ export const REGISTER_FORM_DEFAULTS: IRegisterFormData = {
   birthMonth: null,
   birthYear: null,
   gender: null,
+  acceptedTerms: false,
+  guardianConsent: false,
 }
 
 /** Field-level validators for individual form.Field bindings */
@@ -44,4 +48,7 @@ export const registerFieldValidators = {
   // change-validity event (isPhoneValid ref). Kept out of the schema so the
   // schema doesn't lie about the source of truth.
   countryId: z.number({ error: 'Selecciona un país' }),
+  acceptedTerms: z.literal(true, {
+    error: 'Debes aceptar la política de privacidad y los términos',
+  }),
 }

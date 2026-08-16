@@ -7,5 +7,6 @@ export function toCurrentUser(api: IApiCurrentUser): ICurrentUser {
     firstName: api.firstName,
     lastName: api.lastName,
     role: api.role,
+    pendingConsents: api.pendingConsents ?? [],
   }
 }

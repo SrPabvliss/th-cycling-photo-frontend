@@ -4,6 +4,7 @@ export interface IApiCurrentUser {
   firstName: string | null
   lastName: string | null
   role: string
+  pendingConsents?: string[]
 }
 
 export interface ICurrentUser {
@@ -12,4 +13,5 @@ export interface ICurrentUser {
   firstName: string | null
   lastName: string | null
   role: string
+  pendingConsents: string[]
 }

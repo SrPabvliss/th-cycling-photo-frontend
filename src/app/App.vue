@@ -2,6 +2,7 @@
 import { NConfigProvider, NMessageProvider, NDialogProvider, dateEsAR, esAR } from 'naive-ui'
 
 import ErrorBoundary from '@/core/layout/ErrorBoundary.vue'
+import ConsentReacceptModal from '@/features/auth/presentation/components/ConsentReacceptModal/ConsentReacceptModal.vue'
 import { titanTvTheme } from '@/core/theme/titan-tv-theme'
 </script>
 
@@ -11,6 +12,7 @@ import { titanTvTheme } from '@/core/theme/titan-tv-theme'
       <NDialogProvider>
         <ErrorBoundary>
           <RouterView />
+          <ConsentReacceptModal />
         </ErrorBoundary>
       </NDialogProvider>
     </NMessageProvider>
