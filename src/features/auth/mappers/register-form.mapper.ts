@@ -18,5 +18,7 @@ export function toRegisterRequest(form: IRegisterFormData): IRegisterRequest {
     cantonId: form.cantonId ?? undefined,
     birthDate,
     gender: form.gender ?? undefined,
+    acceptedTerms: form.acceptedTerms ? true : undefined,
+    guardianConsent: form.guardianConsent ? true : undefined,
   }
 }

@@ -6,6 +6,7 @@ import { standaloneRoutes } from '@/core/views/standalone-routes'
 import { authRoutes } from '@/features/auth/routes'
 import { eventRoutes } from '@/features/events/routes'
 import { landingRoutes } from '@/features/landing/routes'
+import { legalRoutes } from '@/features/legal/routes'
 import { photoRoutes } from '@/features/photos/routes'
 import { clientGalleryRoutes } from '@/features/client-gallery/routes'
 import { deliveryRoutes } from '@/features/delivery/routes'
@@ -21,6 +22,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     ...landingRoutes,
+    ...legalRoutes,
     ...authRoutes,
     ...publicGalleryRoutes,
     ...cartRoutes,

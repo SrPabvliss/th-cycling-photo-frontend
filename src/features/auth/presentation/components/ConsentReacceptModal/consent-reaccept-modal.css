@@ -1,0 +1,81 @@
+.consent-modal .n-card-header__main {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.consent-modal__text {
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: #4b5563;
+}
+
+.consent-modal__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0 0 18px;
+}
+
+.consent-modal__links a {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.consent-modal__links a:hover {
+  text-decoration: underline;
+}
+
+.consent-modal__checkbox {
+  align-items: flex-start;
+  padding: 12px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.consent-modal__checkbox .n-checkbox-box-wrapper {
+  margin-top: 1px;
+}
+
+.consent-modal__checkbox .n-checkbox__label {
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: normal;
+  color: #374151;
+}
+
+.consent-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 520px) {
+  .consent-modal .n-card__content,
+  .consent-modal .n-card__footer,
+  .consent-modal .n-card-header {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .consent-modal__text {
+    font-size: 13.5px;
+  }
+
+  .consent-modal__links {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .consent-modal__actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .consent-modal__actions .n-button {
+    width: 100%;
+  }
+}

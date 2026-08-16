@@ -22,6 +22,10 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem(TOKEN_KEY, token)
   }
 
+  function clearPendingConsents() {
+    if (currentUser.value) currentUser.value = { ...currentUser.value, pendingConsents: [] }
+  }
+
   function clearSession() {
     accessToken.value = null
     currentUser.value = null
@@ -34,6 +38,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     setSession,
     setAccessToken,
+    clearPendingConsents,
     clearSession,
   }
 })

@@ -11,4 +11,6 @@ export interface IRegisterRequest {
   cantonId?: number
   birthDate?: string // ISO YYYY-MM-DD
   gender?: Gender
+  acceptedTerms?: boolean
+  guardianConsent?: boolean
 }
