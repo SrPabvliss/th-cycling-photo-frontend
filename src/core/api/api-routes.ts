@@ -26,6 +26,7 @@ export const API_ROUTES = {
     FORGOT_PASSWORD: `${AUTH_BASE}/forgot-password`,
     RESET_PASSWORD: `${AUTH_BASE}/reset-password`,
     VALIDATE_RESET_TOKEN: `${AUTH_BASE}/reset-password/validate`,
+    CONSENTS: `${AUTH_BASE}/consents`,
   },
   USER_PHONES: {
     BASE: '/users/me/phones',

@@ -72,3 +72,34 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+.register-form__consent {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.register-form__minor-alert {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.register-form__consent :deep(.n-checkbox__label) {
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: normal;
+}
+
+.register-form__consent :deep(.n-form-item-feedback__line) {
+  font-size: 12px;
+}
+
+.register-form__consent a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.register-form__consent a:hover {
+  text-decoration: underline;
+}
