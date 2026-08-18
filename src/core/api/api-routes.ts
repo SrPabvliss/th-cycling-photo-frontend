@@ -14,6 +14,7 @@ const COUNTRIES_BASE = '/countries'
 const PHOTO_CATEGORIES_BASE = '/photo-categories'
 const OPERATOR_BASE = '/operator'
 const PRICING_BASE = '/pricing'
+const PAYMENTS_BASE = '/payments'
 
 export const API_ROUTES = {
   AUTH: {
@@ -194,5 +195,15 @@ export const API_ROUTES = {
     BASE: PRICING_BASE,
     PREVIEW: `${PRICING_BASE}/preview`,
     TIERS: `${PRICING_BASE}/tiers`,
+  },
+  PAYMENTS: {
+    BASE: PAYMENTS_BASE,
+    CREATE_INTENT: (orderId: string) => `${PAYMENTS_BASE}/orders/${orderId}/intent`,
+    CONFIRM: `${PAYMENTS_BASE}/confirm`,
+  },
+  PAYMENT_ACCOUNT: {
+    BASE: '/payphone-account',
+    GET: '/payphone-account',
+    CONFIGURE: '/payphone-account',
   },
 } as const
