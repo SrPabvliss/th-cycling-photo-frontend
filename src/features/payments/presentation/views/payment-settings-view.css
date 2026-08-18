@@ -1,0 +1,19 @@
+.payment-settings {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.payment-settings header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.payment-settings header h1 {
+  margin: 0;
+  font-size: 22px;
+}

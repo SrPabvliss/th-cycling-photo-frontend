@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { NAlert, NButton, NDivider, NIcon } from 'naive-ui'
-import { ArrowBack, CheckmarkCircle, ChevronBack, LogoWhatsapp } from '@vicons/ionicons5'
+import { NButton, NDivider, NIcon } from 'naive-ui'
+import { ArrowBack, CheckmarkCircle, ChevronBack } from '@vicons/ionicons5'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { useAuth } from '@/features/auth/composables/use-auth'
+import PaymentCheckout from '@/features/payments/presentation/components/PaymentCheckout/PaymentCheckout.vue'
 import { useCartStore } from '../../stores/cart.store'
 import { useMergeCart } from '../../composables/mutations/use-merge-cart'
 import { useCheckout } from '../../composables/mutations/use-checkout'
@@ -22,6 +23,13 @@ const { mutateAsync: checkout, isPending: isCheckingOut } = useCheckout()
 const cartPricing = useCartPricing()
 
 const orderResults = ref<ICheckoutOrderResult[] | null>(null)
+const payingOrderId = ref<string | null>(null)
+const paidOrderIds = ref<string[]>([])
+
+function handlePaid(orderId: string) {
+  paidOrderIds.value = [...paidOrderIds.value, orderId]
+  payingOrderId.value = null
+}
 
 async function handleConfirm() {
   if (!isAuthenticated.value) {
@@ -58,7 +66,7 @@ async function handleConfirm() {
           <strong
             >{{ orderResults.length }} pedido{{ orderResults.length !== 1 ? 's' : '' }}</strong
           >
-          correctamente. Te contactaremos pronto por WhatsApp.
+          correctamente. Completa el pago de cada pedido para recibir tus fotos.
         </p>
 
         <div class="checkout-order-list">
@@ -66,6 +74,22 @@ async function handleConfirm() {
             <span class="checkout-order-item__name">{{ order.eventName }}</span>
             <span class="checkout-order-item__count">{{ order.photoCount }} fotos</span>
           </div>
+        </div>
+
+        <div v-if="payingOrderId" class="checkout-payment">
+          <PaymentCheckout :order-id="payingOrderId" @paid="handlePaid" />
+        </div>
+
+        <div v-else class="checkout-payment-actions">
+          <NButton
+            v-for="order in orderResults.filter((o) => !paidOrderIds.includes(o.orderId))"
+            :key="order.orderId"
+            type="primary"
+            size="large"
+            @click="payingOrderId = order.orderId"
+          >
+            Pagar {{ order.eventName }}
+          </NButton>
         </div>
 
         <div class="state-page__actions">
@@ -117,14 +141,6 @@ async function handleConfirm() {
 
           <aside class="checkout-summary__aside">
             <div class="checkout-summary__panel">
-              <NAlert type="info" :show-icon="true" class="checkout-summary__notice">
-                <template #icon>
-                  <NIcon :component="LogoWhatsapp" />
-                </template>
-                <strong>Nos contactaremos por WhatsApp</strong>
-                para coordinar el pago y la entrega de tus fotos.
-              </NAlert>
-
               <NDivider class="checkout-summary__divider" />
 
               <div class="checkout-summary__totals">

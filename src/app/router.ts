@@ -17,6 +17,7 @@ import { retouchRoutes, retouchWorkspaceRoutes } from '@/features/retouch/routes
 import { reviewRoutes } from '@/features/review/routes'
 import { buyerRoutes } from '@/features/buyers/routes'
 import { cartRoutes } from '@/features/cart/routes'
+import { paymentRoutes, paymentSettingsRoutes } from '@/features/payments/routes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,6 +27,7 @@ const router = createRouter({
     ...authRoutes,
     ...publicGalleryRoutes,
     ...cartRoutes,
+    ...paymentRoutes,
     ...clientGalleryRoutes,
     ...deliveryRoutes,
     ...standaloneRoutes,
@@ -41,6 +43,7 @@ const router = createRouter({
         ...orderRoutes,
         ...retouchRoutes,
         ...buyerRoutes,
+        ...paymentSettingsRoutes,
       ],
     },
     {
