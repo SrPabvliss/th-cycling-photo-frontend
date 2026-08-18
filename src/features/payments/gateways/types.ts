@@ -11,17 +11,10 @@ import type { IPaymentIntent } from '@/features/payments/types/responses/payment
 
 export interface IPaymentGatewayCheckoutProps {
   intent: IPaymentIntent
-  settling: boolean
 }
 
 export interface IPaymentGatewayCheckoutEmits {
-  (event: 'pay-requested'): void
   (event: 'setup-failed', error: unknown): void
-}
-
-export interface IPaymentGatewayCheckoutInstance {
-  pay: () => Promise<IConfirmPaymentRequest>
-  isProcessing: boolean
 }
 
 export interface IPaymentGatewayCredentialsProps {

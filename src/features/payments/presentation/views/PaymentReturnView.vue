@@ -5,7 +5,10 @@ import { NButton, NResult, NSpin } from 'naive-ui'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { useConfirmPayment } from '../../composables/mutations/use-confirm-payment'
+import { usePaymentTransactionQuery } from '../../composables/queries/use-payment-transaction'
 import { DEFAULT_PAYMENT_PROVIDER, findPaymentGateway } from '../../gateways/registry'
+import { PAYMENT_METHOD, type PaymentMethod } from '../../types/payment-method'
+import PaymentMethodModal from '../components/PaymentMethodModal/PaymentMethodModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -13,6 +16,20 @@ const { mutateAsync: confirmPayment } = useConfirmPayment()
 
 const state = ref<'confirming' | 'approved' | 'declined' | 'error'>('confirming')
 const message = ref<string | null>(null)
+const clientTransactionId = ref<string | null>(null)
+const showMethodModal = ref(false)
+const transferChosen = ref(false)
+
+const {
+  data: transaction,
+  isPending: isTransactionPending,
+  error: transactionError,
+} = usePaymentTransactionQuery(clientTransactionId)
+
+function handleMethodChosen(method: PaymentMethod) {
+  if (method !== PAYMENT_METHOD.TRANSFER) return
+  transferChosen.value = true
+}
 
 onMounted(async () => {
   const provider = String(route.meta.provider ?? DEFAULT_PAYMENT_PROVIDER)
@@ -23,6 +40,8 @@ onMounted(async () => {
     message.value = 'No pudimos identificar tu pago.'
     return
   }
+
+  clientTransactionId.value = confirmation.clientTransactionId
 
   try {
     const result = await confirmPayment(confirmation)
@@ -44,10 +63,10 @@ onMounted(async () => {
         v-else-if="state === 'approved'"
         status="success"
         title="¡Pago confirmado!"
-        description="Ya puedes descargar tus fotos desde el enlace que te enviamos."
+        description="Estamos preparando tus fotos."
       >
         <template #footer>
-          <NButton type="primary" @click="router.push('/gallery')">Volver a la galería</NButton>
+          <NButton type="primary" @click="router.push('/')">Volver al inicio</NButton>
         </template>
       </NResult>
 
@@ -57,8 +76,23 @@ onMounted(async () => {
         title="El pago fue rechazado"
         :description="message ?? 'Intenta nuevamente con otra tarjeta.'"
       >
-        <template #footer>
-          <NButton type="primary" @click="router.push('/checkout')">Intentar de nuevo</NButton>
+        <template v-if="transactionError" #footer>
+          <p class="payment-return__notice">No pudimos cargar tu pago.</p>
+          <NButton type="primary" @click="router.push('/gallery')">Volver a la galería</NButton>
+        </template>
+        <template v-else #footer>
+          <NButton
+            v-if="!transferChosen"
+            type="primary"
+            :loading="isTransactionPending"
+            :disabled="isTransactionPending || !transaction"
+            @click="showMethodModal = true"
+          >
+            Elegir otro método
+          </NButton>
+          <p v-else class="payment-return__notice">
+            Te enviaremos los datos para la transferencia.
+          </p>
         </template>
       </NResult>
 
@@ -68,6 +102,15 @@ onMounted(async () => {
         </template>
       </NResult>
     </div>
+
+    <PaymentMethodModal
+      v-if="transaction"
+      v-model:show="showMethodModal"
+      :order-ids="transaction.orderIds"
+      :total="transaction.amountCents / 100"
+      currency="USD"
+      @method-chosen="handleMethodChosen"
+    />
   </PublicLayout>
 </template>
 

@@ -5,3 +5,11 @@
   justify-content: center;
   padding: 40px 20px;
 }
+
+.payment-return__notice {
+  margin: 0;
+  max-width: 42ch;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  opacity: 0.85;
+}

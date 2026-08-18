@@ -18,7 +18,7 @@ import {
 import { formatRelativeTime, isRecent } from '@/shared/utils/date.utils'
 import { formatCurrency } from '@/features/pricing/utils/format-currency'
 import { ORDER_STATUS, type IOrderListItem } from '../../../types/responses/order-list.response'
-import { ORDER_STATUS_CONFIG } from '../../../constants/status-config'
+import { ORDER_STATUS_CONFIG, PAYMENT_METHOD_LABELS } from '../../../constants/status-config'
 
 const MAX_THUMBS = 3
 
@@ -128,6 +128,10 @@ const currentStepIndex = computed(() => {
 })
 
 const showTimeline = computed(() => props.order.status !== ORDER_STATUS.CANCELLED)
+
+const paymentMethodLabel = computed(() =>
+  props.order.paymentMethod ? (PAYMENT_METHOD_LABELS[props.order.paymentMethod] ?? '—') : '—',
+)
 </script>
 
 <template>
@@ -196,6 +200,9 @@ const showTimeline = computed(() => props.order.status !== ORDER_STATUS.CANCELLE
       <span class="oc__chip oc__chip--photos">
         {{ order.photoCount }} {{ order.photoCount === 1 ? 'foto' : 'fotos' }}
       </span>
+      <span v-if="order.paymentMethod" class="oc__chip oc__chip--payment">{{
+        paymentMethodLabel
+      }}</span>
     </div>
 
     <!-- Actions -->

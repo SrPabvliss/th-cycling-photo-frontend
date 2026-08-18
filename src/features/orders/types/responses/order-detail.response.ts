@@ -42,6 +42,7 @@ export interface IApiOrderDetail {
   eventName: string
   subtotal: string | null
   snapCurrency: string | null
+  paymentMethod: string | null
   photos: IApiOrderDetailPhoto[]
   deliveryLink: IApiOrderDetailDeliveryLink | null
   retouchProgress?: { total: number; retouched: number }
@@ -80,6 +81,7 @@ export interface IOrderDetail {
   eventName: string
   subtotal: number | null
   snapCurrency: string | null
+  paymentMethod: string | null
   photos: IOrderDetailPhoto[]
   deliveryLink: IOrderDetailDeliveryLink | null
   retouchProgress?: { total: number; retouched: number }

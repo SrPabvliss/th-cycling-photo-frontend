@@ -6,10 +6,9 @@ import { ArrowBack, CheckmarkCircle, ChevronBack } from '@vicons/ionicons5'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { useAuth } from '@/features/auth/composables/use-auth'
-import PaymentCheckout from '@/features/payments/presentation/components/PaymentCheckout/PaymentCheckout.vue'
+import PaymentMethodModal from '@/features/payments/presentation/components/PaymentMethodModal/PaymentMethodModal.vue'
 import { useCartStore } from '../../stores/cart.store'
 import { useMergeCart } from '../../composables/mutations/use-merge-cart'
-import { useCheckout } from '../../composables/mutations/use-checkout'
 import type { ICheckoutOrderResult } from '../../types/requests/cart.request'
 import CheckoutSummary from '../components/CheckoutSummary/CheckoutSummary.vue'
 import { useCartPricing } from '../../composables/use-cart-pricing'
@@ -18,18 +17,11 @@ import PricingTotalBlock from '@/features/pricing/presentation/components/Pricin
 const router = useRouter()
 const cartStore = useCartStore()
 const { isAuthenticated } = useAuth()
-const { mutateAsync: mergeCart } = useMergeCart()
-const { mutateAsync: checkout, isPending: isCheckingOut } = useCheckout()
+const { mutateAsync: mergeCart, isPending: isMerging } = useMergeCart()
 const cartPricing = useCartPricing()
 
 const orderResults = ref<ICheckoutOrderResult[] | null>(null)
-const payingOrderId = ref<string | null>(null)
-const paidOrderIds = ref<string[]>([])
-
-function handlePaid(orderId: string) {
-  paidOrderIds.value = [...paidOrderIds.value, orderId]
-  payingOrderId.value = null
-}
+const showMethodModal = ref(false)
 
 async function handleConfirm() {
   if (!isAuthenticated.value) {
@@ -43,8 +35,11 @@ async function handleConfirm() {
     /* already merged */
   }
 
-  const items = cartStore.groups.map((g) => ({ eventId: g.eventId }))
-  orderResults.value = await checkout({ items })
+  showMethodModal.value = true
+}
+
+function handlePaidOrders(orders: ICheckoutOrderResult[]) {
+  orderResults.value = orders
 }
 </script>
 
@@ -66,7 +61,7 @@ async function handleConfirm() {
           <strong
             >{{ orderResults.length }} pedido{{ orderResults.length !== 1 ? 's' : '' }}</strong
           >
-          correctamente. Completa el pago de cada pedido para recibir tus fotos.
+          correctamente. Completa el pago para recibir tus fotos.
         </p>
 
         <div class="checkout-order-list">
@@ -76,20 +71,11 @@ async function handleConfirm() {
           </div>
         </div>
 
-        <div v-if="payingOrderId" class="checkout-payment">
-          <PaymentCheckout :order-id="payingOrderId" @paid="handlePaid" />
-        </div>
-
-        <div v-else class="checkout-payment-actions">
-          <NButton
-            v-for="order in orderResults.filter((o) => !paidOrderIds.includes(o.orderId))"
-            :key="order.orderId"
-            type="primary"
-            size="large"
-            @click="payingOrderId = order.orderId"
-          >
-            Pagar {{ order.eventName }}
-          </NButton>
+        <div class="checkout-payment-actions">
+          <p class="checkout-transfer-notice">
+            Te enviaremos los datos para la transferencia. Apenas confirmemos el pago recibirás tus
+            fotos.
+          </p>
         </div>
 
         <div class="state-page__actions">
@@ -163,8 +149,8 @@ async function handleConfirm() {
                 type="primary"
                 size="large"
                 block
-                :loading="isCheckingOut"
-                :disabled="isCheckingOut || cartPricing.isLoading.value"
+                :loading="isMerging"
+                :disabled="isMerging || cartPricing.isLoading.value"
                 @click="handleConfirm"
               >
                 Confirmar pedido
@@ -177,6 +163,13 @@ async function handleConfirm() {
           </aside>
         </div>
       </section>
+
+      <PaymentMethodModal
+        v-model:show="showMethodModal"
+        :total="cartPricing.subtotal.value"
+        :currency="cartPricing.currency.value"
+        @paid-orders="handlePaidOrders"
+      />
     </template>
   </PublicLayout>
 </template>

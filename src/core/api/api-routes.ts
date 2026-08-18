@@ -144,6 +144,7 @@ export const API_ROUTES = {
     CANCEL: (id: string) => `${ORDERS_BASE}/${id}/cancel`,
     SEND_DELIVERY: (id: string) => `${ORDERS_BASE}/${id}/send-delivery`,
     REGENERATE_DELIVERY: (id: string) => `${ORDERS_BASE}/${id}/regenerate-delivery`,
+    PAYMENT_METHOD: `${ORDERS_BASE}/payment-method`,
   },
   BUYERS: {
     GET_ALL: '/buyers',
@@ -198,8 +199,10 @@ export const API_ROUTES = {
   },
   PAYMENTS: {
     BASE: PAYMENTS_BASE,
-    CREATE_INTENT: (orderId: string) => `${PAYMENTS_BASE}/orders/${orderId}/intent`,
+    CREATE_INTENT: `${PAYMENTS_BASE}/intent`,
     CONFIRM: `${PAYMENTS_BASE}/confirm`,
+    TRANSACTION: (clientTransactionId: string) =>
+      `${PAYMENTS_BASE}/transactions/${clientTransactionId}`,
   },
   PAYMENT_ACCOUNT: {
     BASE: '/payphone-account',

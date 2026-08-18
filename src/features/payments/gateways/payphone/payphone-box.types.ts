@@ -1,11 +1,5 @@
-export interface IPayphonePaymentOutcome {
-  transactionId: number
-  clientTransactionId: string
-}
-
 export interface IPayphoneBoxInstance {
   render: (containerId: string) => void
-  startProcessPaymentAsync?: () => Promise<IPayphonePaymentOutcome>
   destroy?: () => void
 }
 

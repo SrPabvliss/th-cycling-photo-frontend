@@ -202,6 +202,10 @@
   flex: 0 0 auto;
 }
 
+.oc__meta .oc__chip--payment {
+  flex: 0 0 auto;
+}
+
 .oc__body-left {
   flex: 1;
   display: flex;

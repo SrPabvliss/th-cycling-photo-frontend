@@ -5,6 +5,14 @@ export interface IPaymentIntent {
 
 export interface IPaymentResult {
   approved: boolean
-  orderId: string
+  orderIds: string[]
   message: string | null
+}
+
+export interface IPaymentTransaction {
+  clientTransactionId: string
+  status: string
+  amountCents: number
+  orderIds: string[]
+  failureMessage: string | null
 }
