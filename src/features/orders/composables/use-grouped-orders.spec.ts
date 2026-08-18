@@ -28,6 +28,7 @@ function makeOrder(overrides: Partial<IOrderListItem> & { id: string }): IOrderL
     hasDeliveryLink: false,
     subtotal: null,
     snapCurrency: null,
+    paymentMethod: null,
     previewPhotos: [],
     ...overrides,
   }

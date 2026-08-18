@@ -21,6 +21,7 @@ function toOrderListItem(api: IApiOrderListItem): IOrderListItem {
     hasDeliveryLink: api.hasDeliveryLink,
     subtotal: api.subtotal === null ? null : Number(api.subtotal),
     snapCurrency: api.snapCurrency,
+    paymentMethod: api.paymentMethod,
     previewPhotos: api.previewPhotos.map((p) => ({
       photoId: p.photoId,
       publicSlug: p.publicSlug,

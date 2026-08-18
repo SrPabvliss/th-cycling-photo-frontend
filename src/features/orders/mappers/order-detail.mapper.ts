@@ -46,6 +46,7 @@ export function toOrderDetail(api: IApiOrderDetail): IOrderDetail {
     eventName: api.eventName,
     subtotal: api.subtotal === null ? null : Number(api.subtotal),
     snapCurrency: api.snapCurrency,
+    paymentMethod: api.paymentMethod,
     photos: api.photos.map(toOrderDetailPhoto),
     deliveryLink: api.deliveryLink ? toOrderDetailDeliveryLink(api.deliveryLink) : null,
     retouchProgress: api.retouchProgress,

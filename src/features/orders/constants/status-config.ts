@@ -22,6 +22,11 @@ export const DELIVERY_LINK_STATUS_CONFIG: Record<DeliveryLinkStatus, IStatusBadg
   expired: { label: 'Expirado', type: 'error' },
 }
 
+export const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  card: 'Tarjeta',
+  transfer: 'Transferencia',
+}
+
 export interface IOrderFilterTab {
   label: string
   status: OrderStatus | null

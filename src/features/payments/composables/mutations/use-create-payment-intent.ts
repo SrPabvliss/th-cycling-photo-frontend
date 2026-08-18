@@ -6,10 +6,10 @@ import type { IPaymentIntent } from '@/features/payments/types/responses/payment
 
 export function useCreatePaymentIntent() {
   return useMutation({
-    mutationFn: async (orderId: string) => {
+    mutationFn: async (orderIds: string[]) => {
       const response = await httpClient.post<IPaymentIntent>(
-        API_ROUTES.PAYMENTS.CREATE_INTENT(orderId),
-        undefined,
+        API_ROUTES.PAYMENTS.CREATE_INTENT,
+        { orderIds },
         { silent: true },
       )
       return response.data

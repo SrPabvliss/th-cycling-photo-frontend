@@ -84,12 +84,6 @@
   color: #18a058;
 }
 
-.checkout-payment {
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto 16px;
-}
-
 .checkout-payment-actions {
   display: flex;
   flex-direction: column;
@@ -97,6 +91,14 @@
   width: 100%;
   max-width: 400px;
   margin: 0 auto 16px;
+}
+
+.checkout-transfer-notice {
+  margin: 0;
+  max-width: 42ch;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  opacity: 0.85;
 }
 
 .checkout-summary {

@@ -43,6 +43,7 @@ export interface IApiOrderListItem {
   hasDeliveryLink: boolean
   subtotal: string | null
   snapCurrency: string | null
+  paymentMethod: string | null
   previewPhotos: IApiOrderPreviewPhoto[]
 }
 
@@ -66,5 +67,6 @@ export interface IOrderListItem {
   hasDeliveryLink: boolean
   subtotal: number | null
   snapCurrency: string | null
+  paymentMethod: string | null
   previewPhotos: IOrderPreviewPhoto[]
 }

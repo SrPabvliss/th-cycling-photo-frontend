@@ -5,7 +5,7 @@ import { NTag } from 'naive-ui'
 import { formatDate, formatRelativeTime } from '@/shared/utils/date.utils'
 import { formatCurrency } from '@/features/pricing/utils/format-currency'
 import type { IOrderDetail } from '../../../types/responses/order-detail.response'
-import { ORDER_STATUS_CONFIG } from '../../../constants/status-config'
+import { ORDER_STATUS_CONFIG, PAYMENT_METHOD_LABELS } from '../../../constants/status-config'
 
 const props = defineProps<{
   order: IOrderDetail
@@ -25,6 +25,10 @@ const initials = computed(() => {
   const last = props.order.snapLastName?.[0] ?? ''
   return (first + last).toUpperCase() || (props.order.userName[0]?.toUpperCase() ?? '')
 })
+
+const paymentMethodLabel = computed(() =>
+  props.order.paymentMethod ? (PAYMENT_METHOD_LABELS[props.order.paymentMethod] ?? '—') : '—',
+)
 
 const displayName = computed(() => {
   if (props.order.snapFirstName || props.order.snapLastName) {
@@ -66,6 +70,10 @@ const displayName = computed(() => {
       <div class="od-hstat">
         <div class="od-hstat__label">Fecha pedido</div>
         <div class="od-hstat__val">{{ formatDate(order.createdAt) }}</div>
+      </div>
+      <div class="od-hstat">
+        <div class="od-hstat__label">Método de pago</div>
+        <div class="od-hstat__val">{{ paymentMethodLabel }}</div>
       </div>
       <div class="od-hstat">
         <div class="od-hstat__label">Pagado</div>
