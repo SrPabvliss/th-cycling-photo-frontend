@@ -2,7 +2,6 @@ import { watch, onUnmounted } from 'vue'
 import { useQueryClient } from '@tanstack/vue-query'
 import { useMessage } from 'naive-ui'
 
-import { USER_ROLES } from '@/core/auth/user-roles'
 import { connectSocket, disconnectSocket, getSocket } from '@/core/socket/socket-client'
 import { useAuthStore } from '@/features/auth/stores/auth.store'
 import { API_ROUTES } from '@/core/api/api-routes'
@@ -47,9 +46,9 @@ export function useNotificationSocket() {
     }
 
     // Invalidate operator queries when relevant events arrive
-    const role = authStore.currentUser?.role
+    const hasDashboardRead = authStore.currentUser?.permissions?.includes('dashboard.operator.read')
     if (
-      role === USER_ROLES.OPERATOR &&
+      hasDashboardRead &&
       (payload.type === 'order.paid' || payload.type === 'order.retouch_completed')
     ) {
       queryClient.invalidateQueries({ queryKey: [API_ROUTES.OPERATOR.BASE] })
