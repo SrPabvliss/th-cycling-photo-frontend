@@ -17,7 +17,7 @@ const { isAuthenticated, currentUser, logout } = useAuth()
 
 const isCustomer = computed(() => currentUser.value?.role === USER_ROLES.CUSTOMER)
 const showPanelLink = computed(() => isAuthenticated.value && !isCustomer.value)
-const panelPath = computed(() => getHomePath(currentUser.value?.role ?? USER_ROLES.CUSTOMER))
+const panelPath = computed(() => getHomePath(currentUser.value?.permissions ?? []))
 
 useCartQuery()
 
