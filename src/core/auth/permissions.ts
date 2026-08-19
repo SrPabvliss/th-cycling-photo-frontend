@@ -6,6 +6,7 @@ export const PERMISSIONS = {
   ORDER_READ: 'order.read',
   PREVIEW_LINK_READ: 'preview_link.read',
   BUYER_READ: 'buyer.read',
+  EVENT_COLLABORATOR_READ: 'event.collaborator.read',
 } as const
 
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]
