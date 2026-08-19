@@ -3,10 +3,17 @@ export interface IPaymentIntent {
   payload: Record<string, unknown>
 }
 
+export interface IPaymentDelivery {
+  orderId: string
+  eventName: string
+  token: string
+}
+
 export interface IPaymentResult {
   approved: boolean
   orderIds: string[]
   message: string | null
+  deliveries: IPaymentDelivery[]
 }
 
 export interface IPaymentTransaction {
@@ -15,4 +22,5 @@ export interface IPaymentTransaction {
   amountCents: number
   orderIds: string[]
   failureMessage: string | null
+  deliveries: IPaymentDelivery[]
 }

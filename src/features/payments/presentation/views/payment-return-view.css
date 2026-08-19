@@ -6,6 +6,13 @@
   padding: 40px 20px;
 }
 
+.payment-return__deliveries {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
 .payment-return__notice {
   margin: 0;
   max-width: 42ch;
