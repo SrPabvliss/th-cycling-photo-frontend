@@ -8,5 +8,8 @@ export function toCurrentUser(api: IApiCurrentUser): ICurrentUser {
     lastName: api.lastName,
     role: api.role,
     pendingConsents: api.pendingConsents ?? [],
+    permissions: api.permissions ?? [],
+    tenantId: api.tenantId ?? null,
+    isPlatform: api.isPlatform ?? false,
   }
 }
