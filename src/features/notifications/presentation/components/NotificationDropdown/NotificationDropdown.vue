@@ -2,7 +2,6 @@
 import { useRouter } from 'vue-router'
 import { NButton, NSpin } from 'naive-ui'
 
-import type { UserRole } from '@/core/auth/user-roles'
 import { useAuthStore } from '@/features/auth/stores/auth.store'
 import { useNotificationsListQuery } from '../../../composables/queries/use-notifications-list'
 import { useMarkAsRead } from '../../../composables/mutations/use-mark-as-read'
@@ -25,8 +24,8 @@ function handleClick(notification: INotification) {
   }
 
   const config = NOTIFICATION_CONFIG[notification.type as NotificationType]
-  const role = authStore.currentUser?.role as UserRole | undefined
-  const route = config?.getRoute(notification.data, role)
+  const permissions = authStore.currentUser?.permissions ?? []
+  const route = config?.getRoute(notification.data, permissions)
   if (route) {
     router.push(route)
   }
