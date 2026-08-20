@@ -1,0 +1,13 @@
+.avatar-uploader {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.avatar-uploader__spin {
+  border-radius: 50%;
+}
+
+.avatar-uploader__avatar {
+  cursor: pointer;
+}

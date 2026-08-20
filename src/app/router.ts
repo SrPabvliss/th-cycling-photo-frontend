@@ -15,6 +15,7 @@ import { previewLinkRoutes } from '@/features/preview-links/routes'
 import { publicGalleryRoutes } from '@/features/public-gallery/routes'
 import { retouchRoutes, retouchWorkspaceRoutes } from '@/features/retouch/routes'
 import { reviewRoutes } from '@/features/review/routes'
+import { accountRoutes } from '@/features/account/routes'
 import { buyerRoutes } from '@/features/buyers/routes'
 import { cartRoutes } from '@/features/cart/routes'
 import { paymentRoutes, paymentSettingsRoutes } from '@/features/payments/routes'
@@ -27,6 +28,7 @@ const router = createRouter({
     ...legalRoutes,
     ...authRoutes,
     ...publicGalleryRoutes,
+    ...accountRoutes,
     ...cartRoutes,
     ...paymentRoutes,
     ...clientGalleryRoutes,

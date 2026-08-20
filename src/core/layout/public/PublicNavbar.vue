@@ -10,6 +10,7 @@ import { USER_ROLES } from '@/core/auth/user-roles'
 import { useCartQuery } from '@/features/cart/composables/queries/use-cart'
 import CartIcon from '@/features/cart/presentation/components/CartIcon/CartIcon.vue'
 import CartDrawer from '@/features/cart/presentation/components/CartDrawer/CartDrawer.vue'
+import { ACCOUNT_ROUTE_NAMES } from '@/features/account/routes'
 import TitanLogo from './TitanLogo.vue'
 
 const router = useRouter()
@@ -64,6 +65,13 @@ function go(href: string) {
         >
           Ir al panel
         </RouterLink>
+        <RouterLink
+          v-if="isCustomer"
+          :to="{ name: ACCOUNT_ROUTE_NAMES.PROFILE }"
+          class="public-navbar-link"
+        >
+          Mi perfil
+        </RouterLink>
         <a v-if="isAuthenticated" class="public-navbar-link" href="#" @click.prevent="handleLogout">
           Cerrar sesión
         </a>
@@ -115,6 +123,14 @@ function go(href: string) {
             @click="showMenu = false"
           >
             Ir al panel
+          </RouterLink>
+          <RouterLink
+            v-if="isCustomer"
+            :to="{ name: ACCOUNT_ROUTE_NAMES.PROFILE }"
+            class="public-navbar-menu__link"
+            @click="showMenu = false"
+          >
+            Mi perfil
           </RouterLink>
           <a
             v-if="isAuthenticated"
