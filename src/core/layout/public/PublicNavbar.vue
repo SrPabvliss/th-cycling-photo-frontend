@@ -67,6 +67,13 @@ function go(href: string) {
         </RouterLink>
         <RouterLink
           v-if="isCustomer"
+          :to="{ name: ACCOUNT_ROUTE_NAMES.ORDERS }"
+          class="public-navbar-link"
+        >
+          Mis compras
+        </RouterLink>
+        <RouterLink
+          v-if="isCustomer"
           :to="{ name: ACCOUNT_ROUTE_NAMES.PROFILE }"
           class="public-navbar-link"
         >
@@ -123,6 +130,14 @@ function go(href: string) {
             @click="showMenu = false"
           >
             Ir al panel
+          </RouterLink>
+          <RouterLink
+            v-if="isCustomer"
+            :to="{ name: ACCOUNT_ROUTE_NAMES.ORDERS }"
+            class="public-navbar-menu__link"
+            @click="showMenu = false"
+          >
+            Mis compras
           </RouterLink>
           <RouterLink
             v-if="isCustomer"

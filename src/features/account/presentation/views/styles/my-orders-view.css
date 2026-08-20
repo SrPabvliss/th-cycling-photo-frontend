@@ -1,0 +1,41 @@
+.my-orders-view {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.my-orders-view__title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.my-orders-view__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.my-orders-view__load-more {
+  align-self: center;
+  min-height: 44px;
+  min-width: 160px;
+}
+
+.my-orders-view__empty {
+  margin-top: 48px;
+}
+
+.my-orders-view__gallery-link {
+  color: var(--tt-primary, #1da851);
+  font-weight: 600;
+}
+
+@media (max-width: 767px) {
+  .my-orders-view {
+    padding: 20px 16px 96px;
+  }
+}

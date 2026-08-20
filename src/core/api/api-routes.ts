@@ -151,6 +151,12 @@ export const API_ROUTES = {
     REGENERATE_DELIVERY: (id: string) => `${ORDERS_BASE}/${id}/regenerate-delivery`,
     PAYMENT_METHOD: `${ORDERS_BASE}/payment-method`,
   },
+  MY_ORDERS: {
+    BASE: `${ORDERS_BASE}/me`,
+    GET_BY_ID: (id: string) => `${ORDERS_BASE}/me/${id}`,
+    DOWNLOADS: (id: string) => `${ORDERS_BASE}/me/${id}/downloads`,
+    CANCEL: (id: string) => `${ORDERS_BASE}/me/${id}/cancel`,
+  },
   BUYERS: {
     GET_ALL: '/buyers',
   },
