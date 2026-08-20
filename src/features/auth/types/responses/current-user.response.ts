@@ -5,6 +5,9 @@ export interface IApiCurrentUser {
   lastName: string | null
   role: string
   pendingConsents?: string[]
+  permissions?: string[]
+  tenantId?: string | null
+  isPlatform?: boolean
 }
 
 export interface ICurrentUser {
@@ -14,4 +17,7 @@ export interface ICurrentUser {
   lastName: string | null
   role: string
   pendingConsents: string[]
+  permissions: string[]
+  tenantId: string | null
+  isPlatform: boolean
 }
