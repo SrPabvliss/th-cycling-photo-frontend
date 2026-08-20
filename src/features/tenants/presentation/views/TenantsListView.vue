@@ -37,7 +37,7 @@ const columns = [
 
 <template>
   <div class="page-view">
-    <div class="page-view__content">
+    <div class="page-view__content list-content">
       <PageHeader title="Tenants" subtitle="Gestiona los tenants y sus cupos de eventos">
         <NButton type="primary" @click="isCreateModalOpen = true">Crear tenant</NButton>
       </PageHeader>
@@ -71,3 +71,11 @@ const columns = [
     </div>
   </div>
 </template>
+
+<style scoped>
+.list-content {
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+}
+</style>
