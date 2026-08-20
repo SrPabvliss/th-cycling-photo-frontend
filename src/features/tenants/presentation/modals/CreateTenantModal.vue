@@ -45,36 +45,38 @@ const submit = () => {
     :show="show"
     @update:show="(v) => emit('update:show', v)"
     preset="card"
-    title="Create Tenant"
+    title="Crear tenant"
     style="width: 500px"
   >
     <NForm @submit.prevent="submit">
-      <NFormItem label="Tenant Name" required>
+      <NFormItem label="Nombre del tenant" required>
         <NInput v-model:value="name" />
       </NFormItem>
-      <NFormItem label="Event Quota" required>
+      <NFormItem label="Cupo de eventos" required>
         <NInputNumber v-model:value="eventQuota" :min="0" style="width: 100%" />
       </NFormItem>
 
-      <h3 style="margin-top: 16px; margin-bottom: 16px; font-weight: 600">Admin User Details</h3>
+      <h3 style="margin-top: 16px; margin-bottom: 16px; font-weight: 600">
+        Datos del usuario administrador
+      </h3>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
-        <NFormItem label="First Name" required>
+        <NFormItem label="Nombres" required>
           <NInput v-model:value="adminFirstName" />
         </NFormItem>
-        <NFormItem label="Last Name" required>
+        <NFormItem label="Apellidos" required>
           <NInput v-model:value="adminLastName" />
         </NFormItem>
       </div>
-      <NFormItem label="Email" required>
+      <NFormItem label="Correo electrónico" required>
         <NInput v-model:value="adminEmail" />
       </NFormItem>
-      <NFormItem label="Password" required>
+      <NFormItem label="Contraseña" required>
         <NInput v-model:value="adminPassword" type="password" show-password-on="click" />
       </NFormItem>
 
       <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px">
-        <NButton @click="emit('update:show', false)">Cancel</NButton>
-        <NButton type="primary" attr-type="submit" :loading="isPending">Create</NButton>
+        <NButton @click="emit('update:show', false)">Cancelar</NButton>
+        <NButton type="primary" attr-type="submit" :loading="isPending">Crear</NButton>
       </div>
     </NForm>
   </NModal>

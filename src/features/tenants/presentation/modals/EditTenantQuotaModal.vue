@@ -37,20 +37,20 @@ const submit = () => {
     :show="show"
     @update:show="(v) => emit('update:show', v)"
     preset="card"
-    :title="`Edit Quota for ${tenant.name}`"
+    :title="`Editar cupo de ${tenant.name}`"
     style="width: 400px"
   >
     <NForm @submit.prevent="submit">
-      <NFormItem label="Event Quota">
+      <NFormItem label="Cupo de eventos">
         <NInputNumber v-model:value="quota" :min="0" style="width: 100%" />
       </NFormItem>
       <p style="font-size: 13px; color: #666; margin-top: -12px; margin-bottom: 16px">
-        Currently used: {{ tenant.eventsUsed }}
+        Eventos usados actualmente: {{ tenant.eventsUsed }}
       </p>
 
       <div style="display: flex; justify-content: flex-end; gap: 8px">
-        <NButton @click="emit('update:show', false)">Cancel</NButton>
-        <NButton type="primary" attr-type="submit" :loading="isPending">Save</NButton>
+        <NButton @click="emit('update:show', false)">Cancelar</NButton>
+        <NButton type="primary" attr-type="submit" :loading="isPending">Guardar</NButton>
       </div>
     </NForm>
   </NModal>
