@@ -17,18 +17,16 @@ import EventQuickSearch from '../components/EventQuickSearch/EventQuickSearch.vu
 import EventOperatorCard from '../components/EventOperatorCard/EventOperatorCard.vue'
 import EventQuickActions from '../components/EventQuickActions/EventQuickActions.vue'
 import PhotoCategoryManager from '@/features/photo-categories/presentation/components/PhotoCategoryManager/PhotoCategoryManager.vue'
-import { useAuthStore } from '@/features/auth/stores/auth.store'
 import { PERMISSIONS } from '@/core/auth/permissions'
+import { usePermissions } from '@/core/auth/use-permissions'
 
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
+const { has } = usePermissions()
 
 const slug = computed(() => route.params.slug as string)
 
-const canReadCollaborators = computed(() => 
-  authStore.currentUser?.permissions?.includes(PERMISSIONS.EVENT_COLLABORATOR_READ) ?? false
-)
+const canReadCollaborators = computed(() => has(PERMISSIONS.EVENT_COLLABORATOR_READ))
 
 const { data: event, isPending, isError, refetch } = useEventDetailQuery(slug)
 

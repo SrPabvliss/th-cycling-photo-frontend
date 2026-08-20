@@ -9,6 +9,9 @@ export const PERMISSIONS = {
   EVENT_COLLABORATOR_READ: 'event.collaborator.read',
   TENANT_READ: 'tenant.read',
   DASHBOARD_OPERATOR_READ: 'dashboard.operator.read',
+  ORDER_GIFT: 'order.gift',
+  ORDER_CONVERT_TO_GIFT: 'order.convert_to_gift',
+  ORDER_CONVERT_TO_SALE: 'order.convert_to_sale',
 } as const
 
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]
