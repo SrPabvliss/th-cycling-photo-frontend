@@ -34,6 +34,11 @@ export const API_ROUTES = {
     BY_ID: (phoneId: string) => `/users/me/phones/${phoneId}`,
     SET_PRIMARY: (phoneId: string) => `/users/me/phones/${phoneId}/primary`,
   },
+  MY_PROFILE: {
+    BASE: '/users/me',
+    AVATAR_PRESIGNED_URL: '/users/me/avatar/presigned-url',
+    AVATAR_CONFIRM: '/users/me/avatar/confirm',
+  },
   EVENTS: {
     BASE: EVENTS_BASE,
     GET_ALL: EVENTS_BASE,

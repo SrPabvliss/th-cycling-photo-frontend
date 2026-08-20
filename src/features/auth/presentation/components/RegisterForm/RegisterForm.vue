@@ -21,6 +21,7 @@ import { useCountriesQuery } from '@/features/locations/composables/queries/use-
 import { useProvincesByCountryQuery } from '@/features/locations/composables/queries/use-provinces-by-country'
 import { useCantonsQuery } from '@/features/locations/composables/queries/use-cantons'
 import { useBirthDateFields } from '../../../composables/use-birth-date-fields'
+import { findCountryIsoCode } from '@/shared/utils/location.utils'
 import { useCountryPhoneSync } from '../../../composables/use-country-phone-sync'
 import {
   REGISTER_FORM_DEFAULTS,
@@ -88,11 +89,9 @@ const cantonOptions = computed(
 
 const hasRegions = computed(() => provinceOptions.value.length > 0)
 
-const selectedCountryIso = computed(() => {
-  const cid = selectedCountryId.value
-  if (!cid || !countries.value) return null
-  return countries.value.find((c) => c.id === cid)?.isoCode ?? null
-})
+const selectedCountryIso = computed(() =>
+  findCountryIsoCode(countries.value, selectedCountryId.value),
+)
 
 watch(countries, (list) => {
   if (list && !form.getFieldValue('countryId')) {
@@ -236,7 +235,7 @@ const {
       >
         <template v-slot="{ field }">
           <NFormItem label="WhatsApp" required v-bind="fieldStatus(field)">
-            <div class="register-form__phone">
+            <div class="tt-phone-input">
               <IntlTelInput
                 ref="telInputRef"
                 :options="{
