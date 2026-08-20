@@ -20,6 +20,7 @@ const NAV_ITEMS: INavItem[] = [
   { label: 'Pedidos', to: ORDERS_PATH, permission: PERMISSIONS.ORDER_READ },
   { label: 'Retoque', to: RETOUCH_PATH, permission: PERMISSIONS.PHOTO_RETOUCH_READ },
   { label: 'Compradores', to: BUYERS_PATH, permission: PERMISSIONS.BUYER_READ },
+  { label: 'Tenants', to: '/tenants', permission: PERMISSIONS.TENANT_READ },
 ]
 
 export function getNavLinks(permissions: string[]): INavLink[] {
