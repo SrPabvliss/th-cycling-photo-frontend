@@ -55,3 +55,4 @@ docs/superpowers/
 # Archived legacy features (local only, pending elimination)
 **/features/_legacy/
 
+.superpowers/
