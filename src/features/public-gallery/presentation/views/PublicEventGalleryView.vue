@@ -138,6 +138,7 @@ const heroUrl = computed(() => {
               <NIcon :component="ArrowBack" :size="18" />
             </button>
             <h1 class="gallery-hero__title">{{ event.name }}</h1>
+            <p class="gallery-hero__owner">Fotos de {{ event.ownerName }}</p>
             <p class="gallery-hero__meta">
               <template v-if="event.startDate.getTime() === event.endDate.getTime()">
                 {{ formatDate(event.startDate) }}
