@@ -20,6 +20,7 @@ import { useEventDetailQuery } from '../../composables/queries/use-event-detail'
 import { useEventConfiguration } from '../../composables/queries/use-event-configuration'
 import { useUpdateEventConfiguration } from '../../composables/mutations/use-update-event-configuration'
 import { EVENT_ROUTE_NAMES } from '../../routes'
+import type { IEventConfigurationSelectionRequest } from '../../types/requests/event-configuration.request'
 
 const route = useRoute()
 const router = useRouter()
@@ -67,18 +68,51 @@ const activePayoutMethods = computed(
   () => configuration.value?.payoutMethods.filter((method) => method.isActive) ?? [],
 )
 
-const { mutateAsync: updateConfiguration, isPending: isSaving } = useUpdateEventConfiguration(
-  eventId.value,
-)
+const { mutateAsync: updateConfiguration, isPending: isSaving } =
+  useUpdateEventConfiguration(eventId)
+
+function normalizedText(value: string) {
+  return value.trim() === '' ? null : value.trim()
+}
+
+function samePayoutMethodIds(a: string[], b: string[]) {
+  if (a.length !== b.length) return false
+  const sortedA = [...a].sort()
+  const sortedB = [...b].sort()
+  return sortedA.every((id, index) => id === sortedB[index])
+}
 
 async function handleSave() {
-  await updateConfiguration({
-    publicName: publicName.value.trim() === '' ? null : publicName.value.trim(),
-    watermarkStorageKey:
-      watermarkStorageKey.value.trim() === '' ? null : watermarkStorageKey.value.trim(),
-    whatsappNumber: whatsappNumber.value.trim() === '' ? null : whatsappNumber.value.trim(),
-    payoutMethodIds: selectedPayoutMethodIds.value,
-  })
+  if (!configuration.value) return
+  const loaded = configuration.value
+  const payload: IEventConfigurationSelectionRequest = {}
+
+  const nextPublicName = normalizedText(publicName.value)
+  if (nextPublicName !== (loaded.publicName ?? null)) payload.publicName = nextPublicName
+
+  const nextWatermarkStorageKey = normalizedText(watermarkStorageKey.value)
+  if (nextWatermarkStorageKey !== (loaded.watermarkStorageKey ?? null)) {
+    payload.watermarkStorageKey = nextWatermarkStorageKey
+  }
+
+  const nextWhatsappNumber = normalizedText(whatsappNumber.value)
+  if (nextWhatsappNumber !== (loaded.whatsappNumber ?? null)) {
+    payload.whatsappNumber = nextWhatsappNumber
+  }
+
+  const loadedActiveIds = loaded.payoutMethods
+    .filter((method) => method.isActive)
+    .map((method) => method.id)
+  if (!samePayoutMethodIds(selectedPayoutMethodIds.value, loadedActiveIds)) {
+    payload.payoutMethodIds = selectedPayoutMethodIds.value
+  }
+
+  if (Object.keys(payload).length === 0) {
+    router.push({ name: EVENT_ROUTE_NAMES.DETAIL, params: { slug: slug.value } })
+    return
+  }
+
+  await updateConfiguration(payload)
   router.push({ name: EVENT_ROUTE_NAMES.DETAIL, params: { slug: slug.value } })
 }
 </script>
