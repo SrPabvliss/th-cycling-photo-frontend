@@ -27,3 +27,9 @@
   align-items: center;
   justify-content: center;
 }
+
+.event-form-container__footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}

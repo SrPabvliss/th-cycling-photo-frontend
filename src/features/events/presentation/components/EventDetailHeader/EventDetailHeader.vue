@@ -1,20 +1,32 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { NButton, NFlex, NIcon, NTag } from 'naive-ui'
-import { ArrowBack, CreateOutline, CloudUploadOutline } from '@vicons/ionicons5'
+import { ArrowBack, CreateOutline, CloudUploadOutline, SettingsOutline } from '@vicons/ionicons5'
 
 import { formatDate, formatRelativeTime } from '@/shared/utils/date.utils'
 import { PHOTO_ROUTE_NAMES } from '@/features/photos/routes'
+import { PERMISSIONS } from '@/core/auth/permissions'
+import { usePermissions } from '@/core/auth/use-permissions'
 import { EVENT_ROUTE_NAMES } from '../../../routes'
 import { EVENT_STATUS_CONFIG } from '../../../constants/status-config'
+import { useEventConfiguration } from '../../../composables/queries/use-event-configuration'
 import type { IEventDetail } from '../../../types/responses/event-detail.response'
 
-defineProps<{
+const props = defineProps<{
   event: IEventDetail
   eventSlug: string
 }>()
 
 const router = useRouter()
+const { has } = usePermissions()
+const canUpdateEvent = computed(() => has(PERMISSIONS.EVENT_UPDATE))
+
+const eventId = computed(() => (canUpdateEvent.value ? props.event.id : ''))
+const { data: configuration } = useEventConfiguration(eventId)
+const canEditConfiguration = computed(
+  () => canUpdateEvent.value && !!configuration.value?.isEditable,
+)
 </script>
 
 <template>
@@ -40,6 +52,15 @@ const router = useRouter()
       </div>
     </NFlex>
     <NFlex :size="10">
+      <NButton
+        v-if="canEditConfiguration"
+        @click="
+          router.push({ name: EVENT_ROUTE_NAMES.CONFIGURATION_EDIT, params: { slug: eventSlug } })
+        "
+      >
+        <template #icon><NIcon :component="SettingsOutline" /></template>
+        Configuración
+      </NButton>
       <NButton @click="router.push({ name: EVENT_ROUTE_NAMES.EDIT, params: { slug: eventSlug } })">
         <template #icon><NIcon :component="CreateOutline" /></template>
         Editar evento
