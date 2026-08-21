@@ -20,12 +20,14 @@ export const accountRoutes: RouteRecordRaw[] = [
     path: `${ACCOUNT_PATH}/orders`,
     name: ACCOUNT_ROUTE_NAMES.ORDERS,
     component: () => import('./presentation/views/MyOrdersView.vue'),
-    meta: { requiresAuth: true, roles: [USER_ROLES.CUSTOMER] },
+    // Self-scoped orders: authenticated only, like the backend's @Authenticated().
+    meta: { requiresAuth: true },
   },
   {
     path: `${ACCOUNT_PATH}/orders/:id`,
     name: ACCOUNT_ROUTE_NAMES.ORDER_DETAIL,
     component: () => import('./presentation/views/MyOrderDetailView.vue'),
-    meta: { requiresAuth: true, roles: [USER_ROLES.CUSTOMER] },
+    // Self-scoped orders: authenticated only, like the backend's @Authenticated().
+    meta: { requiresAuth: true },
   },
 ]
