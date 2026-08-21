@@ -1,5 +1,4 @@
 import { flushPromises, mount } from '@vue/test-utils'
-import { NModal } from 'naive-ui'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
 
@@ -18,6 +17,7 @@ const checkout = vi.fn(() =>
 )
 
 const chooseMethod = vi.fn(() => Promise.resolve({ orderIds: ['order-9'] }))
+const push = vi.fn()
 
 vi.mock('@/features/cart/composables/mutations/use-checkout', () => ({
   useCheckout: () => ({ mutateAsync: checkout, isPending: ref(false) }),
@@ -27,19 +27,20 @@ vi.mock('@/features/payments/composables/mutations/use-choose-payment-method', (
   useChoosePaymentMethod: () => ({ mutateAsync: chooseMethod, isPending: ref(false) }),
 }))
 
-vi.mock('@/features/payments/composables/mutations/use-create-payment-intent', () => ({
-  useCreatePaymentIntent: () => ({ mutateAsync: vi.fn() }),
+vi.mock('vue-router', () => ({
+  useRouter: () => ({ push }),
 }))
 
 afterEach(() => {
   checkout.mockClear()
   chooseMethod.mockClear()
+  push.mockClear()
 })
 
 function mountModal(orderIds?: string[]) {
   return mount(PaymentMethodModal, {
     props: { show: true, total: 25, currency: 'USD', orderIds },
-    global: { stubs: { Modal: { template: '<div><slot /></div>' }, PaymentCheckout: true } },
+    global: { stubs: { Modal: { template: '<div><slot /></div>' } } },
   })
 }
 
@@ -69,7 +70,7 @@ describe('PaymentMethodModal — new checkout (no orderIds)', () => {
     expect(showEvents[showEvents.length - 1]).toEqual([false])
   })
 
-  it('checks out with card and renders the payment box with the returned ids', async () => {
+  it('checks out with card and navigates to the payment box with the returned ids', async () => {
     const wrapper = mountModal()
 
     await wrapper.get('[data-test="method-card"]').trigger('click')
@@ -77,11 +78,14 @@ describe('PaymentMethodModal — new checkout (no orderIds)', () => {
 
     expect(checkout).toHaveBeenCalledWith('card')
     expect(chooseMethod).not.toHaveBeenCalled()
-    const paymentCheckout = wrapper.findComponent({ name: 'PaymentCheckout' })
-    expect(paymentCheckout.exists()).toBe(true)
-    expect(paymentCheckout.props('orderIds')).toEqual(['order-1'])
+    expect(push).toHaveBeenCalledWith({
+      name: 'payment-box',
+      query: { orders: 'order-1' },
+    })
     expect(wrapper.emitted('paid-orders')).toBeUndefined()
     expect(wrapper.emitted('method-chosen')?.[0]).toEqual(['card'])
+    const showEvents = wrapper.emitted('update:show') ?? []
+    expect(showEvents[showEvents.length - 1]).toEqual([false])
   })
 })
 
@@ -100,7 +104,7 @@ describe('PaymentMethodModal — retry on existing orders (orderIds given)', () 
     expect(showEvents[showEvents.length - 1]).toEqual([false])
   })
 
-  it('records the card choice and renders the payment box with the given ids, without calling checkout', async () => {
+  it('records the card choice and navigates to the payment box with the given ids, without calling checkout', async () => {
     const wrapper = mountModal(['order-9'])
 
     await wrapper.get('[data-test="method-card"]').trigger('click')
@@ -108,91 +112,24 @@ describe('PaymentMethodModal — retry on existing orders (orderIds given)', () 
 
     expect(chooseMethod).toHaveBeenCalledWith({ orderIds: ['order-9'], method: 'card' })
     expect(checkout).not.toHaveBeenCalled()
-    const paymentCheckout = wrapper.findComponent({ name: 'PaymentCheckout' })
-    expect(paymentCheckout.exists()).toBe(true)
-    expect(paymentCheckout.props('orderIds')).toEqual(['order-9'])
+    expect(push).toHaveBeenCalledWith({
+      name: 'payment-box',
+      query: { orders: 'order-9' },
+    })
     expect(wrapper.emitted('method-chosen')?.[0]).toEqual(['card'])
+    const showEvents = wrapper.emitted('update:show') ?? []
+    expect(showEvents[showEvents.length - 1]).toEqual([false])
   })
 })
 
 describe('PaymentMethodModal — shared behaviour', () => {
-  it('goes back to the choice from the box, which is the way out after a decline', async () => {
-    const wrapper = mountModal()
-
-    await wrapper.get('[data-test="method-card"]').trigger('click')
-    await flushPromises()
-    await wrapper.get('[data-test="method-back"]').trigger('click')
-
-    expect(wrapper.get('[data-test="method-transfer"]').isVisible()).toBe(true)
-  })
-
   it('never names the payment provider to the buyer', () => {
     expect(mountModal().text().toLowerCase()).not.toContain('payphone')
   })
 
-  it('switches from card to transfer through chooseExisting once the drafts already exist, never calling checkout twice', async () => {
+  it('shows the prop total regardless of method chosen', () => {
     const wrapper = mountModal()
 
-    await wrapper.get('[data-test="method-card"]').trigger('click')
-    await flushPromises()
-    await wrapper.get('[data-test="method-back"]').trigger('click')
-    await wrapper.get('[data-test="method-transfer"]').trigger('click')
-    await flushPromises()
-
-    expect(checkout).toHaveBeenCalledTimes(1)
-    expect(checkout).toHaveBeenCalledWith('card')
-    expect(chooseMethod).toHaveBeenCalledTimes(1)
-    expect(chooseMethod).toHaveBeenCalledWith({ orderIds: ['order-1'], method: 'transfer' })
-    const showEvents = wrapper.emitted('update:show') ?? []
-    expect(showEvents[showEvents.length - 1]).toEqual([false])
-  })
-
-  it('shows the summed total from the checkout response on the card step, not the prop total', async () => {
-    checkout.mockResolvedValueOnce([
-      {
-        orderId: 'order-1',
-        eventName: 'Vuelta al Valle',
-        photoCount: 3,
-        subtotal: 25,
-        currency: 'USD',
-      },
-      {
-        orderId: 'order-2',
-        eventName: 'Ronda del Lago',
-        photoCount: 2,
-        subtotal: 10,
-        currency: 'USD',
-      },
-    ])
-    const wrapper = mount(PaymentMethodModal, {
-      props: { show: true, total: 0, currency: 'USD' },
-      global: { stubs: { Modal: { template: '<div><slot /></div>' }, PaymentCheckout: true } },
-    })
-
-    await wrapper.get('[data-test="method-card"]').trigger('click')
-    await flushPromises()
-
-    expect(wrapper.get('.payment-method-modal__total').text()).toContain('$35.00')
-    expect(wrapper.get('.payment-method-modal__total').text()).not.toContain('$0.00')
-  })
-
-  it('is not dismissible by mask click or close button once on the card step', async () => {
-    const wrapper = mount(PaymentMethodModal, {
-      props: { show: true, total: 25, currency: 'USD' },
-      attachTo: document.body,
-      global: { stubs: { PaymentCheckout: true } },
-    })
-
-    expect(wrapper.getComponent(NModal).props('maskClosable')).toBe(true)
-    expect(wrapper.getComponent(NModal).props('closable')).toBe(true)
-
-    const cardButton = document.body.querySelector<HTMLButtonElement>('[data-test="method-card"]')
-    cardButton?.click()
-    await flushPromises()
-
-    expect(wrapper.getComponent(NModal).props('maskClosable')).toBe(false)
-    expect(wrapper.getComponent(NModal).props('closable')).toBe(false)
-
-    wrapper.unmount()
+    expect(wrapper.get('.payment-method-modal__total').text()).toContain('$25.00')
   })
 })

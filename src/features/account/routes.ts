@@ -6,6 +6,7 @@ export const ACCOUNT_ROUTE_NAMES = {
   PROFILE: 'account-profile',
   ORDERS: 'account-orders',
   ORDER_DETAIL: 'account-order-detail',
+  VERIFY_EMAIL: 'account-verify-email',
 } as const
 
 export const accountRoutes: RouteRecordRaw[] = [
@@ -14,6 +15,13 @@ export const accountRoutes: RouteRecordRaw[] = [
     name: ACCOUNT_ROUTE_NAMES.PROFILE,
     component: () => import('./presentation/views/ProfileView.vue'),
     // Self-scoped profile: authenticated only, like the backend's @Authenticated().
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/cuenta/verificar-correo',
+    name: ACCOUNT_ROUTE_NAMES.VERIFY_EMAIL,
+    component: () => import('./presentation/views/VerifyEmailView.vue'),
+    // Self-scoped verification: authenticated only, like the backend's @Authenticated().
     meta: { requiresAuth: true },
   },
   {

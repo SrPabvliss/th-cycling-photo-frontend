@@ -5,6 +5,8 @@ import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { useMyProfileQuery } from '../../composables/queries/use-my-profile'
 import ProfileForm from '../components/ProfileForm/ProfileForm.vue'
 import PhoneList from '../components/PhoneList/PhoneList.vue'
+import EmailSection from '../components/EmailSection/EmailSection.vue'
+import PasswordForm from '../components/PasswordForm/PasswordForm.vue'
 
 const { data: profile, isPending, isError, refetch } = useMyProfileQuery()
 </script>
@@ -30,6 +32,8 @@ const { data: profile, isPending, isError, refetch } = useMyProfileQuery()
       <template v-else-if="profile">
         <ProfileForm :profile="profile" />
         <PhoneList />
+        <EmailSection />
+        <PasswordForm />
       </template>
     </div>
   </PublicLayout>

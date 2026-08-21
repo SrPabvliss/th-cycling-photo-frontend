@@ -12,8 +12,14 @@ export interface IPaymentGatewayCheckoutEmits {
   (event: 'setup-failed', error: unknown): void
 }
 
+export interface IPaymentGatewayAmount {
+  amountCents: number
+  currency: string
+}
+
 export interface IPaymentGateway {
   provider: string
   checkoutComponent: Component
   parseReturn: (query: LocationQuery) => IConfirmPaymentRequest | null
+  describeIntent: (intent: IPaymentIntent) => IPaymentGatewayAmount | null
 }

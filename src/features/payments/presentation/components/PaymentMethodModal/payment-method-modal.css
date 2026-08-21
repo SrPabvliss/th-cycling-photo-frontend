@@ -58,12 +58,6 @@
   flex-shrink: 0;
 }
 
-.payment-method-modal__card {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
 .payment-method-modal__error {
   margin-top: 16px;
 }
