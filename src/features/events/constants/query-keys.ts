@@ -7,4 +7,6 @@ export const EVENT_QUERY_KEYS = {
   detail: (id: IEventListItem['id']) => [API_ROUTES.EVENTS.BASE, 'detail', id] as const,
   stats: () => [API_ROUTES.EVENTS.BASE, 'stats'] as const,
   operators: (eventId: string) => [API_ROUTES.EVENTS.BASE, 'operators', eventId] as const,
+  configurationPreset: () => [API_ROUTES.EVENTS.BASE, 'configuration-preset'] as const,
+  configuration: (eventId: string) => [API_ROUTES.EVENTS.BASE, 'configuration', eventId] as const,
 } as const

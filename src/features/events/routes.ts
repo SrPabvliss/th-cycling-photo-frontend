@@ -9,6 +9,7 @@ export const EVENT_ROUTE_NAMES = {
   CREATE: 'events-create',
   DETAIL: 'events-detail',
   EDIT: 'events-edit',
+  CONFIGURATION_EDIT: 'events-configuration-edit',
 } as const
 
 export const eventRoutes: RouteRecordRaw[] = [
@@ -22,7 +23,7 @@ export const eventRoutes: RouteRecordRaw[] = [
     path: 'events/create',
     name: EVENT_ROUTE_NAMES.CREATE,
     component: () => import('./presentation/views/EventCreateView.vue'),
-    meta: { requiresAuth: true, permissions: [PERMISSIONS.EVENT_READ] },
+    meta: { requiresAuth: true, permissions: [PERMISSIONS.EVENT_CREATE] },
   },
   {
     path: 'events/:slug',
@@ -35,5 +36,11 @@ export const eventRoutes: RouteRecordRaw[] = [
     name: EVENT_ROUTE_NAMES.EDIT,
     component: () => import('./presentation/views/EventEditView.vue'),
     meta: { requiresAuth: true, permissions: [PERMISSIONS.EVENT_READ] },
+  },
+  {
+    path: 'events/:slug/configuration',
+    name: EVENT_ROUTE_NAMES.CONFIGURATION_EDIT,
+    component: () => import('./presentation/views/EventConfigurationEditView.vue'),
+    meta: { requiresAuth: true, permissions: [PERMISSIONS.EVENT_UPDATE] },
   },
 ]
