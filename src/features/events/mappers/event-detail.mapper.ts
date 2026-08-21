@@ -19,6 +19,8 @@ export function toEventDetail(api: IApiEventDetail): IEventDetail {
     photoCount: api.photoCount,
     classifiedCount: api.classifiedCount,
     totalFileSize: api.totalFileSize,
+    photoQuota: api.photoQuota,
+    photosUploaded: api.photosUploaded,
     createdAt: new Date(api.createdAt),
     updatedAt: new Date(api.updatedAt),
   }

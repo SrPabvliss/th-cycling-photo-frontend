@@ -17,6 +17,8 @@ export interface IApiEventDetail {
   photoCount: number
   classifiedCount: number
   totalFileSize: number
+  photoQuota: number | null
+  photosUploaded: number
   createdAt: string
   updatedAt: string
 }
@@ -38,6 +40,8 @@ export interface IEventDetail {
   photoCount: number
   classifiedCount: number
   totalFileSize: number
+  photoQuota: number | null
+  photosUploaded: number
   createdAt: Date
   updatedAt: Date
 }

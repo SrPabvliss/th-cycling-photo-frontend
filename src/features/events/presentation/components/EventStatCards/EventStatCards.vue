@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { NCard, NFlex, NGrid, NGridItem, NIcon } from 'naive-ui'
-import { Camera, ServerOutline, ImagesOutline, AlertCircleOutline } from '@vicons/ionicons5'
+import {
+  Camera,
+  ServerOutline,
+  ImagesOutline,
+  AlertCircleOutline,
+  StatsChartOutline,
+} from '@vicons/ionicons5'
 
 import { formatFileSize } from '@/shared/utils/format.utils'
 import type { IEventDetail } from '../../../types/responses/event-detail.response'
@@ -13,6 +19,19 @@ const props = defineProps<{
 
 const unclassifiedCount = computed(() => props.event.photoCount - props.event.classifiedCount)
 
+// photosUploaded is cumulative and never decreases; photoCount drops when photos are deleted
+const quotaValue = computed(() =>
+  props.event.photoQuota === null
+    ? 'Sin límite'
+    : `${props.event.photosUploaded.toLocaleString('es-EC')} / ${props.event.photoQuota.toLocaleString('es-EC')}`,
+)
+
+const quotaDescription = computed(() => {
+  if (props.event.photoQuota === null) return 'Fotos usadas'
+  if (props.event.photosUploaded === props.event.photoCount) return 'Fotos usadas'
+  return `${props.event.photoCount.toLocaleString('es-EC')} en la galería`
+})
+
 const stats = computed<IStatCard[]>(() => [
   {
     icon: Camera,
@@ -20,6 +39,13 @@ const stats = computed<IStatCard[]>(() => [
     label: 'Fotos',
     value: props.event.photoCount,
     description: 'Fotos en el evento',
+  },
+  {
+    icon: StatsChartOutline,
+    color: 'blue',
+    label: 'Cupo de fotos',
+    value: quotaValue.value,
+    description: quotaDescription.value,
   },
   {
     icon: ServerOutline,
@@ -46,7 +72,7 @@ const stats = computed<IStatCard[]>(() => [
 </script>
 
 <template>
-  <NGrid :cols="4" :x-gap="16" :y-gap="16">
+  <NGrid cols="2 600:3 900:5" :x-gap="16" :y-gap="16" responsive="screen">
     <NGridItem v-for="stat in stats" :key="stat.label">
       <NCard>
         <NFlex justify="space-between" align="start" style="margin-bottom: 16px">
