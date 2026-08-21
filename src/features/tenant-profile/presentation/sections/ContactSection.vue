@@ -27,7 +27,8 @@ const { mutate, isPending } = useUpdateTenantProfile()
 
 function submit() {
   if (!hasChanges.value) return
-  mutate({ whatsappNumber: whatsappNumber.value })
+  const trimmed = whatsappNumber.value.trim()
+  mutate({ whatsappNumber: trimmed === '' ? null : trimmed })
 }
 </script>
 

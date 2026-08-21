@@ -32,10 +32,14 @@ const hasChanges = computed(
 const { mutate, isPending } = useUpdateTenantProfile()
 
 function submit() {
-  const payload: Record<string, string> = {}
-  if (publicName.value !== (props.profile.publicName ?? '')) payload.publicName = publicName.value
+  const payload: Record<string, string | null> = {}
+  if (publicName.value !== (props.profile.publicName ?? '')) {
+    const trimmed = publicName.value.trim()
+    payload.publicName = trimmed === '' ? null : trimmed
+  }
   if (watermarkStorageKey.value !== (props.profile.watermarkStorageKey ?? '')) {
-    payload.watermarkStorageKey = watermarkStorageKey.value
+    const trimmed = watermarkStorageKey.value.trim()
+    payload.watermarkStorageKey = trimmed === '' ? null : trimmed
   }
   if (Object.keys(payload).length === 0) return
   mutate(payload)

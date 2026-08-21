@@ -1,5 +1,5 @@
 export interface UpdateTenantProfileRequest {
-  publicName?: string
-  watermarkStorageKey?: string
-  whatsappNumber?: string
+  publicName?: string | null
+  watermarkStorageKey?: string | null
+  whatsappNumber?: string | null
 }
