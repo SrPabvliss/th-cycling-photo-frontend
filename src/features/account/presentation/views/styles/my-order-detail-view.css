@@ -1,50 +1,43 @@
 .my-order-detail-view {
-  max-width: 960px;
+  width: 100%;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 32px 20px 64px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.my-order-detail-view__header {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.my-order-detail-view__title-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.my-order-detail-view__event {
-  font-size: 22px;
-  font-weight: 700;
-  margin: 0;
-}
-
-.my-order-detail-view__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  font-size: 14px;
-  color: #6b7280;
+  padding: 24px 32px 96px;
 }
 
 .my-order-detail-view__actions {
   display: flex;
+  align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 12px;
+  padding: 0 20px 32px;
 }
 
 .my-order-detail-view__actions :deep(.n-button) {
   min-height: 44px;
+  min-width: 180px;
+}
+
+.my-order-detail-view__photos {
+  padding: 0 20px;
 }
 
 @media (max-width: 767px) {
   .my-order-detail-view {
-    padding: 20px 16px 96px;
+    padding: 16px 16px 96px;
+  }
+
+  .my-order-detail-view__actions {
+    padding: 0 0 24px;
+  }
+
+  .my-order-detail-view__actions :deep(.n-button) {
+    min-width: 0;
+    flex: 1 1 140px;
+  }
+
+  .my-order-detail-view__photos {
+    padding: 0;
   }
 }

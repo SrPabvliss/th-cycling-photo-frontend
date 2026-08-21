@@ -156,6 +156,7 @@ export const API_ROUTES = {
     GET_BY_ID: (id: string) => `${ORDERS_BASE}/me/${id}`,
     DOWNLOADS: (id: string) => `${ORDERS_BASE}/me/${id}/downloads`,
     CANCEL: (id: string) => `${ORDERS_BASE}/me/${id}/cancel`,
+    SUMMARY: `${ORDERS_BASE}/me/summary`,
   },
   BUYERS: {
     GET_ALL: '/buyers',

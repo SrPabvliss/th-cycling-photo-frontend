@@ -2,9 +2,11 @@ import type {
   IApiMyOrderDetail,
   IApiMyOrderDownloads,
   IApiMyOrderListItem,
+  IApiMyOrdersSummary,
   IMyOrderDetail,
   IMyOrderDownloads,
   IMyOrderListItem,
+  IMyOrdersSummary,
 } from '../types/responses/my-order.response'
 
 export function toMyOrderList(api: IApiMyOrderListItem[]): IMyOrderListItem[] {
@@ -36,4 +38,13 @@ export function toMyOrderDetail(api: IApiMyOrderDetail): IMyOrderDetail {
 
 export function toMyOrderDownloads(api: IApiMyOrderDownloads): IMyOrderDownloads {
   return { orderId: api.orderId, photos: api.photos }
+}
+
+export function toMyOrdersSummary(api: IApiMyOrdersSummary): IMyOrdersSummary {
+  return {
+    orderCount: api.orderCount,
+    photoCount: api.photoCount,
+    eventCount: api.eventCount,
+    spent: api.spent.map((entry) => ({ currency: entry.currency, amount: entry.amount })),
+  }
 }

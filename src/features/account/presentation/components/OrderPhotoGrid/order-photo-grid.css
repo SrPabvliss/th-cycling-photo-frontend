@@ -1,15 +1,16 @@
 .opg {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 260px));
+  justify-content: center;
+  gap: 20px;
 }
 
 .opg__cell {
   position: relative;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1;
   border-radius: 10px;
   overflow: hidden;
-  background: #0a0a0a;
+  background: #e5e7eb;
 }
 
 .opg__img {
@@ -17,6 +18,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  background: #e5e7eb;
 }
 
 .opg__download {
@@ -27,15 +29,9 @@
   height: 44px;
 }
 
-@media (min-width: 640px) {
+@media (max-width: 639px) {
   .opg {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .opg {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 }

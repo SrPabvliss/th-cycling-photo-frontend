@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { NButton, NIcon, NPopconfirm, NResult, NSkeleton, NTag } from 'naive-ui'
+import { NButton, NIcon, NPopconfirm, NResult, NSkeleton } from 'naive-ui'
 import { CloudDownloadOutline } from '@vicons/ionicons5'
 import { isAxiosError } from 'axios'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
-import { formatDate } from '@/shared/utils/date.utils'
 import { ACCOUNT_ROUTE_NAMES } from '../../routes'
 import { useMyOrderDetailQuery } from '../../composables/queries/use-my-order-detail'
 import { useOrderDownloads } from '../../composables/use-order-downloads'
 import { useCancelMyOrder } from '../../composables/mutations/use-cancel-my-order'
-import { describeOrderState } from '../../utils/order-state.utils'
+import OrderDetailHeader from '../components/OrderDetailHeader/OrderDetailHeader.vue'
 import OrderPhotoGrid from '../components/OrderPhotoGrid/OrderPhotoGrid.vue'
 
 const route = useRoute()
@@ -24,17 +23,6 @@ const { downloadOne, downloadAll, isDownloadingAll, downloadingPhotoId } =
 const cancelOrder = useCancelMyOrder()
 
 const isNotFound = computed(() => isAxiosError(error.value) && error.value.response?.status === 404)
-
-const stateChip = computed(() => (order.value ? describeOrderState(order.value.state) : null))
-
-const createdAtLabel = computed(() =>
-  order.value ? formatDate(new Date(order.value.createdAt)) : '',
-)
-
-const amountLabel = computed(() => {
-  if (!order.value || order.value.subtotal == null || order.value.currency == null) return null
-  return `${order.value.currency} ${order.value.subtotal}`
-})
 </script>
 
 <template>
@@ -62,24 +50,13 @@ const amountLabel = computed(() => {
       </NResult>
 
       <template v-else-if="order">
-        <div class="my-order-detail-view__header">
-          <div class="my-order-detail-view__title-row">
-            <h1 class="my-order-detail-view__event">{{ order.eventName }}</h1>
-            <NTag v-if="stateChip" size="small" :type="stateChip.tone" :bordered="false">
-              {{ stateChip.label }}
-            </NTag>
-          </div>
+        <OrderDetailHeader :order="order" />
 
-          <div class="my-order-detail-view__meta">
-            <span>{{ createdAtLabel }}</span>
-            <span v-if="amountLabel">{{ amountLabel }}</span>
-          </div>
-        </div>
-
-        <div class="my-order-detail-view__actions">
+        <div v-if="order.canDownload || order.canCancel" class="my-order-detail-view__actions">
           <NButton
             v-if="order.canDownload"
             type="primary"
+            size="large"
             :loading="isDownloadingAll"
             :disabled="isDownloadingAll"
             @click="downloadAll()"
@@ -90,7 +67,7 @@ const amountLabel = computed(() => {
 
           <NPopconfirm v-if="order.canCancel" @positive-click="cancelOrder.mutate(orderId)">
             <template #trigger>
-              <NButton type="error" secondary :loading="cancelOrder.isPending.value">
+              <NButton type="error" secondary size="large" :loading="cancelOrder.isPending.value">
                 Cancelar orden
               </NButton>
             </template>
@@ -99,6 +76,7 @@ const amountLabel = computed(() => {
         </div>
 
         <OrderPhotoGrid
+          class="my-order-detail-view__photos"
           :photos="order.photos"
           :can-download="order.canDownload"
           :downloading-photo-id="downloadingPhotoId"

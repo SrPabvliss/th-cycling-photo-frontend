@@ -1,0 +1,73 @@
+.odh {
+  text-align: center;
+  padding: 40px 20px 8px;
+}
+
+.odh__hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.odh__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.odh__title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #1a1f2c;
+  margin: 0 0 12px;
+  overflow-wrap: anywhere;
+}
+
+.odh__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.odh__stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #9ca3af;
+  flex-wrap: wrap;
+}
+
+.odh__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #d1d5db;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .odh__title {
+    font-size: 20px;
+  }
+
+  .odh {
+    padding: 28px 16px 8px;
+  }
+
+  .odh__icon {
+    width: 68px;
+    height: 68px;
+  }
+}

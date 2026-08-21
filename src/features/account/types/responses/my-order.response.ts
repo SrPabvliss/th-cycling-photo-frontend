@@ -1,4 +1,4 @@
-export type MyOrderState = 'in_process' | 'ready' | 'cancelled'
+export type MyOrderState = 'in_process' | 'ready' | 'gifted' | 'cancelled'
 
 export interface IApiMyOrderPreviewPhoto {
   photoId: string
@@ -71,4 +71,28 @@ export interface IMyOrderDetail {
 export interface IMyOrderDownloads {
   orderId: string
   photos: IApiMyOrderDownloadPhoto[]
+}
+
+export interface IApiMyOrdersSummarySpent {
+  currency: string
+  amount: string
+}
+
+export interface IApiMyOrdersSummary {
+  orderCount: number
+  photoCount: number
+  eventCount: number
+  spent: IApiMyOrdersSummarySpent[]
+}
+
+export interface IMyOrdersSummarySpent {
+  currency: string
+  amount: string
+}
+
+export interface IMyOrdersSummary {
+  orderCount: number
+  photoCount: number
+  eventCount: number
+  spent: IMyOrdersSummarySpent[]
 }

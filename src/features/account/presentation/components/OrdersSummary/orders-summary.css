@@ -1,0 +1,41 @@
+.orders-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.orders-summary__tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4px;
+  min-height: 96px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.orders-summary__tile-skeleton {
+  width: 60%;
+  height: 28px;
+}
+
+.orders-summary__value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1f2c;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.orders-summary__label {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+@media (max-width: 767px) {
+  .orders-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
