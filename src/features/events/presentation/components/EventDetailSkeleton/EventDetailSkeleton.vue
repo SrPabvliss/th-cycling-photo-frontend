@@ -26,8 +26,8 @@ import { NCard, NFlex, NGrid, NGridItem, NSkeleton } from 'naive-ui'
     <div class="skeleton-grid">
       <NFlex vertical :size="24">
         <!-- Stat cards: matches EventStatCards -->
-        <NGrid :cols="4" :x-gap="16" :y-gap="16">
-          <NGridItem v-for="i in 4" :key="i">
+        <NGrid cols="2 600:3 900:5" :x-gap="16" :y-gap="16" responsive="screen">
+          <NGridItem v-for="i in 5" :key="i">
             <NCard>
               <NFlex justify="space-between" align="start" style="margin-bottom: 16px">
                 <!-- Icon: 36×36 matches .stat-card__icon -->
