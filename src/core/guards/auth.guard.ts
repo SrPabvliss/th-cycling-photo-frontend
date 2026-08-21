@@ -1,7 +1,7 @@
 import type { Router } from 'vue-router'
 
 import { API_ROUTES } from '@/core/api/api-routes'
-import { getHomePath, type UserRole } from '@/core/auth/role-config'
+import { getHomePath } from '@/core/auth/role-config'
 import { httpClient } from '@/core/http/axios-client'
 import { toCurrentUser } from '@/features/auth/mappers/current-user.mapper'
 import { STANDALONE_PATHS } from '@/core/views/standalone-routes'
@@ -40,7 +40,7 @@ export function registerAuthGuard(router: Router): void {
     // Public routes — no auth required
     if (to.meta.public) {
       if (authStore.isAuthenticated && (to.path === AUTH_PATH || to.path === REGISTER_PATH)) {
-        return getHomePath(authStore.currentUser!.role)
+        return getHomePath(authStore.currentUser?.permissions ?? [])
       }
       return true
     }
@@ -50,10 +50,12 @@ export function registerAuthGuard(router: Router): void {
       return { path: AUTH_PATH, query: { redirect: to.fullPath } }
     }
 
-    // Role check
-    const allowedRoles = to.meta.roles as UserRole[] | undefined
-    if (allowedRoles && !allowedRoles.includes(authStore.currentUser!.role as UserRole)) {
-      return STANDALONE_PATHS.ACCESS_DENIED
+    const required = to.meta.permissions as string[] | undefined
+    if (required?.length) {
+      const held = authStore.currentUser?.permissions ?? []
+      if (!required.some((permission) => held.includes(permission))) {
+        return STANDALONE_PATHS.ACCESS_DENIED
+      }
     }
 
     return true

@@ -14,7 +14,7 @@ const accessId = `ACC-${Math.random().toString(36).substring(2, 10).toUpperCase(
 
 function goBack() {
   if (authStore.isAuthenticated) {
-    router.push(getHomePath(authStore.currentUser!.role))
+    router.push(getHomePath(authStore.currentUser?.permissions ?? []))
   } else if (window.history.length > 1) {
     router.back()
   } else {

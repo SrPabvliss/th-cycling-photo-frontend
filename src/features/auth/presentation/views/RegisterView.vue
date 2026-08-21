@@ -22,7 +22,7 @@ const showCheckoutNotice = computed(() => redirectQuery.value === '/checkout')
 async function handleSubmit(formData: IRegisterFormData) {
   try {
     const user = await register(toRegisterRequest(formData))
-    router.push(redirectQuery.value ?? getHomePath(user.role))
+    router.push(redirectQuery.value ?? getHomePath(user.permissions))
   } catch {
     // Error toast shown by interceptor
   }

@@ -6,14 +6,16 @@ import { NAvatar, NDrawer, NDrawerContent, NIcon } from 'naive-ui'
 import { LogOutOutline, MenuOutline, CloseOutline } from '@vicons/ionicons5'
 
 import { useAuth } from '@/features/auth/composables/use-auth'
-import { getRoleConfig, USER_ROLES } from '@/core/auth/role-config'
+import { getHomePath, getNavLinks, getPrincipalLabel } from '@/core/auth/role-config'
 import NotificationBell from '@/features/notifications/presentation/components/NotificationBell/NotificationBell.vue'
 import TitanLogo from './public/TitanLogo.vue'
 
 const router = useRouter()
 const { currentUser, logout, isLoggingOut } = useAuth()
 
-const roleConfig = computed(() => getRoleConfig(currentUser.value?.role ?? USER_ROLES.CUSTOMER))
+const navLinks = computed(() => getNavLinks(currentUser.value?.permissions ?? []))
+const homePath = computed(() => getHomePath(currentUser.value?.permissions ?? []))
+const principalLabel = computed(() => getPrincipalLabel(currentUser.value ?? null))
 
 const isMobile = useMediaQuery('(max-width: 767px)')
 const showMenu = ref(false)
@@ -55,13 +57,13 @@ function goTo(path: string) {
       <NIcon :component="MenuOutline" :size="22" />
     </button>
 
-    <div class="app-nav-brand" @click="router.push(roleConfig.homePath)">
+    <div class="app-nav-brand" @click="router.push(homePath)">
       <TitanLogo :size="28" />
       <span class="app-nav-title">Titan TV</span>
     </div>
 
     <nav v-if="!isMobile" class="app-nav-links">
-      <template v-for="link in roleConfig.navLinks" :key="link.label">
+      <template v-for="link in navLinks" :key="link.label">
         <router-link v-if="link.to && !link.disabled" :to="link.to" class="app-nav-link">
           {{ link.label }}
         </router-link>
@@ -78,7 +80,7 @@ function goTo(path: string) {
       <div class="app-nav-user">
         <div class="app-nav-user-info">
           <span class="app-nav-user-name">{{ displayName }}</span>
-          <span class="app-nav-user-role">{{ roleConfig.label }}</span>
+          <span class="app-nav-user-role">{{ principalLabel }}</span>
         </div>
         <NAvatar :size="32" round>{{ userInitials }}</NAvatar>
       </div>
@@ -98,7 +100,7 @@ function goTo(path: string) {
     <NDrawerContent :native-scrollbar="false" body-content-style="padding: 0;">
       <div class="app-nav-menu">
         <div class="app-nav-menu__header">
-          <div class="app-nav-menu__brand" @click="goTo(roleConfig.homePath)">
+          <div class="app-nav-menu__brand" @click="goTo(homePath)">
             <TitanLogo :size="28" />
             <span class="app-nav-title">Titan TV</span>
           </div>
@@ -108,7 +110,7 @@ function goTo(path: string) {
         </div>
 
         <nav class="app-nav-menu__nav">
-          <template v-for="link in roleConfig.navLinks" :key="link.label">
+          <template v-for="link in navLinks" :key="link.label">
             <router-link
               v-if="link.to && !link.disabled"
               :to="link.to"

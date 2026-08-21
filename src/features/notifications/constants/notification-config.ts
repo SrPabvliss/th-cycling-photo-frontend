@@ -7,16 +7,14 @@ import {
 } from '@vicons/ionicons5'
 import type { Component } from 'vue'
 
-import { USER_ROLES, type UserRole } from '@/core/auth/user-roles'
+import { PERMISSIONS } from '@/core/auth/permissions'
 import { NOTIFICATION_TYPE, type NotificationType } from '../types/notification.types'
 
 export interface INotificationConfig {
   icon: Component
   color: string
-  // Returns the destination route or `null` when the current role has no
-  // meaningful place to land. Operators do not have access to the admin
-  // /orders/:id detail; routing them there triggered the 403 screen.
-  getRoute: (data: Record<string, unknown>, role: UserRole | undefined) => string | null
+  // Null when the principal has nowhere meaningful to land.
+  getRoute: (data: Record<string, unknown>, permissions: string[]) => string | null
 }
 
 function adminOrderDetail(data: Record<string, unknown>): string | null {
@@ -32,25 +30,28 @@ export const NOTIFICATION_CONFIG: Record<NotificationType, INotificationConfig> 
   [NOTIFICATION_TYPE.ORDER_CREATED]: {
     icon: CartOutline,
     color: '#f0a020',
-    getRoute: (data, role) => (role === USER_ROLES.ADMIN ? adminOrderDetail(data) : null),
+    getRoute: (data, permissions) =>
+      permissions.includes(PERMISSIONS.ORDER_READ) ? adminOrderDetail(data) : null,
   },
   [NOTIFICATION_TYPE.ORDER_PAID]: {
     icon: CheckmarkCircleOutline,
     color: '#18a058',
-    getRoute: (data, role) => {
-      if (role === USER_ROLES.ADMIN) return adminOrderDetail(data)
-      if (role === USER_ROLES.OPERATOR) return '/operator'
+    getRoute: (data, permissions) => {
+      if (permissions.includes(PERMISSIONS.ORDER_READ)) return adminOrderDetail(data)
+      if (permissions.includes(PERMISSIONS.PHOTO_RETOUCH_READ)) return '/operator'
       return null
     },
   },
   [NOTIFICATION_TYPE.ORDER_DELIVERED]: {
     icon: SendOutline,
     color: '#105080',
-    getRoute: (data, role) => (role === USER_ROLES.ADMIN ? adminOrderDetail(data) : null),
+    getRoute: (data, permissions) =>
+      permissions.includes(PERMISSIONS.ORDER_READ) ? adminOrderDetail(data) : null,
   },
   [NOTIFICATION_TYPE.ORDER_RETOUCH_COMPLETED]: {
     icon: BrushOutline,
     color: '#8b5cf6',
-    getRoute: (data, role) => (role === USER_ROLES.ADMIN ? adminOrderDetail(data) : null),
+    getRoute: (data, permissions) =>
+      permissions.includes(PERMISSIONS.ORDER_READ) ? adminOrderDetail(data) : null,
   },
 }

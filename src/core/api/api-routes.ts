@@ -209,9 +209,9 @@ export const API_ROUTES = {
     TRANSACTION: (clientTransactionId: string) =>
       `${PAYMENTS_BASE}/transactions/${clientTransactionId}`,
   },
-  PAYMENT_ACCOUNT: {
-    BASE: '/payphone-account',
-    GET: '/payphone-account',
-    CONFIGURE: '/payphone-account',
+  TENANT_PROFILE: {
+    BASE: '/tenants/me/profile',
+    PAYOUT_METHODS: '/tenants/me/payout-methods',
+    PAYOUT_METHOD: (id: string) => `/tenants/me/payout-methods/${id}`,
   },
 } as const
