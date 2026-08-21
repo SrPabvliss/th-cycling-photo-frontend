@@ -15,6 +15,8 @@ import {
   TimeOutline,
 } from '@vicons/ionicons5'
 
+import { PERMISSIONS } from '@/core/auth/permissions'
+import { usePermissions } from '@/core/auth/use-permissions'
 import { formatRelativeTime, isRecent } from '@/shared/utils/date.utils'
 import { formatCurrency } from '@/features/pricing/utils/format-currency'
 import { ORDER_STATUS, type IOrderListItem } from '../../../types/responses/order-list.response'
@@ -64,6 +66,8 @@ const emit = defineEmits<{
   resendDelivery: [order: IOrderListItem]
   regenerate: [id: string]
 }>()
+
+const { has } = usePermissions()
 
 const isNew = computed(
   () => isRecent(props.order.createdAt) && props.order.status === ORDER_STATUS.PENDING,
@@ -221,6 +225,7 @@ const paymentMethodLabel = computed(() =>
           Confirmar pago
         </button>
         <button
+          v-if="has(PERMISSIONS.ORDER_GIFT)"
           class="oc__icon-btn oc__icon-btn--gift"
           title="Enviar como regalo"
           aria-label="Enviar como regalo"

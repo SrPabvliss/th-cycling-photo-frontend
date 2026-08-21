@@ -1,6 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-import { USER_ROLES } from '@/core/auth/user-roles'
+import { PERMISSIONS } from '@/core/auth/permissions'
 
 export const BUYERS_PATH = '/buyers'
 
@@ -13,6 +13,6 @@ export const buyerRoutes: RouteRecordRaw[] = [
     path: BUYERS_PATH,
     name: BUYERS_ROUTE_NAMES.LIST,
     component: () => import('./presentation/views/BuyersListView.vue'),
-    meta: { roles: [USER_ROLES.ADMIN] },
+    meta: { requiresAuth: true, permissions: [PERMISSIONS.BUYER_READ] },
   },
 ]

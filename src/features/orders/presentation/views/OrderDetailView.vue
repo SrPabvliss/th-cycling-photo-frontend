@@ -12,6 +12,8 @@ import {
   ChevronBack,
 } from '@vicons/ionicons5'
 
+import { PERMISSIONS } from '@/core/auth/permissions'
+import { usePermissions } from '@/core/auth/use-permissions'
 import { env } from '@/core/config/env'
 import { formatWhatsAppNumber } from '@/shared/utils/phone.utils'
 import {
@@ -48,6 +50,7 @@ const {
   isConvertingToGift,
 } = useOrderActions()
 const { mutateAsync: notifyPaymentInfo } = useNotifyPaymentInfo()
+const { has } = usePermissions()
 
 function onConfirmPayment() {
   if (order.value) handleConfirmPayment(order.value.id)
@@ -227,7 +230,11 @@ function onRegenerate() {
                     : 'Enviar info de pago'
                 }}
               </button>
-              <button class="od-status-btn od-status-btn--gift" @click="onMarkGift">
+              <button
+                v-if="has(PERMISSIONS.ORDER_GIFT)"
+                class="od-status-btn od-status-btn--gift"
+                @click="onMarkGift"
+              >
                 <NIcon :component="GiftOutline" :size="16" />
                 Enviar como regalo
               </button>
@@ -270,6 +277,7 @@ function onRegenerate() {
                     Regalado 🎁
                   </button>
                   <button
+                    v-if="has(PERMISSIONS.ORDER_CONVERT_TO_SALE)"
                     class="od-status-btn"
                     :disabled="isConvertingToSale"
                     @click="onConvertToSale"
@@ -305,7 +313,8 @@ function onRegenerate() {
                 </button>
                 <button
                   v-if="
-                    order.status === ORDER_STATUS.PAID || order.status === ORDER_STATUS.DELIVERED
+                    has(PERMISSIONS.ORDER_CONVERT_TO_GIFT) &&
+                    (order.status === ORDER_STATUS.PAID || order.status === ORDER_STATUS.DELIVERED)
                   "
                   class="od-status-btn od-status-btn--gift"
                   :disabled="isConvertingToGift"
