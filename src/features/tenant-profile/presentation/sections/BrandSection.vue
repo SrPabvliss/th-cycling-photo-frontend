@@ -32,7 +32,10 @@ const message = useMessage()
 function submit() {
   if (!hasChanges.value) return
   const trimmed = publicName.value.trim()
-  mutate({ publicName: trimmed === '' ? null : trimmed })
+  mutate(
+    { publicName: trimmed === '' ? null : trimmed },
+    { onSuccess: () => message.success('Nombre público actualizado') },
+  )
 }
 
 async function handleUpload({ file, onFinish, onError }: UploadCustomRequestOptions) {

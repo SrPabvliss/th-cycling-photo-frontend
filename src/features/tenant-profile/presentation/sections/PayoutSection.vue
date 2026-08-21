@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { NButton, NCard, NEmpty, NFlex, NIcon, NPopconfirm, NSpin, NTag } from 'naive-ui'
+import { NAlert, NButton, NCard, NEmpty, NFlex, NIcon, NPopconfirm, NSpin, NTag } from 'naive-ui'
 import { ArrowDownOutline, ArrowUpOutline } from '@vicons/ionicons5'
 
 import { PERMISSIONS } from '@/core/auth/permissions'
 import { usePermissions } from '@/core/auth/use-permissions'
+import { message } from '@/core/ui/discrete-api'
 import { usePayoutMethods } from '../../composables/queries/use-payout-methods'
 import { useDeletePayoutMethod } from '../../composables/mutations/use-delete-payout-method'
 import { useUpdatePayoutMethod } from '../../composables/mutations/use-update-payout-method'
@@ -24,6 +25,10 @@ const reorderError = ref<string | null>(null)
 
 const sortedMethods = computed(() =>
   [...(methods.value ?? [])].sort((a, b) => a.sortOrder - b.sortOrder),
+)
+
+const hasPayphone = computed(() =>
+  sortedMethods.value.some((method) => method.provider === 'payphone'),
 )
 
 const STATUS_LABELS: Record<PayoutMethodResponse['status'], string> = {
@@ -59,6 +64,12 @@ function openEdit(method: PayoutMethodResponse) {
   else isBankModalOpen.value = true
 }
 
+function removeMethod(id: string) {
+  deleteMethod(id, {
+    onSuccess: () => message.success('Método de cobro eliminado'),
+  })
+}
+
 async function moveMethod(method: PayoutMethodResponse, direction: -1 | 1) {
   const list = sortedMethods.value
   const index = list.findIndex((m) => m.id === method.id)
@@ -77,16 +88,31 @@ async function moveMethod(method: PayoutMethodResponse, direction: -1 | 1) {
 
 <template>
   <NCard title="Cobros" class="payout-section">
-    <NFlex v-if="canManagePayouts" :size="8" style="margin-bottom: 16px">
+    <NAlert
+      v-if="!isLoading && !hasPayphone"
+      type="warning"
+      :show-icon="true"
+      class="payout-section__error"
+    >
+      Necesitas una cuenta Payphone verificada para poder publicar eventos y cobrar con tarjeta.
+    </NAlert>
+
+    <NFlex v-if="canManagePayouts" :size="8" class="payout-section__actions">
       <NButton size="small" @click="openCreate('payphone')">Agregar cuenta Payphone</NButton>
       <NButton size="small" @click="openCreate('bank_transfer')">
         Agregar transferencia bancaria
       </NButton>
     </NFlex>
 
-    <p v-if="reorderError" style="color: #d03050; font-size: 13px; margin-top: -8px">
+    <NAlert
+      v-if="reorderError"
+      type="error"
+      :show-icon="true"
+      class="payout-section__error"
+      data-test="reorder-error"
+    >
       {{ reorderError }}
-    </p>
+    </NAlert>
 
     <NSpin v-if="isLoading" size="small" />
 
@@ -99,8 +125,12 @@ async function moveMethod(method: PayoutMethodResponse, direction: -1 | 1) {
           <NTag :type="STATUS_TAG_TYPE[method.status]" size="small">
             {{ STATUS_LABELS[method.status] }}
           </NTag>
-          <span v-if="method.provider === 'payphone'">{{ method.receiverIdentifier }}</span>
-          <span v-else>{{ method.bankName }} · {{ method.accountNumber }}</span>
+          <span v-if="method.provider === 'payphone'" class="payout-method-row__detail">
+            Recibes los pagos en {{ method.receiverIdentifier }}
+          </span>
+          <span v-else class="payout-method-row__detail">
+            {{ method.bankName }} · {{ method.accountNumber }}
+          </span>
         </div>
 
         <NFlex v-if="canManagePayouts" :size="4">
@@ -116,7 +146,7 @@ async function moveMethod(method: PayoutMethodResponse, direction: -1 | 1) {
             <template #icon><NIcon :component="ArrowDownOutline" /></template>
           </NButton>
           <NButton size="tiny" @click="openEdit(method)">Editar</NButton>
-          <NPopconfirm @positive-click="deleteMethod(method.id)">
+          <NPopconfirm @positive-click="removeMethod(method.id)">
             <template #trigger>
               <NButton size="tiny">Eliminar</NButton>
             </template>
@@ -135,22 +165,4 @@ async function moveMethod(method: PayoutMethodResponse, direction: -1 | 1) {
   </NCard>
 </template>
 
-<style scoped>
-.payout-method-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  flex-wrap: wrap;
-}
-
-.payout-method-row__info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-</style>
+<style scoped src="./payout-section.css"></style>
