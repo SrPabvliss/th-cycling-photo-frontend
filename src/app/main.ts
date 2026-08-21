@@ -2,6 +2,7 @@ import '@/assets/styles/base.css'
 import '@/assets/styles/breakpoints.css'
 import '@/assets/styles/phone-input.css'
 import '@/core/theme/theme-vars.css'
+import '@/assets/styles/payphone-box.css'
 import '@/core/config/env'
 
 import { createApp } from 'vue'

@@ -85,10 +85,6 @@ function validateBirthDateFields(): string | undefined {
           </template>
         </form.Field>
       </div>
-
-      <NFormItem label="Correo">
-        <NInput :value="profile.email" disabled />
-      </NFormItem>
     </NCard>
 
     <NCard title="Ubicación" class="profile-form__card">

@@ -28,6 +28,16 @@ export const API_ROUTES = {
     RESET_PASSWORD: `${AUTH_BASE}/reset-password`,
     VALIDATE_RESET_TOKEN: `${AUTH_BASE}/reset-password/validate`,
     CONSENTS: `${AUTH_BASE}/consents`,
+    CHANGE_PASSWORD: `${AUTH_BASE}/change-password`,
+    EMAIL_CHANGE: `${AUTH_BASE}/email-change`,
+    EMAIL_VERIFICATION: {
+      BASE: `${AUTH_BASE}/email-verification`,
+      RESEND: `${AUTH_BASE}/email-verification/resend`,
+      CONFIRM: `${AUTH_BASE}/email-verification/confirm`,
+    },
+    PROMPTS: {
+      SNOOZE: (key: string) => `${AUTH_BASE}/prompts/${key}/snooze`,
+    },
   },
   USER_PHONES: {
     BASE: '/users/me/phones',

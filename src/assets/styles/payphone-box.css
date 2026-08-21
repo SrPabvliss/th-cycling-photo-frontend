@@ -1,0 +1,120 @@
+/* Doubled selector: the provider declares the same vars on :root from a stylesheet injected
+   at runtime, which would otherwise win by load order. */
+:root:root {
+  --ppb-bs-primary: var(--tt-primary);
+  --ppb-bs-primary-rgb: var(--tt-primary-rgb);
+  --ppb-bs-border-radius: 10px;
+  --ppb-bs-border-color: var(--tt-neutral-light);
+  --ppb-bs-body-color: var(--tt-neutral-dark);
+  --ppb-bs-secondary-color: var(--tt-neutral-mid);
+  --ppb-bs-form-invalid-color: var(--tt-error);
+  --ppb-bs-link-color-rgb: var(--tt-primary-rgb);
+  --ppb-bs-link-hover-color-rgb: var(--tt-primary-dark-rgb);
+  --ppb-bs-body-font-family:
+    Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+}
+
+.tt-payphone-box .ppb-btn-pay,
+.ppb-content-otp .ppb-btn-pay {
+  background-color: var(--tt-primary) !important;
+  border-radius: 10px !important;
+  font-family: inherit !important;
+}
+
+.tt-payphone-box .ppb-btn-pay:hover,
+.tt-payphone-box .ppb-btn-pay:active,
+.tt-payphone-box .ppb-btn-pay:focus-visible,
+.ppb-content-otp .ppb-btn-pay:hover,
+.ppb-content-otp .ppb-btn-pay:active,
+.ppb-content-otp .ppb-btn-pay:focus-visible {
+  background-color: var(--tt-primary-dark) !important;
+}
+
+.tt-payphone-box .ppb-btn-control {
+  border-radius: 10px !important;
+}
+
+.tt-payphone-box .ppb-btn-control:hover,
+.tt-payphone-box .select-btn {
+  background-color: color-mix(in srgb, var(--tt-primary) 10%, var(--tt-surface)) !important;
+  border-color: var(--tt-primary) !important;
+}
+
+.tt-payphone-box .ppb-error-message,
+.ppb-content-otp .ppb-error-message {
+  border-color: var(--tt-error) !important;
+  border-radius: 14px !important;
+}
+
+.tt-payphone-box .ppb-error-message h2,
+.ppb-content-otp .ppb-error-message h2 {
+  color: var(--tt-error) !important;
+}
+
+.tt-payphone-box .selected-flag,
+.ppb-content-otp .selected-flag {
+  background-color: var(--tt-primary) !important;
+}
+
+.tt-payphone-box .ppb-text-amount,
+.tt-payphone-box .ppb-text-amount-h4,
+.ppb-content-otp .ppb-text-amount,
+.ppb-content-otp .ppb-text-amount-h4 {
+  color: var(--tt-primary) !important;
+}
+
+.tt-payphone-box .ppb-disclaimer-split,
+.ppb-content-otp .ppb-disclaimer-split {
+  background-color: color-mix(in srgb, var(--tt-primary) 8%, transparent) !important;
+  color: var(--tt-primary-dark) !important;
+}
+
+.tt-payphone-box .ppb-form-control-paypment-box:focus,
+.tt-payphone-box .ppb-form-select-paypment-box:focus,
+.tt-payphone-box .ppb-form-control:focus,
+.tt-payphone-box .ppb-form-select:focus {
+  border-color: var(--tt-primary) !important;
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--tt-primary) 25%, transparent) !important;
+}
+
+@media (max-width: 575px) {
+  .tt-payphone-box div:has(> .ppb-div-btn-control),
+  .ppb-content-otp div:has(> .ppb-div-btn-control) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* The label shares the container with the buttons; without this it would sit
+     beside them instead of above. */
+  .tt-payphone-box div:has(> .ppb-div-btn-control) > p,
+  .ppb-content-otp div:has(> .ppb-div-btn-control) > p {
+    flex: 1 0 100%;
+  }
+
+  .tt-payphone-box .ppb-div-btn-control,
+  .ppb-content-otp .ppb-div-btn-control {
+    flex: 1 1 0;
+    min-width: 0;
+    margin-right: 0;
+  }
+
+  /* Their own .ppb-btn-control.btn-card pins 180px with !important at the same
+     specificity as a two-class selector, and their sheet loads last: we need
+     three classes to win. */
+  .tt-payphone-box .ppb-div-btn-control .ppb-btn-control,
+  .ppb-content-otp .ppb-div-btn-control .ppb-btn-control {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* The provider positions these logos absolutely, so they keep their intrinsic
+     180px and spill onto the next button; back into the flow they can scale. */
+  .tt-payphone-box .ppb-div-btn-control .ppb-img-btn-control,
+  .ppb-content-otp .ppb-div-btn-control .ppb-img-btn-control {
+    position: static !important;
+    max-width: 90% !important;
+    height: auto !important;
+  }
+}

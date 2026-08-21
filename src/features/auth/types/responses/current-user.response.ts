@@ -8,6 +8,8 @@ export interface IApiCurrentUser {
   permissions?: string[]
   tenantId?: string | null
   isPlatform?: boolean
+  emailVerified?: boolean
+  pendingPrompts?: string[]
 }
 
 export interface ICurrentUser {
@@ -20,4 +22,6 @@ export interface ICurrentUser {
   permissions: string[]
   tenantId: string | null
   isPlatform: boolean
+  emailVerified: boolean
+  pendingPrompts: string[]
 }

@@ -2,7 +2,9 @@
 /* Keep in sync with the exported TS constants */
 :root {
   --tt-primary: #105080;
+  --tt-primary-rgb: 16, 80, 128;
   --tt-primary-dark: #005080;
+  --tt-primary-dark-rgb: 0, 80, 128;
   --tt-primary-light: #406090;
   --tt-neutral-dark: #1a1f2c;
   --tt-neutral-mid: #808080;
