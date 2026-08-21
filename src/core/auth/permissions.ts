@@ -2,6 +2,7 @@ export const PERMISSIONS = {
   EVENT_READ: 'event.read',
   EVENT_CREATE: 'event.create',
   EVENT_UPDATE: 'event.update',
+  EVENT_FREEZE: 'event.freeze',
   PHOTO_READ: 'photo.read',
   PHOTO_RETOUCH_READ: 'photo.retouch.read',
   REVIEW_QUEUE_READ: 'dashboard.review_queue.read',
