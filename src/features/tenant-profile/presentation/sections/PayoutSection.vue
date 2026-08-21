@@ -19,7 +19,8 @@ const canManagePayouts = computed(() => has(PERMISSIONS.TENANT_PAYOUT_METHOD_MAN
 
 const { data: methods, isLoading } = usePayoutMethods()
 const { mutate: deleteMethod } = useDeletePayoutMethod()
-const { mutate: updateMethod } = useUpdatePayoutMethod()
+const { mutateAsync: updateMethod } = useUpdatePayoutMethod()
+const reorderError = ref<string | null>(null)
 
 const sortedMethods = computed(() =>
   [...(methods.value ?? [])].sort((a, b) => a.sortOrder - b.sortOrder),
@@ -58,14 +59,19 @@ function openEdit(method: PayoutMethodResponse) {
   else isBankModalOpen.value = true
 }
 
-function moveMethod(method: PayoutMethodResponse, direction: -1 | 1) {
+async function moveMethod(method: PayoutMethodResponse, direction: -1 | 1) {
   const list = sortedMethods.value
   const index = list.findIndex((m) => m.id === method.id)
   const targetIndex = index + direction
   if (targetIndex < 0 || targetIndex >= list.length) return
   const target = list[targetIndex]!
-  updateMethod({ id: method.id, payload: { sortOrder: target.sortOrder } })
-  updateMethod({ id: target.id, payload: { sortOrder: method.sortOrder } })
+  reorderError.value = null
+  try {
+    await updateMethod({ id: method.id, payload: { sortOrder: target.sortOrder } })
+    await updateMethod({ id: target.id, payload: { sortOrder: method.sortOrder } })
+  } catch {
+    reorderError.value = 'No pudimos cambiar el orden. Intenta nuevamente.'
+  }
 }
 </script>
 
@@ -77,6 +83,10 @@ function moveMethod(method: PayoutMethodResponse, direction: -1 | 1) {
         Agregar transferencia bancaria
       </NButton>
     </NFlex>
+
+    <p v-if="reorderError" style="color: #d03050; font-size: 13px; margin-top: -8px">
+      {{ reorderError }}
+    </p>
 
     <NSpin v-if="isLoading" size="small" />
 
