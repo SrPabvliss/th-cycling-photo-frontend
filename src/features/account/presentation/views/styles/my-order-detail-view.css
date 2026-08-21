@@ -1,0 +1,43 @@
+.my-order-detail-view {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 32px 96px;
+}
+
+.my-order-detail-view__actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 0 20px 32px;
+}
+
+.my-order-detail-view__actions :deep(.n-button) {
+  min-height: 44px;
+  min-width: 180px;
+}
+
+.my-order-detail-view__photos {
+  padding: 0 20px;
+}
+
+@media (max-width: 767px) {
+  .my-order-detail-view {
+    padding: 16px 16px 96px;
+  }
+
+  .my-order-detail-view__actions {
+    padding: 0 0 24px;
+  }
+
+  .my-order-detail-view__actions :deep(.n-button) {
+    min-width: 0;
+    flex: 1 1 140px;
+  }
+
+  .my-order-detail-view__photos {
+    padding: 0;
+  }
+}
