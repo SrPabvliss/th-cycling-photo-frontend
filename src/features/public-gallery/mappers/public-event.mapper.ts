@@ -17,6 +17,7 @@ export function toPublicEventListItem(api: IApiPublicEventListItem): IPublicEven
     provinceName: api.provinceName,
     cantonName: api.cantonName,
     photoCount: api.photoCount,
+    ownerName: api.ownerName,
     coverSlug: api.coverSlug,
   }
 }
@@ -30,6 +31,7 @@ export function toPublicEventDetail(api: IApiPublicEventDetail): IPublicEventDet
     provinceName: api.provinceName,
     cantonName: api.cantonName,
     photoCount: api.photoCount,
+    ownerName: api.ownerName,
     assets: api.assets,
     photoCategories: api.photoCategories,
   }
