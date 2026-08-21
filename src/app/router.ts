@@ -18,8 +18,9 @@ import { reviewRoutes } from '@/features/review/routes'
 import { accountRoutes } from '@/features/account/routes'
 import { buyerRoutes } from '@/features/buyers/routes'
 import { cartRoutes } from '@/features/cart/routes'
-import { paymentRoutes, paymentSettingsRoutes } from '@/features/payments/routes'
+import { paymentRoutes } from '@/features/payments/routes'
 import { tenantRoutes } from '@/features/tenants/routes'
+import { tenantProfileRoutes } from '@/features/tenant-profile/routes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,8 +47,8 @@ const router = createRouter({
         ...orderRoutes,
         ...retouchRoutes,
         ...buyerRoutes,
-        ...paymentSettingsRoutes,
         ...tenantRoutes,
+        ...tenantProfileRoutes,
       ],
     },
     {
