@@ -13,6 +13,7 @@ import {
   NSpin,
 } from 'naive-ui'
 
+import { useTenantProfile } from '@/features/tenant-profile/composables/queries/use-tenant-profile'
 import { useEventConfigurationPreset } from '../../composables/queries/use-event-configuration-preset'
 import type { IEventConfigurationSelectionRequest } from '../../types/requests/event-configuration.request'
 
@@ -46,6 +47,18 @@ watch(
   },
   { immediate: true },
 )
+
+const { data: tenantProfile } = useTenantProfile()
+const profileWatermarkKey = computed(() => tenantProfile.value?.watermarkStorageKey ?? null)
+const profileWatermarkUrl = computed(() => tenantProfile.value?.watermarkUrl ?? null)
+const canApplyProfileWatermark = computed(
+  () =>
+    profileWatermarkKey.value !== null && profileWatermarkKey.value !== watermarkStorageKey.value,
+)
+
+function applyProfileWatermark() {
+  if (profileWatermarkKey.value) watermarkStorageKey.value = profileWatermarkKey.value
+}
 
 const activePayoutMethods = computed(
   () => preset.value?.availablePayoutMethods.filter((method) => method.isActive) ?? [],
@@ -111,10 +124,21 @@ watch(
       </NFormItem>
 
       <NFormItem label="Marca de agua">
-        <NInput
-          v-model:value="watermarkStorageKey"
-          placeholder="Clave de almacenamiento de la marca de agua"
-        />
+        <div class="watermark-field">
+          <NInput v-model:value="watermarkStorageKey" readonly placeholder="Sin marca de agua" />
+          <img
+            v-if="profileWatermarkUrl"
+            :src="profileWatermarkUrl"
+            alt="Marca de agua actual de tu perfil"
+            class="watermark-field__preview"
+          />
+          <p v-else class="watermark-field__hint">
+            Aún no has subido una marca de agua en tu perfil.
+          </p>
+          <NButton :disabled="!canApplyProfileWatermark" @click="applyProfileWatermark">
+            Usar mi marca de agua actual
+          </NButton>
+        </div>
       </NFormItem>
 
       <NFormItem label="WhatsApp de contacto">
@@ -145,6 +169,26 @@ watch(
 </template>
 
 <style scoped>
+.watermark-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.watermark-field__preview {
+  max-width: 240px;
+  max-height: 120px;
+  object-fit: contain;
+}
+
+.watermark-field__hint {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
 .configuration-step__label {
   font-size: 14px;
   font-weight: 500;

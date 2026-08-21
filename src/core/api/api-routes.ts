@@ -232,5 +232,7 @@ export const API_ROUTES = {
     BASE: '/tenants/me/profile',
     PAYOUT_METHODS: '/tenants/me/payout-methods',
     PAYOUT_METHOD: (id: string) => `/tenants/me/payout-methods/${id}`,
+    WATERMARK_PRESIGNED_URL: '/tenants/me/watermark/presigned-url',
+    WATERMARK_CONFIRM: '/tenants/me/watermark/confirm',
   },
 } as const

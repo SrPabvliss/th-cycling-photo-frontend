@@ -16,6 +16,7 @@ import {
 import PageHeader from '@/shared/components/PageHeader.vue'
 import { PERMISSIONS } from '@/core/auth/permissions'
 import { usePermissions } from '@/core/auth/use-permissions'
+import { useTenantProfile } from '@/features/tenant-profile/composables/queries/use-tenant-profile'
 import { useEventDetailQuery } from '../../composables/queries/use-event-detail'
 import { useEventConfiguration } from '../../composables/queries/use-event-configuration'
 import { useUpdateEventConfiguration } from '../../composables/mutations/use-update-event-configuration'
@@ -52,6 +53,18 @@ watch(
   },
   { immediate: true },
 )
+
+const { data: tenantProfile } = useTenantProfile()
+const profileWatermarkKey = computed(() => tenantProfile.value?.watermarkStorageKey ?? null)
+const profileWatermarkUrl = computed(() => tenantProfile.value?.watermarkUrl ?? null)
+const canApplyProfileWatermark = computed(
+  () =>
+    profileWatermarkKey.value !== null && profileWatermarkKey.value !== watermarkStorageKey.value,
+)
+
+function applyProfileWatermark() {
+  if (profileWatermarkKey.value) watermarkStorageKey.value = profileWatermarkKey.value
+}
 
 const PROVIDER_LABELS: Record<string, string> = {
   payphone: 'Payphone',
@@ -91,7 +104,7 @@ async function handleSave() {
   if (nextPublicName !== (loaded.publicName ?? null)) payload.publicName = nextPublicName
 
   const nextWatermarkStorageKey = normalizedText(watermarkStorageKey.value)
-  if (nextWatermarkStorageKey !== (loaded.watermarkStorageKey ?? null)) {
+  if (nextWatermarkStorageKey && nextWatermarkStorageKey !== (loaded.watermarkStorageKey ?? null)) {
     payload.watermarkStorageKey = nextWatermarkStorageKey
   }
 
@@ -154,10 +167,25 @@ async function handleSave() {
           </NFormItem>
 
           <NFormItem label="Marca de agua">
-            <NInput
-              v-model:value="watermarkStorageKey"
-              placeholder="Clave de almacenamiento de la marca de agua"
-            />
+            <div class="watermark-field">
+              <NInput
+                v-model:value="watermarkStorageKey"
+                readonly
+                placeholder="Sin marca de agua"
+              />
+              <img
+                v-if="profileWatermarkUrl"
+                :src="profileWatermarkUrl"
+                alt="Marca de agua actual de tu perfil"
+                class="watermark-field__preview"
+              />
+              <p v-else class="watermark-field__hint">
+                Aún no has subido una marca de agua en tu perfil.
+              </p>
+              <NButton :disabled="!canApplyProfileWatermark" @click="applyProfileWatermark">
+                Usar mi marca de agua actual
+              </NButton>
+            </div>
           </NFormItem>
 
           <NFormItem label="WhatsApp de contacto">
@@ -205,6 +233,26 @@ async function handleSave() {
 <style scoped src="./event-form-view.css"></style>
 
 <style scoped>
+.watermark-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.watermark-field__preview {
+  max-width: 240px;
+  max-height: 120px;
+  object-fit: contain;
+}
+
+.watermark-field__hint {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
 .configuration-edit__label {
   font-size: 14px;
   font-weight: 500;
