@@ -1,3 +1,7 @@
+import type {
+  PayoutMethodAccountType,
+  PayoutMethodProvider,
+} from '@/features/tenant-profile/types/responses/payout-method.response'
 import type { OrderStatus } from './order-list.response'
 
 export const DELIVERY_LINK_STATUS = {
@@ -23,6 +27,19 @@ export interface IApiOrderDetailDeliveryLink {
   downloadCount: number
 }
 
+/** Shared shape: no dates or decimals, so it serves both the API and domain types */
+export interface IOrderPayoutMethod {
+  provider: PayoutMethodProvider
+  isActive: boolean
+  sortOrder: number
+  receiverIdentifier: string | null
+  bankName: string | null
+  accountNumber: string | null
+  accountType: PayoutMethodAccountType | null
+  accountHolder: string | null
+  holderIdentification: string | null
+}
+
 /** API projection from GET /orders/:id */
 export interface IApiOrderDetail {
   id: string
@@ -46,6 +63,7 @@ export interface IApiOrderDetail {
   photos: IApiOrderDetailPhoto[]
   deliveryLink: IApiOrderDetailDeliveryLink | null
   retouchProgress?: { total: number; retouched: number }
+  payoutMethods?: IOrderPayoutMethod[]
 }
 
 export interface IOrderDetailPhoto {
@@ -85,4 +103,5 @@ export interface IOrderDetail {
   photos: IOrderDetailPhoto[]
   deliveryLink: IOrderDetailDeliveryLink | null
   retouchProgress?: { total: number; retouched: number }
+  payoutMethods?: IOrderPayoutMethod[]
 }

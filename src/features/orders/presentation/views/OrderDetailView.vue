@@ -29,6 +29,7 @@ import { ORDERS_PATH } from '../../routes'
 import OrderHeroCard from '../components/OrderHeroCard/OrderHeroCard.vue'
 import OrderPhotosCarousel from '../components/OrderPhotosCarousel/OrderPhotosCarousel.vue'
 import DeliveryLinkCard from '../components/DeliveryLinkCard/DeliveryLinkCard.vue'
+import PayoutMethodsCard from '../components/PayoutMethodsCard/PayoutMethodsCard.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -190,6 +191,8 @@ function onRegenerate() {
               @send-whats-app="onSendDeliveryWhatsApp"
               @regenerate="onRegenerate"
             />
+
+            <PayoutMethodsCard v-if="order.payoutMethods?.length" :methods="order.payoutMethods" />
           </div>
 
           <!-- Sidebar -->

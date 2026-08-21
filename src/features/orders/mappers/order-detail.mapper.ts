@@ -50,5 +50,6 @@ export function toOrderDetail(api: IApiOrderDetail): IOrderDetail {
     photos: api.photos.map(toOrderDetailPhoto),
     deliveryLink: api.deliveryLink ? toOrderDetailDeliveryLink(api.deliveryLink) : null,
     retouchProgress: api.retouchProgress,
+    payoutMethods: api.payoutMethods,
   }
 }
