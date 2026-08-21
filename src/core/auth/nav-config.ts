@@ -21,6 +21,7 @@ const NAV_ITEMS: INavItem[] = [
   { label: 'Retoque', to: RETOUCH_PATH, permission: PERMISSIONS.PHOTO_RETOUCH_READ },
   { label: 'Compradores', to: BUYERS_PATH, permission: PERMISSIONS.BUYER_READ },
   { label: 'Tenants', to: '/tenants', permission: PERMISSIONS.TENANT_READ },
+  { label: 'Mi perfil', to: '/mi-perfil', permission: PERMISSIONS.TENANT_PROFILE_READ },
 ]
 
 export function getNavLinks(permissions: string[]): INavLink[] {
