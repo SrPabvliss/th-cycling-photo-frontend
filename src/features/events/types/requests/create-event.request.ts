@@ -1,3 +1,5 @@
+import type { IEventConfigurationSelectionRequest } from './event-configuration.request'
+
 export interface ICreateEventRequest {
   name: string
   startDate: string
@@ -5,4 +7,5 @@ export interface ICreateEventRequest {
   provinceId?: number | null
   cantonId?: number | null
   eventTypeId: number
+  configuration?: IEventConfigurationSelectionRequest
 }

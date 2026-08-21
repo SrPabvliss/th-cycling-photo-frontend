@@ -61,6 +61,8 @@ export const API_ROUTES = {
     OPERATORS: (id: string) => `${EVENTS_BASE}/${id}/operators`,
     OPERATOR: (eventId: string, userId: string) => `${EVENTS_BASE}/${eventId}/operators/${userId}`,
     REVIEW_QUEUE: (eventId: string) => `${EVENTS_BASE}/${eventId}/review-queue`,
+    CONFIGURATION_PRESET: `${EVENTS_BASE}/configuration/preset`,
+    CONFIGURATION: (id: string) => `${EVENTS_BASE}/${id}/configuration`,
     ASSETS: {
       GET_ALL: (id: string) => `${EVENTS_BASE}/${id}/assets`,
       PRESIGNED_URL: (id: string, assetType: string) =>
