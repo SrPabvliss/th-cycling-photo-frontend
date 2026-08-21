@@ -24,11 +24,19 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   box.destroy()
+
+  document.querySelectorAll('.ppb-content-otp').forEach((node) => node.remove())
+  document.body.classList.remove(
+    'ppb-overflow-hidden',
+    'ppb-position-relative',
+    'ppb-h-100',
+    'ppb-vw-100',
+  )
 })
 </script>
 
 <template>
-  <div class="payphone-box">
+  <div class="payphone-box tt-payphone-box">
     <div :id="PAYPHONE_SDK.CONTAINER_ID" class="payphone-box__container" />
 
     <NSpin v-if="!box.isReady.value" size="small" class="payphone-box__loading" />

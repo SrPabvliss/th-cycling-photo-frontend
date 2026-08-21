@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { NAlert, NButton, NIcon, NModal } from 'naive-ui'
-import { CardOutline, ChevronBackOutline, SwapHorizontalOutline } from '@vicons/ionicons5'
+import { useRouter } from 'vue-router'
+import { NAlert, NIcon, NModal } from 'naive-ui'
+import { CardOutline, SwapHorizontalOutline } from '@vicons/ionicons5'
 
 import { useCheckout } from '@/features/cart/composables/mutations/use-checkout'
 import type { ICheckoutOrderResult } from '@/features/cart/types/requests/cart.request'
 import { useChoosePaymentMethod } from '@/features/payments/composables/mutations/use-choose-payment-method'
+import { PAYMENT_ROUTE_NAMES } from '@/features/payments/routes'
 import { PAYMENT_METHOD, type PaymentMethod } from '@/features/payments/types/payment-method'
 import { formatCurrency } from '@/features/pricing/utils/format-currency'
 import { CARD_BRANDS } from './card-brands'
-import PaymentCheckout from '../PaymentCheckout/PaymentCheckout.vue'
 
 const props = defineProps<{
   show: boolean
@@ -24,45 +25,31 @@ const emit = defineEmits<{
   'paid-orders': [ICheckoutOrderResult[]]
 }>()
 
+const router = useRouter()
+
 const { mutateAsync: checkout, isPending: isCheckingOut } = useCheckout()
 const { mutateAsync: chooseMethod, isPending: isChoosing } = useChoosePaymentMethod()
 
-const step = ref<'choice' | 'card'>('choice')
 const error = ref<string | null>(null)
-const cardOrderIds = ref<string[]>([])
-const cardTotal = ref<number | null>(null)
-const cardCurrency = ref<string | null>(null)
 
-const hasCheckedOut = computed(() => cardOrderIds.value.length > 0)
-const isRetry = computed(() => props.orderIds !== undefined || hasCheckedOut.value)
+const isRetry = computed(() => props.orderIds !== undefined)
 const isPending = computed(() => (isRetry.value ? isChoosing.value : isCheckingOut.value))
-
-const displayTotal = computed(() =>
-  step.value === 'card' && cardTotal.value !== null ? cardTotal.value : props.total,
-)
-const displayCurrency = computed(() =>
-  step.value === 'card' && cardCurrency.value !== null ? cardCurrency.value : props.currency,
-)
 
 watch(
   () => props.show,
   (visible) => {
     if (!visible) return
-    step.value = 'choice'
     error.value = null
-    cardOrderIds.value = []
-    cardTotal.value = null
-    cardCurrency.value = null
   },
 )
 
-function backToChoice() {
-  step.value = 'choice'
-  error.value = null
+function goToPaymentBox(orderIds: string[]) {
+  emit('update:show', false)
+  router.push({ name: PAYMENT_ROUTE_NAMES.BOX, query: { orders: orderIds.join(',') } })
 }
 
 async function chooseExisting(method: PaymentMethod) {
-  const orderIds = props.orderIds ?? cardOrderIds.value
+  const orderIds = props.orderIds ?? []
 
   try {
     await chooseMethod({ orderIds, method })
@@ -78,8 +65,7 @@ async function chooseExisting(method: PaymentMethod) {
     return
   }
 
-  cardOrderIds.value = orderIds
-  step.value = 'card'
+  goToPaymentBox(orderIds)
 }
 
 async function chooseNew(method: PaymentMethod) {
@@ -100,10 +86,7 @@ async function chooseNew(method: PaymentMethod) {
     return
   }
 
-  cardOrderIds.value = orders.map((order) => order.orderId)
-  cardTotal.value = orders.reduce((sum, order) => sum + order.subtotal, 0)
-  cardCurrency.value = orders[0]?.currency ?? props.currency
-  step.value = 'card'
+  goToPaymentBox(orders.map((order) => order.orderId))
 }
 
 function choose(method: PaymentMethod) {
@@ -119,15 +102,13 @@ function choose(method: PaymentMethod) {
     class="payment-method-modal"
     style="width: 460px; max-width: calc(100vw - 32px)"
     title="¿Cómo quieres pagar?"
-    :mask-closable="step !== 'card'"
-    :closable="step !== 'card'"
     @update:show="emit('update:show', $event)"
   >
     <p class="payment-method-modal__total">
-      Total a pagar: <strong>{{ formatCurrency(displayTotal, displayCurrency) }}</strong>
+      Total a pagar: <strong>{{ formatCurrency(props.total, props.currency) }}</strong>
     </p>
 
-    <div v-if="step === 'choice'" class="payment-method-modal__options">
+    <div class="payment-method-modal__options">
       <button
         type="button"
         class="payment-method-modal__option"
@@ -155,15 +136,6 @@ function choose(method: PaymentMethod) {
           >Te enviamos los datos para hacer la transferencia</span
         >
       </button>
-    </div>
-
-    <div v-else class="payment-method-modal__card">
-      <NButton quaternary size="small" data-test="method-back" @click="backToChoice">
-        <template #icon><NIcon :component="ChevronBackOutline" /></template>
-        Cambiar método
-      </NButton>
-
-      <PaymentCheckout :order-ids="cardOrderIds" />
     </div>
 
     <NAlert v-if="error" type="error" :show-icon="true" class="payment-method-modal__error">
