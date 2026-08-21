@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { NButton, NCard, NFormItem, NInput, NTag } from 'naive-ui'
 
+import { message } from '@/core/ui/discrete-api'
 import { PERMISSIONS } from '@/core/auth/permissions'
 import { usePermissions } from '@/core/auth/use-permissions'
 import { useUpdateTenantProfile } from '../../composables/mutations/use-update-tenant-profile'
@@ -28,7 +29,10 @@ const { mutate, isPending } = useUpdateTenantProfile()
 function submit() {
   if (!hasChanges.value) return
   const trimmed = whatsappNumber.value.trim()
-  mutate({ whatsappNumber: trimmed === '' ? null : trimmed })
+  mutate(
+    { whatsappNumber: trimmed === '' ? null : trimmed },
+    { onSuccess: () => message.success('Número de WhatsApp actualizado') },
+  )
 }
 </script>
 
