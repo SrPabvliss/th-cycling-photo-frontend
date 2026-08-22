@@ -126,6 +126,12 @@
   margin: 0 0 4px;
 }
 
+.gallery-hero__owner {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 4px;
+}
+
 .gallery-hero__meta {
   font-size: 14px;
   color: rgba(255, 255, 255, 0.8);
@@ -156,6 +162,10 @@
 
   .gallery-hero__title {
     font-size: 20px;
+  }
+
+  .gallery-hero__owner {
+    font-size: 11px;
   }
 
   .gallery-hero__meta {

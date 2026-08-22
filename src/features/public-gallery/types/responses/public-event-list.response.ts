@@ -7,6 +7,7 @@ export interface IApiPublicEventListItem {
   provinceName: string | null
   cantonName: string | null
   photoCount: number
+  ownerName: string
   coverSlug: string | null
 }
 
@@ -19,6 +20,7 @@ export interface IPublicEventListItem {
   provinceName: string | null
   cantonName: string | null
   photoCount: number
+  ownerName: string
   coverSlug: string | null
 }
 

@@ -9,6 +9,7 @@ export interface IApiPublicEventDetail {
   provinceName: string | null
   cantonName: string | null
   photoCount: number
+  ownerName: string
   assets: IApiPublicEventAsset[]
   photoCategories: IApiPublicPhotoCategory[]
 }
@@ -27,6 +28,7 @@ export interface IPublicEventDetail {
   provinceName: string | null
   cantonName: string | null
   photoCount: number
+  ownerName: string
   assets: IPublicEventAsset[]
   photoCategories: IPublicPhotoCategory[]
 }
