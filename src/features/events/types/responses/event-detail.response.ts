@@ -19,6 +19,7 @@ export interface IApiEventDetail {
   totalFileSize: number
   photoQuota: number | null
   photosUploaded: number
+  isFrozen: boolean
   createdAt: string
   updatedAt: string
 }
@@ -42,6 +43,7 @@ export interface IEventDetail {
   totalFileSize: number
   photoQuota: number | null
   photosUploaded: number
+  isFrozen: boolean
   createdAt: Date
   updatedAt: Date
 }

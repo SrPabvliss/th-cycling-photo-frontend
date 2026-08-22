@@ -58,6 +58,7 @@ export const API_ROUTES = {
     DELETE: (id: string) => `${EVENTS_BASE}/${id}`,
     STATS: `${EVENTS_BASE}/stats`,
     FEATURED: (id: string) => `${EVENTS_BASE}/${id}/featured`,
+    FREEZE: (id: string) => `${EVENTS_BASE}/${id}/freeze`,
     OPERATORS: (id: string) => `${EVENTS_BASE}/${id}/operators`,
     OPERATOR: (eventId: string, userId: string) => `${EVENTS_BASE}/${eventId}/operators/${userId}`,
     REVIEW_QUEUE: (eventId: string) => `${EVENTS_BASE}/${eventId}/review-queue`,

@@ -21,6 +21,7 @@ export function toEventDetail(api: IApiEventDetail): IEventDetail {
     totalFileSize: api.totalFileSize,
     photoQuota: api.photoQuota,
     photosUploaded: api.photosUploaded,
+    isFrozen: api.isFrozen,
     createdAt: new Date(api.createdAt),
     updatedAt: new Date(api.updatedAt),
   }
