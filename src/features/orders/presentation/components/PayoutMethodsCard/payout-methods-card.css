@@ -1,0 +1,50 @@
+.pm-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pm-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pm-card__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1f2c;
+}
+
+.pm-card__method {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pm-card__method + .pm-card__method {
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.pm-card__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pm-card__label {
+  min-width: 120px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.pm-card__value {
+  flex: 1;
+  font-size: 13px;
+  color: #374151;
+}
