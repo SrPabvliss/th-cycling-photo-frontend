@@ -2,6 +2,7 @@ import { BUYERS_PATH } from '@/features/buyers/routes'
 import { EVENTS_PATH } from '@/features/events/routes'
 import { LANDING_PATH } from '@/features/landing/routes'
 import { ORDERS_PATH } from '@/features/orders/routes'
+import { ORGANIZERS_PATH } from '@/features/organizers/routes'
 import { RETOUCH_PATH } from '@/features/retouch/routes'
 import { PERMISSIONS, type PermissionKey } from './permissions'
 
@@ -20,7 +21,7 @@ const NAV_ITEMS: INavItem[] = [
   { label: 'Pedidos', to: ORDERS_PATH, permission: PERMISSIONS.ORDER_READ },
   { label: 'Retoque', to: RETOUCH_PATH, permission: PERMISSIONS.PHOTO_RETOUCH_READ },
   { label: 'Compradores', to: BUYERS_PATH, permission: PERMISSIONS.BUYER_READ },
-  { label: 'Tenants', to: '/tenants', permission: PERMISSIONS.TENANT_READ },
+  { label: 'Organizadores', to: ORGANIZERS_PATH, permission: PERMISSIONS.TENANT_READ },
   { label: 'Mi perfil', to: '/mi-perfil', permission: PERMISSIONS.TENANT_PROFILE_READ },
 ]
 

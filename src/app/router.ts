@@ -19,7 +19,8 @@ import { accountRoutes } from '@/features/account/routes'
 import { buyerRoutes } from '@/features/buyers/routes'
 import { cartRoutes } from '@/features/cart/routes'
 import { paymentRoutes } from '@/features/payments/routes'
-import { tenantRoutes } from '@/features/tenants/routes'
+import { contractRoutes } from '@/features/contracts/routes'
+import { organizerRoutes } from '@/features/organizers/routes'
 import { tenantProfileRoutes } from '@/features/tenant-profile/routes'
 
 const router = createRouter({
@@ -47,7 +48,8 @@ const router = createRouter({
         ...orderRoutes,
         ...retouchRoutes,
         ...buyerRoutes,
-        ...tenantRoutes,
+        ...organizerRoutes,
+        ...contractRoutes,
         ...tenantProfileRoutes,
       ],
     },

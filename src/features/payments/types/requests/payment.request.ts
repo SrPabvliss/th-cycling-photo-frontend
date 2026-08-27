@@ -1,4 +1,4 @@
-import type { PaymentMethod } from '../payment-method'
+import type { PaymentMethod } from '@/shared/types/payment-method.types'
 
 export interface IConfirmPaymentRequest {
   clientTransactionId: string

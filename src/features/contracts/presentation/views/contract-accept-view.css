@@ -1,0 +1,57 @@
+.contract-accept-content {
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  max-width: 640px;
+}
+
+.contract-accept-loading {
+  text-align: center;
+  padding: 40px;
+}
+
+.contract-accept-card__subtitle {
+  color: #6b7280;
+  margin: 0 0 16px;
+}
+
+.contract-accept-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.contract-accept-fact {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.contract-accept-fact:last-child {
+  border-bottom: none;
+}
+
+.contract-accept-fact__label {
+  color: #6b7280;
+}
+
+.contract-accept-fact__value {
+  font-weight: 600;
+  text-align: right;
+}
+
+.contract-accept-consent {
+  margin: 20px 0;
+}
+
+.contract-accept-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.contract-accept-blocked__actions {
+  margin-top: 16px;
+}

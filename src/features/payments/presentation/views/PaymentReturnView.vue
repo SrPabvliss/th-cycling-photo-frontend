@@ -8,7 +8,7 @@ import { DELIVERY_ROUTE_NAMES } from '@/features/delivery/routes'
 import { useConfirmPayment } from '../../composables/mutations/use-confirm-payment'
 import { usePaymentTransactionQuery } from '../../composables/queries/use-payment-transaction'
 import { DEFAULT_PAYMENT_PROVIDER, findPaymentGateway } from '../../gateways/registry'
-import { PAYMENT_METHOD, type PaymentMethod } from '../../types/payment-method'
+import { PAYMENT_METHOD, type PaymentMethod } from '@/shared/types/payment-method.types'
 import type { IPaymentDelivery } from '../../types/responses/payment-intent.response'
 import PaymentMethodModal from '@/shared/components/PaymentMethodModal/PaymentMethodModal.vue'
 
