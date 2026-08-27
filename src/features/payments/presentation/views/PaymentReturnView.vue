@@ -10,7 +10,7 @@ import { usePaymentTransactionQuery } from '../../composables/queries/use-paymen
 import { DEFAULT_PAYMENT_PROVIDER, findPaymentGateway } from '../../gateways/registry'
 import { PAYMENT_METHOD, type PaymentMethod } from '../../types/payment-method'
 import type { IPaymentDelivery } from '../../types/responses/payment-intent.response'
-import PaymentMethodModal from '../components/PaymentMethodModal/PaymentMethodModal.vue'
+import PaymentMethodModal from '@/shared/components/PaymentMethodModal/PaymentMethodModal.vue'
 
 const route = useRoute()
 const router = useRouter()

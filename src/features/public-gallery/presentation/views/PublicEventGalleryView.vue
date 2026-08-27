@@ -7,9 +7,9 @@ import { ArrowBack } from '@vicons/ionicons5'
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { formatDate } from '@/shared/utils/date.utils'
 import { getAssetPresetUrl } from '@/shared/utils/cdn.utils'
-import { useCartStore } from '@/features/cart/stores/cart.store'
-import { useAddToCart } from '@/features/cart/composables/mutations/use-add-to-cart'
-import { useRemoveFromCart } from '@/features/cart/composables/mutations/use-remove-from-cart'
+import { useCartStore } from '@/shared/stores/cart.store'
+import { useAddToCart } from '@/shared/composables/use-add-to-cart'
+import { useRemoveFromCart } from '@/shared/composables/use-remove-from-cart'
 import { usePublicEventDetailQuery } from '../../composables/queries/use-public-event-detail'
 import {
   usePublicEventNoBibPhotosInfinite,

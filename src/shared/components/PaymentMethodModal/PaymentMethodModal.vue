@@ -4,12 +4,12 @@ import { useRouter } from 'vue-router'
 import { NAlert, NIcon, NModal } from 'naive-ui'
 import { CardOutline, SwapHorizontalOutline } from '@vicons/ionicons5'
 
-import { useCheckout } from '@/features/cart/composables/mutations/use-checkout'
-import type { ICheckoutOrderResult } from '@/features/cart/types/requests/cart.request'
-import { useChoosePaymentMethod } from '@/features/payments/composables/mutations/use-choose-payment-method'
+import { useCheckout } from '@/shared/composables/use-checkout'
+import { useChoosePaymentMethod } from '@/shared/composables/use-choose-payment-method'
 import { PAYMENT_ROUTE_NAMES } from '@/features/payments/routes'
-import { PAYMENT_METHOD, type PaymentMethod } from '@/features/payments/types/payment-method'
-import { formatCurrency } from '@/features/pricing/utils/format-currency'
+import { PAYMENT_METHOD, type PaymentMethod } from '@/shared/types/payment-method.types'
+import type { ICheckoutOrderResult } from '@/shared/types/cart.types'
+import { formatCurrency } from '@/shared/utils/currency.utils'
 import { CARD_BRANDS } from './card-brands'
 
 const props = defineProps<{
@@ -17,6 +17,7 @@ const props = defineProps<{
   total: number
   currency: string
   orderIds?: string[]
+  eventId?: string
 }>()
 
 const emit = defineEmits<{
@@ -69,10 +70,15 @@ async function chooseExisting(method: PaymentMethod) {
 }
 
 async function chooseNew(method: PaymentMethod) {
+  if (!props.eventId) {
+    error.value = 'No pudimos identificar el evento de tu pedido.'
+    return
+  }
+
   let orders: ICheckoutOrderResult[]
 
   try {
-    orders = await checkout(method)
+    orders = await checkout({ eventId: props.eventId, method })
   } catch {
     error.value = 'No pudimos registrar tu pedido. Intenta nuevamente.'
     return

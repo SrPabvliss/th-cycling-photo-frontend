@@ -1,31 +1,50 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { NButton, NDivider, NIcon } from 'naive-ui'
 import { ArrowBack, CheckmarkCircle, ChevronBack } from '@vicons/ionicons5'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { useAuth } from '@/features/auth/composables/use-auth'
-import PaymentMethodModal from '@/features/payments/presentation/components/PaymentMethodModal/PaymentMethodModal.vue'
-import { useCartStore } from '../../stores/cart.store'
+import PaymentMethodModal from '@/shared/components/PaymentMethodModal/PaymentMethodModal.vue'
+import { useCartStore } from '@/shared/stores/cart.store'
+import type { ICheckoutOrderResult } from '@/shared/types/cart.types'
 import { useMergeCart } from '../../composables/mutations/use-merge-cart'
-import type { ICheckoutOrderResult } from '../../types/requests/cart.request'
+import { checkoutPath } from '../../routes'
 import CheckoutSummary from '../components/CheckoutSummary/CheckoutSummary.vue'
 import { useCartPricing } from '../../composables/use-cart-pricing'
 import PricingTotalBlock from '@/features/pricing/presentation/components/PricingTotalBlock/PricingTotalBlock.vue'
 
+const route = useRoute()
 const router = useRouter()
 const cartStore = useCartStore()
 const { isAuthenticated } = useAuth()
 const { mutateAsync: mergeCart, isPending: isMerging } = useMergeCart()
-const cartPricing = useCartPricing()
+
+const eventId = computed(() => route.params.eventId as string)
+
+watch(
+  eventId,
+  (id) => {
+    if (id) cartStore.setActiveEvent(id)
+  },
+  { immediate: true },
+)
+
+const checkoutGroup = computed(
+  () => cartStore.groups.find((group) => group.eventId === eventId.value) ?? null,
+)
+const checkoutCount = computed(() => checkoutGroup.value?.photos.length ?? 0)
+const cartPricing = useCartPricing(checkoutCount)
 
 const orderResults = ref<ICheckoutOrderResult[] | null>(null)
 const showMethodModal = ref(false)
 
 async function handleConfirm() {
+  if (!eventId.value) return
+
   if (!isAuthenticated.value) {
-    router.push({ path: '/login', query: { redirect: '/checkout' } })
+    router.push({ path: '/login', query: { redirect: checkoutPath(eventId.value) } })
     return
   }
 
@@ -99,7 +118,7 @@ function handlePaidOrders(orders: ICheckoutOrderResult[]) {
         <span class="cf-breadcrumb-cur">Confirmar pedido</span>
       </div>
 
-      <div v-if="cartStore.totalCount === 0" class="checkout-empty">
+      <div v-if="!checkoutGroup" class="checkout-empty">
         <h2 class="checkout-empty__title">Tu carrito está vacío</h2>
         <NButton type="primary" @click="router.push('/gallery')">Explorar eventos</NButton>
       </div>
@@ -115,9 +134,7 @@ function handlePaidOrders(orders: ICheckoutOrderResult[]) {
         <div class="checkout-summary__layout">
           <div class="checkout-summary__main">
             <CheckoutSummary
-              v-for="group in cartStore.groups"
-              :key="group.eventId"
-              :group="group"
+              :group="checkoutGroup"
               :unit-price="cartPricing.preview.value?.unitPrice ?? 0"
               :base-price="cartPricing.basePrice.value"
               :currency="cartPricing.currency.value"
@@ -166,6 +183,7 @@ function handlePaidOrders(orders: ICheckoutOrderResult[]) {
 
       <PaymentMethodModal
         v-model:show="showMethodModal"
+        :event-id="eventId"
         :total="cartPricing.subtotal.value"
         :currency="cartPricing.currency.value"
         @paid-orders="handlePaidOrders"
@@ -174,7 +192,5 @@ function handlePaidOrders(orders: ICheckoutOrderResult[]) {
   </PublicLayout>
 </template>
 
-<style
-  src="@/features/client-gallery/presentation/components/OrderConfirmation/order-confirmation.css"
-></style>
+<style src="./checkout-success.css"></style>
 <style scoped src="./checkout-view.css" />

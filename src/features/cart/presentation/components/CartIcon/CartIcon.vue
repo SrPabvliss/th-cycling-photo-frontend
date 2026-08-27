@@ -2,7 +2,7 @@
 import { NIcon, NBadge } from 'naive-ui'
 import { CartOutline } from '@vicons/ionicons5'
 
-import { useCartStore } from '../../../stores/cart.store'
+import { useCartStore } from '@/shared/stores/cart.store'
 
 const cartStore = useCartStore()
 
