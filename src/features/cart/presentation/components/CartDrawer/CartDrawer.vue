@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { NAlert, NButton, NDrawer, NDrawerContent, NEmpty, NFlex, NIcon } from 'naive-ui'
 import { CloseCircleOutline, CartOutline, LogInOutline } from '@vicons/ionicons5'
@@ -8,9 +9,10 @@ import PhotoLightbox from '@/shared/components/PhotoLightbox/PhotoLightbox.vue'
 import { useLightbox } from '@/shared/composables/use-lightbox'
 import type { ICartPhoto } from '../../../types/responses/cart.response'
 import { useAuth } from '@/features/auth/composables/use-auth'
-import { useCartStore } from '../../../stores/cart.store'
+import { useCartStore } from '@/shared/stores/cart.store'
 import { useRemoveFromCart } from '../../../composables/mutations/use-remove-from-cart'
 import { useCartPricing } from '@/features/cart/composables/use-cart-pricing'
+import { checkoutPath } from '../../../routes'
 import PricingTotalBlock from '@/features/pricing/presentation/components/PricingTotalBlock/PricingTotalBlock.vue'
 import PhotoPriceStrip from '@/features/pricing/presentation/components/PhotoPriceStrip/PhotoPriceStrip.vue'
 
@@ -26,7 +28,18 @@ const router = useRouter()
 const cartStore = useCartStore()
 const { isAuthenticated } = useAuth()
 const { mutate: removeFromCart } = useRemoveFromCart()
-const cartPricing = useCartPricing()
+
+const checkoutEventId = computed(() => {
+  const active = cartStore.activeEventId
+  if (active && cartStore.groups.some((group) => group.eventId === active)) return active
+  return cartStore.groups[0]?.eventId ?? null
+})
+
+const checkoutGroup = computed(
+  () => cartStore.groups.find((group) => group.eventId === checkoutEventId.value) ?? null,
+)
+const checkoutCount = computed(() => checkoutGroup.value?.photos.length ?? 0)
+const cartPricing = useCartPricing(checkoutCount)
 
 const {
   photos: lightboxPhotos,
@@ -35,14 +48,22 @@ const {
   open: openLightbox,
 } = useLightbox<ICartPhoto>()
 
+function resolveCheckoutPath(): string | null {
+  return checkoutEventId.value ? checkoutPath(checkoutEventId.value) : null
+}
+
 function goToCheckout() {
+  const path = resolveCheckoutPath()
+  if (!path) return
   emit('update:show', false)
-  router.push('/checkout')
+  router.push(path)
 }
 
 function goToLogin() {
+  const path = resolveCheckoutPath()
+  if (!path) return
   emit('update:show', false)
-  router.push({ path: '/login', query: { redirect: '/checkout' } })
+  router.push({ path: '/login', query: { redirect: path } })
 }
 </script>
 
@@ -118,7 +139,13 @@ function goToLogin() {
           </div>
 
           <template v-if="isAuthenticated">
-            <NButton type="primary" block size="large" @click="goToCheckout">
+            <NButton
+              type="primary"
+              block
+              size="large"
+              :disabled="!checkoutEventId"
+              @click="goToCheckout"
+            >
               Ir al checkout
             </NButton>
           </template>
@@ -126,7 +153,13 @@ function goToLogin() {
             <NAlert type="info" :show-icon="true" style="font-size: 13px">
               Inicia sesión para completar tu pedido.
             </NAlert>
-            <NButton type="primary" block size="large" @click="goToLogin">
+            <NButton
+              type="primary"
+              block
+              size="large"
+              :disabled="!checkoutEventId"
+              @click="goToLogin"
+            >
               <template #icon><NIcon :component="LogInOutline" /></template>
               Iniciar sesión para continuar
             </NButton>

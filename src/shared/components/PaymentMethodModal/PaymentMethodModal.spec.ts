@@ -19,11 +19,11 @@ const checkout = vi.fn(() =>
 const chooseMethod = vi.fn(() => Promise.resolve({ orderIds: ['order-9'] }))
 const push = vi.fn()
 
-vi.mock('@/features/cart/composables/mutations/use-checkout', () => ({
+vi.mock('@/shared/composables/use-checkout', () => ({
   useCheckout: () => ({ mutateAsync: checkout, isPending: ref(false) }),
 }))
 
-vi.mock('@/features/payments/composables/mutations/use-choose-payment-method', () => ({
+vi.mock('@/shared/composables/use-choose-payment-method', () => ({
   useChoosePaymentMethod: () => ({ mutateAsync: chooseMethod, isPending: ref(false) }),
 }))
 
@@ -39,7 +39,7 @@ afterEach(() => {
 
 function mountModal(orderIds?: string[]) {
   return mount(PaymentMethodModal, {
-    props: { show: true, total: 25, currency: 'USD', orderIds },
+    props: { show: true, total: 25, currency: 'USD', orderIds, eventId: 'event-1' },
     global: { stubs: { Modal: { template: '<div><slot /></div>' } } },
   })
 }
@@ -51,7 +51,7 @@ describe('PaymentMethodModal — new checkout (no orderIds)', () => {
     await wrapper.get('[data-test="method-transfer"]').trigger('click')
     await flushPromises()
 
-    expect(checkout).toHaveBeenCalledWith('transfer')
+    expect(checkout).toHaveBeenCalledWith({ eventId: 'event-1', method: 'transfer' })
     expect(chooseMethod).not.toHaveBeenCalled()
     expect(wrapper.emitted('paid-orders')).toHaveLength(1)
     expect(wrapper.emitted('paid-orders')?.[0]).toEqual([
@@ -76,7 +76,7 @@ describe('PaymentMethodModal — new checkout (no orderIds)', () => {
     await wrapper.get('[data-test="method-card"]').trigger('click')
     await flushPromises()
 
-    expect(checkout).toHaveBeenCalledWith('card')
+    expect(checkout).toHaveBeenCalledWith({ eventId: 'event-1', method: 'card' })
     expect(chooseMethod).not.toHaveBeenCalled()
     expect(push).toHaveBeenCalledWith({
       name: 'payment-box',

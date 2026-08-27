@@ -7,7 +7,6 @@ import { isAxiosError } from 'axios'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { ACCOUNT_ROUTE_NAMES } from '@/features/account/routes'
-import { CART_ROUTE_NAMES } from '@/features/cart/routes'
 import { useCreatePaymentIntent } from '@/features/payments/composables/mutations/use-create-payment-intent'
 import { findPaymentGateway } from '@/features/payments/gateways/registry'
 import { formatCurrency } from '@/features/pricing/utils/format-currency'
@@ -77,7 +76,7 @@ function handleSetupFailed(error: unknown) {
 }
 
 function goToCart() {
-  router.push({ name: CART_ROUTE_NAMES.CHECKOUT })
+  router.push('/gallery')
 }
 
 function goToOrders() {
@@ -88,7 +87,7 @@ watch(
   orderIds,
   (ids) => {
     if (ids.length === 0) {
-      router.replace({ name: CART_ROUTE_NAMES.CHECKOUT })
+      router.replace('/gallery')
       return
     }
     requestIntent(ids)

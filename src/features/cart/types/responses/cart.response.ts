@@ -6,6 +6,7 @@ export interface IApiCartPhoto {
 export interface IApiCartGroup {
   eventId: string
   eventName: string
+  eventSlug: string
   startDate: string
   endDate: string
   photos: IApiCartPhoto[]
@@ -19,6 +20,7 @@ export interface ICartPhoto {
 export interface ICartGroup {
   eventId: string
   eventName: string
+  eventSlug: string
   startDate: Date
   endDate: Date
   photos: ICartPhoto[]

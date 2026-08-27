@@ -1,4 +1,4 @@
-import type { PaymentMethod } from '@/features/payments/types/payment-method'
+import type { PaymentMethod } from '@/shared/types/payment-method.types'
 
 export interface IAddToCartRequest {
   photoId: string
