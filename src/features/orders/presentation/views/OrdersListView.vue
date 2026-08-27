@@ -1,194 +1,260 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { NButton, NEmpty, NResult, NSpin, useMessage } from 'naive-ui'
-import { useQueryClient } from '@tanstack/vue-query'
+import { computed, provide, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import type { LocationQueryRaw } from 'vue-router'
+import { useMediaQuery } from '@vueuse/core'
+import { NButton, NResult, NSpin } from 'naive-ui'
 
 import PageHeader from '@/shared/components/PageHeader.vue'
-import { API_ROUTES } from '@/core/api/api-routes'
-import { env } from '@/core/config/env'
-import { httpClient } from '@/core/http/axios-client'
+import { useAuthStore } from '@/features/auth/stores/auth.store'
+import { useTenantProfile } from '@/features/tenant-profile/composables/queries/use-tenant-profile'
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
-import { openWhatsApp, buildDeliveryTemplate } from '@/shared/utils/whatsapp.utils'
-import {
-  useOrdersListQuery,
-  type IOrderListFilters,
-} from '../../composables/queries/use-orders-list'
+import { useOrdersListQuery } from '../../composables/queries/use-orders-list'
 import { useOrdersStatsQuery } from '../../composables/queries/use-orders-stats'
-import { useGroupedOrders } from '../../composables/use-grouped-orders'
+import { useGroupedOrders, type IOrderGroupCardRow } from '../../composables/use-grouped-orders'
 import { useOrderActions } from '../../composables/use-order-actions'
-import { ORDER_QUERY_KEYS } from '../../constants/query-keys'
-import { toOrderDetail } from '../../mappers/order-detail.mapper'
-import type { IApiOrderDetail } from '../../types/responses/order-detail.response'
-import type { OrderStatus, IOrderListItem } from '../../types/responses/order-list.response'
-import { ORDER_ROUTE_NAMES } from '../../routes'
+import {
+  ORDER_FILTER_STATE_KEY,
+  orderFiltersToQuery,
+  seedOrderFiltersFromQuery,
+  useOrderFilters,
+} from '../../composables/use-order-filters'
+import type { IOrderFilters } from '../../types/requests/order-filters.request'
+import type { IOrderListItem } from '../../types/responses/order-list.response'
+import type { IOrderCustomerGroup } from '../../types/order-customer-group.type'
+import type { OrderOperatorRole } from '../../utils/order-actions'
 import OrderStatsCards from '../components/OrderStatsCards/OrderStatsCards.vue'
 import OrderStatusTabs from '../components/OrderStatusTabs/OrderStatusTabs.vue'
 import OrderFilters from '../components/OrderFilters/OrderFilters.vue'
-import OrderCard from '../components/OrderCard/OrderCard.vue'
-import OrderCustomerSeparator from '../components/OrderCustomerSeparator/OrderCustomerSeparator.vue'
-
-const router = useRouter()
-const message = useMessage()
-const queryClient = useQueryClient()
+import OrderGroup from '../components/OrderGroup/OrderGroup.vue'
+import OrderDetailDrawer from '../components/OrderDetailPanel/OrderDetailDrawer.vue'
+import OrderDetailSheet from '../components/OrderDetailPanel/OrderDetailSheet.vue'
+import ReceivablesNote from '../components/OrderEmptyStates/ReceivablesNote.vue'
+import FirstRun from '../components/OrderEmptyStates/FirstRun.vue'
+import NoResults from '../components/OrderEmptyStates/NoResults.vue'
+import OperatorEmpty from '../components/OrderEmptyStates/OperatorEmpty.vue'
 
 const ORDERS_PER_PAGE = 15
 
-const filters = ref<IOrderListFilters>({
-  status: null,
-  eventId: null,
-  search: '',
+const SUBTITLES: Record<OrderOperatorRole, string> = {
+  titan: 'Todos los pedidos de la plataforma, de todos los organizadores',
+  organizer: 'Los pedidos de los eventos de {organizador}',
+  operator: 'Los pedidos de los eventos en los que te asignaron',
+}
+
+import { PERMISSIONS } from '@/core/auth/permissions'
+import { usePermissions } from '@/core/auth/use-permissions'
+
+const router = useRouter()
+const route = useRoute()
+const authStore = useAuthStore()
+const { has } = usePermissions()
+
+const role = computed<OrderOperatorRole>(() => {
+  if (has(PERMISSIONS.EVENT_READ_ALL)) return 'titan'
+  return authStore.currentUser?.tenantId ? 'organizer' : 'operator'
 })
+
+const filterState = useOrderFilters()
+provide(ORDER_FILTER_STATE_KEY, filterState)
+const { filters, clearAll, tab } = filterState
+
+seedOrderFiltersFromQuery(filterState, route.query)
+
+const openOrderId = computed<string | null>(() => {
+  const raw = route.query.order
+  const value = Array.isArray(raw) ? raw[0] : raw
+  return typeof value === 'string' && value ? value : null
+})
+
+function buildQuery(value: IOrderFilters, orderId: string | null): LocationQueryRaw {
+  const base = orderFiltersToQuery(value)
+  return orderId ? { ...base, order: orderId } : base
+}
+
+watch(
+  filters,
+  (value) => {
+    router.replace({ query: buildQuery(value, openOrderId.value) })
+  },
+  { deep: true },
+)
 
 const { data, isPending, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
   useOrdersListQuery(filters, ORDERS_PER_PAGE)
 const statsEventId = computed(() => filters.value.eventId)
-const { data: stats } = useOrdersStatsQuery(statsEventId)
+const statsSearch = computed(() => filters.value.search)
+const { data: stats } = useOrdersStatsQuery(statsEventId, statsSearch)
 
-const {
-  handleConfirmPayment,
-  handleMarkGift,
-  handleNotifyPaymentInfo,
-  handleSendDelivery,
-  handleRegenerate,
-} = useOrderActions()
+const { data: tenantProfile } = useTenantProfile(computed(() => role.value === 'organizer'))
 
-const activeStatus = computed(() => filters.value.status as OrderStatus | null)
+const subtitle = computed(() => {
+  if (role.value !== 'organizer') return SUBTITLES[role.value]
+  const name = tenantProfile.value?.publicName || tenantProfile.value?.name || 'tu organización'
+  return SUBTITLES.organizer.replace('{organizador}', name)
+})
+
+const { handleConfirmPayment, handleNotifyPaymentInfo, handleSendDelivery } = useOrderActions()
 
 const orders = computed<IOrderListItem[]>(() => data.value?.pages.flatMap((p) => p.items) ?? [])
 
 const rows = useGroupedOrders(orders)
+
+const customerGroups = computed<IOrderCustomerGroup[]>(() =>
+  rows.value.reduce<IOrderCustomerGroup[]>((groups, row) => {
+    if (row.type === 'separator') {
+      return [
+        ...groups,
+        {
+          key: row.key,
+          name: row.customerLabel,
+          phone: row.customerPhone,
+          isUnassigned: row.customerPhone === null && row.customerLabel === 'Sin cliente',
+          orders: [],
+        },
+      ]
+    }
+    const currentGroup = groups[groups.length - 1]
+    currentGroup?.orders.push((row as IOrderGroupCardRow).order)
+    return groups
+  }, []),
+)
+
+const hasActiveFilters = computed(
+  () =>
+    filters.value.search !== null ||
+    filters.value.eventId !== null ||
+    filters.value.tab !== 'all',
+)
+
+const totalOrders = computed(
+  () => data.value?.pages[data.value.pages.length - 1]?.pagination.total ?? orders.value.length,
+)
+const orderCountLabel = computed(() => (totalOrders.value === 1 ? 'pedido' : 'pedidos'))
+const customerCountLabel = computed(() =>
+  customerGroups.value.length === 1 ? 'cliente' : 'clientes',
+)
+
+const showCobrarNote = computed(
+  () => filters.value.tab === 'pending' && (stats.value?.openCount ?? 0) > 0,
+)
+
+const isMobile = useMediaQuery('(max-width: 767px)')
 
 const sentinelRef = useInfiniteScrollTrigger(() => fetchNextPage(), {
   isBusy: computed(() => isFetchingNextPage.value),
   canLoadMore: computed(() => hasNextPage.value ?? false),
 })
 
-function handleStatusChange(status: OrderStatus | null) {
-  filters.value = { ...filters.value, status }
-}
-
-function handleSearchChange(search: string) {
-  filters.value = { ...filters.value, search }
-}
-
-function handleEventChange(eventId: string | null) {
-  filters.value = { ...filters.value, eventId }
-}
-
 function handleView(id: string) {
-  router.push({ name: ORDER_ROUTE_NAMES.DETAIL, params: { id } })
+  router.push({ query: buildQuery(filters.value, id) })
+}
+
+function handleCloseDetail() {
+  router.push({ query: buildQuery(filters.value, null) })
+}
+
+function handleTabChange(next: typeof tab.value) {
+  tab.value = next
 }
 
 function handleSendPaymentInfo(order: IOrderListItem) {
   handleNotifyPaymentInfo(order)
 }
-
-async function handleResendDelivery(order: IOrderListItem) {
-  // Card only carries hasDeliveryLink boolean. Fetch detail to get the
-  // token (cached by TanStack Query, so repeat clicks are free).
-  const detail = await queryClient.fetchQuery({
-    queryKey: ORDER_QUERY_KEYS.detail(order.id),
-    queryFn: async () => {
-      const response = await httpClient.get<IApiOrderDetail>(API_ROUTES.ORDERS.GET_BY_ID(order.id))
-      return toOrderDetail(response.data)
-    },
-  })
-
-  if (!detail.deliveryLink) {
-    message.error('No se encontró el enlace de descarga.')
-    return
-  }
-
-  const deliveryUrl = `${env.VITE_APP_BASE_URL}/delivery/${detail.deliveryLink.token}`
-  const template = buildDeliveryTemplate({
-    customerFirstName: detail.snapFirstName ?? detail.userName,
-    photoCount: detail.photos.length,
-    deliveryUrl,
-  })
-  openWhatsApp(order.snapWhatsapp, template)
-}
 </script>
 
 <template>
-  <div class="page-view">
-    <div class="page-view__content list-content">
-      <PageHeader
-        title="Gestión de Pedidos"
-        subtitle="Administra pagos, entregas y comunicación con clientes"
-      />
+  <div class="page-view orders-view">
+    <div class="page-view__content orders-content">
+      <PageHeader title="Pedidos" :subtitle="subtitle" />
 
       <OrderStatsCards :stats="stats" />
 
-      <div class="orders-list-view__header">
-        <OrderStatusTabs
-          :active-status="activeStatus"
-          :stats="stats"
-          @update:active-status="handleStatusChange"
-        />
+      <OrderStatusTabs
+        :active="filters.tab"
+        :counts="stats?.tabs"
+        @update:active="handleTabChange"
+      />
 
-        <OrderFilters
-          :search="filters.search"
-          :event-id="filters.eventId"
-          @update:search="handleSearchChange"
-          @update:event-id="handleEventChange"
-        />
-      </div>
+      <OrderFilters />
 
-      <div v-if="isPending" class="orders-loading">
-        <NSpin size="medium" />
-      </div>
+      <div class="orders-body">
+        <div v-if="isError" class="orders-error">
+          <NResult
+            status="error"
+            title="Error al cargar pedidos"
+            description="No se pudo obtener la lista de pedidos."
+          >
+            <template #footer>
+              <NButton @click="refetch()">Reintentar</NButton>
+            </template>
+          </NResult>
+        </div>
 
-      <NResult
-        v-else-if="isError"
-        status="error"
-        title="Error al cargar pedidos"
-        description="No se pudo obtener la lista de pedidos."
-      >
-        <template #footer>
-          <NButton @click="refetch()">Reintentar</NButton>
+        <div v-else-if="isPending" class="orders-loading">
+          <NSpin size="medium" />
+        </div>
+
+        <template v-else-if="orders.length === 0">
+          <OperatorEmpty v-if="role === 'operator' && !hasActiveFilters" />
+          <FirstRun v-else-if="!hasActiveFilters" />
+          <NoResults v-else :query="filters.search" @clear="clearAll()" />
         </template>
-      </NResult>
 
-      <div v-else-if="orders.length === 0" class="orders-empty">
-        <NEmpty description="No hay órdenes que coincidan con los filtros" />
-      </div>
+        <template v-else>
+          <ReceivablesNote
+            v-if="showCobrarNote && stats"
+            :open-count="stats.openCount"
+            :open-amount="stats.openAmount"
+            :pending-count="stats.pendingCount"
+            :info-sent-count="stats.paymentInfoSentCount"
+          />
 
-      <template v-else>
-        <div class="orders-grid">
-          <template v-for="row in rows" :key="row.key">
-            <OrderCustomerSeparator
-              v-if="row.type === 'separator'"
-              :label="row.customerLabel"
-              :phone="row.customerPhone"
-              :order-count="row.orderCount"
-            />
-            <OrderCard
-              v-else
-              :order="row.order"
-              :group-position="row.positionInGroup"
-              :group-total="row.totalInGroup"
-              :is-latest-for-customer="row.isLatestForCustomer"
+          <div class="orders-result-line">
+            <b>{{ totalOrders.toLocaleString('de-DE') }}</b>
+            {{ orderCountLabel }}
+            <span class="orders-result-line__sub">
+              · {{ customerGroups.length.toLocaleString('de-DE') }} {{ customerCountLabel }}
+              cargados · agrupados por cliente · desplaza para cargar más
+            </span>
+          </div>
+
+          <div class="orders-groups" data-test="orders-list">
+            <OrderGroup
+              v-for="group in customerGroups"
+              :key="group.key"
+              :group="group"
+              :role="role"
               @view="handleView"
               @confirm-payment="handleConfirmPayment"
-              @mark-gift="handleMarkGift"
               @send-delivery="handleSendDelivery"
               @send-payment-info="handleSendPaymentInfo"
-              @resend-delivery="handleResendDelivery"
-              @regenerate="handleRegenerate"
             />
-          </template>
 
-          <div ref="sentinelRef" class="orders-sentinel" aria-hidden="true" />
-        </div>
+            <div ref="sentinelRef" class="orders-sentinel" aria-hidden="true" />
+          </div>
 
-        <div v-if="isFetchingNextPage" class="orders-loading-more">
-          <NSpin :size="20" /> <span>Cargando más...</span>
-        </div>
-        <p v-else-if="!hasNextPage && orders.length > 0" class="orders-end-marker">
-          No hay más órdenes
-        </p>
-      </template>
+          <div v-if="isFetchingNextPage" class="orders-loading-more">
+            <NSpin :size="20" /> <span>Cargando más...</span>
+          </div>
+          <p v-else-if="!hasNextPage" class="orders-end-marker">No hay más pedidos</p>
+        </template>
+      </div>
+    </div>
+
+    <div v-if="openOrderId" class="orders-detail-host" data-test="order-detail">
+      <OrderDetailSheet
+        v-if="isMobile"
+        :order-id="openOrderId"
+        :role="role"
+        @close="handleCloseDetail"
+      />
+      <OrderDetailDrawer
+        v-else
+        :order-id="openOrderId"
+        :role="role"
+        @close="handleCloseDetail"
+      />
     </div>
   </div>
 </template>

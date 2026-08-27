@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { NIcon, NPopover } from 'naive-ui'
 import { InformationCircleOutline } from '@vicons/ionicons5'
 import type { IOrderStats } from '../../../types/responses/order-stats.response'
-import { formatCurrency } from '@/features/pricing/utils/format-currency'
+import { formatCurrency } from '@/shared/utils/currency.utils'
 
 const props = defineProps<{
   stats: IOrderStats | undefined

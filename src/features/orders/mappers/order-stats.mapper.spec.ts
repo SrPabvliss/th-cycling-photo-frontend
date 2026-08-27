@@ -12,16 +12,25 @@ const api: IApiOrderStats = {
   giftedCount: 0,
   cancelledCount: 1,
   totalRevenue: '1234.50',
+  openCount: 3,
+  openAmount: '567.25',
+  awaitingDeliveryCount: 2,
+  tabs: {
+    all: 10,
+    pending: 1,
+    paymentInfoSent: 2,
+    paid: 3,
+    delivered: 4,
+    gifted: 0,
+    cancelled: 1,
+  },
 }
 
 describe('toOrderStats', () => {
-  it('converts totalRevenue string to a number', () => {
-    expect(toOrderStats(api).totalRevenue).toBe(1234.5)
-  })
-
-  it('maps count fields verbatim', () => {
+  it('parses totalRevenue string to number and keeps openAmount as string', () => {
     const result = toOrderStats(api)
-    expect(result.paidCount).toBe(3)
-    expect(result.totalOrders).toBe(10)
+    expect(result.totalRevenue).toBe(1234.5)
+    expect(result.openAmount).toBe('567.25')
+    expect(typeof result.openAmount).toBe('string')
   })
 })

@@ -2,7 +2,7 @@ import type {
   PayoutMethodAccountType,
   PayoutMethodProvider,
 } from '@/features/tenant-profile/types/responses/payout-method.response'
-import type { OrderStatus } from './order-list.response'
+import type { OrderStatus } from '@/shared/types/order-status.types'
 
 export const DELIVERY_LINK_STATUS = {
   ACTIVE: 'active',
@@ -54,9 +54,11 @@ export interface IApiOrderDetail {
   snapFirstName: string | null
   snapLastName: string | null
   snapWhatsapp: string | null
+  customerPrimaryPhone: string | null
   snapEmail: string | null
   previewLinkToken: string | null
   eventName: string
+  organizerName: string
   subtotal: string | null
   snapCurrency: string | null
   paymentMethod: string | null
@@ -97,7 +99,10 @@ export interface IOrderDetail {
   snapEmail: string | null
   previewLinkToken: string | null
   eventName: string
+  organizerName: string
   subtotal: number | null
+  subtotalDecimal: string | null
+  customerPrimaryPhone: string | null
   snapCurrency: string | null
   paymentMethod: string | null
   photos: IOrderDetailPhoto[]

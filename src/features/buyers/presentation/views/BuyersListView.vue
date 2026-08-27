@@ -1,79 +1,161 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { NButton, NInput, NFlex, NIcon, NPagination, NResult } from 'naive-ui'
+import { computed, provide, ref, watch } from 'vue'
+import { useMediaQuery } from '@vueuse/core'
+import { useRoute, useRouter } from 'vue-router'
+import { NButton, NIcon, NResult, NSpin } from 'naive-ui'
 import { SearchOutline } from '@vicons/ionicons5'
-import { useDebounceFn } from '@vueuse/core'
 
 import PageHeader from '@/shared/components/PageHeader.vue'
+import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import { useBuyersListQuery } from '../../composables/queries/use-buyers-list'
-import BuyerTable from '../components/BuyerTable/BuyerTable.vue'
+import { useBuyersStatsQuery } from '../../composables/queries/use-buyers-stats'
+import {
+  BUYER_FILTER_STATE_KEY,
+  buyerFiltersToQuery,
+  seedBuyerFiltersFromQuery,
+  useBuyerFilters,
+} from '../../composables/use-buyer-filters'
+import { BUYERS_ROUTE_NAMES } from '../../routes'
+import type { IBuyerListItem } from '../../types/responses/buyer-list.response'
+import BuyerCard from '../components/BuyerCard/BuyerCard.vue'
+import BuyerStatsCards from '../components/BuyerStatsCards/BuyerStatsCards.vue'
+import BuyerTabs from '../components/BuyerTabs/BuyerTabs.vue'
+import BuyerFilterBar from '../components/BuyerFilterBar/BuyerFilterBar.vue'
+import BuyerDetailDrawer from '../components/BuyerDetail/BuyerDetailDrawer.vue'
+import { formatNumber } from '@/shared/utils/format.utils'
 
-const page = ref(1)
-const search = ref('')
-const searchInput = ref('')
 const LIMIT = 20
 
-const { data, isPending, isError, refetch } = useBuyersListQuery(page, search, LIMIT)
+const route = useRoute()
+const router = useRouter()
+const isMobile = useMediaQuery('(max-width: 767px)')
 
-const debouncedSearch = useDebounceFn((value: string) => {
-  search.value = value
-  page.value = 1
-}, 400)
+const filterState = useBuyerFilters()
+provide(BUYER_FILTER_STATE_KEY, filterState)
+const { filters, activeChips, clearAll } = filterState
 
-watch(searchInput, (val) => debouncedSearch(val))
+seedBuyerFiltersFromQuery(filterState, route.query)
+
+watch(
+  filters,
+  (value) => {
+    router.replace({ query: buyerFiltersToQuery(value) })
+  },
+  { deep: true },
+)
+
+const { data, isPending, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  useBuyersListQuery(filters, LIMIT)
+
+const { data: stats } = useBuyersStatsQuery(filters)
+
+const buyers = computed(() => data.value?.pages.flatMap((page) => page.items) ?? [])
+const hasFilters = computed(() => activeChips.value.length > 0)
+const resultsCount = computed(() => stats.value?.totalBuyers ?? null)
+
+const sentinelRef = useInfiniteScrollTrigger(() => fetchNextPage(), {
+  isBusy: computed(() => isFetchingNextPage.value),
+  canLoadMore: computed(() => hasNextPage.value ?? false),
+})
+
+const responsibleFilterLabel = computed(() => activeChips.value[0]?.label ?? null)
+
+const selectedBuyerId = ref<string | null>(null)
+const showDrawer = ref(false)
+
+watch(showDrawer, (isOpen) => {
+  if (!isOpen) selectedBuyerId.value = null
+})
+
+function openBuyer(buyer: IBuyerListItem) {
+  if (isMobile.value) {
+    router.push({ name: BUYERS_ROUTE_NAMES.DETAIL, params: { id: buyer.id } })
+    return
+  }
+  selectedBuyerId.value = buyer.id
+  showDrawer.value = true
+}
 </script>
 
 <template>
   <div class="page-view">
     <div class="page-view__content buyers-content">
-      <PageHeader title="Compradores" subtitle="Usuarios registrados como clientes" />
+      <PageHeader
+        title="Compradores"
+        subtitle="Todas las personas registradas para comprar fotografías"
+      />
 
-      <NFlex justify="space-between" align="center" style="margin-bottom: 16px">
-        <NInput
-          v-model:value="searchInput"
-          placeholder="Buscar por nombre, email o teléfono..."
-          clearable
-          style="max-width: 360px"
-        >
-          <template #prefix>
-            <NIcon :component="SearchOutline" />
+      <BuyerStatsCards :stats="stats" />
+
+      <div class="buyers-panel">
+        <BuyerTabs :tabs="stats?.tabs" />
+        <BuyerFilterBar :results-count="resultsCount" />
+
+        <div class="buyers-result-line">
+          <template v-if="resultsCount != null">
+            <b>{{ formatNumber(resultsCount) }}</b>
+            compradores{{ hasFilters ? ' con los filtros aplicados' : '' }}
+            <span v-if="!hasFilters" class="buyers-result-line__sub">
+              · desplaza para cargar más</span
+            >
           </template>
-        </NInput>
+          <span v-else class="buyers-result-line__sub">Cargando compradores…</span>
+        </div>
 
-        <NPagination
-          v-if="data && data.pagination.totalPages > 1"
-          :page="page"
-          :page-count="data.pagination.totalPages"
-          size="small"
-          @update:page="(p: number) => (page = p)"
-        />
-      </NFlex>
+        <div v-if="isPending" class="buyers-loading">
+          <NSpin size="medium" />
+        </div>
 
-      <div v-if="isError" style="padding: 40px 0">
-        <NResult status="error" title="Error al cargar compradores">
-          <template #footer><NButton @click="refetch()">Reintentar</NButton></template>
+        <NResult
+          v-else-if="isError"
+          status="error"
+          title="Error al cargar compradores"
+          description="No se pudo obtener la lista de compradores."
+        >
+          <template #footer>
+            <NButton @click="refetch()">Reintentar</NButton>
+          </template>
         </NResult>
+
+        <div v-else-if="buyers.length === 0" class="buyers-empty">
+          <span class="buyers-empty__icon">
+            <NIcon :component="SearchOutline" :size="22" />
+          </span>
+          <b v-if="hasFilters">Ningún comprador coincide con los filtros</b>
+          <b v-else>Todavía no hay compradores registrados</b>
+          <span v-if="hasFilters" class="buyers-empty__hint">
+            Prueba quitando {{ responsibleFilterLabel
+            }}{{ activeChips.length > 1 ? ' o el resto de los filtros aplicados' : '' }}.
+          </span>
+          <span v-else class="buyers-empty__hint">
+            Las personas que se registren para comprar fotografías aparecerán aquí.
+          </span>
+          <NButton v-if="hasFilters" class="buyers-empty__clear" @click="clearAll()">
+            Limpiar filtros
+          </NButton>
+        </div>
+
+        <template v-else>
+          <div class="buyers-grid">
+            <BuyerCard
+              v-for="buyer in buyers"
+              :key="buyer.id"
+              :buyer="buyer"
+              @open="openBuyer(buyer)"
+            />
+          </div>
+
+          <div ref="sentinelRef" class="buyers-sentinel" aria-hidden="true" />
+
+          <div v-if="isFetchingNextPage" class="buyers-loading-more">
+            <NSpin :size="20" /> <span>Cargando más compradores…</span>
+          </div>
+        </template>
       </div>
-
-      <BuyerTable v-else :buyers="data?.items ?? []" :loading="isPending" />
-
-      <NFlex
-        v-if="data && data.pagination.totalPages > 1"
-        justify="center"
-        style="margin-top: 16px"
-      >
-        <NPagination
-          :page="page"
-          :page-count="data.pagination.totalPages"
-          @update:page="(p: number) => (page = p)"
-        />
-      </NFlex>
     </div>
+
+    <BuyerDetailDrawer v-model:show="showDrawer" :buyer-id="selectedBuyerId" />
   </div>
 </template>
 
-<style scoped>
-.buyers-content {
-  padding: 24px 32px;
-}
-</style>
+<style scoped src="./buyers-list-view.css" />

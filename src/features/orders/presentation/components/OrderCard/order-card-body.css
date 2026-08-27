@@ -1,0 +1,197 @@
+/* ──────────── Body ──────────── */
+.oc__body {
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.oc__info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  align-items: flex-end;
+}
+
+/* Barra slim de progreso — color del estado */
+.oc__progress {
+  display: flex;
+  width: 100%;
+  gap: 3px;
+  height: 6px;
+}
+
+.oc__progress-seg {
+  flex: 1;
+  border-radius: 3px;
+  background: #e5e7eb;
+  transition: background 0.2s;
+}
+
+.oc__body--pending .oc__progress-seg--reached {
+  background: #d03050;
+}
+.oc__body--payment_info_sent .oc__progress-seg--reached {
+  background: #f0a020;
+}
+.oc__body--paid .oc__progress-seg--reached {
+  background: #2080f0;
+}
+.oc__body--delivered .oc__progress-seg--reached {
+  background: #18a058;
+}
+.oc__body--gifted .oc__progress-seg--reached {
+  background: #7c3aed;
+}
+.oc__body--cancelled .oc__progress-seg--reached {
+  background: #909399;
+}
+
+/* Meta inferior: event chip + N fotos */
+.oc__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-top: 1px solid #f0f1f3;
+  min-width: 0;
+}
+
+.oc__meta .oc__chip--event {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.oc__meta .oc__chip--photos {
+  flex: 0 0 auto;
+}
+
+.oc__meta .oc__chip--payment {
+  flex: 0 0 auto;
+}
+
+.oc__body-left {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+}
+
+.oc__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--tt-primary, #105080);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.oc__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.oc__name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1f2c;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.oc__phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #4b5563;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.oc__phone:hover {
+  color: #16a34a;
+  text-decoration: underline;
+}
+
+.oc__body-right {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.oc__subtotal-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #9ca3af;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.oc__subtotal-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--tt-primary, #105080);
+  line-height: 1.05;
+  white-space: nowrap;
+}
+
+.oc__subtotal-value--empty {
+  color: #c7cbd1;
+}
+
+/* Chips */
+.oc__chips {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.oc__chip {
+  font-size: 11px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  color: #6b7280;
+}
+
+@media (max-width: 767px) {
+  .oc__name {
+    font-size: 15px;
+    /* Wrap long names instead of cutting them */
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .oc__phone {
+    font-size: 14px;
+    min-height: 44px;
+    padding: 6px 0;
+  }
+}
+
+@media (max-width: 479px) {
+  .oc__subtotal-value {
+    font-size: 22px;
+  }
+}

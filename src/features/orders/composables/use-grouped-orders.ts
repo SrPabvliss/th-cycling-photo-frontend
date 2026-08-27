@@ -20,6 +20,8 @@ export interface IOrderGroupSeparatorRow {
    * intentional: it reflects the "X de N dentro del filtro" semantics.
    */
   orderCount: number
+  /** True when the group has no linked user account. */
+  isUnassigned: boolean
 }
 
 export interface IOrderGroupCardRow {
@@ -118,6 +120,7 @@ export function useGroupedOrders(orders: Ref<IOrderListItem[]>): ComputedRef<IOr
         customerLabel: group.label,
         customerPhone: group.phone,
         orderCount: total,
+        isUnassigned: group.userId === null,
       }
       const cards = group.items.map<IOrderGroupCardRow>((order, index) => ({
         type: 'card',

@@ -7,7 +7,7 @@ import type {
   IOrderDetailDeliveryLink,
   IOrderDetailPhoto,
 } from '../types/responses/order-detail.response'
-import type { OrderStatus } from '../types/responses/order-list.response'
+import type { OrderStatus } from '@/shared/types/order-status.types'
 
 function toOrderDetailPhoto(api: IApiOrderDetailPhoto): IOrderDetailPhoto {
   return {
@@ -44,7 +44,10 @@ export function toOrderDetail(api: IApiOrderDetail): IOrderDetail {
     snapEmail: api.snapEmail,
     previewLinkToken: api.previewLinkToken,
     eventName: api.eventName,
+    organizerName: api.organizerName,
     subtotal: api.subtotal === null ? null : Number(api.subtotal),
+    subtotalDecimal: api.subtotal ?? null,
+    customerPrimaryPhone: api.customerPrimaryPhone ?? null,
     snapCurrency: api.snapCurrency,
     paymentMethod: api.paymentMethod,
     photos: api.photos.map(toOrderDetailPhoto),

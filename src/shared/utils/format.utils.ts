@@ -14,3 +14,18 @@ export function formatNumber(value: number): string {
 export function pluralize(count: number, singular: string, plural: string): string {
   return count === 1 ? singular : plural
 }
+
+export function getInitials(
+  firstName?: string | null,
+  lastName?: string | null,
+  fallback?: string | null,
+): string {
+  const parts = [firstName, lastName].filter(Boolean) as string[]
+  if (parts.length === 0) {
+    return (fallback ?? '').slice(0, 2).toUpperCase()
+  }
+  return parts
+    .map((p) => p[0])
+    .join('')
+    .toUpperCase()
+}
