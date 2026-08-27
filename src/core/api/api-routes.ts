@@ -60,6 +60,7 @@ export const API_ROUTES = {
     UPDATE: (id: string) => `${EVENTS_BASE}/${id}`,
     DELETE: (id: string) => `${EVENTS_BASE}/${id}`,
     STATS: `${EVENTS_BASE}/stats`,
+    CREATION_CONTEXT: `${EVENTS_BASE}/creation-context`,
     FEATURED: (id: string) => `${EVENTS_BASE}/${id}/featured`,
     FREEZE: (id: string) => `${EVENTS_BASE}/${id}/freeze`,
     OPERATORS: (id: string) => `${EVENTS_BASE}/${id}/operators`,

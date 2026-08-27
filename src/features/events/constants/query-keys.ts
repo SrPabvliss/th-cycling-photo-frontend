@@ -9,4 +9,5 @@ export const EVENT_QUERY_KEYS = {
   operators: (eventId: string) => [API_ROUTES.EVENTS.BASE, 'operators', eventId] as const,
   configurationPreset: () => [API_ROUTES.EVENTS.BASE, 'configuration-preset'] as const,
   configuration: (eventId: string) => [API_ROUTES.EVENTS.BASE, 'configuration', eventId] as const,
+  creationContext: () => [API_ROUTES.EVENTS.BASE, 'creation-context'] as const,
 } as const
