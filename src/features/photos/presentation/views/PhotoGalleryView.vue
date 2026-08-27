@@ -1,323 +1,239 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { NButton, NIcon, NResult, NSpin } from 'naive-ui'
+import { CloseOutline, SnowOutline } from '@vicons/ionicons5'
+
 import {
-  NButton,
-  NCheckbox,
-  NEmpty,
-  NFlex,
-  NGrid,
-  NGridItem,
-  NIcon,
-  NModal,
-  NResult,
-  NSelect,
-  NSpin,
-  useDialog,
-} from 'naive-ui'
-import { CloseOutline } from '@vicons/ionicons5'
-
-import { useEventDetailQuery } from '@/features/events/composables/queries/use-event-detail'
-import { usePhotoCategoriesQuery } from '@/features/photo-categories/composables/queries/use-photo-categories'
-import { useBulkAssignCategory } from '@/features/photo-categories/composables/mutations/use-bulk-assign-category'
-import { useDeletePhoto } from '../../composables/mutations/use-delete-photo'
-import { usePhotoSelectionStore } from '@/features/preview-links/stores/photo-selection.store'
-import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
-import { usePhotosSearchInfiniteQuery } from '../../composables/queries/use-photos-search'
-import { useGalleryFilters } from '../../composables/use-gallery-filters'
-import { usePhotoSelection } from '../../composables/use-photo-selection'
-import { PHOTO_ROUTE_NAMES } from '../../routes'
-import PhotoCard from '../components/PhotoCard/PhotoCard.vue'
-import PhotoGalleryHeader from '../components/PhotoGalleryHeader/PhotoGalleryHeader.vue'
+  FROZEN_EVENT_GALLERY_BANNER,
+  PHOTOS_PER_PAGE,
+} from '../../constants/photo-gallery.constants'
+import { usePhotoGalleryView } from '../../composables/use-photo-gallery-view'
+import GalleryHeader from '../components/GalleryHeader/GalleryHeader.vue'
+import GalleryToolbar from '../components/GalleryToolbar/GalleryToolbar.vue'
+import GalleryFilterPanel from '../components/GalleryFilterPanel/GalleryFilterPanel.vue'
+import GalleryPhotoCard from '../components/GalleryPhotoCard/GalleryPhotoCard.vue'
+import GalleryAuditTable from '../components/GalleryAuditTable/GalleryAuditTable.vue'
+import GallerySelectionBar from '../components/GallerySelectionBar/GallerySelectionBar.vue'
 import PhotoGallerySkeleton from '../components/PhotoGallerySkeleton/PhotoGallerySkeleton.vue'
-import GalleryFilterSidebar from '../components/GalleryFilterSidebar/GalleryFilterSidebar.vue'
-import PhotoSelectionBar from '../components/PhotoSelectionBar/PhotoSelectionBar.vue'
-
-const router = useRouter()
-const dialog = useDialog()
-const selectionStore = usePhotoSelectionStore()
-const { mutate: deletePhoto } = useDeletePhoto()
-
-const slug = computed(() => router.currentRoute.value.params.slug as string)
-const PHOTOS_PER_PAGE = 30
-
-const { data: event } = useEventDetailQuery(slug)
-const eventId = computed(() => event.value?.id ?? '')
+import AssignCategoryModal from '../modals/AssignCategoryModal.vue'
+import DeletePhotoModal from '../modals/DeletePhotoModal.vue'
 
 const {
-  activeStatus,
+  slug,
+  event,
+  bib,
+  photoCategoryId,
+  uncategorized,
+  sale,
   plateNumber,
   bibMatch,
-  helmetColors,
-  clothingColors,
-  bikeColors,
-  photoCategoryId,
+  sort,
   filters,
-  hasActiveFilters,
-} = useGalleryFilters(() => eventId.value)
-
-const { data: categories } = usePhotoCategoriesQuery(eventId)
-const { mutate: bulkAssign } = useBulkAssignCategory(eventId.value)
-const {
-  data: photosData,
+  clearFilters,
+  activeFilterCount,
+  facets,
+  photosData,
   isPending,
   isError,
-  fetchNextPage,
-  hasNextPage,
   isFetchingNextPage,
   refetch,
-} = usePhotosSearchInfiniteQuery(filters, PHOTOS_PER_PAGE)
-
-const allItems = computed(() => photosData.value?.pages.flatMap((p) => p.items) ?? [])
-const totalResults = computed(() => photosData.value?.pages[0]?.pagination.total ?? 0)
-const visibleItems = computed(() => (allItems.value.length > 0 ? allItems.value : undefined))
-
-const {
-  visiblePhotoIds,
+  allItems,
+  totalResults,
   allVisibleSelected,
-  showSelectAllBanner,
-  isSelectingAll,
-  handlePhotoSelect,
-  toggleSelectAllVisible,
-  selectAllMatchingResults,
-} = usePhotoSelection(visibleItems, totalResults, filters)
-
-const sentinel = useInfiniteScrollTrigger(() => fetchNextPage(), {
-  isBusy: computed(() => isFetchingNextPage.value),
-  canLoadMore: computed(() => hasNextPage.value ?? false),
-})
-
-function handlePhotoClick(slug: string) {
-  router.push({ name: PHOTO_ROUTE_NAMES.DETAIL, params: { slug } })
-}
-
-function handleGeneratePreview() {
-  router.push({ name: 'preview-links-create', params: { eventId: eventId.value } })
-}
-
-const deletingIds = ref(new Set<string>())
-
-function handlePhotoDelete(id: string) {
-  if (deletingIds.value.has(id)) return
-  dialog.warning({
-    title: 'Eliminar foto',
-    content: '¿Eliminar esta foto? Esta acción no se puede deshacer.',
-    positiveText: 'Eliminar',
-    negativeText: 'Cancelar',
-    positiveButtonProps: { type: 'error' },
-    onPositiveClick: () => {
-      deletingIds.value = new Set(deletingIds.value).add(id)
-      deletePhoto(
-        { id },
-        {
-          onSuccess: () => selectionStore.deselectPhotos([id]),
-          onSettled: () => {
-            const next = new Set(deletingIds.value)
-            next.delete(id)
-            deletingIds.value = next
-          },
-        },
-      )
-    },
-  })
-}
-
-const showCategoryModal = ref(false)
-const selectedCategoryForAssign = ref<number | null>(null)
-
-const categoryOptions = computed(
-  () => categories.value?.map((c) => ({ label: c.name, value: c.id })) ?? [],
-)
-
-function handleAssignCategory() {
-  showCategoryModal.value = true
-  selectedCategoryForAssign.value = null
-}
-
-function confirmAssignCategory() {
-  const photoIds = Array.from(selectionStore.selectedIds)
-  if (photoIds.length === 0) return
-  bulkAssign(
-    { photoIds, photoCategoryId: selectedCategoryForAssign.value },
-    {
-      onSuccess: () => {
-        showCategoryModal.value = false
-        selectionStore.clear()
-      },
-    },
-  )
-}
-
-onUnmounted(() => {
-  if (!router.currentRoute.value.name?.toString().startsWith('preview-links')) {
-    selectionStore.exitSelectionMode()
-  }
-})
+  sentinel,
+  categories,
+  phrase,
+  emptyStateText,
+  isMobile,
+  density,
+  showFilterSheet,
+  showAuditTable,
+  cardDensity,
+  wholeSetSelected,
+  selectionStore,
+  selectionCount,
+  showSelectionBar,
+  canReview,
+  photoToDelete,
+  showDeleteModal,
+  showCategoryModal,
+  onSelectAllMatching,
+  onOnlyPage,
+  onClearSelection,
+  onTogglePhoto,
+  onToggleSelectAllVisible,
+  handlePhotoClick,
+  goToUpload,
+  goToReview,
+  requestDelete,
+  closeDeleteModal,
+  confirmDelete,
+  openCategoryModal,
+  closeCategoryModal,
+  confirmAssignCategory,
+} = usePhotoGalleryView()
 </script>
 
 <template>
   <div class="page-view">
-    <div class="page-view__content gallery-content">
-      <PhotoGallerySkeleton v-if="isPending && !photosData" />
+    <div class="page-view__content gp" :class="{ m: isMobile }">
+      <div class="gp-body">
+        <PhotoGallerySkeleton v-if="isPending && !photosData" />
 
-      <div v-else-if="isError" class="error-container">
-        <NResult
-          status="error"
-          title="Error al cargar fotos"
-          description="No se pudo obtener la galería de fotos."
-        >
-          <template #footer><NButton @click="refetch()">Reintentar</NButton></template>
-        </NResult>
-      </div>
+        <div v-else-if="isError" class="error-container">
+          <NResult
+            status="error"
+            title="Error al cargar fotos"
+            description="No se pudo obtener la galería de fotos."
+          >
+            <template #footer><NButton @click="refetch()">Reintentar</NButton></template>
+          </NResult>
+        </div>
 
-      <template v-else-if="event">
-        <PhotoGalleryHeader
-          :event="event"
-          :event-id="eventId"
-          :event-slug="slug"
-          :back-to="'/events/' + slug"
-        >
-          <template #extra-actions>
-            <NButton
-              v-if="!selectionStore.isSelectionMode"
-              @click="selectionStore.enterSelectionMode()"
-            >
-              Seleccionar fotos
-            </NButton>
-            <NButton v-else type="error" ghost @click="selectionStore.exitSelectionMode()">
-              <template #icon><NIcon :component="CloseOutline" /></template>
-              Cancelar selección
-            </NButton>
-          </template>
-        </PhotoGalleryHeader>
+        <template v-else-if="event">
+          <GalleryFilterPanel
+            v-if="!isMobile"
+            :filters="filters"
+            :facets="facets"
+            :plate-number="plateNumber"
+            @update:bib="bib = $event"
+            @update:category="photoCategoryId = $event"
+            @update:uncategorized="uncategorized = $event"
+            @update:sale="sale = $event"
+            @update:plate-number="plateNumber = $event"
+            @update:bib-match="bibMatch = $event"
+            @clear="clearFilters"
+          />
 
-        <div class="gallery-layout">
-          <div class="gallery-content__sidebar">
-            <GalleryFilterSidebar
-              :active-status="activeStatus"
-              :plate-number="plateNumber"
-              :bib-match="bibMatch"
-              :helmet-colors="helmetColors"
-              :clothing-colors="clothingColors"
-              :bike-colors="bikeColors"
-              :photo-category-id="photoCategoryId"
-              :categories="categories ?? []"
-              :has-active-filters="hasActiveFilters"
-              @update:plate-number="plateNumber = $event"
-              @update:bib-match="bibMatch = $event"
-              @update:active-status="(s) => (activeStatus = s)"
-              @update:photo-category-id="(id) => (photoCategoryId = id)"
-              @update:helmet-colors="helmetColors = $event"
-              @update:clothing-colors="clothingColors = $event"
-              @update:bike-colors="bikeColors = $event"
-              @clear-filters="
-                () => {
-                  plateNumber = ''
-                  bibMatch = 'exact'
-                  helmetColors = []
-                  clothingColors = []
-                  bikeColors = []
-                  activeStatus = null
-                  photoCategoryId = null
-                }
-              "
-            />
-          </div>
+          <div class="gp-main">
+            <div class="gp-mainscroll">
+              <GalleryHeader
+                :event="event"
+                :event-slug="slug"
+                :can-review="canReview"
+                @upload="goToUpload"
+                @review="goToReview"
+              />
 
-          <div class="gallery-content__main gallery-main">
-            <div class="gallery-toolbar">
-              <NFlex :size="12" align="center">
-                <NCheckbox
-                  v-if="selectionStore.isSelectionMode && allItems.length > 0"
-                  :checked="allVisibleSelected"
-                  @update:checked="toggleSelectAllVisible"
-                >
-                  Seleccionar todo
-                </NCheckbox>
-                <span v-if="selectionStore.hasSelection" class="selection-count">
-                  {{ selectionStore.selectedCount }} foto{{
-                    selectionStore.selectedCount !== 1 ? 's' : ''
-                  }}
-                  seleccionada{{ selectionStore.selectedCount !== 1 ? 's' : '' }}
-                </span>
-                <span v-if="!selectionStore.hasSelection" class="pagination-info">
-                  {{ totalResults }} foto{{ totalResults !== 1 ? 's' : '' }}
-                </span>
-              </NFlex>
-            </div>
-
-            <div v-if="showSelectAllBanner" class="select-all-banner">
-              Las {{ visiblePhotoIds.length }} fotos cargadas están seleccionadas.
-              <button
-                class="select-all-banner__action"
-                :disabled="isSelectingAll"
-                @click="selectAllMatchingResults"
-              >
-                {{
-                  isSelectingAll
-                    ? 'Seleccionando...'
-                    : `Seleccionar las ${totalResults} fotos que coinciden con el filtro`
-                }}
-              </button>
-            </div>
-
-            <div class="gallery-scroll">
-              <div v-if="!isPending && allItems.length === 0" class="empty-container">
-                <NEmpty description="No hay fotos que coincidan con los filtros" />
+              <div v-if="event.isFrozen" class="dt-alert blue gp-alert" data-test="frozen-banner">
+                <NIcon :component="SnowOutline" :size="17" />
+                <div class="dt-alert-t">
+                  <b>{{ FROZEN_EVENT_GALLERY_BANNER.TITLE }}</b>
+                  <span>{{ FROZEN_EVENT_GALLERY_BANNER.DETAIL }}</span>
+                </div>
               </div>
 
-              <NGrid v-else :cols="4" :x-gap="12" :y-gap="12">
-                <NGridItem v-for="photo in allItems" :key="photo.id">
-                  <PhotoCard
-                    :photo="photo"
-                    :selectable="selectionStore.isSelectionMode"
-                    :selected="selectionStore.isSelected(photo.id)"
-                    :deletable="true"
-                    :deleting="deletingIds.has(photo.id)"
-                    @click="handlePhotoClick"
-                    @select="handlePhotoSelect"
-                    @delete="handlePhotoDelete"
-                  />
-                </NGridItem>
-              </NGrid>
+              <GalleryToolbar
+                :loaded="allItems.length"
+                :total="totalResults"
+                :phrase="phrase"
+                :dense="density"
+                :sort="sort"
+                :all-visible-selected="allVisibleSelected"
+                :active-filter-count="activeFilterCount"
+                :mobile="isMobile"
+                @update:dense="density = $event"
+                @update:sort="sort = $event"
+                @update:all-visible-selected="onToggleSelectAllVisible"
+                @open-filters="showFilterSheet = true"
+              />
+
+              <div v-if="!isPending && allItems.length === 0" class="empty-container">
+                <p data-test="gallery-empty-state">{{ emptyStateText }}</p>
+              </div>
+
+              <GalleryAuditTable
+                v-else-if="showAuditTable"
+                data-test="gallery-audit-table"
+                :photos="allItems"
+                :selected-ids="selectionStore.selectedIds"
+                :deletable="!event.isFrozen"
+                @open="handlePhotoClick"
+                @toggle="onTogglePhoto"
+                @delete="requestDelete"
+              />
+
+              <div v-else class="gp-grid" :class="density" data-test="gallery-grid">
+                <GalleryPhotoCard
+                  v-for="photo in allItems"
+                  :key="photo.id"
+                  :photo="photo"
+                  :dense="cardDensity"
+                  :selected="selectionStore.isSelected(photo.id)"
+                  :any-selected="selectionStore.hasSelection"
+                  :deletable="!event.isFrozen"
+                  @open="handlePhotoClick"
+                  @toggle="onTogglePhoto"
+                  @delete="requestDelete"
+                />
+              </div>
 
               <div ref="sentinel" class="gallery-sentinel" aria-hidden="true" />
-              <div v-if="isFetchingNextPage" class="gallery-loading-more">
-                <NSpin :size="20" /> <span>Cargando más...</span>
-              </div>
-              <div v-else-if="!hasNextPage && allItems.length > 0" class="gallery-end-marker">
-                <span>—— fin del catálogo ——</span>
+              <div v-if="isFetchingNextPage" class="tt-loading">
+                <NSpin :size="16" />
+                Cargando {{ PHOTOS_PER_PAGE }} más · {{ allItems.length }} de {{ totalResults }}
               </div>
             </div>
+
+            <GallerySelectionBar
+              v-if="showSelectionBar"
+              :count="selectionStore.selectedCount"
+              :total="totalResults"
+              :phrase="phrase"
+              :whole-set="wholeSetSelected"
+              :can-assign="!event.isFrozen"
+              @select-all="onSelectAllMatching"
+              @only-page="onOnlyPage"
+              @clear="onClearSelection"
+              @assign="openCategoryModal"
+            />
           </div>
+        </template>
+      </div>
+
+      <template v-if="isMobile && event">
+        <div v-if="showFilterSheet" class="tt-scrim" @click="showFilterSheet = false" />
+        <div v-if="showFilterSheet" class="gp-sheet">
+          <div class="gp-sheet-h">
+            <b>Filtros</b>
+            <button type="button" class="tt-iconbtn" @click="showFilterSheet = false">
+              <NIcon :component="CloseOutline" :size="15" />
+            </button>
+          </div>
+          <GalleryFilterPanel
+            :filters="filters"
+            :facets="facets"
+            :plate-number="plateNumber"
+            @update:bib="bib = $event"
+            @update:category="photoCategoryId = $event"
+            @update:uncategorized="uncategorized = $event"
+            @update:sale="sale = $event"
+            @update:plate-number="plateNumber = $event"
+            @update:bib-match="bibMatch = $event"
+            @clear="clearFilters"
+          />
         </div>
       </template>
+
+      <AssignCategoryModal
+        v-if="event"
+        :show="showCategoryModal"
+        :count="selectionCount"
+        :phrase="phrase"
+        :whole-set="wholeSetSelected"
+        :categories="categories"
+        @assign="confirmAssignCategory"
+        @close="closeCategoryModal"
+      />
+
+      <DeletePhotoModal
+        v-if="event && photoToDelete"
+        :show="showDeleteModal"
+        :photo="photoToDelete"
+        :event="event"
+        @confirm="confirmDelete"
+        @close="closeDeleteModal"
+      />
     </div>
-
-    <PhotoSelectionBar
-      @generate-preview="handleGeneratePreview"
-      @assign-category="handleAssignCategory"
-    />
-
-    <NModal
-      v-model:show="showCategoryModal"
-      preset="card"
-      title="Asignar categoría"
-      style="max-width: 400px"
-    >
-      <NFlex vertical :size="16">
-        <NSelect
-          v-model:value="selectedCategoryForAssign"
-          :options="categoryOptions"
-          placeholder="Sin categoría (quitar)"
-          clearable
-        />
-        <NFlex justify="end" :size="8">
-          <NButton @click="showCategoryModal = false">Cancelar</NButton>
-          <NButton type="primary" @click="confirmAssignCategory">Asignar</NButton>
-        </NFlex>
-      </NFlex>
-    </NModal>
   </div>
 </template>
 

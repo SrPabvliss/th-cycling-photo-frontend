@@ -4,10 +4,13 @@ import type {
   IApiBibAttribute,
   IApiColorAttribute,
   IApiPhotoDetail,
+  IApiPhotoOrder,
   IBibAttribute,
   IColorAttribute,
   IPhotoDetail,
+  IPhotoOrder,
 } from '../types/responses/photo-detail.response'
+import type { IPhotoListItem } from '../types/responses/photo-list.response'
 
 const toBib = (b: IApiBibAttribute): IBibAttribute => ({
   id: b.id,
@@ -19,6 +22,14 @@ const toBib = (b: IApiBibAttribute): IBibAttribute => ({
   digitsOriginal: b.digitsOriginal,
   wasCorrected: b.wasCorrected,
   correctedAt: b.correctedAt ? new Date(b.correctedAt) : null,
+  correctedByName: b.correctedByName ?? null,
+})
+
+const toOrder = (o: IApiPhotoOrder): IPhotoOrder => ({
+  id: o.id,
+  buyerName: o.buyerName,
+  createdAt: new Date(o.createdAt),
+  status: o.status,
 })
 
 const toColor = (c: IApiColorAttribute): IColorAttribute => ({
@@ -58,5 +69,34 @@ export function toPhotoDetail(api: IApiPhotoDetail): IPhotoDetail {
     reviewedAt: api.reviewedAt ? new Date(api.reviewedAt) : null,
     bibs: api.bibs.map(toBib),
     colors: api.colors.map(toColor),
+    photoCategoryId: api.photoCategoryId ?? null,
+    photoCategoryName: api.photoCategoryName ?? null,
+    orders: (api.orders ?? []).map(toOrder),
+    position: api.position ?? 1,
+    eventPhotoCount: api.eventPhotoCount ?? 1,
+    previousSlug: api.previousSlug ?? null,
+    nextSlug: api.nextSlug ?? null,
+  }
+}
+
+export function photoDetailToListItem(photo: IPhotoDetail): IPhotoListItem {
+  return {
+    id: photo.id,
+    publicSlug: photo.publicSlug,
+    filename: photo.filename,
+    thumbnailUrl: photo.thumbnailUrl,
+    status: photo.status,
+    uploadedAt: photo.uploadedAt,
+    reviewedAt: photo.reviewedAt,
+    bibs: photo.bibs.map((bib) => ({
+      digits: bib.digits,
+      source: bib.source,
+      confidence: bib.confidence,
+      status: bib.status,
+      corrected: bib.wasCorrected,
+    })),
+    photoCategoryId: photo.photoCategoryId,
+    photoCategoryName: photo.photoCategoryName,
+    sold: photo.orders.length > 0,
   }
 }

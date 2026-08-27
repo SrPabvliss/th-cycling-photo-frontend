@@ -20,6 +20,7 @@ const baseBib: IBibAttribute = {
   digitsOriginal: '42',
   wasCorrected: false,
   correctedAt: null,
+  correctedByName: null,
   status: 'read',
   confidence: 0.9,
   source: 'ai',

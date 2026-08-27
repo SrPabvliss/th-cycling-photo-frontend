@@ -1,16 +1,35 @@
-import { computed, ref, type ComputedRef } from 'vue'
+import { computed, ref, type ComputedRef, type Ref } from 'vue'
 
 import { httpClient } from '@/core/http/axios-client'
 import { API_ROUTES } from '@/core/api/api-routes'
 import { usePhotoSelectionStore } from '@/features/preview-links/stores/photo-selection.store'
-import { toPhotoListItem } from '../mappers/photo-list.mapper'
+import { toPhotoListItems } from '../mappers/photo-list.mapper'
 import type { IApiPhotoListItem, IPhotoListItem } from '../types/responses/photo-list.response'
-import type { IPhotoSearchFilters } from './queries/use-photos-search'
+import type { IGalleryFilterState } from '../types/gallery-filters.types'
+
+const SELECT_ALL_PAGE_SIZE = 100
+
+function buildSelectAllParams(filters: IGalleryFilterState, page: number): Record<string, unknown> {
+  const params: Record<string, unknown> = {
+    page,
+    limit: SELECT_ALL_PAGE_SIZE,
+    sort: filters.sort,
+  }
+  if (filters.bib) params.bib = filters.bib
+  if (filters.uncategorized) params.uncategorized = true
+  else if (filters.photoCategoryId) params.photoCategoryId = filters.photoCategoryId
+  if (filters.sale) params.sale = filters.sale
+  if (filters.plateNumber) {
+    params.plateNumber = filters.plateNumber
+    params.bibMatch = filters.bibMatch
+  }
+  return params
+}
 
 export function usePhotoSelection(
   items: ComputedRef<IPhotoListItem[] | undefined>,
   totalResults: ComputedRef<number>,
-  filters: ComputedRef<IPhotoSearchFilters>,
+  filters: Ref<IGalleryFilterState>,
 ) {
   const selectionStore = usePhotoSelectionStore()
   const isSelectingAll = ref(false)
@@ -52,42 +71,24 @@ export function usePhotoSelection(
   async function selectAllMatchingResults() {
     isSelectingAll.value = true
     try {
-      const allPhotos = new Map(selectionStore.selectedPhotos)
-      const f = filters.value
-      const params: Record<string, unknown> = { limit: 100 }
-      const useSearch = !!(
-        f.plateNumber ||
-        f.status ||
-        f.helmetColor ||
-        f.clothingColor ||
-        f.bikeColor
+      const pageCount = Math.ceil(totalResults.value / SELECT_ALL_PAGE_SIZE)
+      const pages = Array.from({ length: pageCount }, (_, index) => index + 1)
+
+      const allPhotos = await pages.reduce(
+        async (accumulatorPromise, page) => {
+          const accumulator = await accumulatorPromise
+          const response = await httpClient.get<IApiPhotoListItem[]>(
+            API_ROUTES.PHOTOS.BY_EVENT(filters.value.eventId),
+            { params: buildSelectAllParams(filters.value, page) },
+          )
+          return toPhotoListItems(response.data).reduce(
+            (map, photo) => map.set(photo.id, { id: photo.id, thumbnailUrl: photo.thumbnailUrl }),
+            accumulator,
+          )
+        },
+        Promise.resolve(new Map(selectionStore.selectedPhotos)),
       )
 
-      for (let p = 1; p <= Math.ceil(totalResults.value / 100); p++) {
-        params.page = p
-        let apiItems: IApiPhotoListItem[]
-        if (useSearch) {
-          params.eventId = f.eventId
-          if (f.plateNumber) params.plateNumber = f.plateNumber
-          if (f.status) params.status = f.status
-          if (f.helmetColor) params.helmetColor = f.helmetColor
-          if (f.clothingColor) params.clothingColor = f.clothingColor
-          if (f.bikeColor) params.bikeColor = f.bikeColor
-          apiItems = (
-            await httpClient.get<IApiPhotoListItem[]>(API_ROUTES.PHOTOS.SEARCH, { params })
-          ).data
-        } else {
-          apiItems = (
-            await httpClient.get<IApiPhotoListItem[]>(API_ROUTES.PHOTOS.BY_EVENT(f.eventId), {
-              params,
-            })
-          ).data
-        }
-        for (const api of apiItems) {
-          const mapped = toPhotoListItem(api)
-          allPhotos.set(mapped.id, { id: mapped.id, thumbnailUrl: mapped.thumbnailUrl })
-        }
-      }
       selectionStore.selectAll(Array.from(allPhotos.values()))
     } finally {
       isSelectingAll.value = false

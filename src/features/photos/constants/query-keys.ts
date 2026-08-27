@@ -12,4 +12,7 @@ export const PHOTO_QUERY_KEYS = {
     [API_ROUTES.PHOTOS.BASE, 'download', id, type] as const,
   search: (filters: Record<string, unknown>) =>
     [API_ROUTES.PHOTOS.BASE, 'search', filters] as const,
+  gallery: (filters: Record<string, unknown>) =>
+    [...PHOTO_QUERY_KEYS.all(), 'gallery', filters] as const,
+  facets: (eventId: string) => [...PHOTO_QUERY_KEYS.all(), 'facets', eventId] as const,
 } as const
