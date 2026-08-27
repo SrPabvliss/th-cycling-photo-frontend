@@ -5,15 +5,15 @@ import { NSpin } from 'naive-ui'
 
 import { useOperatorRetouchWorkspace } from '../../composables/workspaces/use-operator-retouch-workspace'
 import { useEventRetouchWorkspace } from '../../composables/workspaces/use-event-retouch-workspace'
-import { useWorkspaceKeyboard } from '@/features/workspace/composables/use-workspace-keyboard'
-import { CARD_NAV_KEY } from '@/features/workspace/composables/keys'
-import { WORKSPACE_EVENTS } from '@/features/workspace/constants/workspace-events'
-import type { CardSection } from '@/features/workspace/composables/use-workspace-card-navigation'
-import WorkspaceShell from '@/features/workspace/presentation/components/WorkspaceShell/WorkspaceShell.vue'
-import WorkspaceHeader from '@/features/workspace/presentation/components/WorkspaceHeader/WorkspaceHeader.vue'
-import WorkspacePhotoPanel from '@/features/workspace/presentation/components/WorkspacePhotoPanel/WorkspacePhotoPanel.vue'
-import WorkspaceMobileBottomBar from '@/features/workspace/presentation/components/WorkspaceMobileBottomBar/WorkspaceMobileBottomBar.vue'
-import WorkspaceShortcutCheatsheet from '@/features/workspace/presentation/components/WorkspaceShortcutCheatsheet/WorkspaceShortcutCheatsheet.vue'
+import { useWorkspaceKeyboard } from '@/shared/workspace/composables/use-workspace-keyboard'
+import { CARD_NAV_KEY } from '@/shared/workspace/composables/keys'
+import { WORKSPACE_EVENTS } from '@/shared/workspace/constants/workspace-events'
+import type { CardSection } from '@/shared/workspace/composables/use-workspace-card-navigation'
+import WorkspaceShell from '@/shared/workspace/presentation/components/WorkspaceShell/WorkspaceShell.vue'
+import WorkspaceHeader from '@/shared/workspace/presentation/components/WorkspaceHeader/WorkspaceHeader.vue'
+import WorkspacePhotoPanel from '@/shared/workspace/presentation/components/WorkspacePhotoPanel/WorkspacePhotoPanel.vue'
+import WorkspaceMobileBottomBar from '@/shared/workspace/presentation/components/WorkspaceMobileBottomBar/WorkspaceMobileBottomBar.vue'
+import WorkspaceShortcutCheatsheet from '@/shared/workspace/presentation/components/WorkspaceShortcutCheatsheet/WorkspaceShortcutCheatsheet.vue'
 import ReviewQueuePanel from '@/features/review/presentation/components/ReviewQueuePanel/ReviewQueuePanel.vue'
 import ReviewAttributesPanel from '@/features/review/presentation/components/ReviewAttributesPanel/ReviewAttributesPanel.vue'
 import RetouchOrderTransitionModal from '../components/RetouchOrderTransitionModal/RetouchOrderTransitionModal.vue'
@@ -33,13 +33,17 @@ const router = useRouter()
 
 const eventSlug = computed(() => (route.params.eventSlug as string | undefined) ?? null)
 const initialOrderId = (route.query.orderId as string | undefined) ?? undefined
+const isEventMode = computed(() => !!eventSlug.value)
 
-const ws = eventSlug.value
-  ? useEventRetouchWorkspace(
-      computed(() => eventSlug.value as string),
-      { initialOrderId },
-    )
-  : useOperatorRetouchWorkspace({ initialOrderId })
+const eventWs = useEventRetouchWorkspace(
+  computed(() => eventSlug.value ?? ''),
+  { initialOrderId, enabled: isEventMode },
+)
+const operatorWs = useOperatorRetouchWorkspace({
+  initialOrderId,
+  enabled: computed(() => !eventSlug.value),
+})
+const ws = isEventMode.value ? eventWs : operatorWs
 
 provide(CARD_NAV_KEY, ws.review.cardNav)
 
@@ -185,5 +189,5 @@ const handleExitFromModal = () => {
   </div>
 </template>
 
-<style src="@/features/workspace/presentation/workspace-tokens.css" />
+<style src="@/shared/workspace/presentation/workspace-tokens.css" />
 <style scoped src="./styles/operator-retouch-workspace-view.css" />

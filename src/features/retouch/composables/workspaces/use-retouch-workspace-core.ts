@@ -1,6 +1,6 @@
 import { computed, ref, watch, type ComputedRef } from 'vue'
 
-import { useReviewWorkspaceCore } from '@/features/workspace/composables/use-workspace-core'
+import { useReviewWorkspaceCore } from '@/shared/workspace/composables/use-workspace-core'
 import type { TRetouchDetailScope } from '../queries/use-operator-retouch-order-detail'
 import { useRetouchOrderPhotosSource } from '../queue-sources/use-retouch-order-photos-source'
 

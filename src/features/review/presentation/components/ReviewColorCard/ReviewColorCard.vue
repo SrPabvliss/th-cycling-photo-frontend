@@ -15,9 +15,9 @@ import type { ColorRegion } from '../../../types/color-region.type'
 import { useApplyColorCorrection } from '../../../composables/mutations/use-apply-color-correction'
 import { useDeletePhotoColor } from '../../../composables/mutations/use-delete-photo-color'
 import { useAsyncSaveState } from '@/shared/composables/use-async-save-state'
-import { useWorkspaceCropLightbox } from '@/features/workspace/composables/use-workspace-crop-lightbox'
+import { useWorkspaceCropLightbox } from '@/shared/workspace/composables/use-workspace-crop-lightbox'
 import { useGridKeyboardNav } from '@/shared/composables/use-grid-keyboard-nav'
-import { useWorkspaceCardRegistration } from '@/features/workspace/composables/use-workspace-card-registration'
+import { useWorkspaceCardRegistration } from '@/shared/workspace/composables/use-workspace-card-registration'
 
 const props = defineProps<{
   color: IColorAttribute

@@ -7,8 +7,9 @@ import type { TRetouchOrderScope } from '../../types/responses/operator-retouch-
 export function useEventRetouchOrdersListSource(
   eventSlug: Ref<string>,
   scope: Ref<TRetouchOrderScope> = ref('pending'),
+  enabled: Ref<boolean> = ref(true),
 ) {
-  const query = useEventRetouchOrdersInfiniteQuery(eventSlug, scope)
+  const query = useEventRetouchOrdersInfiniteQuery(eventSlug, scope, enabled)
 
   const orders = computed<IRetouchQueueOrder[]>(
     () => query.data.value?.pages.flatMap((p) => p.items) ?? [],

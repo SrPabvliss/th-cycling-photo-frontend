@@ -1,8 +1,8 @@
 import { computed, type Ref } from 'vue'
 
 import { usePhotoDetailBySlugQuery } from '@/features/photos/composables/queries/use-photo-detail-by-slug'
-import type { IReviewQueueSource } from '@/features/workspace/types/workspace-queue-source.types'
-import type { IWorkspaceQueueItem } from '@/features/workspace/types/workspace-queue-item.types'
+import type { IReviewQueueSource } from '@/shared/workspace/types/workspace-queue-source.types'
+import type { IWorkspaceQueueItem } from '@/shared/workspace/types/workspace-queue-item.types'
 import { toWorkspaceQueueItemFromPhotoDetail } from '../../mappers/photo-detail-to-workspace-item.mapper'
 
 export function useSinglePhotoReviewQueueSource(photoSlug: Ref<string>): IReviewQueueSource {
