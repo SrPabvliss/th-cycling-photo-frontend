@@ -4,7 +4,7 @@ import { useMessage } from 'naive-ui'
 
 import { PERMISSIONS } from '@/core/auth/permissions'
 import { connectSocket, disconnectSocket, getSocket } from '@/core/socket/socket-client'
-import { useAuthStore } from '@/features/auth/stores/auth.store'
+import { useSessionStore } from '@/core/auth/stores/session.store'
 import { API_ROUTES } from '@/core/api/api-routes'
 import { ORDER_QUERY_KEYS } from '@/features/orders/constants/query-keys'
 import { NOTIFICATION_QUERY_KEYS } from '../constants/query-keys'
@@ -19,7 +19,7 @@ const processedIds = new Set<string>()
  * Call this once in AppLayout or App.vue.
  */
 export function useNotificationSocket() {
-  const authStore = useAuthStore()
+  const authStore = useSessionStore()
   const notificationStore = useNotificationStore()
   const queryClient = useQueryClient()
   const message = useMessage()

@@ -18,8 +18,8 @@ vi.mock('vue-router', () => ({
 const authState = reactive({
   currentUser: { pendingPrompts: ['email_verification'] } as { pendingPrompts: string[] } | null,
 })
-vi.mock('@/features/auth/stores/auth.store', () => ({
-  useAuthStore: () => authState,
+vi.mock('@/core/auth/stores/session.store', () => ({
+  useSessionStore: () => authState,
 }))
 
 const mutate = vi.fn()

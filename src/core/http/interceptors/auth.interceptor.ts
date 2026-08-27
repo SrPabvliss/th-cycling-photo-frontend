@@ -1,7 +1,7 @@
 import type { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios'
 
 import { API_ROUTES } from '@/core/api/api-routes'
-import { useAuthStore } from '@/features/auth/stores/auth.store'
+import { useSessionStore } from '@/core/auth/stores/session.store'
 
 let _isRefreshing = false
 let _failedQueue: Array<{
@@ -23,10 +23,10 @@ function processQueue(error: unknown, token: string | null) {
 export function registerAuthInterceptor(axios: AxiosInstance): void {
   // --- Request interceptor: attach Bearer token ---
   axios.interceptors.request.use((config) => {
-    const authStore = useAuthStore()
+    const sessionStore = useSessionStore()
 
-    if (authStore.accessToken) {
-      config.headers.Authorization = `Bearer ${authStore.accessToken}`
+    if (sessionStore.accessToken) {
+      config.headers.Authorization = `Bearer ${sessionStore.accessToken}`
     }
 
     return config
@@ -63,8 +63,8 @@ export function registerAuthInterceptor(axios: AxiosInstance): void {
 
       const newToken: string = response.data.data.accessToken
 
-      const authStore = useAuthStore()
-      authStore.setAccessToken(newToken)
+      const sessionStore = useSessionStore()
+      sessionStore.setAccessToken(newToken)
 
       processQueue(null, newToken)
 
@@ -73,8 +73,8 @@ export function registerAuthInterceptor(axios: AxiosInstance): void {
     } catch (refreshError) {
       processQueue(refreshError, null)
 
-      const authStore = useAuthStore()
-      authStore.clearSession()
+      const sessionStore = useSessionStore()
+      sessionStore.clearSession()
 
       // Only redirect to login if current route requires auth
       const { default: router } = await import('@/app/router')

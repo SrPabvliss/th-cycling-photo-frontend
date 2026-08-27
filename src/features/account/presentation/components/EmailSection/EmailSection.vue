@@ -6,7 +6,7 @@ import { NAlert, NButton, NCard, NFormItem, NIcon, NInput, NTag } from 'naive-ui
 import { MailOutline } from '@vicons/ionicons5'
 
 import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
-import { useAuthStore } from '@/features/auth/stores/auth.store'
+import { useSessionStore } from '@/core/auth/stores/session.store'
 import { useChangeEmail } from '../../../composables/mutations/use-change-email'
 import { ACCOUNT_ROUTE_NAMES } from '../../../routes'
 import {
@@ -15,7 +15,7 @@ import {
 } from '../../../constants/profile-form.schema'
 
 const router = useRouter()
-const authStore = useAuthStore()
+const authStore = useSessionStore()
 const changeEmail = useChangeEmail()
 
 const isChanging = ref(false)

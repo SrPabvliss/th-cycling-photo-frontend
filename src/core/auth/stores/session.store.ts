@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-import type { ICurrentUser } from '../types/responses/current-user.response'
+import type { ICurrentUser } from '@/features/auth/types/responses/current-user.response'
+import { canOperate, canShop } from '../capabilities'
+import { useHatStore } from './hat.store'
 
 const TOKEN_KEY = 'titan_access_token'
 
-export const useAuthStore = defineStore('auth', () => {
+export const useSessionStore = defineStore('session', () => {
   const accessToken = ref<string | null>(localStorage.getItem(TOKEN_KEY))
   const currentUser = ref<ICurrentUser | null>(null)
 
@@ -15,6 +17,7 @@ export const useAuthStore = defineStore('auth', () => {
     accessToken.value = token
     currentUser.value = user
     localStorage.setItem(TOKEN_KEY, token)
+    useHatStore().initFor(user.id, canShop(user.permissions), canOperate(user.permissions))
   }
 
   function setAccessToken(token: string) {
@@ -30,6 +33,7 @@ export const useAuthStore = defineStore('auth', () => {
     accessToken.value = null
     currentUser.value = null
     localStorage.removeItem(TOKEN_KEY)
+    useHatStore().reset()
   }
 
   return {

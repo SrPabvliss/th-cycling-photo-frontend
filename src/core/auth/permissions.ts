@@ -8,6 +8,7 @@ export const PERMISSIONS = {
   PHOTO_RETOUCH_READ: 'photo.retouch.read',
   REVIEW_QUEUE_READ: 'dashboard.review_queue.read',
   ORDER_READ: 'order.read',
+  CART_CHECKOUT: 'cart.checkout',
   PREVIEW_LINK_READ: 'preview_link.read',
   BUYER_READ: 'buyer.read',
   EVENT_COLLABORATOR_READ: 'event.collaborator.read',

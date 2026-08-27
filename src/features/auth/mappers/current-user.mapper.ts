@@ -12,6 +12,7 @@ export function toCurrentUser(api: IApiCurrentUser): ICurrentUser {
     tenantId: api.tenantId ?? null,
     isPlatform: api.isPlatform ?? false,
     emailVerified: api.emailVerified ?? false,
+    hasPersonalProfile: api.hasPersonalProfile ?? false,
     pendingPrompts: api.pendingPrompts ?? [],
   }
 }

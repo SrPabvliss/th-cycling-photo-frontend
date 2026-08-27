@@ -5,6 +5,7 @@ import { ORDERS_PATH } from '@/features/orders/routes'
 import { ORGANIZERS_PATH } from '@/features/organizers/routes'
 import { RETOUCH_PATH } from '@/features/retouch/routes'
 import { PERMISSIONS, type PermissionKey } from './permissions'
+import type { Hat } from './stores/hat.store'
 
 export interface INavLink {
   label: string
@@ -35,10 +36,7 @@ export function getHomePath(permissions: string[]): string {
   return getNavLinks(permissions)[0]?.to ?? LANDING_PATH
 }
 
-export function getPrincipalLabel(
-  user: { isPlatform: boolean; tenantId: string | null } | null,
-): string {
-  if (!user) return 'Cliente'
-  if (user.isPlatform) return 'TitanTV'
-  return user.tenantId ? 'Organizador' : 'Cliente'
+export function getPrincipalLabel(hat: Hat, isPlatform: boolean): string {
+  if (isPlatform) return 'TitanTV'
+  return hat === 'operating' ? 'Organizador' : 'Cliente'
 }

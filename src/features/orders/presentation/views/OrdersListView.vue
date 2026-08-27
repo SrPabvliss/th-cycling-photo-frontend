@@ -6,7 +6,7 @@ import { useMediaQuery } from '@vueuse/core'
 import { NButton, NResult, NSpin } from 'naive-ui'
 
 import PageHeader from '@/shared/components/PageHeader.vue'
-import { useAuthStore } from '@/features/auth/stores/auth.store'
+import { useSessionStore } from '@/core/auth/stores/session.store'
 import { useTenantProfile } from '@/features/tenant-profile/composables/queries/use-tenant-profile'
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import { useOrdersListQuery } from '../../composables/queries/use-orders-list'
@@ -47,7 +47,7 @@ import { usePermissions } from '@/core/auth/use-permissions'
 
 const router = useRouter()
 const route = useRoute()
-const authStore = useAuthStore()
+const authStore = useSessionStore()
 const { has } = usePermissions()
 
 const role = computed<OrderOperatorRole>(() => {

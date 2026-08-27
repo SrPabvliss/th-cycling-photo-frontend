@@ -5,9 +5,9 @@ import { NButton, NCheckbox, NModal } from 'naive-ui'
 import { LEGAL_PATHS } from '@/features/legal/routes'
 import { useRecordConsentsMutation } from '../../../composables/mutations/use-record-consents'
 import { CONSENT_TYPE } from '../../../constants/consent.constants'
-import { useAuthStore } from '../../../stores/auth.store'
+import { useSessionStore } from '@/core/auth/stores/session.store'
 
-const authStore = useAuthStore()
+const authStore = useSessionStore()
 const { mutateAsync: recordConsents, isPending } = useRecordConsentsMutation()
 
 const dismissed = ref(false)

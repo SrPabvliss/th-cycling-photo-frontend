@@ -9,6 +9,7 @@ export interface IApiCurrentUser {
   tenantId?: string | null
   isPlatform?: boolean
   emailVerified?: boolean
+  hasPersonalProfile?: boolean
   pendingPrompts?: string[]
 }
 
@@ -23,5 +24,6 @@ export interface ICurrentUser {
   tenantId: string | null
   isPlatform: boolean
   emailVerified: boolean
+  hasPersonalProfile: boolean
   pendingPrompts: string[]
 }
