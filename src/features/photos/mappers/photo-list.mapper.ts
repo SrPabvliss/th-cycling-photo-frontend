@@ -10,6 +10,10 @@ export function toPhotoListItem(api: IApiPhotoListItem): IPhotoListItem {
     status: api.status as PhotoStatus,
     uploadedAt: new Date(api.uploadedAt),
     reviewedAt: api.reviewedAt ? new Date(api.reviewedAt) : null,
+    bibs: api.bibs ?? [],
+    photoCategoryId: api.photoCategoryId ?? null,
+    photoCategoryName: api.photoCategoryName ?? null,
+    sold: api.sold ?? false,
   }
 }
 

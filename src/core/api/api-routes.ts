@@ -98,6 +98,7 @@ export const API_ROUTES = {
     PENDING_RETOUCH: `${PHOTOS_BASE}/pending-retouch`,
     PARTICIPANTS_BY_PHOTO: (photoId: string) => `${PHOTOS_BASE}/${photoId}/participants`,
     RESUME_POINT: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/resume-point`,
+    GALLERY_FACETS: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/facets`,
     DOWNLOAD_MANIFEST: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/download-manifest`,
     BIB_CORRECTIONS: (photoId: string, bibId: string) =>
       `${PHOTOS_BASE}/${photoId}/bibs/${bibId}/corrections`,

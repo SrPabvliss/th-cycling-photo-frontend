@@ -61,6 +61,7 @@ describe('toPhotoDetail', () => {
         digitsOriginal: '20',
         wasCorrected: false,
         correctedAt: null,
+        correctedByName: null,
       },
     ])
   })

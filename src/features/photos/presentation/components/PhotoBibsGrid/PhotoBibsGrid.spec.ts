@@ -13,6 +13,7 @@ const buildBib = (overrides: Partial<IBibAttribute> = {}): IBibAttribute => ({
   digitsOriginal: '20',
   wasCorrected: false,
   correctedAt: null,
+  correctedByName: null,
   ...overrides,
 })
 

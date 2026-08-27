@@ -1,0 +1,171 @@
+.gp-card {
+  margin: 0;
+  background: #fff;
+  border: 1px solid var(--tt-neutral-light);
+  border-radius: 11px;
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    border-color 0.14s,
+    box-shadow 0.14s;
+}
+
+.gp-card:hover {
+  border-color: #bcd4fb;
+  box-shadow: 0 6px 18px rgba(22, 41, 77, 0.1);
+}
+
+.gp-card.nobib {
+  border-color: #f2cccc;
+}
+
+.gp-card.sel {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px #eaf1fe;
+}
+
+.gp-thumb {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: #e8edf3;
+}
+
+.gp-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gp-pick {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 7px;
+  padding: 3px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.gp-card:hover .gp-pick,
+.gp-card.sel .gp-pick,
+.gp-card.picking .gp-pick {
+  opacity: 1;
+}
+
+.gp-chk {
+  width: 17px;
+  height: 17px;
+  border-radius: 5px;
+  border: 1.5px solid #d8e0e9;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  flex: none;
+}
+
+.gp-chk.on {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.gp-del {
+  position: absolute;
+  bottom: 7px;
+  right: 7px;
+  border: 0;
+  background: rgba(16, 35, 58, 0.72);
+  color: #fff;
+  border-radius: 7px;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.gp-card:hover .gp-del {
+  opacity: 1;
+}
+
+.gp-del:hover {
+  background: var(--tt-error);
+}
+
+.gp-sold {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: #16a34a;
+  color: #fff;
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+
+.gp-bibbar {
+  position: absolute;
+  left: 7px;
+  bottom: 7px;
+  display: flex;
+  gap: 4px;
+}
+
+.gp-card figcaption {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 9px;
+  flex-wrap: wrap;
+}
+
+.gp-card figcaption i {
+  font-style: normal;
+  font-size: 11px;
+  color: #8b98ab;
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.gp-card figcaption em {
+  font-style: normal;
+  flex: 100%;
+  font-size: 10.5px;
+  color: #8b98ab;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.gp-cat {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--tt-neutral-mid);
+  background: #eef2f7;
+  border-radius: 6px;
+  padding: 3px 7px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gp-cat.none {
+  background: transparent;
+  border: 1px dashed #d8e0e9;
+  color: #a86200;
+}

@@ -3,24 +3,28 @@ import { useRoute } from 'vue-router'
 import { refDebounced } from '@vueuse/core'
 
 import { usePhotoSelectionStore } from '@/features/preview-links/stores/photo-selection.store'
-import type { BibMatchMode, IPhotoSearchFilters } from '../composables/queries/use-photos-search'
-import type { PhotoStatus } from '../types/responses/photo-list.response'
+
+import type {
+  BibMatchMode,
+  GalleryBibFilter,
+  GallerySaleFilter,
+  GallerySort,
+  IGalleryFilterState,
+} from '../types/gallery-filters.types'
 
 export function useGalleryFilters(eventId: () => string) {
   const route = useRoute()
   const selectionStore = usePhotoSelectionStore()
 
-  const page = ref(1)
-  const activeStatus = ref<PhotoStatus | null>(null)
+  const bib = ref<GalleryBibFilter | null>(null)
+  const photoCategoryId = ref<number | null>(null)
+  const uncategorized = ref(false)
+  const sale = ref<GallerySaleFilter | null>(null)
   const plateNumber = ref('')
   const debouncedPlateNumber = refDebounced(plateNumber, 300)
   const bibMatch = ref<BibMatchMode>('exact')
-  const helmetColors = ref<string[]>([])
-  const clothingColors = ref<string[]>([])
-  const bikeColors = ref<string[]>([])
-  const photoCategoryId = ref<number | null>(null)
+  const sort = ref<GallerySort>('recent')
 
-  // Read query params on mount (from event detail quick search)
   watch(
     () => route.query,
     (query) => {
@@ -32,62 +36,66 @@ export function useGalleryFilters(eventId: () => string) {
     { immediate: true },
   )
 
-  const filters = computed<IPhotoSearchFilters>(() => ({
+  watch(photoCategoryId, (value) => {
+    if (value !== null) uncategorized.value = false
+  })
+
+  watch(uncategorized, (value) => {
+    if (value) photoCategoryId.value = null
+  })
+
+  const filters = computed<IGalleryFilterState>(() => ({
     eventId: eventId(),
-    plateNumber: debouncedPlateNumber.value ? debouncedPlateNumber.value : null,
-    bibMatch: bibMatch.value,
-    status: activeStatus.value,
-    helmetColor: helmetColors.value.length > 0 ? helmetColors.value.join(',') : null,
-    clothingColor: clothingColors.value.length > 0 ? clothingColors.value.join(',') : null,
-    bikeColor: bikeColors.value.length > 0 ? bikeColors.value.join(',') : null,
+    bib: bib.value,
     photoCategoryId: photoCategoryId.value,
+    uncategorized: uncategorized.value,
+    sale: sale.value,
+    plateNumber: debouncedPlateNumber.value,
+    bibMatch: bibMatch.value,
+    sort: sort.value,
   }))
 
   const hasActiveFilters = computed(
     () =>
       !!(
-        debouncedPlateNumber.value ||
-        activeStatus.value ||
-        helmetColors.value.length ||
-        clothingColors.value.length ||
-        bikeColors.value.length ||
-        photoCategoryId.value
+        bib.value ||
+        photoCategoryId.value ||
+        uncategorized.value ||
+        sale.value ||
+        debouncedPlateNumber.value
       ),
   )
 
-  function handleStatusChange(newStatus: PhotoStatus | null) {
-    activeStatus.value = newStatus
-    page.value = 1
-  }
+  const activeFilterCount = computed(
+    () =>
+      [
+        bib.value,
+        photoCategoryId.value || uncategorized.value,
+        sale.value,
+        debouncedPlateNumber.value,
+      ].filter(Boolean).length,
+  )
 
   function clearFilters() {
+    bib.value = null
+    photoCategoryId.value = null
+    uncategorized.value = false
+    sale.value = null
     plateNumber.value = ''
     bibMatch.value = 'exact'
-    helmetColors.value = []
-    clothingColors.value = []
-    bikeColors.value = []
-    activeStatus.value = null
-    photoCategoryId.value = null
-    page.value = 1
-  }
-
-  function toggleColor(list: string[], color: string): string[] {
-    return list.includes(color) ? list.filter((c) => c !== color) : [...list, color]
   }
 
   return {
-    page,
-    activeStatus,
+    bib,
+    photoCategoryId,
+    uncategorized,
+    sale,
     plateNumber,
     bibMatch,
-    helmetColors,
-    clothingColors,
-    bikeColors,
-    photoCategoryId,
+    sort,
     filters,
     hasActiveFilters,
-    handleStatusChange,
+    activeFilterCount,
     clearFilters,
-    toggleColor,
   }
 }
