@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NButton, NCard, NIcon, NResult, NSkeleton } from 'naive-ui'
+import { NButton, NIcon, NResult, NSkeleton } from 'naive-ui'
 import { AddOutline } from '@vicons/ionicons5'
 
 import { useMyPhonesQuery } from '../../../composables/queries/use-my-phones'
@@ -25,7 +25,7 @@ const {
 </script>
 
 <template>
-  <NCard title="Teléfonos" class="phone-list">
+  <div class="phone-list">
     <NSkeleton v-if="isPending" text :repeat="2" />
 
     <NResult
@@ -65,7 +65,7 @@ const {
       @save="submitSheet"
       @delete="confirmDelete"
     />
-  </NCard>
+  </div>
 </template>
 
 <style scoped src="./phone-list.css"></style>

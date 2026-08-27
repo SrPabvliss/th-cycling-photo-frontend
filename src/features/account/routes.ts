@@ -1,12 +1,15 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-export const ACCOUNT_PATH = '/account'
+import { ROUTE_NAMES } from '@/core/navigation/route-names'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+
+export const ACCOUNT_PATH = ROUTE_PATHS.ACCOUNT
 
 export const ACCOUNT_ROUTE_NAMES = {
-  PROFILE: 'account-profile',
-  ORDERS: 'account-orders',
-  ORDER_DETAIL: 'account-order-detail',
-  VERIFY_EMAIL: 'account-verify-email',
+  PROFILE: ROUTE_NAMES.ACCOUNT_PROFILE,
+  VERIFY_EMAIL: ROUTE_NAMES.ACCOUNT_VERIFY_EMAIL,
+  ORDERS: ROUTE_NAMES.ACCOUNT_ORDERS,
+  ORDER_DETAIL: ROUTE_NAMES.ACCOUNT_ORDER_DETAIL,
 } as const
 
 export const accountRoutes: RouteRecordRaw[] = [
@@ -18,7 +21,7 @@ export const accountRoutes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/cuenta/verificar-correo',
+    path: `${ACCOUNT_PATH}/verify-email`,
     name: ACCOUNT_ROUTE_NAMES.VERIFY_EMAIL,
     component: () => import('./presentation/views/VerifyEmailView.vue'),
     // Self-scoped verification: authenticated only, like the backend's @Authenticated().

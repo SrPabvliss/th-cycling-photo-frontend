@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-import type { ICurrentUser } from '@/features/auth/types/responses/current-user.response'
 import { canOperate, canShop } from '../capabilities'
+import type { ICurrentUser } from '../current-user'
 import { useHatStore } from './hat.store'
 
 const TOKEN_KEY = 'titan_access_token'

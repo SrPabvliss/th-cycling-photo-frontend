@@ -5,7 +5,7 @@ import { useReviewWorkspaceCore } from './use-workspace-core'
 import type { IReviewQueueSource } from '../types/workspace-queue-source.types'
 import type { IWorkspaceQueueItem } from '../types/workspace-queue-item.types'
 
-vi.mock('@/features/photos/composables/queries/use-photo-detail-by-slug', () => ({
+vi.mock('@/shared/composables/use-photo-detail-by-slug', () => ({
   usePhotoDetailBySlugQuery: vi.fn(() => ({
     data: ref(null),
     isPending: ref(false),

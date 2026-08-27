@@ -5,7 +5,7 @@ import { NMenu, NAvatar, NIcon } from 'naive-ui'
 import { LogOut } from '@vicons/ionicons5'
 
 import { PRIMARY } from '@/core/theme/titan-tv-theme'
-import { useAuth } from '@/features/auth/composables/use-auth'
+import { useSession } from '@/core/auth/use-session'
 import { sidebarMenuOptions } from './constants/sidebar-menu'
 
 defineProps<{
@@ -14,7 +14,7 @@ defineProps<{
 
 const router = useRouter()
 const route = useRoute()
-const { currentUser, logout, isLoggingOut } = useAuth()
+const { currentUser, logout, isLoggingOut } = useSession()
 
 const userInitials = computed(() => {
   if (!currentUser.value) return '?'

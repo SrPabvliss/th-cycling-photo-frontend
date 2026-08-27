@@ -1,190 +1,226 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NCard, NFlex, NIcon, NResult, NTag, useDialog } from 'naive-ui'
-import {
-  CalendarOutline,
-  CheckmarkDoneOutline,
-  ImageOutline,
-  TrashOutline,
-} from '@vicons/ionicons5'
+import { useMediaQuery } from '@vueuse/core'
+import { NIcon } from 'naive-ui'
+import { SnowOutline } from '@vicons/ionicons5'
 
-import { REVIEW_ROUTE_NAMES } from '@/features/review/routes'
-
-import { formatRelativeTime } from '@/shared/utils/date.utils'
-import { formatFileSize } from '@/shared/utils/format.utils'
-import PageHeader from '@/shared/components/PageHeader.vue'
+import { ROUTE_NAMES } from '@/core/navigation/route-names'
+import { useEventDetailQuery } from '@/shared/composables/use-event-detail'
+import { useBulkAssignCategory } from '@/features/photo-categories/composables/mutations/use-bulk-assign-category'
+import { usePhotoCategoriesQuery } from '@/features/photo-categories/composables/queries/use-photo-categories'
+import { photoDetailToListItem } from '@/shared/mappers/photo-detail.mapper'
+import { usePhotoDetailBySlugQuery } from '@/shared/composables/use-photo-detail-by-slug'
 import { useDeletePhoto } from '../../composables/mutations/use-delete-photo'
-import { usePhotoDetailBySlugQuery } from '../../composables/queries/use-photo-detail-by-slug'
+import { usePhotoFileOps } from '@/shared/composables/use-photo-file-ops'
+import { FROZEN_PHOTO_DETAIL_BANNER } from '../../constants/photo-detail.constants'
 import { PHOTO_ROUTE_NAMES } from '../../routes'
-import { PHOTO_STATUS_CONFIG } from '../../constants/status-config'
-import PhotoBibsGrid from '../components/PhotoBibsGrid/PhotoBibsGrid.vue'
-import PhotoColorsList from '../components/PhotoColorsList/PhotoColorsList.vue'
+import PhotoDetailHeader from '../components/PhotoDetailHeader/PhotoDetailHeader.vue'
+import PhotoStage from '../components/PhotoStage/PhotoStage.vue'
+import PhotoBibPanel from '../components/PhotoBibPanel/PhotoBibPanel.vue'
+import PhotoCategoryCard from '../components/PhotoCategoryCard/PhotoCategoryCard.vue'
+import PhotoSalesCard from '../components/PhotoSalesCard/PhotoSalesCard.vue'
+import PhotoFileCard from '../components/PhotoFileCard/PhotoFileCard.vue'
+import PhotoActionsCard from '../components/PhotoActionsCard/PhotoActionsCard.vue'
+import AssignCategoryModal from '../modals/AssignCategoryModal.vue'
+import DeletePhotoModal from '../modals/DeletePhotoModal.vue'
 
 const route = useRoute()
 const router = useRouter()
-const dialog = useDialog()
+const isMobile = useMediaQuery('(max-width: 1023px)')
+
 const slug = computed(() => route.params.slug as string)
 
 const { data: photo, isPending, isError, refetch } = usePhotoDetailBySlugQuery(slug)
-const { mutate: deletePhoto, isPending: isDeleting } = useDeletePhoto()
 
-function handleDelete() {
+const eventSlugRef = computed(() => photo.value?.eventSlug ?? '')
+const { data: event } = useEventDetailQuery(eventSlugRef)
+const isFrozen = computed(() => event.value?.isFrozen ?? false)
+
+const eventIdRef = computed(() => photo.value?.eventId ?? '')
+const { data: photoCategories } = usePhotoCategoriesQuery(eventIdRef)
+const { mutate: bulkAssign } = useBulkAssignCategory(eventIdRef)
+const { mutate: deletePhoto } = useDeletePhoto()
+const { download } = usePhotoFileOps()
+
+const stageState = computed<'image' | 'loading' | 'error'>(() => {
+  if (isPending.value) return 'loading'
+  if (isError.value) return 'error'
+  return 'image'
+})
+
+function goBack() {
   if (!photo.value) return
-  const id = photo.value.id
-  const eventSlug = photo.value.eventSlug
-  dialog.warning({
-    title: 'Eliminar foto',
-    content: '¿Eliminar esta foto? Esta acción no se puede deshacer.',
-    positiveText: 'Eliminar',
-    negativeText: 'Cancelar',
-    positiveButtonProps: { type: 'error' },
-    onPositiveClick: () => {
-      deletePhoto(
-        { id },
-        {
-          onSuccess: () =>
-            router.push({ name: PHOTO_ROUTE_NAMES.GALLERY, params: { slug: eventSlug } }),
-        },
-      )
+  router.push({ name: PHOTO_ROUTE_NAMES.GALLERY, params: { slug: photo.value.eventSlug } })
+}
+
+function goToPrevious() {
+  if (!photo.value?.previousSlug) return
+  router.push({ name: PHOTO_ROUTE_NAMES.DETAIL, params: { slug: photo.value.previousSlug } })
+}
+
+function goToNext() {
+  if (!photo.value?.nextSlug) return
+  router.push({ name: PHOTO_ROUTE_NAMES.DETAIL, params: { slug: photo.value.nextSlug } })
+}
+
+function openWorkshop() {
+  router.push({ name: ROUTE_NAMES.REVIEW_SINGLE_PHOTO, params: { photoSlug: slug.value } })
+}
+
+const categories = computed(
+  () => photoCategories.value?.map((c) => ({ id: c.id, name: c.name, count: c.photoCount })) ?? [],
+)
+
+const showCategoryModal = ref(false)
+
+function openCategoryModal() {
+  showCategoryModal.value = true
+}
+
+function closeCategoryModal() {
+  showCategoryModal.value = false
+}
+
+function confirmAssignCategory(categoryId: number | null) {
+  if (!photo.value) return
+  bulkAssign(
+    { photoIds: [photo.value.id], photoCategoryId: categoryId },
+    { onSuccess: () => (showCategoryModal.value = false) },
+  )
+}
+
+const deletePhotoListItem = computed(() => (photo.value ? photoDetailToListItem(photo.value) : null))
+
+const showDeleteModal = ref(false)
+
+function openDeleteModal() {
+  showDeleteModal.value = true
+}
+
+function closeDeleteModal() {
+  showDeleteModal.value = false
+}
+
+function confirmDelete(id: string) {
+  const eventSlug = photo.value?.eventSlug ?? ''
+  deletePhoto(
+    { id },
+    {
+      onSuccess: () => {
+        showDeleteModal.value = false
+        router.push({ name: PHOTO_ROUTE_NAMES.GALLERY, params: { slug: eventSlug } })
+      },
     },
-  })
+  )
 }
 
-function goToReview() {
-  if (!photo.value?.eventSlug) return
-  router.push({
-    name: REVIEW_ROUTE_NAMES.WORKSPACE,
-    params: { eventSlug: photo.value.eventSlug },
-    query: { photo: photo.value.publicSlug },
-  })
+function handleDownload() {
+  if (!photo.value) return
+  download(photo.value.id, photo.value.filename)
 }
 
-function handleEditReview() {
-  router.push({
-    name: REVIEW_ROUTE_NAMES.SINGLE_PHOTO,
-    params: { photoSlug: slug.value },
-  })
+function viewOrder(id: string) {
+  router.push({ name: ROUTE_NAMES.ORDERS_LIST, query: { order: id } })
 }
 </script>
 
 <template>
   <div class="page-view">
-    <div class="page-view__content detail-content">
-      <PageHeader
-        :title="photo?.filename ?? 'Detalle de Foto'"
-        :back-to="'/events/' + (photo?.eventSlug ?? '') + '/photos'"
-      >
-        <NButton type="primary" @click="handleEditReview">Editar revisión</NButton>
-        <NButton v-if="photo?.eventSlug" type="primary" @click="goToReview">
-          <template #icon><NIcon :component="CheckmarkDoneOutline" /></template>
-          Revisar este evento
-        </NButton>
-      </PageHeader>
-      <!-- Loading -->
-      <div v-if="isPending" class="detail-loading">
-        <NCard>
-          <NFlex justify="center" style="padding: 64px 0">
-            <span style="color: var(--tt-neutral-mid)">Cargando foto...</span>
-          </NFlex>
-        </NCard>
-      </div>
+    <div class="page-view__content pd" :class="{ m: isMobile }">
+      <PhotoDetailHeader
+        :filename="photo?.filename ?? ''"
+        :event-name="event?.name ?? ''"
+        :position="photo?.position ?? 1"
+        :event-photo-count="photo?.eventPhotoCount ?? 1"
+        :sold="(photo?.orders.length ?? 0) > 0"
+        :frozen="isFrozen"
+        :mobile="isMobile"
+        @back="goBack"
+        @previous="goToPrevious"
+        @next="goToNext"
+      />
 
-      <!-- Error -->
-      <div v-else-if="isError" class="error-container">
-        <NResult
-          status="error"
-          title="Error al cargar foto"
-          description="No se pudo obtener el detalle de la foto."
-        >
-          <template #footer>
-            <NButton @click="refetch()">Reintentar</NButton>
-          </template>
-        </NResult>
-      </div>
+      <div class="pd-body">
+        <PhotoStage
+          :state="stageState"
+          :image-url="photo?.imageUrl ?? null"
+          :filename="photo?.filename ?? ''"
+          :width="photo?.width ?? null"
+          :height="photo?.height ?? null"
+          :file-size="photo?.fileSize ?? 0"
+          @retry="refetch()"
+        />
 
-      <!-- 3-col layout: info | photo | detections (like review workspace) -->
-      <template v-else-if="photo">
-        <div class="detail-layout">
-          <aside class="detail-layout__info">
-            <NFlex align="center" :size="6" wrap class="detail-info__tags">
-              <NTag :type="PHOTO_STATUS_CONFIG[photo.status].type" size="small" round>
-                {{ PHOTO_STATUS_CONFIG[photo.status].label }}
-              </NTag>
-              <NTag v-if="photo.reviewedAt" type="success" size="small" round>Revisada</NTag>
-            </NFlex>
+        <aside class="pd-rail">
+          <div v-if="isPending" class="pd-skels" data-test="pd-skels">
+            <div class="pd-skel" />
+            <div class="pd-skel" />
+            <div class="pd-skel" />
+          </div>
 
-            <h3 class="detail-side__title">Información</h3>
-
-            <NFlex vertical :size="12">
-              <NFlex align="start" :size="10">
-                <div class="detail-info__icon">
-                  <NIcon :component="ImageOutline" :size="16" />
-                </div>
-                <div>
-                  <p class="detail-info__label">Archivo</p>
-                  <p class="detail-info__value">
-                    {{ photo.mimeType }} · {{ formatFileSize(photo.fileSize) }}
-                  </p>
-                </div>
-              </NFlex>
-
-              <NFlex align="start" :size="10">
-                <div class="detail-info__icon">
-                  <NIcon :component="CalendarOutline" :size="16" />
-                </div>
-                <div>
-                  <p class="detail-info__label">Subida</p>
-                  <p class="detail-info__value">{{ formatRelativeTime(photo.uploadedAt) }}</p>
-                </div>
-              </NFlex>
-
-              <NFlex v-if="photo.processedAt" align="start" :size="10">
-                <div class="detail-info__icon">
-                  <NIcon :component="CalendarOutline" :size="16" />
-                </div>
-                <div>
-                  <p class="detail-info__label">Procesada</p>
-                  <p class="detail-info__value">{{ formatRelativeTime(photo.processedAt) }}</p>
-                </div>
-              </NFlex>
-            </NFlex>
-
-            <div class="detail-info__danger">
-              <NButton
-                quaternary
-                type="error"
-                size="small"
-                :loading="isDeleting"
-                @click="handleDelete"
-              >
-                <template #icon><NIcon :component="TrashOutline" /></template>
-                Eliminar foto
-              </NButton>
+          <template v-else-if="photo">
+            <div v-if="isFrozen" class="dt-alert blue" data-test="frozen-notice">
+              <NIcon :component="SnowOutline" :size="17" />
+              <div class="dt-alert-t">
+                <b>{{ FROZEN_PHOTO_DETAIL_BANNER.TITLE }}</b>
+                <span>{{ FROZEN_PHOTO_DETAIL_BANNER.DETAIL }}</span>
+              </div>
             </div>
-          </aside>
 
-          <section class="detail-layout__photo">
-            <img :src="photo.imageUrl" :alt="photo.filename" class="detail-image" />
-          </section>
+            <PhotoBibPanel :bibs="photo.bibs" :frozen="isFrozen" @open-workshop="openWorkshop" />
 
-          <aside class="detail-layout__detections">
-            <section class="detail-detections__section">
-              <h3 class="detail-side__title">Placas detectadas</h3>
-              <PhotoBibsGrid v-if="photo.bibs.length" :bibs="photo.bibs" />
-              <p v-else class="detail-side__empty">Sin placas detectadas.</p>
-            </section>
+            <PhotoCategoryCard
+              :category-name="photo.photoCategoryName"
+              :frozen="isFrozen"
+              @assign="openCategoryModal"
+            />
 
-            <section class="detail-detections__section">
-              <h3 class="detail-side__title">Colores detectados</h3>
-              <PhotoColorsList v-if="photo.colors.length" :colors="photo.colors" />
-              <p v-else class="detail-side__empty">Sin colores detectados.</p>
-            </section>
-          </aside>
-        </div>
-      </template>
+            <PhotoSalesCard :orders="photo.orders" @view-order="viewOrder" />
+
+            <PhotoFileCard
+              :filename="photo.filename"
+              :mime-type="photo.mimeType"
+              :width="photo.width"
+              :height="photo.height"
+              :file-size="photo.fileSize"
+              :uploaded-at="photo.uploadedAt"
+              :processed-at="photo.processedAt"
+              :reviewed-at="photo.reviewedAt"
+            />
+
+            <PhotoActionsCard
+              :file-size="photo.fileSize"
+              :frozen="isFrozen"
+              @download="handleDownload"
+              @delete="openDeleteModal"
+            />
+          </template>
+        </aside>
+      </div>
+
+      <AssignCategoryModal
+        v-if="photo"
+        :show="showCategoryModal"
+        :count="1"
+        phrase="esta foto"
+        :whole-set="false"
+        :categories="categories"
+        @assign="confirmAssignCategory"
+        @close="closeCategoryModal"
+      />
+
+      <DeletePhotoModal
+        v-if="event && deletePhotoListItem"
+        :show="showDeleteModal"
+        :photo="deletePhotoListItem"
+        :event="event"
+        :orders="photo?.orders ?? []"
+        @confirm="confirmDelete"
+        @close="closeDeleteModal"
+      />
     </div>
   </div>
 </template>
 
-<style scoped src="./photo-detail-view.css"></style>
+<style scoped src="./photo-detail-view.css" />

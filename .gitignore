@@ -49,10 +49,12 @@ __screenshots__/
 # graphify knowledge graph output
 graphify-out/
 
-# Superpowers specs / plans (local only)
-docs/superpowers/
+# Docs & specs (local only)
+docs/
 
 # Archived legacy features (local only, pending elimination)
 **/features/_legacy/
 
 .superpowers/
+
+.worktrees/

@@ -8,7 +8,7 @@
   min-height: 0;
 }
 
-.profile-form__card :deep(.n-card__content) {
+.profile-form__card {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -24,6 +24,10 @@
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 12px;
+}
+
+.profile-form--cols-3 .profile-form__row {
+  grid-template-columns: 1fr 1fr 1fr;
 }
 
 .profile-form__submit-bar {

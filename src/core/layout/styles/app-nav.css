@@ -37,6 +37,10 @@
   text-decoration: none;
   padding: 6px 12px;
   border-radius: 6px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
   transition:
     color 0.15s,
     background 0.15s;
@@ -219,12 +223,15 @@
   border: none;
   border-left: 3px solid transparent;
   font-family: inherit;
-  color: #ef4444;
 }
 
 .app-nav-menu__link--button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.app-nav-menu__link--destructive {
+  color: #ef4444;
 }
 
 @media (max-width: 767px) {

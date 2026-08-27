@@ -1,9 +1,9 @@
-import { ORDER_STATUS, type OrderStatus } from '@/shared/types/order-status.types'
+import { ORDER_STATUS, type OrderStatus } from '../responses/order-list.response'
 
 export const ORDER_TABS = [
   'all',
   'pending',
-  'paymentInfoSent',
+  'payment_info_sent',
   'paid',
   'delivered',
   'gifted',
@@ -15,7 +15,7 @@ export type OrderTab = (typeof ORDER_TABS)[number]
 export const ORDER_TAB_STATUS: Record<OrderTab, OrderStatus | undefined> = {
   all: undefined,
   pending: ORDER_STATUS.PENDING,
-  paymentInfoSent: ORDER_STATUS.PAYMENT_INFO_SENT,
+  payment_info_sent: ORDER_STATUS.PAYMENT_INFO_SENT,
   paid: ORDER_STATUS.PAID,
   delivered: ORDER_STATUS.DELIVERED,
   gifted: ORDER_STATUS.GIFTED,

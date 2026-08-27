@@ -1,7 +1,8 @@
 import type { RouteRecordRaw } from 'vue-router'
+import { ROUTE_NAMES } from '@/core/navigation/route-names'
 
 export const CONTRACT_ROUTE_NAMES = {
-  ACCEPT: 'contract-accept',
+  ACCEPT: ROUTE_NAMES.CONTRACT_ACCEPT,
 } as const
 
 export const contractRoutes: RouteRecordRaw[] = [

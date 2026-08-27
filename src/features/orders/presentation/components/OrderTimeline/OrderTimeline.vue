@@ -3,7 +3,7 @@ import { computed } from 'vue'
 
 import { formatDate } from '@/shared/utils/date.utils'
 import type { IOrderTimelineFacts } from '../../../types/order-timeline.types'
-import { ORDER_STATUS } from '@/shared/types/order-status.types'
+import { ORDER_STATUS } from '../../../types/responses/order-list.response'
 import { getOrderStatusPresentation } from '../../../utils/order-status-presentation'
 
 const props = withDefaults(

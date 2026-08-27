@@ -1,7 +1,6 @@
 import type { QueryClient } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
-import { PHOTO_QUERY_KEYS } from '@/features/photos/constants/query-keys'
 import { REVIEW_QUERY_KEYS } from '../constants/query-keys'
 
 interface IInvalidateContext {
@@ -40,8 +39,8 @@ export function invalidateReviewWorkspaceQueries(
   // Photo detail (specific slug if available, otherwise broad photo invalidation)
   if (context.photoSlug) {
     queryClient.invalidateQueries({
-      queryKey: PHOTO_QUERY_KEYS.detailBySlug(context.photoSlug),
+      queryKey: [API_ROUTES.PHOTOS.BASE, 'detail', context.photoSlug],
     })
   }
-  queryClient.invalidateQueries({ queryKey: PHOTO_QUERY_KEYS.all() })
+  queryClient.invalidateQueries({ queryKey: [API_ROUTES.PHOTOS.BASE] })
 }

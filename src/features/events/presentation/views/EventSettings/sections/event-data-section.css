@@ -1,0 +1,16 @@
+.event-data-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.event-data-section > :last-child {
+  flex: 1;
+}
+
+.error-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

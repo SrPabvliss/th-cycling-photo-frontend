@@ -1,6 +1,8 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-export const CHECKOUT_PATH = '/checkout'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+
+export const CHECKOUT_PATH = ROUTE_PATHS.CHECKOUT
 
 export function checkoutPath(eventId: string): string {
   return `${CHECKOUT_PATH}/${eventId}`

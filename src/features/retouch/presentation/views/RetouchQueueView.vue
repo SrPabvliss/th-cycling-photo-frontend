@@ -5,9 +5,10 @@ import { NGrid, NGridItem, NSpin } from 'naive-ui'
 
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import { useOperatorRetouchOrdersListSource } from '../../composables/queue-sources/use-retouch-orders-list-source'
-import { useEventsListQuery } from '@/features/events/composables/queries/use-events-list'
+import { useEventsListQuery } from '@/shared/composables/use-events-list'
+import type { IEventFilters } from '@/shared/types/event-filters.types'
 import { RETOUCH_ROUTE_NAMES } from '../../constants/retouch-routes'
-import { EVENTS_PATH } from '@/features/events/routes'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import RetouchOrderCard from '../components/RetouchOrderCard/RetouchOrderCard.vue'
 import RetouchPageHeader from '../components/RetouchPageHeader/RetouchPageHeader.vue'
 import RetouchEmptyState from '../components/RetouchEmptyState/RetouchEmptyState.vue'
@@ -24,11 +25,16 @@ const selectedEventSlug = ref<string | null>(null)
 
 const source = useOperatorRetouchOrdersListSource(scope, selectedEventSlug)
 
-const eventsPage = ref(1)
-const eventsListQuery = useEventsListQuery(eventsPage, 50)
+const eventsFilter = ref<IEventFilters>({
+  search: null,
+  organizerId: null,
+  sort: 'name',
+  tab: 'active',
+})
+const eventsListQuery = useEventsListQuery(eventsFilter, 50)
 
 const eventOptions = computed(() =>
-  (eventsListQuery.data.value?.items ?? []).map((e) => ({
+  (eventsListQuery.data.value?.pages.flatMap((page) => page.items) ?? []).map((e) => ({
     label: e.name,
     value: e.slug,
   })),
@@ -40,7 +46,7 @@ const goWorkspace = (orderId?: string) =>
     query: orderId ? { orderId } : undefined,
   })
 
-const goDashboard = () => router.push(EVENTS_PATH)
+const goDashboard = () => router.push(ROUTE_PATHS.EVENTS)
 
 const totalPendingPhotos = computed(() =>
   source.orders.value.reduce((acc, o) => acc + o.pendingPhotosCount, 0),
@@ -89,7 +95,7 @@ const sentinel = useInfiniteScrollTrigger(() => source.fetchNextPage(), {
         :subtitle="headerSubtitle"
         :total-orders="source.total.value"
         :total-pending-photos="isPendingScope ? totalPendingPhotos : undefined"
-        :back-to="EVENTS_PATH"
+        :back-to="ROUTE_PATHS.EVENTS"
         :hide-start-cta="isCompletedScope"
         :start-disabled="source.orders.value.length === 0"
         @start="goWorkspace()"

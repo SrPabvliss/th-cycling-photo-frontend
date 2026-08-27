@@ -1,3 +1,3 @@
-import type { IPhotoDetail } from '@/features/photos/types/responses/photo-detail.response'
+import type { IPhotoDetail } from '@/shared/types/photo-detail.types'
 
 export type IWorkspacePhotoDetail = IPhotoDetail

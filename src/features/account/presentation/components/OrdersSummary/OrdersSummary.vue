@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { NSkeleton } from 'naive-ui'
 
-import { formatCurrency } from '@/features/pricing/utils/format-currency'
+import { formatCurrency } from '@/shared/utils/currency.utils'
 import { useMyOrdersSummaryQuery } from '../../../composables/queries/use-my-orders-summary'
 
 const { data, isPending, isError } = useMyOrdersSummaryQuery()

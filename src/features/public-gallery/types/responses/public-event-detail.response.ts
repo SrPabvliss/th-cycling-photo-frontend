@@ -2,6 +2,7 @@ import type { IApiPublicEventAsset, IPublicEventAsset } from './public-event-lis
 
 /** API projection from GET /public/events/:slug */
 export interface IApiPublicEventDetail {
+  id: string
   slug: string
   name: string
   startDate: string
@@ -21,6 +22,7 @@ export interface IApiPublicPhotoCategory {
 
 /** Frontend domain type */
 export interface IPublicEventDetail {
+  id: string
   slug: string
   name: string
   startDate: Date

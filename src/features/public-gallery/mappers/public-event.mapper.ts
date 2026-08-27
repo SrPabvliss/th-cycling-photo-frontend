@@ -24,6 +24,7 @@ export function toPublicEventListItem(api: IApiPublicEventListItem): IPublicEven
 
 export function toPublicEventDetail(api: IApiPublicEventDetail): IPublicEventDetail {
   return {
+    id: api.id,
     slug: api.slug,
     name: api.name,
     startDate: parseDateOnly(api.startDate),

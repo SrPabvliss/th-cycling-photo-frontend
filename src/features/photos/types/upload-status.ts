@@ -42,3 +42,8 @@ export interface IUploadItem {
   /** AbortController for cancellation — never proxified by Vue */
   _abortController: AbortController | null
 }
+
+export interface IRejectionSummary {
+  invalidType: number
+  tooLarge: number
+}

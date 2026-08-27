@@ -2,8 +2,8 @@ import { computed, ref, type ComputedRef, type Ref } from 'vue'
 
 import { httpClient } from '@/core/http/axios-client'
 import { API_ROUTES } from '@/core/api/api-routes'
-import { usePhotoSelectionStore } from '@/features/preview-links/stores/photo-selection.store'
-import { toPhotoListItems } from '../mappers/photo-list.mapper'
+import { usePhotoSelectionStore } from '@/shared/stores/photo-selection.store'
+import { toPhotoListItems } from '@/shared/mappers/photo-list.mapper'
 import type { IApiPhotoListItem, IPhotoListItem } from '../types/responses/photo-list.response'
 import type { IGalleryFilterState } from '../types/gallery-filters.types'
 

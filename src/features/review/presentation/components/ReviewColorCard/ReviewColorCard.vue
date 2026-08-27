@@ -2,7 +2,7 @@
 import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import { NIcon, useDialog } from 'naive-ui'
 import { TrashOutline } from '@vicons/ionicons5'
-import type { IColorAttribute } from '@/features/photos/types/responses/photo-detail.response'
+import type { IColorAttribute } from '@/shared/types/photo-detail.types'
 import {
   asColorName,
   COLOR_PALETTE,

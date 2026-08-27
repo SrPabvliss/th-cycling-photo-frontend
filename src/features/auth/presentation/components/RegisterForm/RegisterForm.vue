@@ -28,12 +28,8 @@ import {
   registerFieldValidators as v,
   type IRegisterFormData,
 } from '../../../constants/register-form.schema'
-import {
-  DEFAULT_COUNTRY_ISO,
-  GENDER_OPTIONS,
-  MONTH_OPTIONS,
-  PHONE_PRIORITY_ISOS,
-} from '../../../constants/register-form.options'
+import { GENDER_OPTIONS, MONTH_OPTIONS } from '../../../constants/register-form.options'
+import { DEFAULT_COUNTRY_ISO, PHONE_INPUT_OPTIONS } from '@/shared/constants/phone-input'
 import type { Gender } from '../../../types/requests/register.request'
 import { isMinor } from '../../../utils/age.utils'
 import { LEGAL_PATHS } from '@/features/legal/routes'
@@ -238,14 +234,7 @@ const {
             <div class="tt-phone-input">
               <IntlTelInput
                 ref="telInputRef"
-                :options="{
-                  initialCountry: DEFAULT_COUNTRY_ISO.toLowerCase(),
-                  separateDialCode: true,
-                  strictMode: true,
-                  allowDropdown: false,
-                  countryOrder: PHONE_PRIORITY_ISOS,
-                  i18n: { searchPlaceholder: 'Buscar país...' },
-                }"
+                :options="{ ...PHONE_INPUT_OPTIONS, allowDropdown: false }"
                 :input-props="{ placeholder: 'Ej. 99 123 4567' }"
                 @change-number="(num: string) => field.handleChange(num)"
                 @change-validity="(valid: boolean) => (isPhoneValid = valid)"

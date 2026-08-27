@@ -56,6 +56,12 @@ describe('VerifyEmailPrompt', () => {
     expect(w.text()).not.toContain('Verificar ahora')
   })
 
+  it('does not show when the key is present but not first in pendingPrompts', () => {
+    authState.currentUser = { pendingPrompts: ['personal_profile', 'email_verification'] }
+    const w = mountPrompt()
+    expect(w.text()).not.toContain('Verificar ahora')
+  })
+
   it.each([['cart-checkout'], ['payment-box'], ['payment-return'], ['account-verify-email']])(
     'does not show on the %s route',
     (routeName) => {

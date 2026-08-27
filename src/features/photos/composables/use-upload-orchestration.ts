@@ -3,7 +3,7 @@ import { useMessage } from 'naive-ui'
 
 import { formatFileSize } from '@/shared/utils/format.utils'
 import { MAX_FILES, MAX_FILE_SIZE } from '../constants/upload.constants'
-import type { IRejectionSummary } from '../presentation/components/UploadDropzone/UploadDropzone.vue'
+import type { IRejectionSummary } from '../types/upload-status'
 import { useUploadStore } from '../stores/upload.store'
 import { useUploadQueue } from './use-upload-queue'
 

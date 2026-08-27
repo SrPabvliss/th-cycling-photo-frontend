@@ -2,7 +2,7 @@
 export interface IApiOrderStatsTabs {
   all: number
   pending: number
-  paymentInfoSent: number
+  payment_info_sent: number
   paid: number
   delivered: number
   gifted: number
@@ -31,7 +31,7 @@ export interface IApiOrderStats {
 export interface IOrderStatsTabs {
   all: number
   pending: number
-  paymentInfoSent: number
+  payment_info_sent: number
   paid: number
   delivered: number
   gifted: number

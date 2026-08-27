@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { IApiPhotoDetail } from '../types/responses/photo-detail.response'
-import { toPhotoDetail } from './photo-detail.mapper'
+import type { IApiPhotoDetail } from '@/shared/types/photo-detail.types'
+import { photoDetailToListItem, toPhotoDetail } from '@/shared/mappers/photo-detail.mapper'
 
 const baseApi: IApiPhotoDetail = {
   id: 'p1',
@@ -150,6 +150,99 @@ describe('toPhotoDetail', () => {
     ])
   })
 
+  it('maps correctedByName on bibs', () => {
+    const result = toPhotoDetail({
+      ...baseApi,
+      bibs: [
+        {
+          id: 'b1',
+          digits: '20',
+          status: 'read',
+          confidence: 0.95,
+          source: 'reviewer',
+          cropUrl: null,
+          digitsOriginal: '02',
+          wasCorrected: true,
+          correctedAt: '2026-05-09T10:00:00Z',
+          correctedByName: 'Ana Torres',
+        },
+      ],
+    })
+    expect(result.bibs[0]!.correctedByName).toBe('Ana Torres')
+  })
+
+  it('maps the photo-level enrichment fields through', () => {
+    const result = toPhotoDetail({
+      ...baseApi,
+      photoCategoryId: 7,
+      photoCategoryName: 'Elite',
+      orders: [
+        {
+          id: 'o1',
+          buyerName: 'Carla Ruiz',
+          createdAt: '2026-05-02T00:00:00Z',
+          status: 'paid',
+        },
+      ],
+      position: 3,
+      eventPhotoCount: 12,
+      previousSlug: 'prev-slug',
+      nextSlug: 'next-slug',
+    })
+    expect(result.photoCategoryId).toBe(7)
+    expect(result.photoCategoryName).toBe('Elite')
+    expect(result.orders).toHaveLength(1)
+    expect(result.orders[0]!.id).toBe('o1')
+    expect(result.orders[0]!.buyerName).toBe('Carla Ruiz')
+    expect(result.orders[0]!.status).toBe('paid')
+    expect(result.position).toBe(3)
+    expect(result.eventPhotoCount).toBe(12)
+    expect(result.previousSlug).toBe('prev-slug')
+    expect(result.nextSlug).toBe('next-slug')
+  })
+
+  it("converts an order's createdAt to a Date", () => {
+    const result = toPhotoDetail({
+      ...baseApi,
+      orders: [
+        {
+          id: 'o1',
+          buyerName: 'Carla Ruiz',
+          createdAt: '2026-05-02T00:00:00Z',
+          status: 'paid',
+        },
+      ],
+    })
+    expect(result.orders[0]!.createdAt).toBeInstanceOf(Date)
+  })
+
+  it('defaults the enrichment fields when the API payload predates them', () => {
+    const result = toPhotoDetail({
+      ...baseApi,
+      bibs: [
+        {
+          id: 'b1',
+          digits: '20',
+          status: 'read',
+          confidence: 0.95,
+          source: 'ai',
+          cropUrl: null,
+          digitsOriginal: '20',
+          wasCorrected: false,
+          correctedAt: null,
+        },
+      ],
+    })
+    expect(result.photoCategoryId).toBeNull()
+    expect(result.photoCategoryName).toBeNull()
+    expect(result.orders).toEqual([])
+    expect(result.position).toBe(1)
+    expect(result.eventPhotoCount).toBe(1)
+    expect(result.previousSlug).toBeNull()
+    expect(result.nextSlug).toBeNull()
+    expect(result.bibs[0]!.correctedByName).toBeNull()
+  })
+
   it('preserves null cropUrl', () => {
     const result = toPhotoDetail({
       ...baseApi,
@@ -168,5 +261,54 @@ describe('toPhotoDetail', () => {
       ],
     })
     expect(result.bibs[0]!.cropUrl).toBeNull()
+  })
+})
+
+describe('photoDetailToListItem', () => {
+  it('maps IPhotoDetail to IPhotoListItem properly', () => {
+    const detail = toPhotoDetail({
+      ...baseApi,
+      photoCategoryId: 5,
+      photoCategoryName: 'VIP',
+      orders: [
+        {
+          id: 'o1',
+          buyerName: 'Buyer',
+          createdAt: '2026-05-02T00:00:00Z',
+          status: 'paid',
+        },
+      ],
+      bibs: [
+        {
+          id: 'b1',
+          digits: '123',
+          status: 'read',
+          confidence: 0.99,
+          source: 'ai',
+          cropUrl: null,
+          digitsOriginal: '123',
+          wasCorrected: true,
+          correctedAt: null,
+        },
+      ],
+    })
+
+    const listItem = photoDetailToListItem(detail)
+    expect(listItem.id).toBe('p1')
+    expect(listItem.publicSlug).toBe('pub')
+    expect(listItem.filename).toBe('IMG.jpg')
+    expect(listItem.thumbnailUrl).toBe('https://t/IMG.jpg')
+    expect(listItem.photoCategoryId).toBe(5)
+    expect(listItem.photoCategoryName).toBe('VIP')
+    expect(listItem.sold).toBe(true)
+    expect(listItem.bibs).toEqual([
+      {
+        digits: '123',
+        source: 'ai',
+        confidence: 0.99,
+        status: 'read',
+        corrected: true,
+      },
+    ])
   })
 })

@@ -6,3 +6,9 @@ export interface IEventFormData {
   cantonId: number | null
   eventTypeId: number
 }
+
+export interface IEventFormExtra {
+  assetFiles?: Map<'cover_image', File>
+  assetRemovals?: 'cover_image'[]
+  categoryIds?: number[]
+}

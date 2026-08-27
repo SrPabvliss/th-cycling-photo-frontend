@@ -9,10 +9,18 @@ vi.mock('../../../composables/mutations/use-apply-bib-correction', () => ({
   }),
 }))
 
+vi.mock('../../../composables/mutations/use-delete-photo-bib', () => ({
+  useDeletePhotoBib: () => ({
+    mutateAsync: vi.fn(),
+    isPending: { value: false },
+  }),
+}))
+
+import { NDialogProvider } from 'naive-ui'
 import { CARD_NAV_KEY } from '@/shared/workspace/composables/keys'
 import { useWorkspaceCardNavigation } from '@/shared/workspace/composables/use-workspace-card-navigation'
 import ReviewBibCard from './ReviewBibCard.vue'
-import type { IBibAttribute } from '@/features/photos/types/responses/photo-detail.response'
+import type { IBibAttribute } from '@/shared/types/photo-detail.types'
 
 const baseBib: IBibAttribute = {
   id: 'b-1',
@@ -20,18 +28,18 @@ const baseBib: IBibAttribute = {
   digitsOriginal: '42',
   wasCorrected: false,
   correctedAt: null,
-  correctedByName: null,
   status: 'read',
   confidence: 0.9,
   source: 'ai',
   cropUrl: 'https://cdn/x.jpg',
+  correctedByName: null,
 }
 
 function mountWithProviders(bib: IBibAttribute) {
   const Comp = defineComponent({
     setup() {
       provide(CARD_NAV_KEY, useWorkspaceCardNavigation())
-      return () => h(ReviewBibCard, { bib, photoId: 'p-1', photoSlug: 'slug-1' })
+      return () => h(NDialogProvider, null, () => h(ReviewBibCard, { bib, photoId: 'p-1', photoSlug: 'slug-1' }))
     },
   })
   return mount(Comp)

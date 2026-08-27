@@ -17,7 +17,7 @@ const route = useRoute()
 const { register, isRegistering } = useAuth()
 
 const redirectQuery = computed(() => (route.query.redirect as string | undefined) ?? null)
-const showCheckoutNotice = computed(() => redirectQuery.value === '/checkout')
+const showCheckoutNotice = computed(() => redirectQuery.value?.startsWith('/checkout') ?? false)
 
 async function handleSubmit(formData: IRegisterFormData) {
   try {

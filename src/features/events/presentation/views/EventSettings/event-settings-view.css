@@ -1,0 +1,36 @@
+.event-settings-view {
+  display: flex;
+  flex-direction: column;
+}
+
+.event-settings-container {
+  max-width: 1120px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding-top: 16px;
+}
+
+.event-settings-container :deep(.page-header) {
+  margin-bottom: 8px;
+}
+
+.event-settings-layout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+  flex: 1;
+}
+
+.event-settings-content {
+  min-width: 0;
+}
+
+@media (max-width: 767px) {
+  .event-settings-layout {
+    grid-template-columns: 1fr;
+  }
+}

@@ -2,9 +2,9 @@
 import { computed, ref } from 'vue'
 
 import type { IWorkspacePhotoDetail } from '@/shared/workspace/types/workspace-photo.types'
-import { useImageZoom } from '@/features/photos/composables/use-image-zoom'
-import { usePhotoFileOps } from '@/features/photos/composables/use-photo-file-ops'
-import ImageComparisonSlider from '@/features/review/presentation/components/ImageComparisonSlider/ImageComparisonSlider.vue'
+import { useImageZoom } from '@/shared/composables/use-image-zoom'
+import { usePhotoFileOps } from '@/shared/composables/use-photo-file-ops'
+import ImageComparisonSlider from '@/shared/components/ImageComparisonSlider/ImageComparisonSlider.vue'
 import { pluralize } from '@/shared/utils/format.utils'
 
 const props = defineProps<{

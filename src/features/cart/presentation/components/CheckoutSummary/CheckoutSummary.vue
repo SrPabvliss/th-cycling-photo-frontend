@@ -9,7 +9,7 @@ import PhotoLightbox from '@/shared/components/PhotoLightbox/PhotoLightbox.vue'
 import PhotoPriceStrip from '@/features/pricing/presentation/components/PhotoPriceStrip/PhotoPriceStrip.vue'
 import { useLightbox } from '@/shared/composables/use-lightbox'
 import type { ICartGroup, ICartPhoto } from '../../../types/responses/cart.response'
-import { useRemoveFromCart } from '@/shared/composables/use-remove-from-cart'
+import { useRemoveFromCart } from '../../../composables/mutations/use-remove-from-cart'
 
 const props = defineProps<{
   group: ICartGroup

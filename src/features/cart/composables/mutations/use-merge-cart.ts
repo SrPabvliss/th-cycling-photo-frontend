@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
-import { CART_QUERY_KEYS } from '@/shared/constants/cart-query-keys'
+import { CART_QUERY_KEYS } from '../../constants/query-keys'
 import { useCartStore } from '@/shared/stores/cart.store'
 
 export function useMergeCart() {

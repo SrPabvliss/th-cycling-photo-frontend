@@ -1,9 +1,4 @@
-import { BUYERS_PATH } from '@/features/buyers/routes'
-import { EVENTS_PATH } from '@/features/events/routes'
-import { LANDING_PATH } from '@/features/landing/routes'
-import { ORDERS_PATH } from '@/features/orders/routes'
-import { ORGANIZERS_PATH } from '@/features/organizers/routes'
-import { RETOUCH_PATH } from '@/features/retouch/routes'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { PERMISSIONS, type PermissionKey } from './permissions'
 import type { Hat } from './stores/hat.store'
 
@@ -17,13 +12,17 @@ interface INavItem extends INavLink {
   permission: PermissionKey
 }
 
+// Retouch is hidden on purpose: 1 photo retouched out of 10,994 in production.
 const NAV_ITEMS: INavItem[] = [
-  { label: 'Eventos', to: EVENTS_PATH, permission: PERMISSIONS.EVENT_READ },
-  { label: 'Pedidos', to: ORDERS_PATH, permission: PERMISSIONS.ORDER_READ },
-  { label: 'Retoque', to: RETOUCH_PATH, permission: PERMISSIONS.PHOTO_RETOUCH_READ },
-  { label: 'Compradores', to: BUYERS_PATH, permission: PERMISSIONS.BUYER_READ },
-  { label: 'Organizadores', to: ORGANIZERS_PATH, permission: PERMISSIONS.TENANT_READ },
-  { label: 'Mi perfil', to: '/mi-perfil', permission: PERMISSIONS.TENANT_PROFILE_READ },
+  { label: 'Eventos', to: ROUTE_PATHS.EVENTS, permission: PERMISSIONS.EVENT_READ },
+  { label: 'Pedidos', to: ROUTE_PATHS.ORDERS, permission: PERMISSIONS.ORDER_READ },
+  { label: 'Compradores', to: ROUTE_PATHS.BUYERS, permission: PERMISSIONS.BUYER_READ },
+  { label: 'Organizadores', to: ROUTE_PATHS.ORGANIZERS, permission: PERMISSIONS.TENANT_READ },
+  {
+    label: 'Perfil',
+    to: ROUTE_PATHS.BUSINESS_PROFILE,
+    permission: PERMISSIONS.TENANT_PROFILE_READ,
+  },
 ]
 
 export function getNavLinks(permissions: string[]): INavLink[] {
@@ -33,7 +32,7 @@ export function getNavLinks(permissions: string[]): INavLink[] {
 }
 
 export function getHomePath(permissions: string[]): string {
-  return getNavLinks(permissions)[0]?.to ?? LANDING_PATH
+  return getNavLinks(permissions)[0]?.to ?? ROUTE_PATHS.LANDING
 }
 
 export function getPrincipalLabel(hat: Hat, isPlatform: boolean): string {

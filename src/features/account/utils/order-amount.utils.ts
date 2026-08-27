@@ -1,4 +1,4 @@
-import { formatCurrency } from '@/features/pricing/utils/format-currency'
+import { formatCurrency } from '@/shared/utils/currency.utils'
 import type { MyOrderState } from '../types/responses/my-order.response'
 
 export interface IOrderAmountSource {

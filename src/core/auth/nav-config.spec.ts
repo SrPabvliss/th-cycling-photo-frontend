@@ -20,7 +20,7 @@ describe('getNavLinks', () => {
 
   it('gives a platform principal every link', () => {
     const labels = getNavLinks(PLATFORM_PERMISSIONS).map((l) => l.label)
-    expect(labels).toEqual(['Eventos', 'Pedidos', 'Retoque', 'Compradores', 'Organizadores'])
+    expect(labels).toEqual(['Eventos', 'Pedidos', 'Compradores', 'Organizadores'])
   })
 
   it('shows Organizadores to somebody holding tenant.read', () => {
@@ -38,7 +38,7 @@ describe('getNavLinks', () => {
 
   it('gives a tenant profile-only principal the profile link', () => {
     const labels = getNavLinks([PERMISSIONS.TENANT_PROFILE_READ]).map((l) => l.label)
-    expect(labels).toEqual(['Mi perfil'])
+    expect(labels).toEqual(['Perfil'])
   })
 })
 

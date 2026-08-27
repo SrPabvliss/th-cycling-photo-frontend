@@ -23,10 +23,10 @@ function processQueue(error: unknown, token: string | null) {
 export function registerAuthInterceptor(axios: AxiosInstance): void {
   // --- Request interceptor: attach Bearer token ---
   axios.interceptors.request.use((config) => {
-    const sessionStore = useSessionStore()
+    const authStore = useSessionStore()
 
-    if (sessionStore.accessToken) {
-      config.headers.Authorization = `Bearer ${sessionStore.accessToken}`
+    if (authStore.accessToken) {
+      config.headers.Authorization = `Bearer ${authStore.accessToken}`
     }
 
     return config
@@ -63,8 +63,8 @@ export function registerAuthInterceptor(axios: AxiosInstance): void {
 
       const newToken: string = response.data.data.accessToken
 
-      const sessionStore = useSessionStore()
-      sessionStore.setAccessToken(newToken)
+      const authStore = useSessionStore()
+      authStore.setAccessToken(newToken)
 
       processQueue(null, newToken)
 
@@ -73,8 +73,8 @@ export function registerAuthInterceptor(axios: AxiosInstance): void {
     } catch (refreshError) {
       processQueue(refreshError, null)
 
-      const sessionStore = useSessionStore()
-      sessionStore.clearSession()
+      const authStore = useSessionStore()
+      authStore.clearSession()
 
       // Only redirect to login if current route requires auth
       const { default: router } = await import('@/app/router')

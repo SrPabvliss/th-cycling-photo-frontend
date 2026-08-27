@@ -1,15 +1,15 @@
 import type { IBreadcrumbItem } from '@/core/layout/types/breadcrumb.interface'
 
-import { EVENTS_PATH } from '@/features/events/routes'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 
-const root: IBreadcrumbItem = { label: 'Eventos', to: EVENTS_PATH }
+const root: IBreadcrumbItem = { label: 'Eventos', to: ROUTE_PATHS.EVENTS }
 
 export function galleryBreadcrumbs(eventId: string, eventName: string): IBreadcrumbItem[] {
-  return [root, { label: eventName, to: `${EVENTS_PATH}/${eventId}` }, { label: 'Galería' }]
+  return [root, { label: eventName, to: `${ROUTE_PATHS.EVENTS}/${eventId}` }, { label: 'Galería' }]
 }
 
 export function uploadBreadcrumbs(eventId: string, eventName: string): IBreadcrumbItem[] {
-  return [root, { label: eventName, to: `${EVENTS_PATH}/${eventId}` }, { label: 'Subir Fotos' }]
+  return [root, { label: eventName, to: `${ROUTE_PATHS.EVENTS}/${eventId}` }, { label: 'Subir Fotos' }]
 }
 
 export function detailBreadcrumbs(
@@ -19,8 +19,8 @@ export function detailBreadcrumbs(
 ): IBreadcrumbItem[] {
   return [
     root,
-    { label: eventName, to: `${EVENTS_PATH}/${eventId}` },
-    { label: 'Galería', to: `${EVENTS_PATH}/${eventId}/photos` },
+    { label: eventName, to: `${ROUTE_PATHS.EVENTS}/${eventId}` },
+    { label: 'Galería', to: `${ROUTE_PATHS.EVENTS}/${eventId}/photos` },
     { label: filename },
   ]
 }

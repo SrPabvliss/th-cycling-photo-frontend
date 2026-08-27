@@ -1,4 +1,4 @@
-.email-section :deep(.n-card__content) {
+.email-section {
   display: flex;
   flex-direction: column;
   gap: 16px;

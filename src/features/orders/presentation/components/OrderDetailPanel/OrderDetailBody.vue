@@ -6,7 +6,7 @@ import { LogoWhatsapp } from '@vicons/ionicons5'
 import { formatCurrency } from '@/shared/utils/currency.utils'
 import { formatDateTime, formatRelativeTime } from '@/shared/utils/date.utils'
 import { formatWhatsAppNumber } from '@/shared/utils/phone.utils'
-import { ORDER_STATUS } from '@/shared/types/order-status.types'
+import { ORDER_STATUS } from '../../../types/responses/order-list.response'
 import type { IOrderDetail } from '../../../types/responses/order-detail.response'
 import { getOrderStatusPresentation } from '../../../utils/order-status-presentation'
 import {

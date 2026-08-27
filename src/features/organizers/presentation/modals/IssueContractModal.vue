@@ -5,10 +5,10 @@ import { NButton, NIcon, NModal } from 'naive-ui'
 import { AlertCircleOutline, RefreshOutline } from '@vicons/ionicons5'
 
 import { message } from '@/core/ui/discrete-api'
-import { useIssueContract } from '@/features/contracts/composables/mutations/use-issue-contract'
+import { useIssueContract } from '../../composables/mutations/use-issue-contract'
 import { useSearchUsersQuery } from '../../composables/queries/use-search-users'
 import type { IOrganizerProp } from '../../types/issue-contract-modal.types'
-import type { IContractIssued } from '@/features/contracts/types/responses/contract-issued.response'
+import type { IContractIssued } from '../../types/responses/contract-issued.response'
 import type { IPickablePerson } from '../../types/responses/pickable-person.response'
 import PersonPicker from '../components/PersonPicker/PersonPicker.vue'
 

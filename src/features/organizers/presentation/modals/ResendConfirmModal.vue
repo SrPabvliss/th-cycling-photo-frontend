@@ -4,9 +4,9 @@ import { NButton, NIcon, NModal } from 'naive-ui'
 import { WarningOutline } from '@vicons/ionicons5'
 
 import { formatDate, parseDateOnly } from '@/shared/utils/date.utils'
-import { useResendContract } from '@/features/contracts/composables/mutations/use-resend-contract'
+import { useResendContract } from '../../composables/mutations/use-resend-contract'
 import type { IInvitationCard } from '../../types/responses/organizer-list.response'
-import type { IContractIssued } from '@/features/contracts/types/responses/contract-issued.response'
+import type { IContractIssued } from '../../types/responses/contract-issued.response'
 import { formatNumber } from '@/shared/utils/format.utils'
 
 const props = withDefaults(

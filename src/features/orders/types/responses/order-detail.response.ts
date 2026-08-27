@@ -2,7 +2,7 @@ import type {
   PayoutMethodAccountType,
   PayoutMethodProvider,
 } from '@/features/tenant-profile/types/responses/payout-method.response'
-import type { OrderStatus } from '@/shared/types/order-status.types'
+import type { OrderStatus } from './order-list.response'
 
 export const DELIVERY_LINK_STATUS = {
   ACTIVE: 'active',

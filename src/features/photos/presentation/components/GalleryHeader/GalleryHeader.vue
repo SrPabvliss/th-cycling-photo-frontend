@@ -13,8 +13,8 @@ import {
 } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
-import { EVENT_ROUTE_NAMES } from '@/features/events/routes'
-import type { IEventDetail } from '@/features/events/types/responses/event-detail.response'
+import { ROUTE_NAMES } from '@/core/navigation/route-names'
+import type { IEventDetail } from '@/shared/types/event.types'
 import { formatNumber } from '@/shared/utils/format.utils'
 
 const props = defineProps<{
@@ -31,11 +31,11 @@ defineEmits<{
 const router = useRouter()
 
 function goToEventList() {
-  router.push({ name: EVENT_ROUTE_NAMES.LIST })
+  router.push({ name: ROUTE_NAMES.EVENTS_LIST })
 }
 
 function goToEventDetail() {
-  router.push({ name: EVENT_ROUTE_NAMES.DETAIL, params: { slug: props.eventSlug } })
+  router.push({ name: ROUTE_NAMES.EVENTS_DETAIL, params: { slug: props.eventSlug } })
 }
 </script>
 
@@ -64,9 +64,9 @@ function goToEventDetail() {
           </span>
           <span v-else>{{ formatDate(event.startDate) }} – {{ formatDate(event.endDate) }}</span>
         </span>
-        <span v-if="event.provinceName || event.cantonName">
+        <span>
           <NIcon :component="BusinessOutline" :size="13" />
-          {{ [event.cantonName, event.provinceName].filter(Boolean).join(', ') }}
+          {{ event.organizerName }}
         </span>
         <span v-if="event.photoQuota !== null" class="dt-upd">
           <NIcon :component="CubeOutline" :size="13" />

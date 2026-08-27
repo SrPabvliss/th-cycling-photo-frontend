@@ -16,7 +16,7 @@ const emit = defineEmits<{
 const TABS: OrderTab[] = [
   'all',
   'pending',
-  'paymentInfoSent',
+  'payment_info_sent',
   'paid',
   'delivered',
   'gifted',

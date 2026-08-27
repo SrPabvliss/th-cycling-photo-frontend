@@ -1,0 +1,18 @@
+.tt-input {
+  border: 1px solid #d8e0e9;
+  border-radius: 9px;
+  height: 38px;
+  padding: 0 11px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tt-neutral-dark, #16233a);
+  outline: 0;
+  background: #fff;
+  width: 100%;
+}
+
+.ce-selin.ph {
+  color: #8b98ab;
+  font-weight: 500;
+}

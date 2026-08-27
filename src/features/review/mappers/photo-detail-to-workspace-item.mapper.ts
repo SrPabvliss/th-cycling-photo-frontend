@@ -1,4 +1,4 @@
-import type { IPhotoDetail } from '@/features/photos/types/responses/photo-detail.response'
+import type { IPhotoDetail } from '@/shared/types/photo-detail.types'
 import type { IWorkspaceQueueItem } from '@/shared/workspace/types/workspace-queue-item.types'
 
 /**

@@ -4,9 +4,9 @@ import { useSessionStore } from '@/core/auth/stores/session.store'
 import type { PermissionKey } from './permissions'
 
 export function usePermissions() {
-  const sessionStore = useSessionStore()
+  const authStore = useSessionStore()
 
-  const permissions = computed(() => sessionStore.currentUser?.permissions ?? [])
+  const permissions = computed(() => authStore.currentUser?.permissions ?? [])
 
   function has(key: PermissionKey): boolean {
     return permissions.value.includes(key)

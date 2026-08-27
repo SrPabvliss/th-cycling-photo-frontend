@@ -3,19 +3,17 @@ import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton, NModal } from 'naive-ui'
 
-import { CART_ROUTE_NAMES } from '@/features/cart/routes'
-import { PAYMENT_ROUTE_NAMES } from '@/features/payments/routes'
+import { ROUTE_NAMES } from '@/core/navigation/route-names'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import { useSnoozePrompt } from '../../../composables/mutations/use-snooze-prompt'
-import { ACCOUNT_ROUTE_NAMES } from '../../../routes'
 
 const PROMPT_KEY = 'email_verification'
 
 const HIDDEN_ROUTE_NAMES = new Set<string | symbol>([
-  CART_ROUTE_NAMES.CHECKOUT,
-  PAYMENT_ROUTE_NAMES.BOX,
-  PAYMENT_ROUTE_NAMES.RETURN,
-  ACCOUNT_ROUTE_NAMES.VERIFY_EMAIL,
+  ROUTE_NAMES.CART_CHECKOUT,
+  ROUTE_NAMES.PAYMENT_BOX,
+  ROUTE_NAMES.PAYMENT_RETURN,
+  ROUTE_NAMES.ACCOUNT_VERIFY_EMAIL,
 ])
 
 const route = useRoute()
@@ -26,12 +24,12 @@ const snoozePrompt = useSnoozePrompt()
 const dismissed = ref(false)
 
 const isRouteAllowed = computed(() => !HIDDEN_ROUTE_NAMES.has(route.name ?? ''))
-const isPending = computed(() => (authStore.currentUser?.pendingPrompts ?? []).includes(PROMPT_KEY))
+const isPending = computed(() => (authStore.currentUser?.pendingPrompts ?? [])[0] === PROMPT_KEY)
 const isVisible = computed(() => !dismissed.value && isPending.value && isRouteAllowed.value)
 
 function verifyNow() {
   dismissed.value = true
-  router.push({ name: ACCOUNT_ROUTE_NAMES.VERIFY_EMAIL })
+  router.push({ name: ROUTE_NAMES.ACCOUNT_VERIFY_EMAIL })
 }
 
 function later() {
@@ -48,7 +46,7 @@ function closeLocally() {
   <NModal
     :show="isVisible"
     preset="card"
-    title="¿Nos ayudás con tu correo?"
+    title="¿Nos ayudas con tu correo?"
     class="verify-email-prompt"
     style="width: 420px; max-width: calc(100vw - 32px)"
     :closable="true"

@@ -1,0 +1,68 @@
+.pd-card {
+  background: var(--tt-surface);
+  border: 1px solid var(--tt-neutral-light);
+  border-radius: 12px;
+  padding: 13px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  box-shadow: 0 1px 2px rgba(16, 35, 58, 0.04);
+}
+
+.pd-card-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pd-card-h h4 {
+  margin: 0;
+  font: 700 10px/1 'Plus Jakarta Sans';
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: #8b98ab;
+}
+
+.pd-kvs {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.pd-kv {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: 12px;
+  padding: 5px 0;
+  border-bottom: 1px solid #f1f4f7;
+}
+
+.pd-kv:last-child {
+  border-bottom: 0;
+}
+
+.pd-kv span {
+  color: #8b98ab;
+  flex: none;
+}
+
+.pd-kv b {
+  font-weight: 700;
+  text-align: right;
+  color: var(--tt-neutral-dark);
+}
+
+.pd-kv b.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11.5px;
+}
+
+.pd-note {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #8b98ab;
+}

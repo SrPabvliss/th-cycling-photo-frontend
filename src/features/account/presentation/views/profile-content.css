@@ -1,0 +1,25 @@
+.profile-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profile-content :deep(.page-header) {
+  margin-bottom: 0;
+}
+
+.profile-content__spin {
+  align-self: center;
+  margin-top: 48px;
+}
+
+.profile-content__count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tt-neutral-mid);
+  background: var(--tt-background);
+  border-radius: 999px;
+  padding: 3px 9px;
+  min-width: 24px;
+  text-align: center;
+}

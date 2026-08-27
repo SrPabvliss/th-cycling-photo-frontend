@@ -5,7 +5,7 @@ import type { LocationQueryRaw } from 'vue-router'
 import { useMediaQuery } from '@vueuse/core'
 import { NButton, NResult, NSpin } from 'naive-ui'
 
-import PageHeader from '@/shared/components/PageHeader.vue'
+import PageHeader from '@/shared/components/PageHeader/PageHeader.vue'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import { useTenantProfile } from '@/features/tenant-profile/composables/queries/use-tenant-profile'
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
@@ -47,17 +47,17 @@ import { usePermissions } from '@/core/auth/use-permissions'
 
 const router = useRouter()
 const route = useRoute()
-const authStore = useSessionStore()
+const sessionStore = useSessionStore()
 const { has } = usePermissions()
 
 const role = computed<OrderOperatorRole>(() => {
   if (has(PERMISSIONS.EVENT_READ_ALL)) return 'titan'
-  return authStore.currentUser?.tenantId ? 'organizer' : 'operator'
+  return sessionStore.currentUser?.tenantId ? 'organizer' : 'operator'
 })
 
 const filterState = useOrderFilters()
 provide(ORDER_FILTER_STATE_KEY, filterState)
-const { filters, clearAll, tab } = filterState
+const { filters, clearAll } = filterState
 
 seedOrderFiltersFromQuery(filterState, route.query)
 
@@ -154,10 +154,6 @@ function handleCloseDetail() {
   router.push({ query: buildQuery(filters.value, null) })
 }
 
-function handleTabChange(next: typeof tab.value) {
-  tab.value = next
-}
-
 function handleSendPaymentInfo(order: IOrderListItem) {
   handleNotifyPaymentInfo(order)
 }
@@ -173,7 +169,7 @@ function handleSendPaymentInfo(order: IOrderListItem) {
       <OrderStatusTabs
         :active="filters.tab"
         :counts="stats?.tabs"
-        @update:active="handleTabChange"
+        @update:active="(t) => (filters.tab = t)"
       />
 
       <OrderFilters />

@@ -4,9 +4,9 @@ import { NButton, NFlex, NIcon, NTag } from 'naive-ui'
 import { ArrowBack, CloudUploadOutline } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
-import { EVENT_STATUS_CONFIG } from '@/features/events/constants/status-config'
+import { EVENT_STATUS_CONFIG } from '@/shared/constants/event-status.constants'
 import { PHOTO_ROUTE_NAMES } from '../../../routes'
-import type { IEventDetail } from '@/features/events/types/responses/event-detail.response'
+import type { IEventDetail } from '@/shared/types/event.types'
 
 defineProps<{
   event: IEventDetail

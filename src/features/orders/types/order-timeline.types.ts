@@ -1,4 +1,4 @@
-import type { OrderStatus } from '@/shared/types/order-status.types'
+import type { OrderStatus } from './responses/order-list.response'
 
 export interface IOrderTimelineFacts {
   status: OrderStatus

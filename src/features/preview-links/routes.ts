@@ -1,8 +1,10 @@
 import type { RouteRecordRaw } from 'vue-router'
 
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+
 import { PERMISSIONS } from '@/core/auth/permissions'
 
-export const PREVIEW_LINKS_PATH = '/preview-links'
+export const PREVIEW_LINKS_PATH = ROUTE_PATHS.PREVIEW_LINKS
 
 export const PREVIEW_LINK_ROUTE_NAMES = {
   LIST: 'preview-links-list',

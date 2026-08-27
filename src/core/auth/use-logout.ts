@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
-import { AUTH_PATH } from '@/features/auth/routes'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { useSessionStore } from './stores/session.store'
 
 export function useLogoutMutation() {
@@ -18,7 +18,7 @@ export function useLogoutMutation() {
     onSettled: () => {
       sessionStore.clearSession()
       queryClient.clear()
-      router.push(AUTH_PATH)
+      router.push(ROUTE_PATHS.LOGIN)
     },
   })
 }

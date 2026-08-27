@@ -7,7 +7,7 @@ import { AddOutline } from '@vicons/ionicons5'
 import { dialog } from '@/core/ui/discrete-api'
 import { PERMISSIONS } from '@/core/auth/permissions'
 import { usePermissions } from '@/core/auth/use-permissions'
-import PageHeader from '@/shared/components/PageHeader.vue'
+import PageHeader from '@/shared/components/PageHeader/PageHeader.vue'
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import { useOrganizersListQuery } from '../../composables/queries/use-organizers-list'
 import { useOrganizersStatsQuery } from '../../composables/queries/use-organizers-stats'
@@ -17,14 +17,14 @@ import {
   seedOrganizerFiltersFromQuery,
   useOrganizerFilters,
 } from '../../composables/use-organizer-filters'
-import { useRevokeContract } from '@/features/contracts/composables/mutations/use-revoke-contract'
+import { useRevokeContract } from '../../composables/mutations/use-revoke-contract'
 import { ORGANIZER_ROUTE_NAMES } from '../../routes'
 import type {
   IInvitationCard,
   IOrganizerCard,
   IOrganizerRow,
 } from '../../types/responses/organizer-list.response'
-import type { IContractIssued } from '@/features/contracts/types/responses/contract-issued.response'
+import type { IContractIssued } from '../../types/responses/contract-issued.response'
 import type { IPickableOrganizer } from '../../types/responses/pickable-person.response'
 import IssueContractModal from '../modals/IssueContractModal.vue'
 import LinkResultModal from '../modals/LinkResultModal.vue'

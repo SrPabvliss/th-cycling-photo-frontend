@@ -20,11 +20,12 @@ import {
   LogoWhatsapp,
 } from '@vicons/ionicons5'
 
-import { usePhotoSelectionStore } from '../../stores/photo-selection.store'
+import { usePhotoSelectionStore } from '@/shared/stores/photo-selection.store'
 import { useCreatePreviewLink } from '../../composables/mutations/use-create-preview-link'
 import { openWhatsApp } from '@/shared/utils/whatsapp.utils'
-import PageHeader from '@/shared/components/PageHeader.vue'
+import PageHeader from '@/shared/components/PageHeader/PageHeader.vue'
 import type { IPreviewLinkCreated } from '../../types/responses/preview-link-created.response'
+import { pluralize } from '@/shared/utils/format.utils'
 
 const route = useRoute()
 const router = useRouter()
@@ -95,7 +96,7 @@ function handleWhatsAppSend() {
     <div class="page-view__content preview-gen-content">
       <PageHeader
         title="Generar Preview"
-        :subtitle="`${selectionStore.selectedCount} foto${selectionStore.selectedCount !== 1 ? 's' : ''} seleccionada${selectionStore.selectedCount !== 1 ? 's' : ''}`"
+        :subtitle="`${selectionStore.selectedCount} ${pluralize(selectionStore.selectedCount, 'foto seleccionada', 'fotos seleccionadas')}`"
         back-to=""
       />
 
