@@ -9,7 +9,9 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 
+import { registerCartLayoutSlots } from '@/features/cart/layout-slots'
 import { registerCartPostLoginMerge } from '@/features/cart/post-login'
+import { registerNotificationLayoutSlots } from '@/features/notifications/layout-slots'
 import App from './App.vue'
 import { queryClientConfig } from './providers'
 import router from './router'
@@ -22,5 +24,7 @@ app.use(router)
 app.use(VueQueryPlugin, { queryClient })
 
 registerCartPostLoginMerge(queryClient)
+registerCartLayoutSlots()
+registerNotificationLayoutSlots()
 
 app.mount('#app')

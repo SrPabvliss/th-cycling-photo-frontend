@@ -18,9 +18,9 @@ import {
 import { CopyOutline, LogoWhatsapp } from '@vicons/ionicons5'
 import type { DataTableColumns } from 'naive-ui'
 
-import { useEventDetailQuery } from '@/features/events/composables/queries/use-event-detail'
+import { useEventDetailQuery } from '@/shared/composables/use-event-detail'
 import { env } from '@/core/config/env'
-import PageHeader from '@/shared/components/PageHeader.vue'
+import PageHeader from '@/shared/components/PageHeader/PageHeader.vue'
 import { formatDate, formatRelativeTime } from '@/shared/utils/date.utils'
 import { usePreviewLinksListQuery } from '../../composables/queries/use-preview-links-list'
 import { openWhatsApp } from '@/shared/utils/whatsapp.utils'

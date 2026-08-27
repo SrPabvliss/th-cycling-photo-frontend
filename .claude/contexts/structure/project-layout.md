@@ -37,12 +37,54 @@ src/
 
 ## Import Rules
 
-- **features → core:** Allowed. Features import httpClient, API_ROUTES, layout
-- **features → shared:** Allowed. Features import shared components/utils
-- **features → features:** FORBIDDEN. No direct cross-feature imports
-- **shared → features:** FORBIDDEN. Shared never imports from features
-- **core → features:** FORBIDDEN. Core never imports from features (except auth store in interceptor)
-- **Cross-feature communication:** Via Pinia stores or route params only
+Four layers, each may only import downward:
+
+```
+app/        composes everything
+  |
+features/domain/    events, photos, orders, cart, review, ...
+  |                 MAY NOT import each other
+features/base/      auth, locations, pricing, tenant-profile, legal,
+  |                 event-types, participant-categories
+  |                 Any feature may import these. They import nothing from features.
+shared/     generic components, composables, utils, types
+  |
+core/       http, api routes, config, layout, theme, auth primitives
+```
+
+### Base features
+
+A feature is **base** when it holds platform-wide identity or reference data and has
+**zero outgoing imports to other features**. Any feature may import a base feature.
+
+Current base tier: `auth`, `account`, `locations`, `pricing`, `tenant-profile`, `legal`,
+`event-types`, `participant-categories`, `event-assets`, `photo-categories`, `organizers`,
+`contracts`, `review`.
+
+Promoting a feature to base requires it to have no feature imports of its own (except
+other base features). That property is what makes the tier safe, and it is checked by lint.
+
+### Domain features
+
+Everything else. Domain features may import `core/`, `shared/` and base features.
+They may **NOT** import another domain feature — no exceptions, and specifically no
+cycles. Cross-domain communication goes through:
+
+1. Route params / route `meta`
+2. A Pinia store promoted to `shared/stores/`
+3. A registry in `core/` that one feature fills and another consumes
+   (see `core/auth/post-login-tasks.ts`)
+4. Props and events, when both sit under a common parent
+
+### Hard rules
+
+- **shared → features:** FORBIDDEN, always.
+- **core → features:** FORBIDDEN, always. Core sits underneath everything.
+  Layout shells expose slots; they never mount feature components directly.
+- **base → domain:** FORBIDDEN. This is what keeps the base tier a tier.
+- **domain → domain:** FORBIDDEN.
+
+Enforced by `no-restricted-imports` in `eslint.config.ts`.
 
 ## Where Things Go
 

@@ -6,8 +6,7 @@ import { ChevronForwardOutline, FlagOutline, CardOutline, StarOutline } from '@v
 import { formatRelativeTime, formatDateTime, isRecent } from '@/shared/utils/date.utils'
 import { formatWhatsAppNumber } from '@/shared/utils/phone.utils'
 import { formatCurrency } from '@/shared/utils/currency.utils'
-import { ORDER_STATUS } from '@/shared/types/order-status.types'
-import { type IOrderListItem } from '../../../types/responses/order-list.response'
+import { ORDER_STATUS, type IOrderListItem } from '../../../types/responses/order-list.response'
 import { PAYMENT_METHOD_LABELS } from '../../../constants/status-config'
 import { getOrderStatusPresentation } from '../../../utils/order-status-presentation'
 import {

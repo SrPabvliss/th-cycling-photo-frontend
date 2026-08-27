@@ -4,6 +4,8 @@ import { NConfigProvider, NMessageProvider, NDialogProvider, dateEsAR, esAR } fr
 import ErrorBoundary from '@/core/layout/ErrorBoundary.vue'
 import ConsentReacceptModal from '@/features/auth/presentation/components/ConsentReacceptModal/ConsentReacceptModal.vue'
 import VerifyEmailPrompt from '@/features/account/presentation/components/VerifyEmailPrompt/VerifyEmailPrompt.vue'
+import PersonalProfilePrompt from '@/features/account/presentation/components/PersonalProfilePrompt/PersonalProfilePrompt.vue'
+import NotificationSocketProvider from '@/features/notifications/presentation/components/NotificationSocketProvider/NotificationSocketProvider.vue'
 import { titanTvTheme } from '@/core/theme/titan-tv-theme'
 </script>
 
@@ -12,9 +14,11 @@ import { titanTvTheme } from '@/core/theme/titan-tv-theme'
     <NMessageProvider>
       <NDialogProvider>
         <ErrorBoundary>
+          <NotificationSocketProvider />
           <RouterView />
           <ConsentReacceptModal />
           <VerifyEmailPrompt />
+          <PersonalProfilePrompt />
         </ErrorBoundary>
       </NDialogProvider>
     </NMessageProvider>

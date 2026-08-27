@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { NCard, NEmpty, NFlex, NSpin, NTag } from 'naive-ui'
+import { NEmpty, NFlex, NSpin, NTag } from 'naive-ui'
 
 import { formatDate } from '@/shared/utils/date.utils'
 import type {
@@ -48,7 +48,7 @@ const totalEventsRemaining = computed(() =>
 </script>
 
 <template>
-  <NCard title="Contratos" class="contracts-section">
+  <div class="contracts-section">
     <NSpin v-if="isLoading" size="small" />
 
     <NEmpty v-else-if="!contracts?.length" description="No tienes contratos registrados" />
@@ -85,7 +85,7 @@ const totalEventsRemaining = computed(() =>
         </div>
       </NFlex>
     </template>
-  </NCard>
+  </div>
 </template>
 
 <style scoped src="./contracts-section.css"></style>

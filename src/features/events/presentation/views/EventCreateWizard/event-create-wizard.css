@@ -1,0 +1,158 @@
+.ce-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-bottom: 34px;
+}
+
+.ce-loading {
+  align-self: center;
+  margin-top: 60px;
+}
+
+.ce-page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.ce-page-head h1 {
+  margin: 0;
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--tt-neutral-dark, #16233a);
+}
+
+.ce-page-head p {
+  margin: 4px 0 0;
+  font-size: 13.5px;
+  color: #8b98ab;
+}
+
+.ce-layout {
+  display: grid;
+  grid-template-columns: 236px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.ce-rail {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ce-railcard {
+  background: #fff;
+  border: 1px solid var(--tt-neutral-light, #e6ebf1);
+  border-radius: 12px;
+  padding: 12px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ce-railcard span {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #8b98ab;
+}
+
+.ce-railcard b {
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--tt-neutral-dark, #16233a);
+}
+
+.ce-railcard i {
+  font-style: normal;
+  font-size: 11.5px;
+  color: #5b6a80;
+}
+
+.ce-panel {
+  background: var(--tt-surface, #fff);
+  border: 1px solid var(--tt-neutral-light, #e6ebf1);
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(16, 35, 58, 0.04);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ce-panel.solo .ce-panel-body {
+  padding: 0;
+}
+
+.ce-panel-body {
+  padding: 20px 22px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.ce-step-placeholder {
+  margin: 0;
+  font-size: 13px;
+  color: #8b98ab;
+}
+
+@media (max-width: 767px) {
+  .ce-page-head {
+    display: none;
+  }
+
+  .ce-rail {
+    display: none;
+  }
+
+  .ce-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ce-panel {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .ce-panel-body {
+    padding: 14px 14px 22px;
+  }
+}
+
+.ce-payout-error {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border-radius: 11px;
+  padding: 12px 13px;
+  margin-bottom: 14px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid #f6c4c4;
+  color: #9b1c1c;
+}
+
+.ce-payout-error > svg {
+  flex: none;
+}
+
+.ce-payout-error div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ce-payout-error b {
+  font-size: 13px;
+}

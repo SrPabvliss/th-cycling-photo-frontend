@@ -8,16 +8,12 @@ import {
   ACCEPTED_MIME_TYPES,
   MAX_FILE_SIZE,
 } from '../../../constants/upload.constants'
+import type { IRejectionSummary } from '../../../types/upload-status'
 import { formatFileSize } from '@/shared/utils/format.utils'
 
 defineProps<{
   disabled?: boolean
 }>()
-
-export interface IRejectionSummary {
-  invalidType: number
-  tooLarge: number
-}
 
 const emit = defineEmits<{
   'files-selected': [files: File[]]

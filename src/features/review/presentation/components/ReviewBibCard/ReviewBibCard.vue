@@ -2,7 +2,7 @@
 import { computed, onUnmounted, ref } from 'vue'
 import { NIcon, useDialog } from 'naive-ui'
 import { TrashOutline } from '@vicons/ionicons5'
-import type { IBibAttribute } from '@/features/photos/types/responses/photo-detail.response'
+import type { IBibAttribute } from '@/shared/types/photo-detail.types'
 import { useApplyBibCorrection } from '../../../composables/mutations/use-apply-bib-correction'
 import { useDeletePhotoBib } from '../../../composables/mutations/use-delete-photo-bib'
 import { useAsyncSaveState } from '@/shared/composables/use-async-save-state'

@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { useForm } from '@tanstack/vue-form'
 import { useRouter } from 'vue-router'
-import { NAlert, NButton, NCard, NFormItem, NIcon, NInput, NTag } from 'naive-ui'
+import { NAlert, NButton, NFormItem, NIcon, NInput, NTag } from 'naive-ui'
 import { MailOutline } from '@vicons/ionicons5'
 
 import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
@@ -39,7 +39,7 @@ const form = useForm({
 </script>
 
 <template>
-  <NCard title="Correo" class="email-section">
+  <div class="email-section">
     <div class="email-section__row">
       <div
         class="email-section__icon"
@@ -147,7 +147,7 @@ const form = useForm({
         <NButton quaternary size="small" @click="isChanging = false">Cancelar</NButton>
       </div>
     </form>
-  </NCard>
+  </div>
 </template>
 
 <style scoped src="./email-section.css"></style>

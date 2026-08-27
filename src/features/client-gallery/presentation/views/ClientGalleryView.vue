@@ -25,7 +25,8 @@ import ContactForm from '../components/ContactForm/ContactForm.vue'
 import OrderConfirmation from '../components/OrderConfirmation/OrderConfirmation.vue'
 import PreviewExpired from '../components/PreviewExpired/PreviewExpired.vue'
 import PreviewAlreadyOrdered from '../components/PreviewAlreadyOrdered/PreviewAlreadyOrdered.vue'
-import PreviewNotFound from '../components/PreviewNotFound/PreviewNotFound.vue'
+import PreviewNotFound from '@/shared/components/PreviewNotFound/PreviewNotFound.vue'
+import { pluralize } from '@/shared/utils/format.utils'
 
 type ViewStep = 'gallery' | 'contact' | 'confirmation'
 
@@ -198,7 +199,7 @@ async function handleSubmit(formData: IContactFormData) {
             <p class="cg-panel__cta-sub">
               {{
                 selectedCount > 0
-                  ? `${selectedCount} foto${selectedCount !== 1 ? 's' : ''} seleccionada${selectedCount !== 1 ? 's' : ''}`
+                  ? `${selectedCount} ${pluralize(selectedCount, 'foto seleccionada', 'fotos seleccionadas')}`
                   : 'Selecciona al menos una foto'
               }}
             </p>

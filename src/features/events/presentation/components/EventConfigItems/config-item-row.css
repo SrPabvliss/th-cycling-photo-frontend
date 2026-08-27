@@ -1,0 +1,153 @@
+.ce-item {
+  border: 1px solid var(--tt-neutral-light, #e6ebf1);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  border-left: 4px solid #16a34a;
+}
+
+.ce-item.new {
+  border-left-color: #2563eb;
+}
+
+.ce-item.missing {
+  border-left-color: #dc2626;
+}
+
+.ce-item.open {
+  border-color: #bcd4fb;
+  box-shadow: 0 6px 20px rgb(22 41 77 / 8%);
+}
+
+.ce-item-head {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+}
+
+.ce-item-head:hover {
+  background: #fbfcfe;
+}
+
+.ce-item-ic {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  background: #eef2f7;
+  color: #16294d;
+}
+
+.ce-item.missing .ce-item-ic {
+  background: #fdecec;
+  color: #dc2626;
+}
+
+.ce-item.new .ce-item-ic {
+  background: #eaf1fe;
+  color: #2563eb;
+}
+
+.ce-item-t {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ce-item-t b {
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.ce-item-t i {
+  font-style: normal;
+  font-size: 12px;
+  color: #5b6a80;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ce-item.missing .ce-item-t i {
+  color: #dc2626;
+}
+
+.ce-chip {
+  flex: none;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.ce-chip.ok {
+  background: #e9f8ee;
+  color: #16a34a;
+}
+
+.ce-chip.new {
+  background: #eaf1fe;
+  color: #2563eb;
+}
+
+.ce-chip.bad {
+  background: #dc2626;
+  color: #fff;
+}
+
+.ce-item-act {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #5b6a80;
+}
+
+.ce-item.open .ce-item-act,
+.ce-item-head:hover .ce-item-act {
+  color: #2563eb;
+}
+
+.ce-item-act .flipped {
+  transform: rotate(180deg);
+}
+
+.ce-item-body {
+  border-top: 1px solid var(--tt-neutral-light, #e6ebf1);
+  background: #fbfcfe;
+  padding: 15px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+@media (max-width: 767px) {
+  .ce-item-head {
+    padding: 11px 12px;
+    gap: 10px;
+  }
+
+  .ce-item-act {
+    display: none;
+  }
+
+  .ce-item-body {
+    padding: 14px;
+  }
+}

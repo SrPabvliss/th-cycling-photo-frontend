@@ -2,9 +2,9 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
-import { toCurrentUser } from '@/features/auth/mappers/current-user.mapper'
+import { toCurrentUser } from '@/core/auth/current-user.mapper'
 import { useSessionStore } from '@/core/auth/stores/session.store'
-import type { IApiCurrentUser } from '@/features/auth/types/responses/current-user.response'
+import type { IApiCurrentUser } from '@/core/auth/current-user'
 import { CONTRACT_QUERY_KEYS } from '../../constants/query-keys'
 
 export function useAcceptContract() {

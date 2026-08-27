@@ -1,8 +1,10 @@
 import type { RouteRecordRaw } from 'vue-router'
 
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+
 import { PERMISSIONS } from '@/core/auth/permissions'
 
-export const PHOTOS_PATH = '/photos'
+export const PHOTOS_PATH = ROUTE_PATHS.PHOTOS
 
 export const PHOTO_ROUTE_NAMES = {
   GALLERY: 'photos-gallery',

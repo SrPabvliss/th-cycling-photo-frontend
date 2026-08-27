@@ -7,7 +7,7 @@ import {
 } from '@vicons/ionicons5'
 
 import { formatDateTime } from '@/shared/utils/date.utils'
-import { ORDER_STATUS } from '@/shared/types/order-status.types'
+import { ORDER_STATUS } from '../types/responses/order-list.response'
 import type { IOrderDetail } from '../types/responses/order-detail.response'
 import { PAYMENT_METHOD_LABELS } from '../constants/status-config'
 

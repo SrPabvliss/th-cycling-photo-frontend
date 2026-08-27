@@ -7,7 +7,7 @@ import { formatFileSize, formatNumber } from '@/shared/utils/format.utils'
 import { formatDate } from '@/shared/utils/date.utils'
 import { usePhotoDetailQuery } from '@/features/photos/composables/queries/use-photo-detail'
 import type { IPhotoListItem } from '@/features/photos/types/responses/photo-list.response'
-import type { IEventDetail } from '@/features/events/types/responses/event-detail.response'
+import type { IEventDetail } from '@/shared/types/event.types'
 import type { IPhotoOrder } from '@/features/photos/types/responses/photo-detail.response'
 import GalleryBibChips from '../components/GalleryBibChips/GalleryBibChips.vue'
 

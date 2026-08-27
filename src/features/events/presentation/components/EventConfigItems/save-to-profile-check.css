@@ -1,0 +1,55 @@
+.ce-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  border: 1px dashed #d8e0e9;
+  border-radius: 11px;
+  padding: 11px 12px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  width: 100%;
+}
+
+.ce-check.on {
+  border-style: solid;
+  border-color: #bcd4fb;
+  background: #eaf1fe;
+}
+
+.tt-check {
+  width: 16px;
+  height: 16px;
+  border: 1px solid #d8e0e9;
+  border-radius: 5px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: #fff;
+  flex: none;
+  margin-top: 1px;
+}
+
+.tt-check.on {
+  background: #16294d;
+  border-color: #16294d;
+}
+
+.ce-check-t {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ce-check-t b {
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.ce-check-t i {
+  font-style: normal;
+  font-size: 11.5px;
+  color: #5b6a80;
+  line-height: 1.45;
+}

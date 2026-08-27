@@ -2,7 +2,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { refDebounced } from '@vueuse/core'
 
-import { usePhotoSelectionStore } from '@/features/preview-links/stores/photo-selection.store'
+import { usePhotoSelectionStore } from '@/shared/stores/photo-selection.store'
 
 import type {
   BibMatchMode,

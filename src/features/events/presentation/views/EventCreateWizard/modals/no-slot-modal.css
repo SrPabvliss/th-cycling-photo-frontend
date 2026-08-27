@@ -1,0 +1,62 @@
+.ce-noslot {
+  width: 460px;
+  max-width: calc(100vw - 32px);
+}
+
+.ce-noslot-sub {
+  margin: 0 0 14px;
+  font-size: 12.5px;
+  color: #8b98ab;
+  line-height: 1.5;
+}
+
+.tt-notice {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border-radius: 11px;
+  padding: 12px 13px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.tt-notice > svg {
+  flex: none;
+}
+
+.tt-notice div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tt-notice b {
+  font-size: 13px;
+}
+
+.tt-notice.red {
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid #f6c4c4;
+  color: #9b1c1c;
+}
+
+.tt-m-note {
+  margin: 10px 0 0;
+  font-size: 11.5px;
+  color: #8b98ab;
+  line-height: 1.55;
+}
+
+.ce-noslot-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+}
+
+@media (max-width: 575px) {
+  .ce-noslot-foot .n-button {
+    flex: 1;
+    justify-content: center;
+  }
+}

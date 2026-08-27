@@ -9,10 +9,18 @@ vi.mock('../../../composables/mutations/use-apply-color-correction', () => ({
   }),
 }))
 
+vi.mock('../../../composables/mutations/use-delete-photo-color', () => ({
+  useDeletePhotoColor: () => ({
+    mutateAsync: vi.fn(),
+    isPending: { value: false },
+  }),
+}))
+
+import { NDialogProvider } from 'naive-ui'
 import { CARD_NAV_KEY } from '@/shared/workspace/composables/keys'
 import { useWorkspaceCardNavigation } from '@/shared/workspace/composables/use-workspace-card-navigation'
 import ReviewColorCard from './ReviewColorCard.vue'
-import type { IColorAttribute } from '@/features/photos/types/responses/photo-detail.response'
+import type { IColorAttribute } from '@/shared/types/photo-detail.types'
 
 const baseColor: IColorAttribute = {
   id: 'c-1',
@@ -33,12 +41,14 @@ function mountWithProviders(color: IColorAttribute) {
     setup() {
       provide(CARD_NAV_KEY, useWorkspaceCardNavigation())
       return () =>
-        h(ReviewColorCard, {
-          color,
-          region: 'helmet',
-          photoId: 'p-1',
-          photoSlug: 'slug-1',
-        })
+        h(NDialogProvider, null, () =>
+          h(ReviewColorCard, {
+            color,
+            region: 'helmet',
+            photoId: 'p-1',
+            photoSlug: 'slug-1',
+          }),
+        )
     },
   })
   return mount(Comp)

@@ -19,8 +19,8 @@ export function useCheckout() {
       )
       return response.data.orders
     },
-    onSuccess: (_orders, { eventId }) => {
-      cartStore.setGroups(cartStore.groups.filter((group) => group.eventId !== eventId))
+    onSuccess: () => {
+      cartStore.clear()
       queryClient.invalidateQueries({ queryKey: CART_QUERY_KEYS.cart() })
     },
   })

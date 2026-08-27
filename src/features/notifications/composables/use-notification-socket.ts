@@ -6,7 +6,6 @@ import { PERMISSIONS } from '@/core/auth/permissions'
 import { connectSocket, disconnectSocket, getSocket } from '@/core/socket/socket-client'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import { API_ROUTES } from '@/core/api/api-routes'
-import { ORDER_QUERY_KEYS } from '@/features/orders/constants/query-keys'
 import { NOTIFICATION_QUERY_KEYS } from '../constants/query-keys'
 import { useNotificationStore } from '../stores/notification.store'
 import type { INotificationSocketPayload } from '../types/notification.types'
@@ -43,7 +42,7 @@ export function useNotificationSocket() {
 
     // Invalidate orders cache for order-related events
     if (payload.type.startsWith('order.')) {
-      queryClient.invalidateQueries({ queryKey: ORDER_QUERY_KEYS.all() })
+      queryClient.invalidateQueries({ queryKey: [API_ROUTES.ORDERS.BASE] })
     }
 
     // Invalidate operator queries when relevant events arrive

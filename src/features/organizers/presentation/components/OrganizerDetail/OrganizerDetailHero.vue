@@ -44,7 +44,10 @@ const createdRelative = computed(() => formatRelativeTime(props.organizer.create
         <div class="od-id__holder">
           <span class="od-ellip">{{ organizer.holderName }}</span>
           <i>·</i>
-          <span class="od-mailbit" :class="{ 'od-mailbit--warn': !organizer.holderEmailVerified }">
+          <span
+            class="od-mailbit"
+            :class="{ 'od-mailbit--warn': !organizer.holderEmailVerified }"
+          >
             <NIcon
               :component="organizer.holderEmailVerified ? CheckmarkCircle : AlertCircle"
               :size="12"

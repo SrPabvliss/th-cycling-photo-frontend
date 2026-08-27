@@ -9,7 +9,7 @@ function toOrderStatsTabs(tabs: IApiOrderStatsTabs): IOrderStatsTabs {
   return {
     all: tabs.all,
     pending: tabs.pending,
-    paymentInfoSent: tabs.paymentInfoSent,
+    payment_info_sent: tabs.payment_info_sent,
     paid: tabs.paid,
     delivered: tabs.delivered,
     gifted: tabs.gifted,

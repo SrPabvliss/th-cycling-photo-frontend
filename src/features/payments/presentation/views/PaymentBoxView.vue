@@ -6,10 +6,11 @@ import { ChevronBackOutline } from '@vicons/ionicons5'
 import { isAxiosError } from 'axios'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
-import { ACCOUNT_ROUTE_NAMES } from '@/features/account/routes'
+import { ROUTE_NAMES } from '@/core/navigation/route-names'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { useCreatePaymentIntent } from '@/features/payments/composables/mutations/use-create-payment-intent'
 import { findPaymentGateway } from '@/features/payments/gateways/registry'
-import { formatCurrency } from '@/features/pricing/utils/format-currency'
+import { formatCurrency } from '@/shared/utils/currency.utils'
 
 const SETUP_ERROR_MESSAGE = 'No podemos procesar pagos en este momento. Intenta nuevamente.'
 
@@ -76,18 +77,18 @@ function handleSetupFailed(error: unknown) {
 }
 
 function goToCart() {
-  router.push('/gallery')
+  router.push(ROUTE_PATHS.PUBLIC_GALLERY)
 }
 
 function goToOrders() {
-  router.push({ name: ACCOUNT_ROUTE_NAMES.ORDERS })
+  router.push({ name: ROUTE_NAMES.ACCOUNT_ORDERS })
 }
 
 watch(
   orderIds,
   (ids) => {
     if (ids.length === 0) {
-      router.replace('/gallery')
+      router.replace(ROUTE_PATHS.PUBLIC_GALLERY)
       return
     }
     requestIntent(ids)

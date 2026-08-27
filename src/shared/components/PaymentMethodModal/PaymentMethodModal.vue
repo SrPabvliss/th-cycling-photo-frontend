@@ -6,7 +6,7 @@ import { CardOutline, SwapHorizontalOutline } from '@vicons/ionicons5'
 
 import { useCheckout } from '@/shared/composables/use-checkout'
 import { useChoosePaymentMethod } from '@/shared/composables/use-choose-payment-method'
-import { PAYMENT_ROUTE_NAMES } from '@/features/payments/routes'
+import { ROUTE_NAMES } from '@/core/navigation/route-names'
 import { PAYMENT_METHOD, type PaymentMethod } from '@/shared/types/payment-method.types'
 import type { ICheckoutOrderResult } from '@/shared/types/cart.types'
 import { formatCurrency } from '@/shared/utils/currency.utils'
@@ -46,7 +46,7 @@ watch(
 
 function goToPaymentBox(orderIds: string[]) {
   emit('update:show', false)
-  router.push({ name: PAYMENT_ROUTE_NAMES.BOX, query: { orders: orderIds.join(',') } })
+  router.push({ name: ROUTE_NAMES.PAYMENT_BOX, query: { orders: orderIds.join(',') } })
 }
 
 async function chooseExisting(method: PaymentMethod) {

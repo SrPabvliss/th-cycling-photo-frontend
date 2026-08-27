@@ -4,11 +4,11 @@ import { useRoute, useRouter } from 'vue-router'
 import { isAxiosError } from 'axios'
 import { NAlert, NButton, NCard, NCheckbox, NResult, NSpin } from 'naive-ui'
 
-import PageHeader from '@/shared/components/PageHeader.vue'
+import PageHeader from '@/shared/components/PageHeader/PageHeader.vue'
 import { message } from '@/core/ui/discrete-api'
 import { formatDate } from '@/shared/utils/date.utils'
-import { ACCOUNT_ROUTE_NAMES } from '@/features/account/routes'
-import { EVENTS_PATH } from '@/features/events/routes'
+import { ROUTE_NAMES } from '@/core/navigation/route-names'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { LEGAL_PATHS } from '@/features/legal/routes'
 import { useContractByToken } from '../../composables/queries/use-contract-by-token'
 import { useAcceptContract } from '../../composables/mutations/use-accept-contract'
@@ -56,13 +56,13 @@ function readErrorMessage(caught: unknown, fallback: string): string {
 }
 
 function goToVerifyEmail() {
-  router.push({ name: ACCOUNT_ROUTE_NAMES.VERIFY_EMAIL })
+  router.push({ name: ROUTE_NAMES.ACCOUNT_VERIFY_EMAIL })
 }
 
 function handleAccept() {
   acceptContract(token.value, {
     onSuccess: () => {
-      router.push(EVENTS_PATH)
+      router.push(ROUTE_PATHS.EVENTS)
     },
     onError: (caught) => {
       message.error(readErrorMessage(caught, 'No pudimos registrar tu aceptación.'))
@@ -107,7 +107,7 @@ function handleAccept() {
             </NButton>
             <RouterLink
               v-else-if="offer.blockedReason === 'contract.already_accepted'"
-              :to="EVENTS_PATH"
+              :to="ROUTE_PATHS.EVENTS"
             >
               <NButton type="primary">Ir al panel</NButton>
             </RouterLink>

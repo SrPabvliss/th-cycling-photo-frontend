@@ -6,7 +6,7 @@ import { INTERNAL_IMAGE_QUERY_DEFAULTS } from '@/core/api/internal-image-query'
 import { httpClient } from '@/core/http/axios-client'
 import { toPagination } from '@/core/http/pagination'
 import { PHOTO_QUERY_KEYS } from '../../constants/query-keys'
-import { toPhotoListItems } from '../../mappers/photo-list.mapper'
+import { toPhotoListItems } from '@/shared/mappers/photo-list.mapper'
 import type { IApiPhotoListItem } from '../../types/responses/photo-list.response'
 import type { IGalleryFilterState } from '../../types/gallery-filters.types'
 

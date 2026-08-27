@@ -65,7 +65,7 @@ function openEdit(method: PayoutMethodResponse) {
 }
 
 function removeMethod(id: string) {
-  deleteMethod(id, {
+  deleteMethod({ id }, {
     onSuccess: () => message.success('Método de cobro eliminado'),
   })
 }

@@ -1,9 +1,11 @@
 import type { RouteRecordRaw } from 'vue-router'
 
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+
 export const LEGAL_PATHS = {
-  PRIVACY: '/privacidad',
-  TERMS: '/terminos',
-  TENANT_TERMS: '/terminos-organizador',
+  PRIVACY: ROUTE_PATHS.PRIVACY,
+  TERMS: ROUTE_PATHS.TERMS,
+  TENANT_TERMS: ROUTE_PATHS.TENANT_TERMS,
 } as const
 
 export const LEGAL_ROUTE_NAMES = {

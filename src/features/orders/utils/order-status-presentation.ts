@@ -1,4 +1,4 @@
-import { ORDER_STATUS, type OrderStatus } from '@/shared/types/order-status.types'
+import { ORDER_STATUS, type OrderStatus } from '../types/responses/order-list.response'
 
 export type OrderStatusTone = 'pend' | 'info' | 'paid' | 'deli' | 'gift' | 'canc'
 

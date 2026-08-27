@@ -2,15 +2,15 @@ import { useMutation } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { runPostLoginTasks } from '@/core/auth/post-login-tasks'
-import { useSessionStore } from '@/core/auth/stores/session.store'
 import { httpClient } from '@/core/http/axios-client'
-import { toCurrentUser } from '../../mappers/current-user.mapper'
-import type { IApiCurrentUser } from '../../types/responses/current-user.response'
+import { toCurrentUser } from '@/core/auth/current-user.mapper'
+import { useSessionStore } from '@/core/auth/stores/session.store'
+import type { IApiCurrentUser } from '@/core/auth/current-user'
 import type { IApiAuthTokens } from '../../types/responses/auth-tokens.response'
 import type { ILoginRequest } from '../../types/requests/login.request'
 
 export function useLoginMutation() {
-  const sessionStore = useSessionStore()
+  const authStore = useSessionStore()
 
   return useMutation({
     mutationFn: async (credentials: ILoginRequest) => {
@@ -20,14 +20,14 @@ export function useLoginMutation() {
       )
       const accessToken = loginResponse.data.accessToken
 
-      sessionStore.setAccessToken(accessToken)
+      authStore.setAccessToken(accessToken)
 
       const meResponse = await httpClient.get<IApiCurrentUser>(API_ROUTES.AUTH.ME, {
         silent: true,
       })
       const user = toCurrentUser(meResponse.data)
 
-      sessionStore.setSession(accessToken, user)
+      authStore.setSession(accessToken, user)
 
       await runPostLoginTasks({ permissions: user.permissions })
 

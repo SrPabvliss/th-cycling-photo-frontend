@@ -1,9 +1,11 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-export const AUTH_PATH = '/login'
-export const REGISTER_PATH = '/register'
-export const FORGOT_PASSWORD_PATH = '/forgot-password'
-export const RESET_PASSWORD_PATH = '/reset-password'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+
+export const AUTH_PATH = ROUTE_PATHS.LOGIN
+export const REGISTER_PATH = ROUTE_PATHS.REGISTER
+export const FORGOT_PASSWORD_PATH = ROUTE_PATHS.FORGOT_PASSWORD
+export const RESET_PASSWORD_PATH = ROUTE_PATHS.RESET_PASSWORD
 
 export const AUTH_ROUTE_NAMES = {
   LOGIN: 'auth-login',

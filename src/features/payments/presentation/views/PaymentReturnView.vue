@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { NButton, NResult, NSpin } from 'naive-ui'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
-import { DELIVERY_ROUTE_NAMES } from '@/features/delivery/routes'
+import { ROUTE_NAMES } from '@/core/navigation/route-names'
 import { useConfirmPayment } from '../../composables/mutations/use-confirm-payment'
 import { usePaymentTransactionQuery } from '../../composables/queries/use-payment-transaction'
 import { DEFAULT_PAYMENT_PROVIDER, findPaymentGateway } from '../../gateways/registry'
@@ -75,7 +75,7 @@ watch(
   ([currentState, currentDeliveries]) => {
     if (currentState !== 'approved' || currentDeliveries.length !== 1) return
     router.replace({
-      name: DELIVERY_ROUTE_NAMES.DELIVERY,
+      name: ROUTE_NAMES.DELIVERY,
       params: { token: currentDeliveries[0]!.token },
     })
   },
@@ -106,7 +106,7 @@ watch(
               type="primary"
               @click="
                 router.push({
-                  name: DELIVERY_ROUTE_NAMES.DELIVERY,
+                  name: ROUTE_NAMES.DELIVERY,
                   params: { token: delivery.token },
                 })
               "

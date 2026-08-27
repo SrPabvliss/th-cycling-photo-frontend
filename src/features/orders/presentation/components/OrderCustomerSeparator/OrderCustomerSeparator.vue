@@ -3,7 +3,7 @@ import { computed } from 'vue'
 
 import { formatWhatsAppNumber } from '@/shared/utils/phone.utils'
 import { formatCurrency } from '@/shared/utils/currency.utils'
-import { ORDER_STATUS } from '@/shared/types/order-status.types'
+import { ORDER_STATUS } from '../../../types/responses/order-list.response'
 import type { IOrderCustomerGroup } from '../../../types/order-customer-group.type'
 import { centsToDecimal, sumSubtotalCents } from '../../../utils/order-money'
 import { pluralize } from '@/shared/utils/format.utils'

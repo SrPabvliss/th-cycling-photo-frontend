@@ -11,6 +11,7 @@ export interface CreatePayoutMethodRequest {
   accountType?: PayoutMethodAccountType
   accountHolder?: string
   holderIdentification?: string
+  password?: string
 }
 
 export interface UpdatePayoutMethodRequest {
@@ -22,4 +23,10 @@ export interface UpdatePayoutMethodRequest {
   holderIdentification?: string
   isActive?: boolean
   sortOrder?: number
+  password?: string
+}
+
+export interface IDeletePayoutMethodRequest {
+  id: string
+  password?: string
 }

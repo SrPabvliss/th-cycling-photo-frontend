@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { formatCurrency } from '../../../utils/format-currency'
+import { formatCurrency } from '@/shared/utils/currency.utils'
 import type { IPricingTier } from '../../../types/responses/pricing-preview.response'
+import { pluralize } from '@/shared/utils/format.utils'
 
 const props = withDefaults(
   defineProps<{
@@ -23,7 +24,7 @@ const fillPercent = computed(() => {
   return Math.max(0, Math.min(100, Math.round((props.quantity / props.nextTier.minQty) * 100)))
 })
 
-const noun = computed(() => (props.photosToNextTier === 1 ? 'foto' : 'fotos'))
+const noun = computed(() => pluralize(props.photosToNextTier ?? 0, 'foto', 'fotos'))
 
 const nextPriceLabel = computed(() =>
   props.nextTier ? formatCurrency(props.nextTier.pricePerPhoto, props.currency) : '',

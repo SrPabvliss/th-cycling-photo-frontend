@@ -1,0 +1,114 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { NButton, NIcon } from 'naive-ui'
+import {
+  AlertCircleOutline,
+  ArchiveOutline,
+  BanOutline,
+  CloudUploadOutline,
+  SnowOutline,
+} from '@vicons/ionicons5'
+
+import { formatDate } from '@/shared/utils/date.utils'
+import type { IEventDetail } from '../../../../types/responses/event-detail.response'
+import { formatNumber } from '@/shared/utils/format.utils'
+
+const props = defineProps<{ event: IEventDetail; canEdit: boolean }>()
+
+const emit = defineEmits<{ 'upload-cover': [] }>()
+
+const isClosedForWork = computed(() => props.event.isFrozen || props.event.status === 'archived')
+
+const hasNoCover = computed(
+  () => props.event.status === 'active' && props.event.coverImageSlug === null,
+)
+
+const isQuotaExhausted = computed(
+  () =>
+    props.event.status === 'active' &&
+    props.event.photoQuota !== null &&
+    props.event.photosUploaded >= props.event.photoQuota,
+)
+
+const deletedPhotos = computed(() =>
+  Math.max(0, props.event.photosUploaded - props.event.photoCount),
+)
+
+const hasAny = computed(
+  () =>
+    hasNoCover.value ||
+    props.event.isFrozen ||
+    props.event.status === 'archived' ||
+    isQuotaExhausted.value,
+)
+</script>
+
+<template>
+  <div v-if="hasAny" class="alerts" data-test="alerts">
+    <div v-if="hasNoCover" class="alert alert--red" data-test="alert-cover">
+      <NIcon :component="AlertCircleOutline" :size="17" />
+      <div class="alert__text">
+        <b>Sin imagen de portada: nadie puede comprar sus fotos.</b>
+        <span>
+          La galería pública solo muestra eventos activos con portada. Este evento está activo y
+          publicado, pero es inalcanzable: no aparece en la galería, no se puede llegar a su carrito
+          y no vende una sola foto.
+        </span>
+      </div>
+      <NButton
+        v-if="canEdit && !isClosedForWork"
+        type="error"
+        size="small"
+        data-test="alert-upload-cover"
+        @click="emit('upload-cover')"
+      >
+        <template #icon><NIcon :component="CloudUploadOutline" /></template>
+        Subir portada
+      </NButton>
+    </div>
+
+    <div v-if="event.isFrozen" class="alert alert--blue" data-test="alert-frozen">
+      <NIcon :component="SnowOutline" :size="17" />
+      <div class="alert__text">
+        <b v-if="event.frozenAt">Congelado el {{ formatDate(event.frozenAt) }}.</b>
+        <b v-else>Congelado.</b>
+        <span>
+          Se bloquea el lado de quien trabaja: no se puede subir, editar ni borrar fotos, ni cambiar
+          la configuración, las categorías o la portada. La galería, el carrito y el checkout siguen
+          abiertos — los compradores siguen comprando y los pedidos se siguen gestionando.
+        </span>
+      </div>
+    </div>
+
+    <div v-if="event.status === 'archived'" class="alert alert--grey" data-test="alert-archived">
+      <NIcon :component="ArchiveOutline" :size="17" />
+      <div class="alert__text">
+        <b>Archivado.</b>
+        <span>
+          Sale de la lista de trabajo y no admite cambios. Nada se borró: sus fotos, pedidos e
+          ingresos siguen intactos y se pueden consultar. Restaurarlo lo devuelve a Activos.
+        </span>
+      </div>
+    </div>
+
+    <div v-if="isQuotaExhausted" class="alert alert--amber" data-test="alert-quota">
+      <NIcon :component="BanOutline" :size="17" />
+      <div class="alert__text">
+        <b>
+          Cupo de fotos agotado: {{ formatNumber(event.photosUploaded) }} de
+          {{ formatNumber(event.photoQuota ?? 0) }} consumidas.
+        </b>
+        <span>
+          No se pueden subir más fotos. Borrar fotos no devuelve cupo<template
+            v-if="deletedPhotos > 0"
+          >
+            — de hecho ya hay {{ formatNumber(deletedPhotos) }} borradas que siguen
+            contando</template
+          >.
+        </span>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped src="./event-alerts.css" />

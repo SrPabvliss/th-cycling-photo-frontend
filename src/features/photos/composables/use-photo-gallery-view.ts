@@ -4,10 +4,10 @@ import { useRouter } from 'vue-router'
 
 import { PERMISSIONS } from '@/core/auth/permissions'
 import { usePermissions } from '@/core/auth/use-permissions'
-import { useEventDetailQuery } from '@/features/events/composables/queries/use-event-detail'
+import { ROUTE_NAMES } from '@/core/navigation/route-names'
+import { useEventDetailQuery } from '@/shared/composables/use-event-detail'
 import { useBulkAssignCategory } from '@/features/photo-categories/composables/mutations/use-bulk-assign-category'
-import { REVIEW_ROUTE_NAMES } from '@/features/review/routes'
-import { usePhotoSelectionStore } from '@/features/preview-links/stores/photo-selection.store'
+import { usePhotoSelectionStore } from '@/shared/stores/photo-selection.store'
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import { useDeletePhoto } from './mutations/use-delete-photo'
 import { useGalleryPhotosInfiniteQuery } from './queries/use-gallery-photos'
@@ -45,7 +45,7 @@ export function usePhotoGalleryView() {
   } = useGalleryFilters(() => eventId.value)
 
   const { data: facets } = useGalleryFacetsQuery(eventId)
-  const { mutate: bulkAssign } = useBulkAssignCategory(eventId.value)
+  const { mutate: bulkAssign } = useBulkAssignCategory(eventId)
 
   const {
     data: photosData,
@@ -132,7 +132,7 @@ export function usePhotoGalleryView() {
   }
 
   function goToReview() {
-    router.push({ name: REVIEW_ROUTE_NAMES.WORKSPACE, params: { eventSlug: slug.value } })
+    router.push({ name: ROUTE_NAMES.REVIEW_WORKSPACE, params: { eventSlug: slug.value } })
   }
 
   const canReview = computed(() => has(PERMISSIONS.REVIEW_QUEUE_READ))

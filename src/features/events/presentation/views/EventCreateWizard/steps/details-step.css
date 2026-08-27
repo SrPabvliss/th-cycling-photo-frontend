@@ -1,0 +1,28 @@
+.details-step {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.ce-sechead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.ce-sechead h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--tt-neutral-dark, #16233a);
+}
+
+.ce-sechead p {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: #8b98ab;
+  line-height: 1.5;
+  max-width: 56ch;
+}

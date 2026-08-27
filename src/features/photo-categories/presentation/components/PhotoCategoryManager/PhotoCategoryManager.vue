@@ -3,22 +3,26 @@ import { computed, ref } from 'vue'
 import { NButton, NEmpty, NIcon, NInput, NPopconfirm, NSelect } from 'naive-ui'
 import { AddOutline, CloseCircleOutline } from '@vicons/ionicons5'
 
-import CollapsibleCard from '@/shared/components/CollapsibleCard.vue'
+import CollapsibleCard from '@/shared/components/CollapsibleCard/CollapsibleCard.vue'
 import { usePhotoCategoriesQuery } from '../../../composables/queries/use-photo-categories'
 import { usePhotoCategoriesGlobalQuery } from '../../../composables/queries/use-photo-categories-global'
 import { useCreatePhotoCategory } from '../../../composables/mutations/use-create-photo-category'
 import { useAssignPhotoCategory } from '../../../composables/mutations/use-assign-photo-category'
 import { useUnassignPhotoCategory } from '../../../composables/mutations/use-unassign-photo-category'
 
-const props = defineProps<{
-  eventId: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    eventId: string
+    editable?: boolean
+  }>(),
+  { editable: true },
+)
 
 const { data: assignedCategories } = usePhotoCategoriesQuery(() => props.eventId)
 const { data: globalCategories } = usePhotoCategoriesGlobalQuery()
 const { mutateAsync: createCategory, isPending: isCreating } = useCreatePhotoCategory()
-const { mutate: assignCategory } = useAssignPhotoCategory(props.eventId)
-const { mutate: unassignCategory } = useUnassignPhotoCategory(props.eventId)
+const { mutate: assignCategory } = useAssignPhotoCategory(() => props.eventId)
+const { mutate: unassignCategory } = useUnassignPhotoCategory(() => props.eventId)
 
 const newCategoryName = ref('')
 const selectedGlobalId = ref<number | null>(null)
@@ -66,7 +70,7 @@ async function handleCreateAndAssign() {
           <span class="category-item__name">{{ cat.name }}</span>
           <span class="category-item__count">{{ cat.photoCount }}</span>
         </div>
-        <div class="category-item__actions">
+        <div v-if="editable" class="category-item__actions">
           <NPopconfirm @positive-click="unassignCategory(cat.id)">
             <template #trigger>
               <NButton text size="tiny" type="error">
@@ -79,7 +83,7 @@ async function handleCreateAndAssign() {
       </div>
     </div>
 
-    <div v-if="availableToAssign.length > 0" class="category-assign">
+    <div v-if="editable && availableToAssign.length > 0" class="category-assign">
       <NSelect
         v-model:value="selectedGlobalId"
         :options="availableToAssign"
@@ -93,7 +97,7 @@ async function handleCreateAndAssign() {
       </NButton>
     </div>
 
-    <div class="category-add">
+    <div v-if="editable" class="category-add">
       <NInput
         v-model:value="newCategoryName"
         size="small"

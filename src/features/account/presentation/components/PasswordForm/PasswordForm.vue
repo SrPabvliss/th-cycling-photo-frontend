@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useForm } from '@tanstack/vue-form'
-import { NButton, NCard, NFormItem, NInput } from 'naive-ui'
+import { NButton, NFormItem, NInput } from 'naive-ui'
 
 import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
 import { useChangePassword } from '../../../composables/mutations/use-change-password'
@@ -33,7 +33,7 @@ const form = useForm({
       }
     "
   >
-    <NCard title="Contraseña" class="password-form__card">
+    <div class="password-form__card">
       <form.Field
         name="currentPassword"
         :validators="{
@@ -120,7 +120,7 @@ const form = useForm({
           </template>
         </form.Subscribe>
       </div>
-    </NCard>
+    </div>
   </form>
 </template>
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue'
-import type { IPhotoDetail } from '@/features/photos/types/responses/photo-detail.response'
+import type { IPhotoDetail } from '@/shared/types/photo-detail.types'
 import ReviewBibCard from '../ReviewBibCard/ReviewBibCard.vue'
 import ReviewSectionGroup from '../ReviewSectionGroup/ReviewSectionGroup.vue'
 import AddBibForm from '../AddBibForm/AddBibForm.vue'
@@ -11,6 +11,8 @@ import {
   type IShowCropDetail,
 } from '@/shared/workspace/constants/workspace-events'
 import { useWindowEvent } from '@/shared/composables/use-window-event'
+import { COLOR_CLASSIFICATION_ENABLED } from '@/shared/constants/feature-flags'
+import { pluralize } from '@/shared/utils/format.utils'
 
 const props = defineProps<{ photo: IPhotoDetail }>()
 const emit = defineEmits<{ saveAndAdvance: [] }>()
@@ -35,9 +37,9 @@ const manualBibsCount = computed(
 
 const bibsSubtitle = computed(() => {
   const parts = [
-    `${props.photo.bibs.length} placa${props.photo.bibs.length === 1 ? '' : 's'}`,
-    `${correctedBibsCount.value} corregida${correctedBibsCount.value === 1 ? '' : 's'}`,
-    `${manualBibsCount.value} manual${manualBibsCount.value === 1 ? '' : 'es'}`,
+    `${props.photo.bibs.length} ${pluralize(props.photo.bibs.length, 'placa', 'placas')}`,
+    `${correctedBibsCount.value} ${pluralize(correctedBibsCount.value, 'corregida', 'corregidas')}`,
+    `${manualBibsCount.value} ${pluralize(manualBibsCount.value, 'manual', 'manuales')}`,
   ]
   return parts.join(' · ')
 })
@@ -47,6 +49,11 @@ const colorsSubtitle = computed(
 )
 
 function onAddManual() {
+  if (!COLOR_CLASSIFICATION_ENABLED) {
+    showAddBib.value = true
+    return
+  }
+
   const section = cardNav?.getActiveSection() ?? null
   const colorGroups = {
     helmet: helmetGroupRef,
@@ -157,7 +164,10 @@ useWindowEvent(WORKSPACE_EVENTS.SHOW_CROP, onShowCrop)
         </div>
       </div>
 
-      <div class="rv-attrs__section-header rv-attrs__section-header--colors">
+      <div
+        v-if="COLOR_CLASSIFICATION_ENABLED"
+        class="rv-attrs__section-header rv-attrs__section-header--colors"
+      >
         <span class="rv-attrs__section-icon">
           <svg
             width="16"
@@ -179,6 +189,7 @@ useWindowEvent(WORKSPACE_EVENTS.SHOW_CROP, onShowCrop)
       </div>
 
       <ReviewSectionGroup
+        v-if="COLOR_CLASSIFICATION_ENABLED"
         ref="helmetGroupRef"
         region="helmet"
         :colors="helmetColors"
@@ -187,6 +198,7 @@ useWindowEvent(WORKSPACE_EVENTS.SHOW_CROP, onShowCrop)
         show-add
       />
       <ReviewSectionGroup
+        v-if="COLOR_CLASSIFICATION_ENABLED"
         ref="clothesGroupRef"
         region="cyclist_clothes"
         :colors="clothesColors"
@@ -195,6 +207,7 @@ useWindowEvent(WORKSPACE_EVENTS.SHOW_CROP, onShowCrop)
         show-add
       />
       <ReviewSectionGroup
+        v-if="COLOR_CLASSIFICATION_ENABLED"
         ref="bicycleGroupRef"
         region="bicycle"
         :colors="bicycleColors"
@@ -210,7 +223,7 @@ useWindowEvent(WORKSPACE_EVENTS.SHOW_CROP, onShowCrop)
         <span class="rv-kbd rv-attrs__save-kbd">⌘↵</span>
       </button>
       <div class="rv-attrs__hint">
-        Cada placa y color se guarda al editar. Esto solo marca la foto como revisada.
+        Cada placa se guarda al editar. Esto solo marca la foto como revisada.
       </div>
     </div>
 

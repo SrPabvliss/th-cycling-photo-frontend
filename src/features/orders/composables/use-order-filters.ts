@@ -11,7 +11,7 @@ const DEFAULT_TAB: OrderTab = 'all'
 export const ORDER_TAB_LABELS: Record<OrderTab, string> = {
   all: 'Todos',
   pending: 'Pendientes',
-  paymentInfoSent: 'Info enviada',
+  payment_info_sent: 'Info enviada',
   paid: 'Pagados',
   delivered: 'Entregados',
   gifted: 'Regaladas',

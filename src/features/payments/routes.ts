@@ -1,9 +1,11 @@
 import type { RouteRecordRaw } from 'vue-router'
 
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+
 const PAYMENT_RETURN_PROVIDER = 'payphone'
 
 export const PAYMENT_RETURN_PATH = `/checkout/${PAYMENT_RETURN_PROVIDER}/return`
-export const PAYMENT_BOX_PATH = '/checkout/pago'
+export const PAYMENT_BOX_PATH = ROUTE_PATHS.PAYMENT_BOX
 
 export const PAYMENT_ROUTE_NAMES = {
   RETURN: 'payment-return',

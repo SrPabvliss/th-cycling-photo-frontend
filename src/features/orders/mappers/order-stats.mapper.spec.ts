@@ -18,7 +18,7 @@ const api: IApiOrderStats = {
   tabs: {
     all: 10,
     pending: 1,
-    paymentInfoSent: 2,
+    payment_info_sent: 2,
     paid: 3,
     delivered: 4,
     gifted: 0,

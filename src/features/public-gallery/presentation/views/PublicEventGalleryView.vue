@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NEmpty, NIcon, NSpin } from 'naive-ui'
 import { ArrowBack } from '@vicons/ionicons5'
@@ -26,6 +26,16 @@ const router = useRouter()
 const slug = computed(() => route.params.slug as string)
 
 const { data: event, isPending: isEventPending } = usePublicEventDetailQuery(slug)
+
+const cartStore = useCartStore()
+
+watch(
+  () => event.value?.id ?? null,
+  (eventId) => cartStore.setActiveEvent(eventId),
+  { immediate: true },
+)
+
+onUnmounted(() => cartStore.setActiveEvent(null))
 
 const activeCategoryId = ref<number | null>(null)
 const bibNumber = ref('')
@@ -68,7 +78,6 @@ const showNoBibSection = computed(
 )
 
 // --- Cart-based selection ---
-const cartStore = useCartStore()
 const { mutate: addToCart } = useAddToCart()
 const { mutate: removeFromCart } = useRemoveFromCart()
 

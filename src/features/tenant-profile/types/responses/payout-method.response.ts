@@ -1,6 +1,8 @@
+import type { AccountType } from '@/shared/constants/payout'
+
 export type PayoutMethodProvider = 'payphone' | 'bank_transfer'
 export type PayoutMethodStatus = 'pending' | 'verified' | 'disabled'
-export type PayoutMethodAccountType = 'ahorros' | 'corriente'
+export type PayoutMethodAccountType = AccountType
 
 export interface PayoutMethodResponse {
   id: string
@@ -14,4 +16,5 @@ export interface PayoutMethodResponse {
   accountType: PayoutMethodAccountType | null
   accountHolder: string | null
   holderIdentification: string | null
+  verifiedAt: string | null
 }

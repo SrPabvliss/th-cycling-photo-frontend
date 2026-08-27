@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import type { IColorAttribute } from '@/features/photos/types/responses/photo-detail.response'
+import type { IColorAttribute } from '@/shared/types/photo-detail.types'
 import ReviewColorCard from '../ReviewColorCard/ReviewColorCard.vue'
 import AddColorForm from '../AddColorForm/AddColorForm.vue'
 import { REGION_LABELS } from '../../../constants/region-labels'
 import type { ColorRegion } from '../../../types/color-region.type'
+import { pluralize } from '@/shared/utils/format.utils'
 
 const props = defineProps<{
   region: ColorRegion
@@ -18,8 +19,8 @@ const label = computed(() => REGION_LABELS[props.region])
 
 const cyclistLabel = (idx: number) => `Ciclista ${idx + 1}`
 
-const cyclistCountText = computed(() =>
-  props.colors.length === 1 ? '1 ciclista' : `${props.colors.length} ciclistas`,
+const cyclistCountText = computed(
+  () => `${props.colors.length} ${pluralize(props.colors.length, 'ciclista', 'ciclistas')}`,
 )
 
 const isAdding = ref(false)

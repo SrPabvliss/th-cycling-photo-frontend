@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
-import { formatCurrency } from '../../../utils/format-currency'
+import { formatCurrency } from '@/shared/utils/currency.utils'
 
 const props = withDefaults(
   defineProps<{

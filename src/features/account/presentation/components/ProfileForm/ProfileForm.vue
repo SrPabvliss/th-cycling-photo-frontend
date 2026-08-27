@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { NButton, NCard, NFormItem, NGrid, NGridItem, NInput, NSelect } from 'naive-ui'
+import { NButton, NFormItem, NGrid, NGridItem, NInput, NSelect } from 'naive-ui'
 
 import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
 import { isValidCalendarDate } from '@/shared/utils/date.utils'
@@ -12,9 +12,13 @@ import { useProfileForm } from '@/features/account/composables/use-profile-form'
 import { useLocationCascade } from '@/features/account/composables/use-location-cascade'
 import type { IMyProfile } from '../../../types/responses/my-profile.response'
 
-const props = defineProps<{
-  profile: IMyProfile
-}>()
+const props = withDefaults(
+  defineProps<{
+    profile: IMyProfile
+    columns?: 2 | 3
+  }>(),
+  { columns: 2 },
+)
 
 const profileRef = computed(() => props.profile)
 
@@ -59,6 +63,7 @@ function validateBirthDateFields(): string | undefined {
 <template>
   <form
     class="profile-form"
+    :class="{ 'profile-form--cols-3': columns === 3 }"
     @submit="
       (e) => {
         e.preventDefault()
@@ -67,7 +72,7 @@ function validateBirthDateFields(): string | undefined {
       }
     "
   >
-    <NCard title="Datos personales" class="profile-form__card">
+    <div class="profile-form__card">
       <div class="profile-form__row">
         <form.Field name="firstName" :validators="{ onBlur: v.firstName, onSubmit: v.firstName }">
           <template v-slot="{ field }">
@@ -85,9 +90,9 @@ function validateBirthDateFields(): string | undefined {
           </template>
         </form.Field>
       </div>
-    </NCard>
+    </div>
 
-    <NCard title="Ubicación" class="profile-form__card">
+    <div class="profile-form__card">
       <form.Field name="countryId" :validators="{ onSubmit: v.countryId }">
         <template v-slot="{ field }">
           <NFormItem label="País" required v-bind="fieldStatus(field)">
@@ -103,7 +108,7 @@ function validateBirthDateFields(): string | undefined {
         </template>
       </form.Field>
 
-      <NGrid v-if="hasRegions" :cols="2" :x-gap="12">
+      <NGrid v-if="hasRegions" :cols="columns" :x-gap="12">
         <NGridItem>
           <form.Field name="provinceId">
             <template v-slot="{ field }">
@@ -140,9 +145,9 @@ function validateBirthDateFields(): string | undefined {
           </form.Field>
         </NGridItem>
       </NGrid>
-    </NCard>
+    </div>
 
-    <NCard title="Nacimiento y género" class="profile-form__card">
+    <div class="profile-form__card">
       <div class="profile-form__row profile-form__row--3">
         <form.Field name="birthDay" :validators="{ onSubmit: validateBirthDateFields }">
           <template v-slot="{ field }">
@@ -203,7 +208,7 @@ function validateBirthDateFields(): string | undefined {
           </NFormItem>
         </template>
       </form.Field>
-    </NCard>
+    </div>
 
     <div v-if="hasChanges" class="profile-form__submit-bar">
       <form.Subscribe>

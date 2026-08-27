@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { NEmpty, NSkeleton } from 'naive-ui'
 import type { IReviewQueueItem } from '../../../types/review-queue-item.type'
 import ReviewQueueItem from '../ReviewQueueItem/ReviewQueueItem.vue'
+import { pluralize } from '@/shared/utils/format.utils'
 
 const props = defineProps<{
   items: IReviewQueueItem[]
@@ -21,8 +22,8 @@ const reviewedCount = computed(() => props.items.filter((i) => i.reviewedAt).len
     <div class="rv-queue__header">
       <div class="rv-queue__title">Cola de revisión</div>
       <div class="rv-queue__subtitle mono">
-        {{ pendingCount }} pendiente{{ pendingCount === 1 ? '' : 's' }} · {{ reviewedCount }}
-        {{ reviewedCount === 1 ? 'lista' : 'listas' }}
+        {{ pendingCount }} {{ pluralize(pendingCount, 'pendiente', 'pendientes') }} ·
+        {{ reviewedCount }} {{ pluralize(reviewedCount, 'lista', 'listas') }}
       </div>
     </div>
 

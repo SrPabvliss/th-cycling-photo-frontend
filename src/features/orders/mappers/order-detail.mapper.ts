@@ -7,7 +7,7 @@ import type {
   IOrderDetailDeliveryLink,
   IOrderDetailPhoto,
 } from '../types/responses/order-detail.response'
-import type { OrderStatus } from '@/shared/types/order-status.types'
+import type { OrderStatus } from '../types/responses/order-list.response'
 
 function toOrderDetailPhoto(api: IApiOrderDetailPhoto): IOrderDetailPhoto {
   return {

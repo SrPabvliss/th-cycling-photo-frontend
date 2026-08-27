@@ -1,0 +1,110 @@
+.profile-organizer-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile-organizer-mobile__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  color: var(--tt-neutral-mid);
+}
+
+.profile-organizer-mobile__meta.is-warn {
+  color: var(--tt-warning);
+}
+
+.profile-organizer-mobile__meta.is-ok {
+  color: var(--tt-success);
+}
+
+.profile-organizer-mobile__row-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.profile-organizer-mobile__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.profile-organizer-mobile__tab-warn {
+  color: var(--tt-warning);
+  flex-shrink: 0;
+}
+
+.profile-organizer-mobile__tabs :deep(.n-tabs-nav) {
+  background: var(--tt-surface);
+  border: 1px solid var(--tt-neutral-light);
+  border-radius: 999px;
+  padding: 4px;
+}
+
+.profile-organizer-mobile__tabs :deep(.n-tabs-rail) {
+  background: transparent;
+  border-radius: 999px;
+  padding: 0;
+}
+
+.profile-organizer-mobile__tabs :deep(.n-tabs-capsule) {
+  background: var(--tt-neutral-dark);
+  border-radius: 999px;
+}
+
+.profile-organizer-mobile__tabs :deep(.n-tabs-tab-wrapper) {
+  flex: 1;
+}
+
+.profile-organizer-mobile__tabs :deep(.n-tabs-tab) {
+  justify-content: center;
+  width: 100%;
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 9px;
+  border-radius: 999px;
+  color: var(--tt-neutral-mid);
+}
+
+.profile-organizer-mobile__tabs :deep(.n-tabs-tab.n-tabs-tab--active) {
+  color: #fff !important;
+  font-weight: 500;
+}
+
+.profile-organizer-mobile__tabs :deep(.n-tabs-pane-wrapper) {
+  margin-top: 12px;
+}
+
+.profile-organizer-mobile__card {
+  background: var(--tt-surface);
+  border: 1px solid var(--tt-neutral-light);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.profile-organizer-mobile__card :deep(.n-collapse-item) {
+  border-bottom: 1px solid var(--tt-neutral-light);
+  margin: 0;
+}
+
+.profile-organizer-mobile__card :deep(.n-collapse-item:last-child) {
+  border-bottom: none;
+}
+
+.profile-organizer-mobile__card :deep(.n-collapse-item__header) {
+  padding: 15px 14px;
+  min-height: 52px;
+  background: var(--tt-background);
+}
+
+.profile-organizer-mobile__card :deep(.n-collapse-item:first-child > .n-collapse-item__header) {
+  padding-top: 15px;
+}
+
+.profile-organizer-mobile__card :deep(.n-collapse-item__content-inner) {
+  padding: 0 14px 16px;
+  background: var(--tt-surface);
+}

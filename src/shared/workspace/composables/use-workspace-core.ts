@@ -1,6 +1,6 @@
 import { computed, ref, watch, type Ref } from 'vue'
 
-import { usePhotoDetailBySlugQuery } from '@/features/photos/composables/queries/use-photo-detail-by-slug'
+import { usePhotoDetailBySlugQuery } from '@/shared/composables/use-photo-detail-by-slug'
 import { useMarkPhotoReviewed } from './use-mark-photo-reviewed'
 import { useWorkspaceCardNavigation } from './use-workspace-card-navigation'
 import type { MobileSheet } from '../types/mobile-sheet.type'

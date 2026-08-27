@@ -1,0 +1,59 @@
+.cum-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cum-notice {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--tt-error) 8%, transparent);
+  color: var(--tt-error);
+  font-size: 12.5px;
+}
+
+.cum-notice b {
+  display: block;
+  font-size: 13px;
+}
+
+.cum-notice span {
+  color: inherit;
+  opacity: 0.9;
+}
+
+.cum-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 16px;
+  border: 1px dashed var(--tt-neutral-light);
+  border-radius: 10px;
+  background: var(--tt-background);
+  text-align: center;
+  cursor: pointer;
+}
+
+.cum-dropzone b {
+  font-size: 13.5px;
+}
+
+.cum-dropzone span {
+  font-size: 11.5px;
+  color: var(--tt-neutral-mid);
+}
+
+.cum-footnote {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--tt-neutral-mid);
+}
+
+.cum-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

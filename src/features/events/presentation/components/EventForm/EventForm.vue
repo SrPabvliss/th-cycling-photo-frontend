@@ -24,13 +24,9 @@ import AssetUploadZone from '@/features/event-assets/presentation/components/Ass
 import EventCategoryPicker from '@/features/photo-categories/presentation/components/EventCategoryPicker/EventCategoryPicker.vue'
 import { useCreatePhotoCategory } from '@/features/photo-categories/composables/mutations/use-create-photo-category'
 import { EVENT_FORM_DEFAULTS, eventFormSchema } from '../../../constants/event-form.schema'
-import type { IEventFormData } from '../../../types/event-form.types'
+import type { IEventFormData, IEventFormExtra } from '../../../types/event-form.types'
 
-export interface IEventFormExtra {
-  assetFiles?: Map<'cover_image', File>
-  assetRemovals?: 'cover_image'[]
-  categoryIds?: number[]
-}
+
 
 const props = defineProps<{
   isSubmitting: boolean
@@ -39,8 +35,6 @@ const props = defineProps<{
   hideAssetUpload?: boolean
   existingAssets?: IEventAsset[]
   initialCategoryIds?: number[]
-  /** Extra guard (e.g. no contract slot) — keeps form UX, only blocks submit */
-  submitDisabled?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -51,7 +45,6 @@ const emit = defineEmits<{
 const form = useForm({
   defaultValues: props.initialData ?? EVENT_FORM_DEFAULTS,
   onSubmit: async ({ value }) => {
-    if (props.submitDisabled) return
     const removals = assetPreviews.getPendingRemovals() as 'cover_image'[]
     const files = assetPreviews.getPendingFiles() as Map<'cover_image', File> | undefined
     emit('submit', value, {
@@ -60,6 +53,11 @@ const form = useForm({
       categoryIds: selectedCategoryIds.value.length > 0 ? selectedCategoryIds.value : undefined,
     })
   },
+})
+
+defineExpose({
+  submit: () => form.handleSubmit(),
+  canSubmit: computed(() => form.state.canSubmit),
 })
 
 const assetPreviews = useLocalAssetPreviews(() => props.existingAssets)
@@ -265,7 +263,7 @@ const eventTypeOptions = computed(
             type="primary"
             attr-type="submit"
             :loading="props.isSubmitting"
-            :disabled="!canSubmit || props.submitDisabled"
+            :disabled="!canSubmit"
           >
             {{ props.submitLabel ?? 'Crear Evento' }}
             <template #icon><NIcon :component="ArrowForward" /></template>

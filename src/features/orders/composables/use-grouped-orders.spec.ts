@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { ref } from 'vue'
 
-import { ORDER_STATUS } from '@/shared/types/order-status.types'
+import { ORDER_STATUS } from '../types/responses/order-list.response'
 import type { IOrderListItem } from '../types/responses/order-list.response'
 import {
   useGroupedOrders,

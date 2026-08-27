@@ -19,8 +19,7 @@ import { PERMISSIONS } from '@/core/auth/permissions'
 import { usePermissions } from '@/core/auth/use-permissions'
 import { formatRelativeTime, isRecent } from '@/shared/utils/date.utils'
 import { formatCurrency } from '@/shared/utils/currency.utils'
-import { ORDER_STATUS } from '@/shared/types/order-status.types'
-import { type IOrderListItem } from '../../../types/responses/order-list.response'
+import { ORDER_STATUS, type IOrderListItem } from '../../../types/responses/order-list.response'
 import { ORDER_STATUS_CONFIG, PAYMENT_METHOD_LABELS } from '../../../constants/status-config'
 
 const MAX_THUMBS = 3

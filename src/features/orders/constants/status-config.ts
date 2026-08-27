@@ -1,6 +1,6 @@
 import type { IStatusBadgeConfig } from '@/shared/types/badge-config.types'
 import type { DeliveryLinkStatus } from '../types/responses/order-detail.response'
-import { ORDER_STATUS, type OrderStatus } from '@/shared/types/order-status.types'
+import { ORDER_STATUS, type OrderStatus } from '../types/responses/order-list.response'
 
 export type { IStatusBadgeConfig } from '@/shared/types/badge-config.types'
 

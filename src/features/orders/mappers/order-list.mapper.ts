@@ -1,4 +1,4 @@
-import type { OrderStatus } from '@/shared/types/order-status.types'
+import type { OrderStatus } from '../types/responses/order-list.response'
 import type { IApiOrderListItem, IOrderListItem } from '../types/responses/order-list.response'
 
 function toOrderListItem(api: IApiOrderListItem): IOrderListItem {

@@ -18,7 +18,7 @@ import ReviewQueuePanel from '@/features/review/presentation/components/ReviewQu
 import ReviewAttributesPanel from '@/features/review/presentation/components/ReviewAttributesPanel/ReviewAttributesPanel.vue'
 import RetouchOrderTransitionModal from '../components/RetouchOrderTransitionModal/RetouchOrderTransitionModal.vue'
 import RetouchEmptyState from '../components/RetouchEmptyState/RetouchEmptyState.vue'
-import { EVENTS_PATH } from '@/features/events/routes'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { RETOUCH_ROUTE_NAMES } from '../../constants/retouch-routes'
 
 const SECTION_TO_COMPARE_VIEW: Partial<Record<CardSection, 'original' | 'compare' | 'retouched'>> =
@@ -123,7 +123,7 @@ const handleExitFromModal = () => {
 
     <RetouchEmptyState
       v-if="!ws.orderId.value && !ws.isOrdersPending.value"
-      @go-dashboard="router.push(EVENTS_PATH)"
+      @go-dashboard="router.push(ROUTE_PATHS.EVENTS)"
     />
 
     <WorkspaceShell

@@ -1,4 +1,10 @@
-export const ORGANIZER_TABS = ['all', 'active', 'no_quota', 'expiring', 'invitations'] as const
+export const ORGANIZER_TABS = [
+  'all',
+  'active',
+  'no_quota',
+  'expiring',
+  'invitations',
+] as const
 export type OrganizerTab = (typeof ORGANIZER_TABS)[number]
 
 export const ORGANIZER_SORTS = ['recent', 'available', 'expiry', 'events'] as const

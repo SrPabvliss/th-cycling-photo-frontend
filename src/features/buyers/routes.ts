@@ -1,8 +1,10 @@
 import type { RouteRecordRaw } from 'vue-router'
 
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+
 import { PERMISSIONS } from '@/core/auth/permissions'
 
-export const BUYERS_PATH = '/buyers'
+export const BUYERS_PATH = ROUTE_PATHS.BUYERS
 
 export const BUYERS_ROUTE_NAMES = {
   LIST: 'buyers-list',

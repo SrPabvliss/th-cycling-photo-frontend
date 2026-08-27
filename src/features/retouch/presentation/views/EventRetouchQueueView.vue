@@ -6,7 +6,7 @@ import { NGrid, NGridItem, NSpin } from 'naive-ui'
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import { useEventRetouchOrdersListSource } from '../../composables/queue-sources/use-event-retouch-orders-source'
 import { RETOUCH_ROUTE_NAMES } from '../../constants/retouch-routes'
-import { EVENTS_PATH } from '@/features/events/routes'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import RetouchOrderCard from '../components/RetouchOrderCard/RetouchOrderCard.vue'
 import RetouchPageHeader from '../components/RetouchPageHeader/RetouchPageHeader.vue'
 import RetouchEmptyState from '../components/RetouchEmptyState/RetouchEmptyState.vue'
@@ -38,7 +38,7 @@ const goWorkspace = (orderId?: string) =>
     query: orderId ? { orderId } : undefined,
   })
 
-const eventDetailPath = computed(() => `${EVENTS_PATH}/${eventSlug.value}`)
+const eventDetailPath = computed(() => `${ROUTE_PATHS.EVENTS}/${eventSlug.value}`)
 const goDashboard = () => router.push(eventDetailPath.value)
 
 const handleCardClick = (order: IRetouchQueueOrder) => goWorkspace(order.orderId)

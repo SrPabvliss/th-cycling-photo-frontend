@@ -1,0 +1,68 @@
+.pqm-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pqm-figures {
+  display: flex;
+  gap: 16px;
+}
+
+.pqm-figure {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--tt-background);
+}
+
+.pqm-figure__label {
+  font-size: 11.5px;
+  color: var(--tt-neutral-mid);
+}
+
+.pqm-figure b {
+  font-size: 16px;
+}
+
+.pqm-figure__note {
+  font-size: 11px;
+  color: var(--tt-neutral-mid);
+}
+
+.pqm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pqm-field__label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--tt-neutral-dark);
+}
+
+.pqm-field__hint {
+  font-size: 11.5px;
+  color: var(--tt-neutral-mid);
+}
+
+.pqm-field__error {
+  font-size: 11.5px;
+  color: var(--tt-error);
+}
+
+.pqm-footnote {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--tt-neutral-mid);
+}
+
+.pqm-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

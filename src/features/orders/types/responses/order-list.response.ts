@@ -1,4 +1,5 @@
 import type { OrderStatus } from '@/shared/types/order-status.types'
+export { ORDER_STATUS, type OrderStatus } from '@/shared/types/order-status.types'
 
 export interface IApiOrderPreviewPhoto {
   photoId: string

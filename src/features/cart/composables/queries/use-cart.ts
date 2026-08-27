@@ -3,7 +3,7 @@ import { watch } from 'vue'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
-import { CART_QUERY_KEYS } from '@/shared/constants/cart-query-keys'
+import { CART_QUERY_KEYS } from '../../constants/query-keys'
 import { useCartStore } from '@/shared/stores/cart.store'
 import { parseDateOnly } from '@/shared/utils/date.utils'
 import type { IApiCartGroup, ICartGroup } from '../../types/responses/cart.response'

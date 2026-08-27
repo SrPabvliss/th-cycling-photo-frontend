@@ -5,7 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { NButton, NIcon, NResult, NSpin } from 'naive-ui'
 import { SearchOutline } from '@vicons/ionicons5'
 
-import PageHeader from '@/shared/components/PageHeader.vue'
+import PageHeader from '@/shared/components/PageHeader/PageHeader.vue'
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import { useBuyersListQuery } from '../../composables/queries/use-buyers-list'
 import { useBuyersStatsQuery } from '../../composables/queries/use-buyers-stats'

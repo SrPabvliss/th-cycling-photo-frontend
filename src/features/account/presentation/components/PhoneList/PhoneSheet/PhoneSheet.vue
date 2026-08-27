@@ -3,18 +3,7 @@ import { NButton, NCheckbox, NInput, NModal, NPopconfirm, NSwitch } from 'naive-
 import IntlTelInput from 'intl-tel-input/vueWithUtils'
 import 'intl-tel-input/styles'
 
-import {
-  DEFAULT_COUNTRY_ISO,
-  PHONE_PRIORITY_ISOS,
-} from '@/features/auth/constants/register-form.options'
-
-const PHONE_INPUT_OPTIONS = {
-  initialCountry: DEFAULT_COUNTRY_ISO.toLowerCase(),
-  separateDialCode: true,
-  strictMode: true,
-  countryOrder: PHONE_PRIORITY_ISOS,
-  i18n: { searchPlaceholder: 'Buscar país...' },
-}
+import { PHONE_INPUT_OPTIONS } from '@/shared/constants/phone-input'
 
 defineProps<{
   title: string

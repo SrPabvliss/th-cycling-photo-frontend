@@ -5,21 +5,26 @@ import { useMediaQuery } from '@vueuse/core'
 import { NAvatar, NDrawer, NDrawerContent, NIcon } from 'naive-ui'
 import { LogOutOutline, MenuOutline, CloseOutline } from '@vicons/ionicons5'
 
-import { useAuth } from '@/features/auth/composables/use-auth'
+import { useSession } from '@/core/auth/use-session'
 import { getHomePath, getNavLinks, getPrincipalLabel } from '@/core/auth/role-config'
+import { canShop } from '@/core/auth/capabilities'
 import { useHatStore } from '@/core/auth/stores/hat.store'
-import NotificationBell from '@/features/notifications/presentation/components/NotificationBell/NotificationBell.vue'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+import { LAYOUT_SLOTS, useLayoutSlot } from '@/core/layout/slot-registry'
 import TitanLogo from './public/TitanLogo.vue'
 
 const router = useRouter()
-const { currentUser, logout, isLoggingOut } = useAuth()
+const { currentUser, logout, isLoggingOut } = useSession()
+const navActions = useLayoutSlot(LAYOUT_SLOTS.APP_NAV_ACTIONS)
 const hatStore = useHatStore()
 
 const navLinks = computed(() => getNavLinks(currentUser.value?.permissions ?? []))
 const homePath = computed(() => getHomePath(currentUser.value?.permissions ?? []))
+const permissions = computed(() => currentUser.value?.permissions ?? [])
 const principalLabel = computed(() =>
   getPrincipalLabel(hatStore.activeHat, currentUser.value?.isPlatform ?? false),
 )
+const showShoppingSwitch = computed(() => canShop(permissions.value))
 
 const isMobile = useMediaQuery('(max-width: 767px)')
 const showMenu = ref(false)
@@ -47,6 +52,12 @@ async function handleLogout() {
 function goTo(path: string) {
   showMenu.value = false
   router.push(path)
+}
+
+function goShopping() {
+  showMenu.value = false
+  hatStore.setHat('shopping')
+  router.push(ROUTE_PATHS.LANDING)
 }
 </script>
 
@@ -80,7 +91,7 @@ function goTo(path: string) {
     <div id="page-actions" class="app-nav-center" />
 
     <div v-if="currentUser" class="app-nav-right">
-      <NotificationBell />
+      <component :is="action" v-for="(action, index) in navActions" :key="index" />
       <div class="app-nav-user">
         <div class="app-nav-user-info">
           <span class="app-nav-user-name">{{ displayName }}</span>
@@ -88,6 +99,9 @@ function goTo(path: string) {
         </div>
         <NAvatar :size="32" round>{{ userInitials }}</NAvatar>
       </div>
+      <button v-if="!isMobile && showShoppingSwitch" class="app-nav-link" @click="goShopping">
+        Ir a la tienda
+      </button>
       <button
         v-if="!isMobile"
         class="app-nav-logout"
@@ -128,8 +142,15 @@ function goTo(path: string) {
             </span>
           </template>
           <button
-            v-if="currentUser"
+            v-if="showShoppingSwitch"
             class="app-nav-menu__link app-nav-menu__link--button"
+            @click="goShopping"
+          >
+            <span>Ir a la tienda</span>
+          </button>
+          <button
+            v-if="currentUser"
+            class="app-nav-menu__link app-nav-menu__link--button app-nav-menu__link--destructive"
             :disabled="isLoggingOut"
             @click="handleLogout"
           >

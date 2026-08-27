@@ -8,6 +8,7 @@ import {
   CardOutline,
   FlashOutline,
 } from '@vicons/ionicons5'
+import { pluralize } from '@/shared/utils/format.utils'
 
 defineProps<{
   eventName: string
@@ -29,9 +30,10 @@ const router = useRouter()
 
       <h1 class="state-page__title">¡Pedido recibido!</h1>
       <p class="state-page__description">
-        Tu selección de <strong>{{ photoCount }} foto{{ photoCount !== 1 ? 's' : '' }}</strong> del
-        evento <strong>{{ eventName }}</strong> fue registrada correctamente. Te contactaremos
-        pronto por WhatsApp.
+        Tu selección de
+        <strong>{{ photoCount }} {{ pluralize(photoCount, 'foto', 'fotos') }}</strong> del evento
+        <strong>{{ eventName }}</strong> fue registrada correctamente. Te contactaremos pronto por
+        WhatsApp.
       </p>
 
       <div class="state-page__actions">
