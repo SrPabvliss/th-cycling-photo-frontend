@@ -1,0 +1,114 @@
+.ot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  --tone: #16294d;
+}
+
+.ot--pend {
+  --tone: #dc2626;
+}
+.ot--info {
+  --tone: #e08700;
+}
+.ot--paid {
+  --tone: #2563eb;
+}
+.ot--deli {
+  --tone: #16a34a;
+}
+.ot--gift {
+  --tone: #7c3aed;
+}
+.ot--canc {
+  --tone: #9aa7b8;
+}
+
+.ot__step {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  text-align: center;
+}
+
+.ot__line {
+  position: absolute;
+  top: 6px;
+  right: 50%;
+  left: -50%;
+  height: 3px;
+  background: #e6ebf1;
+  z-index: 0;
+}
+
+.ot__step--reached .ot__line {
+  background: var(--tone);
+  opacity: 0.5;
+}
+
+.ot__dot {
+  position: relative;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #dbe3ec;
+  z-index: 1;
+}
+
+.ot__step--reached .ot__dot {
+  background: var(--tone);
+  border-color: var(--tone);
+}
+
+.ot__step--current .ot__dot {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--tone) 22%, transparent);
+}
+
+.ot--gift .ot__step--skip .ot__dot {
+  background: #7c3aed;
+  border-color: #7c3aed;
+}
+
+.ot__label {
+  line-height: 1.2;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #8b98ab;
+}
+
+.ot__step--reached .ot__label {
+  color: #5b6a80;
+}
+
+.ot__step--current .ot__label {
+  color: var(--tone);
+  font-weight: 700;
+}
+
+.ot__date {
+  font-size: 10px;
+  color: #8b98ab;
+  font-weight: 600;
+}
+
+.ot__step--current .ot__date {
+  color: #5b6a80;
+}
+
+.ot__cancelled {
+  flex: 0 0 100%;
+  margin-top: 7px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #9aa7b8;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

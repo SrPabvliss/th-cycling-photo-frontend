@@ -1,67 +1,55 @@
 <script setup lang="ts">
-import { ORDER_STATUS, type OrderStatus } from '../../../types/responses/order-list.response'
-import type { IOrderStats } from '../../../types/responses/order-stats.response'
-import { ORDER_FILTER_TABS } from '../../../constants/status-config'
+import { ORDER_TAB_LABELS } from '../../../composables/use-order-filters'
+import type { OrderTab } from '../../../types/requests/order-filters.request'
+import type { IOrderStatsTabs } from '../../../types/responses/order-stats.response'
+import { formatNumber } from '@/shared/utils/format.utils'
 
-type TabVariant = 'all' | 'error' | 'warning' | 'info' | 'success' | 'gift' | 'neutral'
-
-const STATUS_TO_STATS_KEY: Record<OrderStatus, keyof IOrderStats> = {
-  [ORDER_STATUS.PENDING]: 'pendingCount',
-  [ORDER_STATUS.PAYMENT_INFO_SENT]: 'paymentInfoSentCount',
-  [ORDER_STATUS.PAID]: 'paidCount',
-  [ORDER_STATUS.DELIVERED]: 'deliveredCount',
-  [ORDER_STATUS.GIFTED]: 'giftedCount',
-  [ORDER_STATUS.CANCELLED]: 'cancelledCount',
-}
-
-const STATUS_TO_VARIANT: Record<OrderStatus, TabVariant> = {
-  [ORDER_STATUS.PENDING]: 'error',
-  [ORDER_STATUS.PAYMENT_INFO_SENT]: 'warning',
-  [ORDER_STATUS.PAID]: 'info',
-  [ORDER_STATUS.DELIVERED]: 'success',
-  [ORDER_STATUS.GIFTED]: 'gift',
-  [ORDER_STATUS.CANCELLED]: 'neutral',
-}
-
-defineProps<{
-  activeStatus: OrderStatus | null
-  stats: IOrderStats | undefined
+const props = defineProps<{
+  active: OrderTab
+  counts: IOrderStatsTabs | undefined
 }>()
 
 const emit = defineEmits<{
-  'update:activeStatus': [status: OrderStatus | null]
+  'update:active': [tab: OrderTab]
 }>()
 
-function getCount(status: OrderStatus | null, stats: IOrderStats | undefined): number | null {
-  if (!stats) return null
-  if (!status) return stats.activeOrders
-  return stats[STATUS_TO_STATS_KEY[status]] as number
+const TABS: OrderTab[] = [
+  'all',
+  'pending',
+  'paymentInfoSent',
+  'paid',
+  'delivered',
+  'gifted',
+  'cancelled',
+]
+
+function countFor(tab: OrderTab): string {
+  if (props.counts == null) return '—'
+  return formatNumber(props.counts[tab])
 }
 
-function getVariant(status: OrderStatus | null): TabVariant {
-  return status === null ? 'all' : STATUS_TO_VARIANT[status]
+function isWarn(tab: OrderTab): boolean {
+  return tab === 'pending' && props.counts != null && props.counts.pending > 0
+}
+
+function select(tab: OrderTab) {
+  emit('update:active', tab)
 }
 </script>
 
 <template>
-  <div class="status-tabs" role="tablist">
+  <div class="ost-tabs" role="tablist">
     <button
-      v-for="tab in ORDER_FILTER_TABS"
-      :key="tab.label"
+      v-for="tab in TABS"
+      :key="tab"
+      type="button"
       role="tab"
-      :aria-selected="activeStatus === tab.status"
-      :class="[
-        'status-tab',
-        `status-tab--${getVariant(tab.status)}`,
-        { 'status-tab--active': activeStatus === tab.status },
-      ]"
-      @click="emit('update:activeStatus', tab.status)"
+      :aria-selected="active === tab"
+      class="ost-tab"
+      :class="{ 'ost-tab--on': active === tab, 'ost-tab--warn': isWarn(tab) }"
+      @click="select(tab)"
     >
-      <span v-if="getVariant(tab.status) !== 'all'" class="status-tab__dot" aria-hidden="true" />
-      <span class="status-tab__label">{{ tab.label }}</span>
-      <span v-if="getCount(tab.status, stats) !== null" class="status-tab__count">
-        {{ getCount(tab.status, stats) }}
-      </span>
+      {{ ORDER_TAB_LABELS[tab] }}<span class="ost-tab__n">{{ countFor(tab) }}</span>
     </button>
   </div>
 </template>

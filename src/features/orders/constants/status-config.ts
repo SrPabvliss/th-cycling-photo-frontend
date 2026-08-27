@@ -1,11 +1,8 @@
+import type { IStatusBadgeConfig } from '@/shared/types/badge-config.types'
 import type { DeliveryLinkStatus } from '../types/responses/order-detail.response'
-import { ORDER_STATUS, type OrderStatus } from '../types/responses/order-list.response'
+import { ORDER_STATUS, type OrderStatus } from '@/shared/types/order-status.types'
 
-export interface IStatusBadgeConfig {
-  label: string
-  type: 'default' | 'info' | 'warning' | 'success' | 'error'
-  color?: string
-}
+export type { IStatusBadgeConfig } from '@/shared/types/badge-config.types'
 
 export const ORDER_STATUS_CONFIG: Record<OrderStatus, IStatusBadgeConfig> = {
   [ORDER_STATUS.PENDING]: { label: 'Pendiente', type: 'error' },
@@ -26,18 +23,3 @@ export const PAYMENT_METHOD_LABELS: Record<string, string> = {
   card: 'Tarjeta',
   transfer: 'Transferencia',
 }
-
-export interface IOrderFilterTab {
-  label: string
-  status: OrderStatus | null
-}
-
-export const ORDER_FILTER_TABS: IOrderFilterTab[] = [
-  { label: 'Todos', status: null },
-  { label: 'Pendientes', status: ORDER_STATUS.PENDING },
-  { label: 'Info enviada', status: ORDER_STATUS.PAYMENT_INFO_SENT },
-  { label: 'Pagados', status: ORDER_STATUS.PAID },
-  { label: 'Entregados', status: ORDER_STATUS.DELIVERED },
-  { label: 'Regaladas', status: ORDER_STATUS.GIFTED },
-  { label: 'Cancelados', status: ORDER_STATUS.CANCELLED },
-]

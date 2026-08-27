@@ -28,6 +28,8 @@
 
 .dl-card__url {
   flex: 1;
+  /* Without this the token, being unbreakable, forces the row wider than the screen. */
+  min-width: 0;
   background: #f3f4f6;
   padding: 8px 12px;
   border-radius: 6px;

@@ -1,4 +1,4 @@
-import type { OrderStatus } from '../types/responses/order-list.response'
+import type { OrderStatus } from '@/shared/types/order-status.types'
 import type { IApiOrderListItem, IOrderListItem } from '../types/responses/order-list.response'
 
 function toOrderListItem(api: IApiOrderListItem): IOrderListItem {
@@ -9,6 +9,8 @@ function toOrderListItem(api: IApiOrderListItem): IOrderListItem {
     notifiedAt: api.notifiedAt ? new Date(api.notifiedAt) : null,
     paidAt: api.paidAt ? new Date(api.paidAt) : null,
     deliveredAt: api.deliveredAt ? new Date(api.deliveredAt) : null,
+    cancelledAt: api.cancelledAt ? new Date(api.cancelledAt) : null,
+    eventId: api.eventId,
     userName: api.userName,
     userId: api.userId,
     customerFirstName: api.customerFirstName,
@@ -20,6 +22,7 @@ function toOrderListItem(api: IApiOrderListItem): IOrderListItem {
     photoCount: api.photoCount,
     hasDeliveryLink: api.hasDeliveryLink,
     subtotal: api.subtotal === null ? null : Number(api.subtotal),
+    subtotalDecimal: api.subtotal ?? null,
     snapCurrency: api.snapCurrency,
     paymentMethod: api.paymentMethod,
     previewPhotos: api.previewPhotos.map((p) => ({

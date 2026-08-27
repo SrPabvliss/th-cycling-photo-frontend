@@ -1,0 +1,126 @@
+.buyers-content {
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+.buyers-content > * {
+  flex-shrink: 0;
+}
+
+.buyers-content :deep(.page-header) {
+  margin-bottom: 8px;
+}
+
+.buyers-content > .bsc-metrics,
+.buyers-content > .bsc-hero {
+  margin-bottom: 18px;
+}
+
+.buyers-panel {
+  background: var(--tt-surface, #fff);
+  border: 1px solid var(--tt-neutral-light, #e5e7eb);
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(16, 35, 58, 0.04);
+  overflow: hidden;
+}
+
+.buyers-result-line {
+  padding: 0 16px 12px;
+  font-size: 12.5px;
+  color: var(--tt-neutral-mid, #6b7280);
+  border-bottom: 1px solid var(--tt-neutral-light, #e5e7eb);
+}
+
+.buyers-result-line b {
+  color: var(--tt-neutral-dark, #111827);
+  font-weight: 700;
+}
+
+.buyers-result-line__sub {
+  color: var(--tt-neutral-mid, #9ca3af);
+}
+
+.buyers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 14px;
+  padding: 16px;
+}
+
+.buyers-sentinel {
+  width: 100%;
+  height: 1px;
+}
+
+.buyers-loading,
+.buyers-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.buyers-loading {
+  padding: 60px 0;
+}
+
+.buyers-empty {
+  gap: 7px;
+  padding: 64px 20px 76px;
+}
+
+.buyers-empty__icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: var(--tt-neutral-lightest, #f2f5f8);
+  color: var(--tt-neutral-mid, #6b7280);
+  display: grid;
+  place-items: center;
+  margin-bottom: 4px;
+}
+
+.buyers-empty b {
+  font-size: 15px;
+}
+
+.buyers-empty__hint {
+  font-size: 12.5px;
+  color: var(--tt-neutral-mid, #6b7280);
+  max-width: 360px;
+}
+
+.buyers-empty__clear {
+  margin-top: 6px;
+}
+
+.buyers-loading-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 0 22px;
+  color: var(--tt-neutral-mid, #6b7280);
+  font-size: 12px;
+}
+
+@media (max-width: 767px) {
+  .buyers-content {
+    padding: 12px 16px;
+    gap: 10px;
+  }
+
+  .buyers-panel {
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .buyers-grid {
+    grid-template-columns: 1fr;
+    padding: 12px 16px;
+  }
+}

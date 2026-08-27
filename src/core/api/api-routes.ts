@@ -15,6 +15,7 @@ const PHOTO_CATEGORIES_BASE = '/photo-categories'
 const OPERATOR_BASE = '/operator'
 const PRICING_BASE = '/pricing'
 const PAYMENTS_BASE = '/payments'
+const BUYERS_BASE = '/buyers'
 const ORGANIZERS_BASE = '/organizers'
 const CONTRACTS_BASE = '/contracts'
 const TENANTS_BASE = '/tenants'
@@ -175,7 +176,10 @@ export const API_ROUTES = {
     SUMMARY: `${ORDERS_BASE}/me/summary`,
   },
   BUYERS: {
-    GET_ALL: '/buyers',
+    BASE: BUYERS_BASE,
+    GET_ALL: BUYERS_BASE,
+    STATS: `${BUYERS_BASE}/stats`,
+    GET_BY_ID: (id: string) => `${BUYERS_BASE}/${id}`,
   },
   ORGANIZERS: {
     BASE: ORGANIZERS_BASE,

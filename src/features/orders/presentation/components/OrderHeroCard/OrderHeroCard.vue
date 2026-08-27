@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { NTag } from 'naive-ui'
 
 import { formatDate, formatRelativeTime } from '@/shared/utils/date.utils'
-import { formatCurrency } from '@/features/pricing/utils/format-currency'
+import { formatCurrency } from '@/shared/utils/currency.utils'
 import type { IOrderDetail } from '../../../types/responses/order-detail.response'
 import { ORDER_STATUS_CONFIG, PAYMENT_METHOD_LABELS } from '../../../constants/status-config'
 

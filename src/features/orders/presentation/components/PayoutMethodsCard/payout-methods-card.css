@@ -45,6 +45,8 @@
 
 .pm-card__value {
   flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: 13px;
   color: #374151;
 }

@@ -1,71 +1,62 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { NInput, NSelect, NIcon } from 'naive-ui'
+import { ref, watch } from 'vue'
+import { useDebounceFn } from '@vueuse/core'
+import { NSelect, NIcon } from 'naive-ui'
 import { SearchOutline } from '@vicons/ionicons5'
-import { useDebounceFn, useMediaQuery } from '@vueuse/core'
 
 import { useEventsDropdownQuery } from '../../../composables/queries/use-events-dropdown'
+import { useInjectedOrderFilterState } from '../../../composables/use-order-filters'
 
-defineProps<{
-  search: string
-  eventId: string | null
-}>()
+const filterState = useInjectedOrderFilterState()
 
-const emit = defineEmits<{
-  'update:search': [value: string]
-  'update:eventId': [value: string | null]
-}>()
+const searchInput = ref(filterState.search.value)
+const debouncedApply = useDebounceFn((value: string) => {
+  filterState.search.value = value
+}, 400)
+
+watch(searchInput, (value) => debouncedApply(value))
+watch(
+  () => filterState.search.value,
+  (value) => {
+    if (value !== searchInput.value) searchInput.value = value ?? ''
+  },
+)
 
 const eventSearch = ref('')
 const debouncedEventSearch = ref('')
-
 watch(
   eventSearch,
-  useDebounceFn((val: string) => {
-    debouncedEventSearch.value = val
+  useDebounceFn((value: string) => {
+    debouncedEventSearch.value = value
   }, 300),
 )
 
 const { options: eventOptions, isLoading: loadingEvents } =
   useEventsDropdownQuery(debouncedEventSearch)
-
-const isMobile = useMediaQuery('(max-width: 767px)')
-const inputSize = computed<'small' | 'medium'>(() => (isMobile.value ? 'medium' : 'small'))
-
-const localSearch = ref('')
-
-watch(
-  () => localSearch.value,
-  useDebounceFn((val: string) => emit('update:search', val), 300),
-)
 </script>
 
 <template>
-  <div class="order-filters">
-    <NInput
-      v-model:value="localSearch"
-      placeholder="Buscar por nombre o WhatsApp..."
-      clearable
-      :size="inputSize"
-      class="order-filters__search"
-    >
-      <template #prefix>
-        <NIcon :component="SearchOutline" />
-      </template>
-    </NInput>
+  <div class="of-bar">
+    <div class="of-search">
+      <NIcon :component="SearchOutline" :size="15" />
+      <input
+        v-model="searchInput"
+        data-test="search"
+        placeholder="Buscar por nombre del cliente o WhatsApp…"
+      />
+    </div>
 
     <NSelect
-      :value="eventId"
-      placeholder="Filtrar por evento"
+      class="of-event"
+      :value="filterState.eventId.value"
+      placeholder="Todos los eventos"
       clearable
       filterable
       remote
-      :size="inputSize"
       :options="eventOptions"
       :loading="loadingEvents"
-      class="order-filters__event"
-      @search="(q: string) => (eventSearch = q)"
-      @update:value="emit('update:eventId', $event)"
+      @search="(query: string) => (eventSearch = query)"
+      @update:value="(value: string | null) => (filterState.eventId.value = value)"
     />
   </div>
 </template>

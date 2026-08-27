@@ -1,0 +1,39 @@
+.oc {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-left-width: 4px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  overflow: hidden;
+  height: 100%;
+  transition:
+    box-shadow 0.15s,
+    transform 0.15s;
+}
+
+.oc:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+  transform: translateY(-1px);
+}
+
+/* Status-driven left borders */
+.oc--pending {
+  border-left-color: #d03050;
+}
+.oc--payment_info_sent {
+  border-left-color: #f0a020;
+}
+.oc--paid {
+  border-left-color: #2080f0;
+}
+.oc--delivered {
+  border-left-color: #18a058;
+}
+.oc--gifted {
+  border-left-color: #7c3aed;
+}
+.oc--cancelled {
+  border-left-color: #909399;
+}

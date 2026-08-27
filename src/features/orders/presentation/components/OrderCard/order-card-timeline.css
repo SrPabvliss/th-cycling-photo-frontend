@@ -1,0 +1,67 @@
+/* ──────────── Timeline ──────────── */
+.oc__timeline {
+  list-style: none;
+  margin: 0;
+  padding: 14px 16px 6px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid #f0f1f3;
+}
+
+.oc__step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.oc__step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #d1d5db;
+  z-index: 1;
+}
+
+.oc__step-label {
+  line-height: 1.2;
+}
+
+/* Connecting line: drawn from each step's right edge to the next dot */
+.oc__step--has-line::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: calc(50% + 8px);
+  right: calc(-50% + 8px);
+  height: 2px;
+  background: #e5e7eb;
+  z-index: 0;
+}
+
+.oc__step--line-reached::after {
+  background: var(--tt-primary, #105080);
+}
+
+.oc__step--reached {
+  color: #4b5563;
+}
+
+.oc__step--reached .oc__step-dot {
+  background: var(--tt-primary, #105080);
+  border-color: var(--tt-primary, #105080);
+}
+
+.oc__step--current {
+  color: #1a1f2c;
+  font-weight: 600;
+}
+
+.oc__step--current .oc__step-dot {
+  box-shadow: 0 0 0 4px rgba(16, 80, 128, 0.15);
+}

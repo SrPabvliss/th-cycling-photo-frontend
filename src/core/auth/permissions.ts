@@ -1,5 +1,6 @@
 export const PERMISSIONS = {
   EVENT_READ: 'event.read',
+  EVENT_READ_ALL: 'event.read.all',
   EVENT_CREATE: 'event.create',
   EVENT_UPDATE: 'event.update',
   EVENT_FREEZE: 'event.freeze',
