@@ -1,6 +1,6 @@
 import { computed, type Ref } from 'vue'
 
-import type { IReviewQueueSource } from '@/features/workspace/types/workspace-queue-source.types'
+import type { IReviewQueueSource } from '@/shared/workspace/types/workspace-queue-source.types'
 import { QUEUE_PAGINATION_DEFAULTS } from '../../constants/queue-pagination'
 import { useReviewQueueQuery } from '../queries/use-review-queue'
 

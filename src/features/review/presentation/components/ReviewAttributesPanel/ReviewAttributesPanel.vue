@@ -4,12 +4,12 @@ import type { IPhotoDetail } from '@/features/photos/types/responses/photo-detai
 import ReviewBibCard from '../ReviewBibCard/ReviewBibCard.vue'
 import ReviewSectionGroup from '../ReviewSectionGroup/ReviewSectionGroup.vue'
 import AddBibForm from '../AddBibForm/AddBibForm.vue'
-import WorkspaceCropLightbox from '@/features/workspace/presentation/components/WorkspaceCropLightbox/WorkspaceCropLightbox.vue'
-import { CARD_NAV_KEY } from '@/features/workspace/composables/keys'
+import WorkspaceCropLightbox from '@/shared/workspace/presentation/components/WorkspaceCropLightbox/WorkspaceCropLightbox.vue'
+import { CARD_NAV_KEY } from '@/shared/workspace/composables/keys'
 import {
   WORKSPACE_EVENTS,
   type IShowCropDetail,
-} from '@/features/workspace/constants/workspace-events'
+} from '@/shared/workspace/constants/workspace-events'
 import { useWindowEvent } from '@/shared/composables/use-window-event'
 
 const props = defineProps<{ photo: IPhotoDetail }>()

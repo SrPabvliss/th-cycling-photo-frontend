@@ -9,8 +9,8 @@ vi.mock('../../../composables/mutations/use-apply-color-correction', () => ({
   }),
 }))
 
-import { CARD_NAV_KEY } from '@/features/workspace/composables/keys'
-import { useWorkspaceCardNavigation } from '@/features/workspace/composables/use-workspace-card-navigation'
+import { CARD_NAV_KEY } from '@/shared/workspace/composables/keys'
+import { useWorkspaceCardNavigation } from '@/shared/workspace/composables/use-workspace-card-navigation'
 import ReviewColorCard from './ReviewColorCard.vue'
 import type { IColorAttribute } from '@/features/photos/types/responses/photo-detail.response'
 

@@ -7,8 +7,8 @@ import { useApplyBibCorrection } from '../../../composables/mutations/use-apply-
 import { useDeletePhotoBib } from '../../../composables/mutations/use-delete-photo-bib'
 import { useAsyncSaveState } from '@/shared/composables/use-async-save-state'
 import { useBibConfidence } from '../../../composables/use-bib-confidence'
-import { useWorkspaceCropLightbox } from '@/features/workspace/composables/use-workspace-crop-lightbox'
-import { useWorkspaceCardRegistration } from '@/features/workspace/composables/use-workspace-card-registration'
+import { useWorkspaceCropLightbox } from '@/shared/workspace/composables/use-workspace-crop-lightbox'
+import { useWorkspaceCardRegistration } from '@/shared/workspace/composables/use-workspace-card-registration'
 
 const props = defineProps<{
   bib: IBibAttribute

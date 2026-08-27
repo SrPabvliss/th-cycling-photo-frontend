@@ -4,12 +4,12 @@ import { useRoute, useRouter } from 'vue-router'
 import { NSpin } from 'naive-ui'
 
 import { useSinglePhotoReviewWorkspace } from '@/features/review/composables/use-single-photo-review-workspace'
-import { CARD_NAV_KEY } from '@/features/workspace/composables/keys'
-import { useWorkspaceKeyboard } from '@/features/workspace/composables/use-workspace-keyboard'
-import WorkspaceHeader from '@/features/workspace/presentation/components/WorkspaceHeader/WorkspaceHeader.vue'
-import WorkspaceShell from '@/features/workspace/presentation/components/WorkspaceShell/WorkspaceShell.vue'
-import WorkspacePhotoPanel from '@/features/workspace/presentation/components/WorkspacePhotoPanel/WorkspacePhotoPanel.vue'
-import WorkspaceShortcutCheatsheet from '@/features/workspace/presentation/components/WorkspaceShortcutCheatsheet/WorkspaceShortcutCheatsheet.vue'
+import { CARD_NAV_KEY } from '@/shared/workspace/composables/keys'
+import { useWorkspaceKeyboard } from '@/shared/workspace/composables/use-workspace-keyboard'
+import WorkspaceHeader from '@/shared/workspace/presentation/components/WorkspaceHeader/WorkspaceHeader.vue'
+import WorkspaceShell from '@/shared/workspace/presentation/components/WorkspaceShell/WorkspaceShell.vue'
+import WorkspacePhotoPanel from '@/shared/workspace/presentation/components/WorkspacePhotoPanel/WorkspacePhotoPanel.vue'
+import WorkspaceShortcutCheatsheet from '@/shared/workspace/presentation/components/WorkspaceShortcutCheatsheet/WorkspaceShortcutCheatsheet.vue'
 import ReviewAttributesPanel from '@/features/review/presentation/components/ReviewAttributesPanel/ReviewAttributesPanel.vue'
 
 const route = useRoute()
@@ -93,5 +93,5 @@ useWorkspaceKeyboard({
   </div>
 </template>
 
-<style src="@/features/workspace/presentation/workspace-tokens.css" />
+<style src="@/shared/workspace/presentation/workspace-tokens.css" />
 <style scoped src="./styles/single-photo-review-workspace-view.css" />

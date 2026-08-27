@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { useRetouchWorkspaceCore } from './use-retouch-workspace-core'
 
 // Mock the workspace core to avoid deep dependency on photo queries/mutations
-vi.mock('@/features/workspace/composables/use-workspace-core', () => ({
+vi.mock('@/shared/workspace/composables/use-workspace-core', () => ({
   useReviewWorkspaceCore: vi.fn(() => ({
     queueItems: computed(() => []),
     totalCount: computed(() => 0),

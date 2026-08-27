@@ -1,8 +1,8 @@
 import { computed, ref, type ComputedRef } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { useReviewWorkspaceCore } from '@/features/workspace/composables/use-workspace-core'
-import type { IReviewWorkspaceState } from '@/features/workspace/types/workspace-state.types'
+import { useReviewWorkspaceCore } from '@/shared/workspace/composables/use-workspace-core'
+import type { IReviewWorkspaceState } from '@/shared/workspace/types/workspace-state.types'
 import { useEventReviewQueueSource } from './queue-sources/use-event-review-queue-source'
 
 type EventReviewWorkspace = IReviewWorkspaceState & {

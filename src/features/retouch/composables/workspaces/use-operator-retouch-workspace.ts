@@ -1,10 +1,13 @@
-import { computed } from 'vue'
+import { computed, ref, type Ref } from 'vue'
 
 import { useOperatorRetouchOrdersListSource } from '../queue-sources/use-retouch-orders-list-source'
 import { useRetouchWorkspaceCore } from './use-retouch-workspace-core'
 
-export function useOperatorRetouchWorkspace(options: { initialOrderId?: string } = {}) {
-  const ordersSource = useOperatorRetouchOrdersListSource()
+export function useOperatorRetouchWorkspace(
+  options: { initialOrderId?: string; enabled?: Ref<boolean> } = {},
+) {
+  const enabled = options.enabled ?? ref(true)
+  const ordersSource = useOperatorRetouchOrdersListSource(ref('pending'), ref(null), enabled)
 
   const orders = computed(() =>
     ordersSource.orders.value.map((o) => ({
@@ -16,7 +19,7 @@ export function useOperatorRetouchWorkspace(options: { initialOrderId?: string }
   )
 
   const core = useRetouchWorkspaceCore({
-    initialOrderId: options.initialOrderId ?? null,
+    initialOrderId: enabled.value ? (options.initialOrderId ?? null) : null,
     orders,
   })
 

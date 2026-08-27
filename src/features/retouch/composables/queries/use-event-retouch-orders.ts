@@ -27,6 +27,7 @@ export interface IEventRetouchOrdersPage {
 export function useEventRetouchOrdersInfiniteQuery(
   eventSlug: Ref<string>,
   scope: Ref<TRetouchOrderScope> = ref('pending'),
+  enabled: Ref<boolean> = ref(true),
 ) {
   return useInfiniteQuery({
     queryKey: computed(() => RETOUCH_QUERY_KEYS.eventOrders(eventSlug.value, scope.value)),
@@ -54,7 +55,7 @@ export function useEventRetouchOrdersInfiniteQuery(
       last.pagination.page < last.pagination.totalPages
         ? ({ page: last.pagination.page + 1 } satisfies IPageParams)
         : undefined,
-    enabled: computed(() => !!eventSlug.value),
+    enabled: computed(() => !!eventSlug.value && enabled.value),
     ...INTERNAL_IMAGE_QUERY_DEFAULTS,
   })
 }

@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-import type { IPhotoDetail } from '@/features/photos/types/responses/photo-detail.response'
+import type { IWorkspacePhotoDetail } from '@/shared/workspace/types/workspace-photo.types'
 import { useImageZoom } from '@/features/photos/composables/use-image-zoom'
 import { usePhotoFileOps } from '@/features/photos/composables/use-photo-file-ops'
 import ImageComparisonSlider from '@/features/review/presentation/components/ImageComparisonSlider/ImageComparisonSlider.vue'
+import { pluralize } from '@/shared/utils/format.utils'
 
 const props = defineProps<{
-  photo: IPhotoDetail
+  photo: IWorkspacePhotoDetail
   hasNext: boolean
   hasPrev: boolean
 }>()
@@ -106,7 +107,7 @@ defineExpose({
           <span v-else class="rv-tag warn">pendiente de revisar</span>
           <span v-if="isRetouched" class="rv-tag info">retocada</span>
           <span v-if="bibsCount > 0" class="rv-tag neutral"
-            >{{ bibsCount }} placa{{ bibsCount === 1 ? '' : 's' }}</span
+            >{{ bibsCount }} {{ pluralize(bibsCount, 'placa', 'placas') }}</span
           >
           <span v-if="colorsCount > 0" class="rv-tag neutral">{{ colorsCount }} colores</span>
         </div>

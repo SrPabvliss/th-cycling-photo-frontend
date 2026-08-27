@@ -1,7 +1,7 @@
 import { computed, ref, watch, type Ref } from 'vue'
 
 import { usePhotoDetailBySlugQuery } from '@/features/photos/composables/queries/use-photo-detail-by-slug'
-import { useMarkPhotoReviewed } from '@/features/review/composables/mutations/use-mark-photo-reviewed'
+import { useMarkPhotoReviewed } from './use-mark-photo-reviewed'
 import { useWorkspaceCardNavigation } from './use-workspace-card-navigation'
 import type { MobileSheet } from '../types/mobile-sheet.type'
 import type { IReviewQueueSource } from '../types/workspace-queue-source.types'
@@ -139,7 +139,11 @@ export function useReviewWorkspaceCore(
   function saveAndAdvance() {
     if (!photo.value) return
     markReviewed.mutate(
-      { photoId: photo.value.id, photoSlug: photo.value.publicSlug },
+      {
+        photoId: photo.value.id,
+        photoSlug: photo.value.publicSlug,
+        eventSlug: photo.value.eventSlug,
+      },
       {
         onSuccess: () => {
           if (mode === 'edit-one') {

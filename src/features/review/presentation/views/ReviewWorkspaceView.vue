@@ -4,17 +4,17 @@ import { NSpin } from 'naive-ui'
 import { useRouter } from 'vue-router'
 
 import { useEventReviewWorkspace } from '../../composables/use-event-review-workspace'
-import { useWorkspaceKeyboard } from '@/features/workspace/composables/use-workspace-keyboard'
-import { CARD_NAV_KEY } from '@/features/workspace/composables/keys'
-import WorkspaceShell from '@/features/workspace/presentation/components/WorkspaceShell/WorkspaceShell.vue'
-import WorkspaceHeader from '@/features/workspace/presentation/components/WorkspaceHeader/WorkspaceHeader.vue'
-import WorkspacePhotoPanel from '@/features/workspace/presentation/components/WorkspacePhotoPanel/WorkspacePhotoPanel.vue'
-import WorkspaceMobileBottomBar from '@/features/workspace/presentation/components/WorkspaceMobileBottomBar/WorkspaceMobileBottomBar.vue'
+import { useWorkspaceKeyboard } from '@/shared/workspace/composables/use-workspace-keyboard'
+import { CARD_NAV_KEY } from '@/shared/workspace/composables/keys'
+import WorkspaceShell from '@/shared/workspace/presentation/components/WorkspaceShell/WorkspaceShell.vue'
+import WorkspaceHeader from '@/shared/workspace/presentation/components/WorkspaceHeader/WorkspaceHeader.vue'
+import WorkspacePhotoPanel from '@/shared/workspace/presentation/components/WorkspacePhotoPanel/WorkspacePhotoPanel.vue'
+import WorkspaceMobileBottomBar from '@/shared/workspace/presentation/components/WorkspaceMobileBottomBar/WorkspaceMobileBottomBar.vue'
 import ReviewQueuePanel from '../components/ReviewQueuePanel/ReviewQueuePanel.vue'
 import ReviewAttributesPanel from '../components/ReviewAttributesPanel/ReviewAttributesPanel.vue'
-import WorkspaceShortcutCheatsheet from '@/features/workspace/presentation/components/WorkspaceShortcutCheatsheet/WorkspaceShortcutCheatsheet.vue'
-import { WORKSPACE_EVENTS } from '@/features/workspace/constants/workspace-events'
-import type { CardSection } from '@/features/workspace/composables/use-workspace-card-navigation'
+import WorkspaceShortcutCheatsheet from '@/shared/workspace/presentation/components/WorkspaceShortcutCheatsheet/WorkspaceShortcutCheatsheet.vue'
+import { WORKSPACE_EVENTS } from '@/shared/workspace/constants/workspace-events'
+import type { CardSection } from '@/shared/workspace/composables/use-workspace-card-navigation'
 
 const SECTION_TO_COMPARE_VIEW: Partial<Record<CardSection, 'original' | 'compare' | 'retouched'>> =
   {
@@ -126,7 +126,7 @@ useWorkspaceKeyboard({
       :pending-count="pendingPhotosCount"
       :photo-index="ws.currentIndex.value"
       :photo-total="ws.queueItems.value.length"
-      :attrs-count="ws.photo.value ? ws.photo.value.bibs.length + ws.photo.value.colors.length : 0"
+      :attrs-count="ws.photo.value ? ws.photo.value.bibs.length : 0"
       @open="ws.openSheet($event)"
     />
 
@@ -137,5 +137,5 @@ useWorkspaceKeyboard({
   </div>
 </template>
 
-<style src="@/features/workspace/presentation/workspace-tokens.css" />
+<style src="@/shared/workspace/presentation/workspace-tokens.css" />
 <style scoped src="./review-workspace-view.css" />

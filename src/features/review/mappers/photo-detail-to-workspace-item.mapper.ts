@@ -1,5 +1,5 @@
 import type { IPhotoDetail } from '@/features/photos/types/responses/photo-detail.response'
-import type { IWorkspaceQueueItem } from '@/features/workspace/types/workspace-queue-item.types'
+import type { IWorkspaceQueueItem } from '@/shared/workspace/types/workspace-queue-item.types'
 
 /**
  * Adapts a photo detail response to a single workspace queue item. Used by

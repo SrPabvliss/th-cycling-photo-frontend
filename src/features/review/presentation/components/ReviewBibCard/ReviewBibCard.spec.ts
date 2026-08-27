@@ -9,8 +9,8 @@ vi.mock('../../../composables/mutations/use-apply-bib-correction', () => ({
   }),
 }))
 
-import { CARD_NAV_KEY } from '@/features/workspace/composables/keys'
-import { useWorkspaceCardNavigation } from '@/features/workspace/composables/use-workspace-card-navigation'
+import { CARD_NAV_KEY } from '@/shared/workspace/composables/keys'
+import { useWorkspaceCardNavigation } from '@/shared/workspace/composables/use-workspace-card-navigation'
 import ReviewBibCard from './ReviewBibCard.vue'
 import type { IBibAttribute } from '@/features/photos/types/responses/photo-detail.response'
 

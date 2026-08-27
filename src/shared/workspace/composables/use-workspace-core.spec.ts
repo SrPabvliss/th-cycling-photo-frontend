@@ -12,7 +12,7 @@ vi.mock('@/features/photos/composables/queries/use-photo-detail-by-slug', () => 
   })),
 }))
 
-vi.mock('@/features/review/composables/mutations/use-mark-photo-reviewed', () => ({
+vi.mock('./use-mark-photo-reviewed', () => ({
   useMarkPhotoReviewed: vi.fn(() => ({
     mutate: vi.fn(),
   })),

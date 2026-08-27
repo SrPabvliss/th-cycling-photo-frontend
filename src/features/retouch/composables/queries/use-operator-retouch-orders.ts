@@ -27,6 +27,7 @@ export interface IOperatorRetouchOrdersInfinitePage {
 export function useOperatorRetouchOrdersInfiniteQuery(
   scope: Ref<TRetouchOrderScope> = ref('pending'),
   eventSlug: Ref<string | null> = ref(null),
+  enabled: Ref<boolean> = ref(true),
 ) {
   return useInfiniteQuery({
     queryKey: computed(() =>
@@ -63,6 +64,7 @@ export function useOperatorRetouchOrdersInfiniteQuery(
       last.pagination.page < last.pagination.totalPages
         ? ({ page: last.pagination.page + 1 } satisfies IPageParams)
         : undefined,
+    enabled: computed(() => enabled.value),
     ...INTERNAL_IMAGE_QUERY_DEFAULTS,
   })
 }
