@@ -15,6 +15,9 @@ const PHOTO_CATEGORIES_BASE = '/photo-categories'
 const OPERATOR_BASE = '/operator'
 const PRICING_BASE = '/pricing'
 const PAYMENTS_BASE = '/payments'
+const ORGANIZERS_BASE = '/organizers'
+const CONTRACTS_BASE = '/contracts'
+const TENANTS_BASE = '/tenants'
 
 export const API_ROUTES = {
   AUTH: {
@@ -173,6 +176,26 @@ export const API_ROUTES = {
   },
   BUYERS: {
     GET_ALL: '/buyers',
+  },
+  ORGANIZERS: {
+    BASE: ORGANIZERS_BASE,
+    GET_ALL: ORGANIZERS_BASE,
+    STATS: `${ORGANIZERS_BASE}/stats`,
+    GET_BY_ID: (id: string) => `${ORGANIZERS_BASE}/${id}`,
+    EVENTS: (id: string) => `${ORGANIZERS_BASE}/${id}/events`,
+  },
+  CONTRACTS: {
+    BASE: CONTRACTS_BASE,
+    ISSUE: CONTRACTS_BASE,
+    BY_TOKEN: (token: string) => `${CONTRACTS_BASE}/token/${token}`,
+    ACCEPT: (token: string) => `${CONTRACTS_BASE}/token/${token}/accept`,
+    RESEND: (id: string) => `${CONTRACTS_BASE}/${id}/resend`,
+    REVOKE: (id: string) => `${CONTRACTS_BASE}/${id}/revoke`,
+    MINE: `${CONTRACTS_BASE}/mine`,
+  },
+  TENANTS: {
+    BASE: TENANTS_BASE,
+    PHOTO_QUOTA_DEFAULT: (id: string) => `${TENANTS_BASE}/${id}/photo-quota-default`,
   },
   CART: {
     GET: '/cart',

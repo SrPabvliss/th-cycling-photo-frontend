@@ -1,0 +1,225 @@
+.od-capbig {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: #f7f9fb;
+  border: 1px solid var(--tt-neutral-light);
+  border-radius: 12px;
+  padding: 16px;
+}
+.od-capbig--red {
+  border-color: rgba(217, 45, 32, 0.35);
+}
+.od-capbig__main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 200px;
+}
+.od-capbig__l {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tt-neutral-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.od-capbig__v {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.od-capbig__v em {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tt-neutral-mid);
+}
+.od-capbig__n {
+  font-size: 11.5px;
+  color: var(--tt-neutral-mid);
+}
+
+.od-bar {
+  height: 7px;
+  border-radius: 4px;
+  background: #eef2f7;
+  overflow: hidden;
+}
+.od-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+}
+.od-tone-bg--green {
+  background: var(--tt-success);
+}
+.od-tone-bg--amber {
+  background: var(--tt-warning);
+}
+.od-tone-bg--red {
+  background: var(--tt-error);
+}
+.od-tone--red {
+  color: var(--tt-error);
+}
+
+.od-capbig__side {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: none;
+  border-left: 1px solid var(--tt-neutral-light);
+  padding-left: 16px;
+  min-width: 160px;
+}
+.od-capbig__side > div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.od-capbig__side b {
+  font-size: 13.5px;
+  font-weight: 700;
+}
+.od-capbig__side span {
+  font-size: 11px;
+  color: var(--tt-neutral-mid);
+}
+
+.od-minis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background: #f7f9fb;
+  border: 1px solid var(--tt-neutral-light);
+  border-radius: 11px;
+  padding: 13px 8px;
+}
+.od-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+.od-mini__v {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.od-mini__l {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--tt-neutral-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.od-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #fdecec;
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--tt-error);
+}
+.od-notice div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12.5px;
+  color: #8a2a20;
+}
+.od-notice b {
+  font-weight: 700;
+}
+
+.od-sec h4 {
+  margin: 0 0 9px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tt-neutral-mid);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.od-sec--last {
+  padding-bottom: 6px;
+}
+
+.od-set {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid var(--tt-neutral-light);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.od-set__txt {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+.od-set__txt b {
+  font-size: 13px;
+  font-weight: 700;
+}
+.od-set__txt span {
+  font-size: 11.5px;
+  color: var(--tt-neutral-mid);
+  line-height: 1.4;
+}
+.od-set__value {
+  font-size: 13px;
+  font-weight: 700;
+  flex: none;
+}
+
+.od-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+.od-stepper button {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--tt-neutral-light);
+  background: var(--tt-surface);
+  color: var(--tt-neutral-dark);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.od-stepper button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.od-stepper__value {
+  min-width: 64px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.od-readonly {
+  margin: 12px 0 0;
+  font-size: 11.5px;
+  color: var(--tt-neutral-mid);
+  line-height: 1.5;
+  border-top: 1px solid var(--tt-neutral-light);
+  padding-top: 11px;
+}
