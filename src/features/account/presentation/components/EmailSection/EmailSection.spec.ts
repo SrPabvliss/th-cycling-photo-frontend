@@ -14,8 +14,8 @@ const authState = reactive({
     emailVerified: boolean
   } | null,
 })
-vi.mock('@/features/auth/stores/auth.store', () => ({
-  useAuthStore: () => authState,
+vi.mock('@/core/auth/stores/session.store', () => ({
+  useSessionStore: () => authState,
 }))
 
 const mutate = vi.fn((_input, opts?: { onSuccess?: () => void }) => opts?.onSuccess?.())

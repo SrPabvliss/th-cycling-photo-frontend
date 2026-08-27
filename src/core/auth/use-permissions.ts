@@ -1,12 +1,12 @@
 import { computed } from 'vue'
 
-import { useAuthStore } from '@/features/auth/stores/auth.store'
+import { useSessionStore } from '@/core/auth/stores/session.store'
 import type { PermissionKey } from './permissions'
 
 export function usePermissions() {
-  const authStore = useAuthStore()
+  const sessionStore = useSessionStore()
 
-  const permissions = computed(() => authStore.currentUser?.permissions ?? [])
+  const permissions = computed(() => sessionStore.currentUser?.permissions ?? [])
 
   function has(key: PermissionKey): boolean {
     return permissions.value.includes(key)

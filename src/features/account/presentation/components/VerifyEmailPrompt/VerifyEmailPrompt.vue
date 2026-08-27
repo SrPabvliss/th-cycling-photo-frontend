@@ -5,7 +5,7 @@ import { NButton, NModal } from 'naive-ui'
 
 import { CART_ROUTE_NAMES } from '@/features/cart/routes'
 import { PAYMENT_ROUTE_NAMES } from '@/features/payments/routes'
-import { useAuthStore } from '@/features/auth/stores/auth.store'
+import { useSessionStore } from '@/core/auth/stores/session.store'
 import { useSnoozePrompt } from '../../../composables/mutations/use-snooze-prompt'
 import { ACCOUNT_ROUTE_NAMES } from '../../../routes'
 
@@ -20,7 +20,7 @@ const HIDDEN_ROUTE_NAMES = new Set<string | symbol>([
 
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
+const authStore = useSessionStore()
 const snoozePrompt = useSnoozePrompt()
 
 const dismissed = ref(false)

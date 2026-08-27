@@ -7,15 +7,19 @@ import { LogOutOutline, MenuOutline, CloseOutline } from '@vicons/ionicons5'
 
 import { useAuth } from '@/features/auth/composables/use-auth'
 import { getHomePath, getNavLinks, getPrincipalLabel } from '@/core/auth/role-config'
+import { useHatStore } from '@/core/auth/stores/hat.store'
 import NotificationBell from '@/features/notifications/presentation/components/NotificationBell/NotificationBell.vue'
 import TitanLogo from './public/TitanLogo.vue'
 
 const router = useRouter()
 const { currentUser, logout, isLoggingOut } = useAuth()
+const hatStore = useHatStore()
 
 const navLinks = computed(() => getNavLinks(currentUser.value?.permissions ?? []))
 const homePath = computed(() => getHomePath(currentUser.value?.permissions ?? []))
-const principalLabel = computed(() => getPrincipalLabel(currentUser.value ?? null))
+const principalLabel = computed(() =>
+  getPrincipalLabel(hatStore.activeHat, currentUser.value?.isPlatform ?? false),
+)
 
 const isMobile = useMediaQuery('(max-width: 767px)')
 const showMenu = ref(false)

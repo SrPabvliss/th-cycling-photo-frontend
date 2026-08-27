@@ -3,11 +3,11 @@ import { useMutation } from '@tanstack/vue-query'
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
 import { toCurrentUser } from '@/features/auth/mappers/current-user.mapper'
-import { useAuthStore } from '@/features/auth/stores/auth.store'
+import { useSessionStore } from '@/core/auth/stores/session.store'
 import type { IApiCurrentUser } from '@/features/auth/types/responses/current-user.response'
 
 export function useSnoozePrompt() {
-  const authStore = useAuthStore()
+  const authStore = useSessionStore()
 
   return useMutation({
     mutationFn: async (key: string) => {

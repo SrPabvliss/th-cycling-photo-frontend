@@ -7,16 +7,20 @@ import '@/core/config/env'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { VueQueryPlugin } from '@tanstack/vue-query'
+import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 
+import { registerCartPostLoginMerge } from '@/features/cart/post-login'
 import App from './App.vue'
 import { queryClientConfig } from './providers'
 import router from './router'
 
 const app = createApp(App)
+const queryClient = new QueryClient(queryClientConfig)
 
 app.use(createPinia())
 app.use(router)
-app.use(VueQueryPlugin, { queryClientConfig })
+app.use(VueQueryPlugin, { queryClient })
+
+registerCartPostLoginMerge(queryClient)
 
 app.mount('#app')

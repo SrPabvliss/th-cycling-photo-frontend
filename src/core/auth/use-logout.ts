@@ -3,10 +3,11 @@ import { useRouter } from 'vue-router'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
-import { useAuthStore } from '../../stores/auth.store'
+import { AUTH_PATH } from '@/features/auth/routes'
+import { useSessionStore } from './stores/session.store'
 
 export function useLogoutMutation() {
-  const authStore = useAuthStore()
+  const sessionStore = useSessionStore()
   const queryClient = useQueryClient()
   const router = useRouter()
 
@@ -15,9 +16,9 @@ export function useLogoutMutation() {
       await httpClient.post(API_ROUTES.AUTH.LOGOUT, undefined, { silent: true })
     },
     onSettled: () => {
-      authStore.clearSession()
+      sessionStore.clearSession()
       queryClient.clear()
-      router.push('/login')
+      router.push(AUTH_PATH)
     },
   })
 }

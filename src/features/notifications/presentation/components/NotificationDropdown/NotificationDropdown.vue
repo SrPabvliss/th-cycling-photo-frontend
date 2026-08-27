@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router'
 import { NButton, NSpin } from 'naive-ui'
 
-import { useAuthStore } from '@/features/auth/stores/auth.store'
+import { useSessionStore } from '@/core/auth/stores/session.store'
 import { useNotificationsListQuery } from '../../../composables/queries/use-notifications-list'
 import { useMarkAsRead } from '../../../composables/mutations/use-mark-as-read'
 import { useMarkAllRead } from '../../../composables/mutations/use-mark-all-read'
@@ -13,7 +13,7 @@ import NotificationItem from '../NotificationItem/NotificationItem.vue'
 
 const router = useRouter()
 const store = useNotificationStore()
-const authStore = useAuthStore()
+const authStore = useSessionStore()
 const { data: notifications, isPending } = useNotificationsListQuery()
 const { mutate: markAsRead } = useMarkAsRead()
 const { mutate: markAllRead } = useMarkAllRead()
