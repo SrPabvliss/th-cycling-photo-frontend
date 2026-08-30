@@ -1,6 +1,7 @@
 import '@/assets/styles/base.css'
 import '@/assets/styles/breakpoints.css'
 import '@/assets/styles/phone-input.css'
+import '@/assets/styles/modal-form.css'
 import '@/core/theme/theme-vars.css'
 import '@/assets/styles/payphone-box.css'
 import '@/core/config/env'

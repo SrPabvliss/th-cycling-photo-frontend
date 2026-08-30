@@ -1,19 +1,57 @@
-.payphone-settings {
-  max-width: 560px;
-  margin: 0 auto;
-  padding: 32px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.payphone-modal__steps {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
-.payphone-settings header {
+.payphone-step__input {
+  width: 100%;
+}
+
+.payphone-shortcut {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 5px 10px 5px 6px;
+  border: 1px dashed #cfe6d8;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
 }
 
-.payphone-settings header h1 {
-  margin: 0;
-  font-size: 22px;
+.payphone-shortcut:hover {
+  border-style: solid;
+  background: #f3fbf6;
+}
+
+.payphone-shortcut__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e7f9ef;
+  color: #1da851;
+}
+
+.payphone-shortcut__text {
+  font-size: 12.5px;
+  color: #4b5563;
+}
+
+.payphone-shortcut__text b {
+  color: #1a1f2c;
+  font-weight: 600;
+}
+
+.payphone-shortcut__cue {
+  flex-shrink: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1da851;
 }
