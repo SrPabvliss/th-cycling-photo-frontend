@@ -1,14 +1,27 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { NButton, NIcon, NInput, NModal } from 'naive-ui'
-import { AlertCircleOutline, CheckmarkOutline } from '@vicons/ionicons5'
+import { AlertCircleOutline, CheckmarkOutline, TrashOutline } from '@vicons/ionicons5'
 
-const props = defineProps<{
-  show: boolean
-  methods: string[]
-  loading?: boolean
-  error?: string | null
-}>()
+const props = withDefaults(
+  defineProps<{
+    show: boolean
+    methods: string[]
+    loading?: boolean
+    error?: string | null
+    subtitle?: string
+    actionVerb?: string
+    footnote?: string
+    tone?: 'default' | 'danger'
+  }>(),
+  {
+    subtitle: 'Necesitamos verificar que eres tú antes de crear tus métodos de pago.',
+    actionVerb: 'Crear',
+    footnote:
+      'Nada más se guarda con esta contraseña. Los datos que reusaste de tu perfil no la necesitan.',
+    tone: 'default',
+  },
+)
 
 const emit = defineEmits<{
   'update:show': [boolean]
@@ -46,27 +59,25 @@ function confirm() {
     :mask-closable="false"
     @update:show="emit('update:show', $event)"
   >
-    <div class="ce-pass" data-test="password-modal">
-      <p class="ce-pass-sub">
-        Necesitamos verificar que eres tú antes de crear tus métodos de pago.
-      </p>
+    <div class="pcm" data-test="password-modal">
+      <p class="pcm__sub">{{ props.subtitle }}</p>
 
-      <div class="ce-authbox">
-        <span class="tt-field-l">Esto autoriza</span>
-        <ul class="ce-authlist">
+      <div class="pcm__authbox" :class="{ 'is-danger': props.tone === 'danger' }">
+        <span class="pcm__label">Esto autoriza</span>
+        <ul class="pcm__authlist">
           <li v-for="method in methods" :key="method" data-test="auth-item">
-            <NIcon :component="CheckmarkOutline" :size="14" />
-            Crear {{ method }} en tu cuenta
+            <NIcon
+              :component="props.tone === 'danger' ? TrashOutline : CheckmarkOutline"
+              :size="14"
+            />
+            {{ props.actionVerb }} {{ method }} en tu cuenta
           </li>
         </ul>
-        <p>
-          Nada más se guarda con esta contraseña. Los datos que reusaste de tu perfil no la
-          necesitan.
-        </p>
+        <p>{{ props.footnote }}</p>
       </div>
 
-      <div class="tt-field">
-        <span class="tt-field-l">Contraseña</span>
+      <div class="tt-form-field">
+        <span class="pcm__label">Contraseña</span>
         <NInput
           v-model:value="password"
           type="password"
@@ -75,7 +86,7 @@ function confirm() {
           :status="error ? 'error' : undefined"
           @keyup.enter="confirm"
         />
-        <span v-if="error" class="ce-fhint err" data-test="password-error">
+        <span v-if="error" class="pcm__hint err" data-test="password-error">
           <NIcon :component="AlertCircleOutline" :size="13" />
           {{ error }}
         </span>
@@ -83,10 +94,10 @@ function confirm() {
     </div>
 
     <template #footer>
-      <div class="ce-pass-foot">
+      <div class="tt-modal-foot">
         <NButton :disabled="loading" data-test="cancel-password" @click="cancel">Cancelar</NButton>
         <NButton
-          type="primary"
+          :type="props.tone === 'danger' ? 'error' : 'primary'"
           :loading="loading"
           :disabled="password.length === 0 || loading"
           data-test="confirm-password"

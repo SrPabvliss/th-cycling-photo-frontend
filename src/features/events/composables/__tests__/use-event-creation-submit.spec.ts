@@ -41,7 +41,7 @@ import type { ConfigurationItemId, IConfigurationItem } from '../use-configurati
 import type { IEventFormData, IEventFormExtra } from '../../types/event-form.types'
 import type { IEventConfigurationSelectionRequest } from '../../types/requests/event-configuration.request'
 import type { ICreateEventRequest } from '../../types/requests/create-event.request'
-import PasswordConfirmModal from '../../presentation/views/EventCreateWizard/modals/PasswordConfirmModal.vue'
+import PasswordConfirmModal from '@/shared/components/PasswordConfirmModal/PasswordConfirmModal.vue'
 import CreatingModal from '../../presentation/views/EventCreateWizard/modals/CreatingModal.vue'
 import NoSlotModal from '../../presentation/views/EventCreateWizard/modals/NoSlotModal.vue'
 import ExitWarningModal from '../../presentation/views/EventCreateWizard/modals/ExitWarningModal.vue'
