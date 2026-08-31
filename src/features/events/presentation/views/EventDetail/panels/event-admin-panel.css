@@ -70,3 +70,20 @@
     align-items: stretch;
   }
 }
+
+.admin__info {
+  display: inline-grid;
+  place-items: center;
+  vertical-align: -2px;
+  margin-left: 5px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--tt-neutral-mid, #6a7380);
+  cursor: pointer;
+}
+
+.admin__info:hover {
+  color: var(--tt-primary, #2f6fed);
+}
