@@ -16,11 +16,7 @@ const { data: configuration } = useEventConfiguration(eventId)
 
 const isClosedForWork = computed(() => props.event.isFrozen || props.event.status === 'archived')
 
-const watermarkLabel = computed(() =>
-  configuration.value?.watermarkStorageKey
-    ? 'La del organizador al crear el evento'
-    : 'Sin marca de agua',
-)
+const watermarkUrl = computed(() => configuration.value?.watermarkUrl ?? null)
 
 const whatsappLabel = computed(() => configuration.value?.whatsappNumber || 'Sin número')
 
@@ -68,7 +64,15 @@ const PLATFORM_TIERS = [
       </div>
       <div class="brand__row" data-test="brand-watermark">
         <dt>Marca de agua</dt>
-        <dd>{{ watermarkLabel }}</dd>
+        <dd>
+          <img
+            v-if="watermarkUrl"
+            class="brand__watermark"
+            :src="watermarkUrl"
+            alt="Marca de agua del evento"
+          />
+          <span v-else>Sin marca de agua</span>
+        </dd>
       </div>
       <div class="brand__row" data-test="brand-whatsapp">
         <dt>WhatsApp</dt>
@@ -93,15 +97,20 @@ const PLATFORM_TIERS = [
       <h4 class="brand__prices-heading" data-test="brand-prices-heading">
         Precios de la plataforma · iguales en todos los eventos
       </h4>
-      <div
-        v-for="tier in PLATFORM_TIERS"
-        :key="tier.range"
-        class="brand__prices-row"
-        data-test="brand-prices-row"
-      >
-        <span>{{ tier.range }}</span>
-        <b>{{ tier.price }}</b>
-      </div>
+      <table class="brand__prices-table">
+        <thead>
+          <tr>
+            <th scope="col">Fotos en la compra</th>
+            <th scope="col">Precio de cada una</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="tier in PLATFORM_TIERS" :key="tier.range" data-test="brand-prices-row">
+            <th scope="row">{{ tier.range }}</th>
+            <td>{{ tier.price }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </section>
 </template>

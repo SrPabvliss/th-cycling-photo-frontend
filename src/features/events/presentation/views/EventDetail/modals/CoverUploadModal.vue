@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import { NButton, NIcon, NModal } from 'naive-ui'
 import { AlertCircleOutline, CloudUploadOutline } from '@vicons/ionicons5'
 
 import { useUploadAsset } from '@/features/event-assets/composables/mutations/use-upload-asset'
+import { ASSET_TYPE_CONFIG } from '@/features/event-assets/constants/asset-config'
+import FocalPointPicker from '@/features/event-assets/presentation/components/FocalPointPicker/FocalPointPicker.vue'
 import type { IEventDetail } from '../../../../types/responses/event-detail.response'
 
 const ACCEPTED_TYPES = 'image/jpeg,image/png,image/webp'
@@ -12,8 +14,22 @@ const props = defineProps<{ show: boolean; event: IEventDetail }>()
 
 const emit = defineEmits<{ 'update:show': [value: boolean]; done: [] }>()
 
+const COVER_CONFIG = ASSET_TYPE_CONFIG.cover_image
+const MAX_BYTES = COVER_CONFIG.maxSizeMb * 1024 * 1024
+
 const fileInput = ref<HTMLInputElement | null>(null)
 const selectedFile = ref<File | null>(null)
+const previewUrl = ref<string | null>(null)
+const sizeError = ref<string | null>(null)
+const focalX = ref(0.5)
+const focalY = ref(0.5)
+
+function releasePreview() {
+  if (previewUrl.value) URL.revokeObjectURL(previewUrl.value)
+  previewUrl.value = null
+}
+
+onBeforeUnmount(releasePreview)
 
 const hasCover = computed(() => props.event.coverImageSlug !== null)
 
@@ -31,11 +47,32 @@ function triggerFilePick() {
 
 function handleFileChange(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
-  selectedFile.value = file ?? null
+  releasePreview()
+  sizeError.value = null
+
+  if (!file) {
+    selectedFile.value = null
+    return
+  }
+
+  if (file.size > MAX_BYTES) {
+    selectedFile.value = null
+    sizeError.value = `La imagen pesa ${(file.size / 1024 / 1024).toFixed(1)} MB. El máximo es ${COVER_CONFIG.maxSizeMb} MB.`
+    return
+  }
+
+  selectedFile.value = file
+  previewUrl.value = URL.createObjectURL(file)
+  focalX.value = 0.5
+  focalY.value = 0.5
 }
 
 function resetForm() {
+  releasePreview()
   selectedFile.value = null
+  sizeError.value = null
+  focalX.value = 0.5
+  focalY.value = 0.5
   if (fileInput.value) fileInput.value.value = ''
 }
 
@@ -46,7 +83,12 @@ function close() {
 
 async function confirm() {
   if (!selectedFile.value) return
-  await uploadAsset({ file: selectedFile.value, assetType: 'cover_image' })
+  await uploadAsset({
+    file: selectedFile.value,
+    assetType: 'cover_image',
+    focalX: focalX.value,
+    focalY: focalY.value,
+  })
   emit('done')
   close()
 }
@@ -77,7 +119,8 @@ async function confirm() {
         <NIcon :component="CloudUploadOutline" :size="28" />
         <b>{{ selectedFile ? selectedFile.name : 'Arrastra la imagen o elige un archivo' }}</b>
         <span>
-          JPG o PNG · horizontal · desde 1200 px de ancho. Se recorta a 16:9 para la galería.
+          JPG o PNG · horizontal · desde 1200 px de ancho, máximo
+          {{ COVER_CONFIG.maxSizeMb }} MB. Se recorta a 16:9 para la galería.
         </span>
         <NButton size="small" data-test="cover-upload-choose" @click.stop="triggerFilePick">
           Elegir archivo
@@ -91,6 +134,15 @@ async function confirm() {
         data-test="cover-upload-input"
         style="display: none"
         @change="handleFileChange"
+      />
+
+      <p v-if="sizeError" class="cum-error" data-test="cover-upload-size-error">{{ sizeError }}</p>
+
+      <FocalPointPicker
+        v-if="previewUrl"
+        v-model:focal-x="focalX"
+        v-model:focal-y="focalY"
+        :src="previewUrl"
       />
 
       <p v-if="hasCover" class="cum-footnote" data-test="cover-upload-footnote">

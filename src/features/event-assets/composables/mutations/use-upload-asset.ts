@@ -10,13 +10,15 @@ import type { IApiAssetPresignedUrl } from '../../types/responses/asset-presigne
 interface UploadAssetParams {
   file: File
   assetType: EventAssetType
+  focalX?: number
+  focalY?: number
 }
 
 export function useUploadAsset(eventId: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ file, assetType }: UploadAssetParams) => {
+    mutationFn: async ({ file, assetType, focalX, focalY }: UploadAssetParams) => {
       const { data: presigned } = await httpClient.post<IApiAssetPresignedUrl>(
         API_ROUTES.EVENTS.ASSETS.PRESIGNED_URL(eventId, assetType),
         { fileName: file.name, contentType: file.type },
@@ -30,6 +32,8 @@ export function useUploadAsset(eventId: string) {
         storageKey: presigned.objectKey,
         fileSize: file.size,
         mimeType: file.type,
+        focalX,
+        focalY,
       })
     },
     onSuccess: () => {

@@ -7,6 +7,8 @@ export function toEventAsset(api: IApiEventAsset): IEventAsset {
     url: api.url,
     fileSize: api.fileSize,
     mimeType: api.mimeType,
+    focalX: api.focalX,
+    focalY: api.focalY,
     uploadedAt: new Date(api.uploadedAt),
   }
 }

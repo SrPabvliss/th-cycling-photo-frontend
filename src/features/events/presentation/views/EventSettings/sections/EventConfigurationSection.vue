@@ -127,6 +127,7 @@ async function handleSave() {
             :save-to-profile="item.saveToProfile"
             :show-save-to-profile="false"
             :draft="drafts.watermark"
+            :current-url="configuration?.watermarkUrl ?? null"
             @update:use-profile="setUseProfile('watermark', $event)"
             @update:save-to-profile="setSaveToProfile('watermark', $event)"
             @update:draft="patchDraft('watermark', $event)"

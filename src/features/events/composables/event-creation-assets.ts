@@ -7,6 +7,7 @@ import type { IConfirmationResourceState } from '../types/event-wizard.types'
 type UploadAssets = (input: {
   eventId: string
   assetFiles: NonNullable<IEventFormExtra['assetFiles']>
+  focalPoints?: IEventFormExtra['assetFocalPoints']
 }) => Promise<unknown>
 type AssignCategories = (input: { eventId: string; categoryIds: number[] }) => Promise<unknown>
 
@@ -27,7 +28,7 @@ export async function uploadCoverResource(params: {
 
   creatingStep.value = 1
   try {
-    await uploadAssets({ eventId, assetFiles })
+    await uploadAssets({ eventId, assetFiles, focalPoints: extra.assetFocalPoints })
     coverImage.value = { status: 'ok', detail: cover.name }
   } catch {
     coverImage.value = { status: 'bad' }
