@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
-  padding-bottom: 34px;
+  padding: 24px 32px 34px;
 }
 
 .ce-loading {
@@ -31,6 +31,11 @@
   color: #8b98ab;
 }
 
+.ce-exit {
+  flex: none;
+  font-weight: 600;
+}
+
 .ce-layout {
   display: grid;
   grid-template-columns: 236px minmax(0, 1fr);
@@ -40,7 +45,7 @@
 
 .ce-rail {
   position: sticky;
-  top: 0;
+  top: 24px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -113,6 +118,11 @@
     display: none;
   }
 
+  .ce-exit {
+    flex: none;
+    font-weight: 600;
+  }
+
   .ce-layout {
     grid-template-columns: 1fr;
   }
@@ -125,6 +135,10 @@
 
   .ce-panel-body {
     padding: 14px 14px 22px;
+  }
+
+  .ce-page {
+    padding: 16px 14px 24px;
   }
 }
 

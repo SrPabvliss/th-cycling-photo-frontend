@@ -55,7 +55,8 @@
   flex: none;
 }
 
-.efb-org :deep(.n-base-selection-label) {
+.efb-org :deep(.n-base-selection-label),
+.efb-org :deep(.n-base-selection-placeholder) {
   padding-left: 22px;
 }
 

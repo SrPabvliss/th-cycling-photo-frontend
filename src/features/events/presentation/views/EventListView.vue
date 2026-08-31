@@ -210,8 +210,7 @@ function handleCreate() {
             <b>{{ formatNumber(resultsCount) }}</b>
             {{ pluralize(resultsCount, 'evento', 'eventos') }}
             <span class="events-result-line__sub">
-              · ordenados por {{ SORT_LABELS[filters.sort].toLowerCase() }} · desplaza para cargar
-              más
+              · ordenados por {{ SORT_LABELS[filters.sort].toLowerCase() }}
             </span>
           </div>
 
