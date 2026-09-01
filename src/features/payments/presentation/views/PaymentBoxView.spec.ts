@@ -1,4 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils'
+
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
 
@@ -70,23 +72,23 @@ function mountView() {
 }
 
 describe('PaymentBoxView', () => {
-  it('redirects to the cart when there are no order ids in the query', async () => {
+  it('sends the buyer back to the gallery when there are no order ids in the query', async () => {
     routeQuery.value = {}
 
     mountView()
     await flushPromises()
 
-    expect(replace).toHaveBeenCalledWith({ name: 'cart-checkout' })
+    expect(replace).toHaveBeenCalledWith(ROUTE_PATHS.PUBLIC_GALLERY)
     expect(mutate).not.toHaveBeenCalled()
   })
 
-  it('redirects to the cart when the orders query is only commas', async () => {
+  it('sends the buyer back to the gallery when the orders query is only commas', async () => {
     routeQuery.value = { orders: ',,' }
 
     mountView()
     await flushPromises()
 
-    expect(replace).toHaveBeenCalledWith({ name: 'cart-checkout' })
+    expect(replace).toHaveBeenCalledWith(ROUTE_PATHS.PUBLIC_GALLERY)
   })
 
   it('creates an intent for the ids found in the query and renders the gateway box', async () => {
