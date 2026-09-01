@@ -94,7 +94,8 @@ const subtitle = computed(() => {
   return SUBTITLES.organizer.replace('{organizador}', name)
 })
 
-const { handleConfirmPayment, handleNotifyPaymentInfo, handleSendDelivery } = useOrderActions()
+const { handleConfirmPayment, handleNotifyPaymentInfo, handleSendDelivery, handleRegenerate } =
+  useOrderActions()
 
 const orders = computed<IOrderListItem[]>(() => data.value?.pages.flatMap((p) => p.items) ?? [])
 
@@ -122,9 +123,7 @@ const customerGroups = computed<IOrderCustomerGroup[]>(() =>
 
 const hasActiveFilters = computed(
   () =>
-    filters.value.search !== null ||
-    filters.value.eventId !== null ||
-    filters.value.tab !== 'all',
+    filters.value.search !== null || filters.value.eventId !== null || filters.value.tab !== 'all',
 )
 
 const totalOrders = computed(
@@ -224,6 +223,7 @@ function handleSendPaymentInfo(order: IOrderListItem) {
               @view="handleView"
               @confirm-payment="handleConfirmPayment"
               @send-delivery="handleSendDelivery"
+              @resend-delivery="handleRegenerate"
               @send-payment-info="handleSendPaymentInfo"
             />
 
@@ -245,12 +245,7 @@ function handleSendPaymentInfo(order: IOrderListItem) {
         :role="role"
         @close="handleCloseDetail"
       />
-      <OrderDetailDrawer
-        v-else
-        :order-id="openOrderId"
-        :role="role"
-        @close="handleCloseDetail"
-      />
+      <OrderDetailDrawer v-else :order-id="openOrderId" :role="role" @close="handleCloseDetail" />
     </div>
   </div>
 </template>

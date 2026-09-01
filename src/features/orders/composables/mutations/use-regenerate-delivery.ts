@@ -11,7 +11,7 @@ export function useRegenerateDelivery() {
 
   return useMutation({
     mutationFn: async (orderId: string) => {
-      const response = await httpClient.patch<IApiOrderPaymentConfirmed>(
+      const response = await httpClient.post<IApiOrderPaymentConfirmed>(
         API_ROUTES.ORDERS.REGENERATE_DELIVERY(orderId),
       )
       return toOrderPaymentConfirmed(response.data)

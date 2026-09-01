@@ -1,12 +1,7 @@
 import type { Ref } from 'vue'
 import { useMessage } from 'naive-ui'
 
-import { env } from '@/core/config/env'
-import {
-  buildDeliveryTemplate,
-  buildPaymentInfoTemplate,
-  openWhatsApp,
-} from '@/shared/utils/whatsapp.utils'
+import { openWhatsApp } from '@/shared/utils/whatsapp.utils'
 import { useOrderDetailQuery } from './queries/use-order-detail'
 import { useNotifyPaymentInfo } from './mutations/use-notify-payment-info'
 import { useOrderActions } from './use-order-actions'
@@ -32,37 +27,26 @@ export function useOrderDetailPanel(orderId: Ref<string>) {
     const o = order.value
     if (!o) return
     try {
-      await notifyPaymentInfo(o.id)
+      const result = await notifyPaymentInfo(o.id)
+      // The message is composed server-side: it carries the bank account frozen on this event, and
+      // the browser has no business deciding where a buyer transfers money to.
+      openWhatsApp(o.snapWhatsapp, result.whatsappTemplate)
     } catch {
       message.error('No se pudo registrar el envío. Intenta de nuevo.')
-      return
     }
-    const template = buildPaymentInfoTemplate({
-      customerFirstName: o.snapFirstName ?? o.userName,
-      photoCount: o.photos.length,
-      eventName: o.eventName,
-      totalPrice: o.subtotal,
-      currency: o.snapCurrency,
-    })
-    openWhatsApp(o.snapWhatsapp, template)
   }
 
   function onSendDeliveryWhatsApp() {
     const o = order.value
     if (!o?.deliveryLink) return
-    const deliveryUrl = `${env.VITE_APP_BASE_URL}/delivery/${o.deliveryLink.token}`
-    const template = buildDeliveryTemplate({
-      customerFirstName: o.snapFirstName ?? o.userName,
-      photoCount: o.photos.length,
-      deliveryUrl,
-    })
-    openWhatsApp(o.snapWhatsapp, template)
+    // Same text the backend sends on delivery and regeneration; the browser used to write its own.
+    openWhatsApp(o.snapWhatsapp, o.deliveryLink.whatsappTemplate)
   }
 
   function onRegenerateDelivery() {
     const o = order.value
     if (!o) return
-    handleRegenerate(o.id, o.snapWhatsapp ?? undefined)
+    handleRegenerate(o)
   }
 
   function onAction(id: OrderActionId) {
@@ -73,7 +57,7 @@ export function useOrderDetailPanel(orderId: Ref<string>) {
       notify: onSendPaymentInfo,
       resend: onSendPaymentInfo,
       confirm: () => handleConfirmPayment(o.id),
-      deliver: () => handleSendDelivery(o.id, o.snapWhatsapp ?? undefined),
+      deliver: () => handleSendDelivery(o),
       regenerate: onRegenerateDelivery,
       gift: () => handleMarkGift(o.id),
       to_sale: () =>

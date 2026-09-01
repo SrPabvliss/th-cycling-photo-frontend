@@ -41,7 +41,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   view: [id: string]
   confirmPayment: [id: string]
-  sendDelivery: [id: string]
+  sendDelivery: [order: IOrderListItem]
   sendPaymentInfo: [order: IOrderListItem]
 }>()
 
@@ -101,7 +101,7 @@ function handlePrimaryAction() {
     return
   }
   if (action.id === 'deliver') {
-    emit('sendDelivery', props.order.id)
+    emit('sendDelivery', props.order)
   }
 }
 </script>

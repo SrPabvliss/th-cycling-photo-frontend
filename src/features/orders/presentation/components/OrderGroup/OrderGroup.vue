@@ -17,8 +17,9 @@ const props = defineProps<{
 const emit = defineEmits<{
   view: [id: string]
   confirmPayment: [id: string]
-  sendDelivery: [id: string]
+  sendDelivery: [order: IOrderListItem]
   sendPaymentInfo: [order: IOrderListItem]
+  resendDelivery: [order: IOrderListItem]
 }>()
 
 const isMobile = useMediaQuery('(max-width: 767px)')
@@ -34,8 +35,12 @@ function forwardConfirmPayment(id: string) {
   emit('confirmPayment', id)
 }
 
-function forwardSendDelivery(id: string) {
-  emit('sendDelivery', id)
+function forwardSendDelivery(order: IOrderListItem) {
+  emit('sendDelivery', order)
+}
+
+function forwardResendDelivery(order: IOrderListItem) {
+  emit('resendDelivery', order)
 }
 
 function forwardSendPaymentInfo(order: IOrderListItem) {
@@ -65,6 +70,7 @@ function forwardSendPaymentInfo(order: IOrderListItem) {
         @view="forwardView"
         @confirm-payment="forwardConfirmPayment"
         @send-delivery="forwardSendDelivery"
+        @resend-delivery="forwardResendDelivery"
         @send-payment-info="forwardSendPaymentInfo"
       />
     </div>
@@ -80,6 +86,7 @@ function forwardSendPaymentInfo(order: IOrderListItem) {
         @view="forwardView"
         @confirm-payment="forwardConfirmPayment"
         @send-delivery="forwardSendDelivery"
+        @resend-delivery="forwardResendDelivery"
         @send-payment-info="forwardSendPaymentInfo"
       />
     </div>
