@@ -24,6 +24,7 @@ function toOrderDetailDeliveryLink(api: IApiOrderDetailDeliveryLink): IOrderDeta
     status: api.status as DeliveryLinkStatus,
     expiresAt: new Date(api.expiresAt),
     downloadCount: api.downloadCount,
+    whatsappTemplate: api.whatsappTemplate,
   }
 }
 

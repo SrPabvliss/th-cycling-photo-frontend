@@ -6,6 +6,7 @@ import { NButton, NResult } from 'naive-ui'
 import { useEventAssetsQuery } from '@/features/event-assets/composables/queries/use-event-assets'
 import { useUploadAssetsBatch } from '@/features/event-assets/composables/mutations/use-upload-assets-batch'
 import { useRemoveAssetsBatch } from '@/features/event-assets/composables/mutations/use-remove-assets-batch'
+import { useSetAssetFocalPoint } from '@/features/event-assets/composables/mutations/use-set-asset-focal-point'
 import { usePhotoCategoriesQuery } from '@/features/photo-categories/composables/queries/use-photo-categories'
 import { useAssignPhotoCategoriesBatch } from '@/features/photo-categories/composables/mutations/use-assign-photo-categories-batch'
 import { useUnassignPhotoCategoriesBatch } from '@/features/photo-categories/composables/mutations/use-unassign-photo-categories-batch'
@@ -33,6 +34,7 @@ const { data: assets } = useEventAssetsQuery(id)
 const { data: assignedCategories } = usePhotoCategoriesQuery(id)
 const { mutateAsync: updateEvent, isPending: isUpdating } = useUpdateEvent(id)
 const { mutateAsync: uploadAssetsBatch } = useUploadAssetsBatch()
+const { mutateAsync: setAssetFocalPoint } = useSetAssetFocalPoint(id.value)
 const { mutateAsync: removeAssetsBatch } = useRemoveAssetsBatch()
 const { mutateAsync: assignCategoriesBatch } = useAssignPhotoCategoriesBatch()
 const { mutateAsync: unassignCategoriesBatch } = useUnassignPhotoCategoriesBatch()
@@ -62,7 +64,18 @@ async function handleSubmit(formData: IEventFormData, extra: IEventFormExtra) {
   }
 
   if (extra.assetFiles && extra.assetFiles.size > 0) {
-    promises.push(uploadAssetsBatch({ eventId: id.value, assetFiles: extra.assetFiles }))
+    promises.push(
+      uploadAssetsBatch({
+        eventId: id.value,
+        assetFiles: extra.assetFiles,
+        focalPoints: extra.assetFocalPoints,
+      }),
+    )
+  } else if (extra.assetFocalPoints) {
+    // Reframing an image that is already uploaded travels on its own: there is no file to send.
+    extra.assetFocalPoints.forEach((point, assetType) => {
+      promises.push(setAssetFocalPoint({ assetType, ...point }))
+    })
   }
 
   if (extra.categoryIds && assignedCategories.value) {

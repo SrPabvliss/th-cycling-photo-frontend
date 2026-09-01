@@ -19,7 +19,7 @@ import ContractStep from './steps/ContractStep.vue'
 import ConfigurationStep from './steps/ConfigurationStep.vue'
 import DetailsStep from './steps/DetailsStep.vue'
 import ConfirmationStep from './steps/ConfirmationStep.vue'
-import PasswordConfirmModal from './modals/PasswordConfirmModal.vue'
+import PasswordConfirmModal from '@/shared/components/PasswordConfirmModal/PasswordConfirmModal.vue'
 import CreatingModal from './modals/CreatingModal.vue'
 import NoSlotModal from './modals/NoSlotModal.vue'
 import ExitWarningModal from './modals/ExitWarningModal.vue'
@@ -229,113 +229,115 @@ function createAnother() {
 </script>
 
 <template>
-  <div class="ce-page">
-    <NSpin v-if="isLoading" size="large" class="ce-loading" />
+  <div class="page-view">
+    <div class="page-view__content ce-page">
+      <NSpin v-if="isLoading" size="large" class="ce-loading" />
 
-    <NResult
-      v-else-if="isError"
-      status="error"
-      title="No pudimos cargar el contexto del evento"
-      description="Intenta de nuevo en unos segundos."
-    >
-      <template #footer>
-        <NButton @click="refetch()">Reintentar</NButton>
-      </template>
-    </NResult>
+      <NResult
+        v-else-if="isError"
+        status="error"
+        title="No pudimos cargar el contexto del evento"
+        description="Intenta de nuevo en unos segundos."
+      >
+        <template #footer>
+          <NButton @click="refetch()">Reintentar</NButton>
+        </template>
+      </NResult>
 
-    <template v-else>
-      <div class="ce-page-head">
-        <div>
-          <h1>Crear evento</h1>
-          <p>{{ subtitle }}</p>
-        </div>
-        <NButton quaternary @click="exitWizard">
-          <template #icon><NIcon :component="CloseOutline" /></template>
-          Salir
-        </NButton>
-      </div>
-
-      <WizardStepper
-        v-if="!isCreated"
-        :steps="steps"
-        :current-index="currentIndex"
-        variant="mobile"
-        @back="goBack"
-        @exit="exitWizard"
-      />
-
-      <div v-if="isCreated" class="ce-panel solo" data-test="confirmation-panel">
-        <div class="ce-panel-body">
-          <ConfirmationStep
-            :event-name="eventName"
-            :event-date-range-label="eventDateRangeLabel"
-            :role="role"
-            :slots-remaining="slotsRemaining"
-            :photo-quota="photoQuota"
-            :cover-image="coverImage"
-            :categories="categories"
-            :profile-save="profileSave"
-            @retry="retryResource"
-            @go-to-event="goToCreatedEvent"
-            @create-another="createAnother"
-          />
-        </div>
-      </div>
-
-      <div v-else class="ce-layout">
-        <aside class="ce-rail">
-          <WizardStepper :steps="steps" :current-index="currentIndex" variant="rail" />
-          <div v-if="role === 'organizer' && contract" class="ce-railcard">
-            <span>Contrato</span>
-            <b>{{ contract.commercialName }}</b>
-            <i>{{ freeSlots }} de {{ contract.eventsTotal }} cupos libres</i>
+      <template v-else>
+        <div class="ce-page-head">
+          <div>
+            <h1>Crear evento</h1>
+            <p>{{ subtitle }}</p>
           </div>
-        </aside>
+          <NButton quaternary @click="exitWizard">
+            <template #icon><NIcon :component="CloseOutline" /></template>
+            Salir
+          </NButton>
+        </div>
 
-        <div class="ce-panel">
+        <WizardStepper
+          v-if="!isCreated"
+          :steps="steps"
+          :current-index="currentIndex"
+          variant="mobile"
+          @back="goBack"
+          @exit="exitWizard"
+        />
+
+        <div v-if="isCreated" class="ce-panel solo" data-test="confirmation-panel">
           <div class="ce-panel-body">
-            <div v-if="payoutError" class="ce-payout-error" data-test="payout-error">
-              <NIcon :component="AlertCircleOutline" :size="18" />
-              <div>
-                <b>No se creó el método de pago</b>
-                {{ payoutError }}
+            <ConfirmationStep
+              :event-name="eventName"
+              :event-date-range-label="eventDateRangeLabel"
+              :role="role"
+              :slots-remaining="slotsRemaining"
+              :photo-quota="photoQuota"
+              :cover-image="coverImage"
+              :categories="categories"
+              :profile-save="profileSave"
+              @retry="retryResource"
+              @go-to-event="goToCreatedEvent"
+              @create-another="createAnother"
+            />
+          </div>
+        </div>
+
+        <div v-else class="ce-layout">
+          <aside class="ce-rail">
+            <WizardStepper :steps="steps" :current-index="currentIndex" variant="rail" />
+            <div v-if="role === 'organizer' && contract" class="ce-railcard">
+              <span>Contrato</span>
+              <b>{{ contract.commercialName }}</b>
+              <i>{{ freeSlots }} de {{ contract.eventsTotal }} cupos libres</i>
+            </div>
+          </aside>
+
+          <div class="ce-panel">
+            <div class="ce-panel-body">
+              <div v-if="payoutError" class="ce-payout-error" data-test="payout-error">
+                <NIcon :component="AlertCircleOutline" :size="18" />
+                <div>
+                  <b>No se creó el método de pago</b>
+                  {{ payoutError }}
+                </div>
               </div>
+
+              <ContractStep
+                v-if="role === 'organizer'"
+                v-show="currentStep?.id === 'contract'"
+                :key="`contrato-${wizardKey}`"
+                @update:can-continue="canContinueContract = $event"
+              />
+              <ConfigurationStep
+                v-show="currentStep?.id === 'configuration'"
+                :key="`config-${wizardKey}`"
+                ref="configurationRef"
+                @update:can-continue="canContinueConfiguration = $event"
+              />
+              <DetailsStep
+                v-show="currentStep?.id === 'details'"
+                :key="`detalles-${wizardKey}`"
+                ref="detailsRef"
+                :is-submitting="isCreatingOpen"
+                @submit="handleSubmit"
+              />
             </div>
 
-            <ContractStep
-              v-if="role === 'organizer'"
-              v-show="currentStep?.id === 'contract'"
-              :key="`contrato-${wizardKey}`"
-              @update:can-continue="canContinueContract = $event"
-            />
-            <ConfigurationStep
-              v-show="currentStep?.id === 'configuration'"
-              :key="`config-${wizardKey}`"
-              ref="configurationRef"
-              @update:can-continue="canContinueConfiguration = $event"
-            />
-            <DetailsStep
-              v-show="currentStep?.id === 'details'"
-              :key="`detalles-${wizardKey}`"
-              ref="detailsRef"
-              :is-submitting="isCreatingOpen"
-              @submit="handleSubmit"
+            <WizardFooter
+              :back="currentIndex > 0"
+              :listos="footerProps.listos"
+              :total="footerProps.total"
+              :cta="footerProps.cta"
+              :dis="footerProps.dis"
+              :nota="footerProps.nota"
+              @next="handleFooterNext"
+              @back="goBack"
             />
           </div>
-
-          <WizardFooter
-            :back="currentIndex > 0"
-            :listos="footerProps.listos"
-            :total="footerProps.total"
-            :cta="footerProps.cta"
-            :dis="footerProps.dis"
-            :nota="footerProps.nota"
-            @next="handleFooterNext"
-            @back="goBack"
-          />
         </div>
-      </div>
-    </template>
+      </template>
+    </div>
 
     <PasswordConfirmModal
       :show="isPasswordOpen"

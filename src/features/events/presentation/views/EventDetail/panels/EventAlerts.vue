@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { NButton, NIcon } from 'naive-ui'
 import {
   AlertCircleOutline,
@@ -10,12 +10,17 @@ import {
 } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
+import ArchivedInfoModal from '../../../components/ArchivedInfoModal/ArchivedInfoModal.vue'
+import FrozenInfoModal from '../../../components/FrozenInfoModal/FrozenInfoModal.vue'
 import type { IEventDetail } from '../../../../types/responses/event-detail.response'
 import { formatNumber } from '@/shared/utils/format.utils'
 
 const props = defineProps<{ event: IEventDetail; canEdit: boolean }>()
 
 const emit = defineEmits<{ 'upload-cover': [] }>()
+
+const isFrozenInfoOpen = ref(false)
+const isArchivedInfoOpen = ref(false)
 
 const isClosedForWork = computed(() => props.event.isFrozen || props.event.status === 'archived')
 
@@ -70,24 +75,39 @@ const hasAny = computed(
     <div v-if="event.isFrozen" class="alert alert--blue" data-test="alert-frozen">
       <NIcon :component="SnowOutline" :size="17" />
       <div class="alert__text">
-        <b v-if="event.frozenAt">Congelado el {{ formatDate(event.frozenAt) }}.</b>
-        <b v-else>Congelado.</b>
-        <span>
-          Se bloquea el lado de quien trabaja: no se puede subir, editar ni borrar fotos, ni cambiar
-          la configuración, las categorías o la portada. La galería, el carrito y el checkout siguen
-          abiertos — los compradores siguen comprando y los pedidos se siguen gestionando.
-        </span>
+        <b>
+          <template v-if="event.frozenAt">
+            Congelado el {{ formatDate(event.frozenAt) }}.
+          </template>
+          <template v-else>Congelado.</template>
+          <button
+            type="button"
+            class="alert__link"
+            data-test="alert-frozen-info"
+            @click="isFrozenInfoOpen = true"
+          >
+            ¿Qué significa?
+          </button>
+        </b>
+        <span>La venta sigue abierta; lo que se detiene es el trabajo sobre las fotos.</span>
       </div>
     </div>
 
-    <div v-if="event.status === 'archived'" class="alert alert--grey" data-test="alert-archived">
+    <div v-if="event.status === 'archived'" class="alert alert--red" data-test="alert-archived">
       <NIcon :component="ArchiveOutline" :size="17" />
       <div class="alert__text">
-        <b>Archivado.</b>
-        <span>
-          Sale de la lista de trabajo y no admite cambios. Nada se borró: sus fotos, pedidos e
-          ingresos siguen intactos y se pueden consultar. Restaurarlo lo devuelve a Activos.
-        </span>
+        <b>
+          Archivado.
+          <button
+            type="button"
+            class="alert__link"
+            data-test="alert-archived-info"
+            @click="isArchivedInfoOpen = true"
+          >
+            ¿Qué significa?
+          </button>
+        </b>
+        <span>Nada se borró y se puede restaurar cuando quieras.</span>
       </div>
     </div>
 
@@ -108,6 +128,9 @@ const hasAny = computed(
         </span>
       </div>
     </div>
+
+    <FrozenInfoModal v-model:show="isFrozenInfoOpen" />
+    <ArchivedInfoModal v-model:show="isArchivedInfoOpen" />
   </div>
 </template>
 

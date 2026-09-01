@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { NButton, NSwitch } from 'naive-ui'
+import { computed, ref } from 'vue'
+import { NButton, NIcon, NSwitch } from 'naive-ui'
+import { InformationCircleOutline } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
+import FrozenInfoModal from '../../../components/FrozenInfoModal/FrozenInfoModal.vue'
 import type { IEventDetail } from '../../../../types/responses/event-detail.response'
 import { formatNumber } from '@/shared/utils/format.utils'
 
@@ -57,6 +59,8 @@ const archiveBody = computed(() =>
     : 'Sale de la lista de trabajo y deja de admitir cambios. Sus fotos, pedidos e ingresos se conservan. Se puede restaurar cuando quieras.',
 )
 
+const isFrozenInfoOpen = ref(false)
+
 function handleFreezeToggle(value: boolean) {
   emit('freeze', value)
 }
@@ -71,7 +75,18 @@ function handleFreezeToggle(value: boolean) {
 
     <div v-if="canFreeze" class="admin__row" data-test="admin-freeze">
       <div class="admin__text">
-        <b>{{ freezeTitle }}</b>
+        <b>
+          {{ freezeTitle }}
+          <button
+            type="button"
+            class="admin__info"
+            title="Ver qué cambia al congelar"
+            data-test="admin-freeze-info"
+            @click="isFrozenInfoOpen = true"
+          >
+            <NIcon :component="InformationCircleOutline" :size="15" />
+          </button>
+        </b>
         <span>{{ freezeBody }}</span>
       </div>
       <NSwitch
@@ -111,6 +126,7 @@ function handleFreezeToggle(value: boolean) {
         {{ event.status === 'archived' ? 'Restaurar' : 'Archivar' }}
       </NButton>
     </div>
+    <FrozenInfoModal v-model:show="isFrozenInfoOpen" />
   </section>
 </template>
 

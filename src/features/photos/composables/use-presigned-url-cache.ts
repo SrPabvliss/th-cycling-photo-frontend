@@ -23,11 +23,15 @@ const PRESIGNED_URL_STALE_TIME = 4 * 60 * 1000 // 4 min (URLs expire at 5 min)
 export function usePresignedUrlCache(eventId: Ref<string>) {
   const queryClient = useQueryClient()
 
-  async function fetch(fileName: string, contentType: string): Promise<IPresignedUrl> {
+  async function fetch(
+    fileName: string,
+    contentType: string,
+    batchSize?: number,
+  ): Promise<IPresignedUrl> {
     const data = await queryClient.fetchQuery({
       queryKey: PHOTO_QUERY_KEYS.presignedUrl(eventId.value, fileName),
       queryFn: async () => {
-        const body: IGeneratePresignedUrlRequest = { fileName, contentType }
+        const body: IGeneratePresignedUrlRequest = { fileName, contentType, batchSize }
         const response = await httpClient.post<IApiPresignedUrl>(
           API_ROUTES.PHOTOS.PRESIGNED_URL(eventId.value),
           body,

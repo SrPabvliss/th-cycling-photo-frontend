@@ -2,4 +2,5 @@
 export interface IGeneratePresignedUrlRequest {
   fileName: string
   contentType: string
+  batchSize?: number
 }

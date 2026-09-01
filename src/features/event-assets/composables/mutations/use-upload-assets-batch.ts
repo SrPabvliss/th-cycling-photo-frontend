@@ -6,17 +6,19 @@ import { b2UploadClient } from '@/core/http/b2-upload-client'
 import { EVENT_ASSET_QUERY_KEYS } from '../../constants/query-keys'
 import type { EventAssetType } from '../../types/asset-type'
 import type { IApiAssetPresignedUrl } from '../../types/responses/asset-presigned-url.response'
+import type { IFocalPoint } from '../use-local-asset-previews'
 
 interface UploadAssetsBatchParams {
   eventId: string
   assetFiles: Map<EventAssetType, File>
+  focalPoints?: Map<EventAssetType, IFocalPoint>
 }
 
 export function useUploadAssetsBatch() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ eventId, assetFiles }: UploadAssetsBatchParams) => {
+    mutationFn: async ({ eventId, assetFiles, focalPoints }: UploadAssetsBatchParams) => {
       await Promise.all(
         Array.from(assetFiles.entries()).map(async ([assetType, file]) => {
           const { data: presigned } = await httpClient.post<IApiAssetPresignedUrl>(
@@ -32,6 +34,8 @@ export function useUploadAssetsBatch() {
             storageKey: presigned.objectKey,
             fileSize: file.size,
             mimeType: file.type,
+            focalX: focalPoints?.get(assetType)?.focalX,
+            focalY: focalPoints?.get(assetType)?.focalY,
           })
         }),
       )

@@ -61,7 +61,8 @@ const emit = defineEmits<{
   view: [id: string]
   confirmPayment: [id: string]
   markGift: [id: string]
-  sendDelivery: [id: string]
+  // The whole order, not its id: the message goes to the buyer's phone, which lives on it.
+  sendDelivery: [order: IOrderListItem]
   sendPaymentInfo: [order: IOrderListItem]
   resendDelivery: [order: IOrderListItem]
   regenerate: [id: string]
@@ -241,7 +242,7 @@ const paymentMethodLabel = computed(() =>
           (order.status === ORDER_STATUS.GIFTED && !order.deliveredAt)
         "
         class="oc__btn oc__btn--send"
-        @click.stop="emit('sendDelivery', order.id)"
+        @click.stop="emit('sendDelivery', order)"
       >
         <NIcon :component="SendOutline" :size="16" />
         Enviar fotos

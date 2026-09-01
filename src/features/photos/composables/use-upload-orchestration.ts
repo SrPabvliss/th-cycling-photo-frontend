@@ -7,7 +7,7 @@ import type { IRejectionSummary } from '../types/upload-status'
 import { useUploadStore } from '../stores/upload.store'
 import { useUploadQueue } from './use-upload-queue'
 
-export function useUploadOrchestration(eventId: Ref<string>) {
+export function useUploadOrchestration(eventId: Ref<string>, quotaRemaining?: Ref<number | null>) {
   const store = useUploadStore()
   const message = useMessage()
   const {
@@ -29,7 +29,19 @@ export function useUploadOrchestration(eventId: Ref<string>) {
     return c.total > 0 && c.confirmed + c.failed === c.total
   })
 
-  const canAddFiles = computed(() => selectedFiles.value.length + store.counts.total < MAX_FILES)
+  // The event's remaining quota caps the batch below the global ceiling: signing more than fits
+  // used to upload every file to storage only for the batch confirm to reject the lot, leaving the
+  // rejected objects orphaned in the bucket.
+  const uploadCeiling = computed(() => {
+    const remaining = quotaRemaining?.value
+    return remaining === null || remaining === undefined
+      ? MAX_FILES
+      : Math.min(MAX_FILES, remaining)
+  })
+
+  const canAddFiles = computed(
+    () => selectedFiles.value.length + store.counts.total < uploadCeiling.value,
+  )
 
   watch(isComplete, (complete) => {
     if (complete && autoConfirmedCount.value > 0) {
@@ -42,8 +54,16 @@ export function useUploadOrchestration(eventId: Ref<string>) {
   })
 
   function handleFilesSelected(files: File[]) {
-    const remaining = MAX_FILES - selectedFiles.value.length - store.counts.total
-    selectedFiles.value = [...selectedFiles.value, ...files.slice(0, remaining)]
+    const room = uploadCeiling.value - selectedFiles.value.length - store.counts.total
+    selectedFiles.value = [...selectedFiles.value, ...files.slice(0, room)]
+
+    const dropped = files.length - Math.max(0, room)
+    if (dropped > 0) {
+      message.warning(
+        `Solo caben ${uploadCeiling.value} foto${uploadCeiling.value !== 1 ? 's' : ''} en este evento: se descartaron ${dropped}.`,
+        { duration: 6000 },
+      )
+    }
   }
 
   function handleFilesRejected(summary: IRejectionSummary) {
@@ -96,6 +116,7 @@ export function useUploadOrchestration(eventId: Ref<string>) {
     isOnline,
     autoConfirmedCount,
     photoCategoryId,
+    uploadCeiling,
     handleFilesSelected,
     handleFilesRejected,
     handleStartUpload,

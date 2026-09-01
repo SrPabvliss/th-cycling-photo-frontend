@@ -104,6 +104,7 @@ function makeCurrent(
   return {
     publicName: 'Evento Sierra Norte',
     watermarkStorageKey: 'events/sierra-norte/marca.png',
+    watermarkUrl: 'https://cdn.titantv.com.ec/events/sierra-norte/marca.png',
     whatsappNumber: '+593 90 000 1111',
     payoutMethods: [makeEventPayphone(), makeEventBank()],
     isEditable: true,

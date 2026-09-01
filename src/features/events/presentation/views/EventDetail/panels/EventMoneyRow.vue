@@ -39,7 +39,7 @@ const ordersLabel = computed(() =>
     <div class="money-tile" data-test="money-orders">
       <span class="money-tile__label">Órdenes</span>
       <b class="money-tile__value">{{ ordersLabel }}</b>
-      <i class="money-tile__note">sin contar borradores</i>
+      <i class="money-tile__note">sin contar carritos sin pagar</i>
     </div>
   </div>
 </template>

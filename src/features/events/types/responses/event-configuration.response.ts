@@ -38,6 +38,7 @@ export interface IEventPayoutMethodResponse {
 export interface IEventConfigurationResponse {
   publicName: string | null
   watermarkStorageKey: string | null
+  watermarkUrl: string | null
   whatsappNumber: string | null
   payoutMethods: IEventPayoutMethodResponse[]
   isEditable: boolean

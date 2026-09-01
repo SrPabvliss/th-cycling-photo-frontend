@@ -1,0 +1,104 @@
+.tt-modal-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.tt-modal-head__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: #eef4ff;
+  color: #2f6fed;
+}
+
+.tt-modal-head h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: #1a1f2c;
+}
+
+.tt-modal-head p {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #6a7380;
+}
+
+.tt-modal-alert {
+  margin-bottom: 16px;
+}
+
+.tt-modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.tt-fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--tt-neutral-light, #e4e8ec);
+  border-radius: 12px;
+}
+
+.tt-fieldset + .tt-fieldset {
+  margin-top: 12px;
+}
+
+.tt-fieldset--muted {
+  background: #fafbfc;
+}
+
+.tt-fieldset__head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #6a7380;
+}
+
+.tt-fieldset__head h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1f2c;
+}
+
+.tt-fieldset__num {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #2f6fed;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tt-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tt-form-field > span {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.tt-form-hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #6a7380;
+}

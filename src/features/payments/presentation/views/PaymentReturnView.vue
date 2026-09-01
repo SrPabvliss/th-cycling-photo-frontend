@@ -16,7 +16,7 @@ const route = useRoute()
 const router = useRouter()
 const { mutateAsync: confirmPayment } = useConfirmPayment()
 
-const state = ref<'confirming' | 'approved' | 'declined' | 'error'>('confirming')
+const state = ref<'confirming' | 'approved' | 'unsettled' | 'declined' | 'error'>('confirming')
 const message = ref<string | null>(null)
 const clientTransactionId = ref<string | null>(null)
 const showMethodModal = ref(false)
@@ -61,7 +61,10 @@ onMounted(async () => {
 
   try {
     const result = await confirmPayment(confirmation)
-    state.value = result.approved ? 'approved' : 'declined'
+    // An approved charge that could not become a paid order is not a confirmation: the money left
+    // the buyer's card and there is nothing to download. It needs its own answer, and the
+    // transaction id so support can trace the charge.
+    state.value = result.approved ? (result.settled ? 'approved' : 'unsettled') : 'declined'
     message.value = result.message
     confirmedDeliveries.value = result.deliveries ?? []
   } catch {
@@ -95,7 +98,7 @@ watch(
         :description="
           deliveries.length > 0
             ? 'Tus fotos están listas para descargar.'
-            : 'Te contactaremos con tu enlace de descarga.'
+            : 'Tu compra quedó registrada. Encuentras tus fotos en Mis compras.'
         "
       >
         <template #footer>
@@ -114,7 +117,29 @@ watch(
               Descargar fotos de {{ delivery.eventName }}
             </NButton>
           </div>
-          <NButton v-else type="primary" @click="router.push('/')">Volver al inicio</NButton>
+          <NButton v-else type="primary" @click="router.push({ name: ROUTE_NAMES.ACCOUNT_ORDERS })">
+            Ver mis compras
+          </NButton>
+        </template>
+      </NResult>
+
+      <NResult
+        v-else-if="state === 'unsettled'"
+        status="warning"
+        title="Cobramos tu pago, pero falta entregarte las fotos"
+        description="El cobro salió bien y quedó registrado. Algo falló de nuestro lado al preparar la entrega, así que lo estamos resolviendo y te avisamos apenas esté listo."
+      >
+        <template #footer>
+          <div class="payment-return__reference" data-test="payment-reference">
+            <span>Referencia de tu pago</span>
+            <code>{{ clientTransactionId }}</code>
+          </div>
+          <p class="payment-return__notice">
+            Guarda esta referencia: con ella podemos encontrar tu cobro si necesitas escribirnos.
+          </p>
+          <NButton type="primary" @click="router.push({ name: ROUTE_NAMES.ACCOUNT_ORDERS })">
+            Ver mis compras
+          </NButton>
         </template>
       </NResult>
 

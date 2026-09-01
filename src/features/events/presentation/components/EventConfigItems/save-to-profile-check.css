@@ -14,7 +14,7 @@
 
 .ce-check.on {
   border-style: solid;
-  border-color: #bcd4fb;
+  border-color: #2563eb;
   background: #eaf1fe;
 }
 
@@ -32,8 +32,8 @@
 }
 
 .tt-check.on {
-  background: #16294d;
-  border-color: #16294d;
+  background: #2563eb;
+  border-color: #2563eb;
 }
 
 .ce-check-t {

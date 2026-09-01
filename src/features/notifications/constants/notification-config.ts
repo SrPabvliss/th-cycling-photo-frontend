@@ -8,6 +8,7 @@ import {
 import type { Component } from 'vue'
 
 import { PERMISSIONS } from '@/core/auth/permissions'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { NOTIFICATION_TYPE, type NotificationType } from '../types/notification.types'
 
 export interface INotificationConfig {
@@ -17,8 +18,9 @@ export interface INotificationConfig {
   getRoute: (data: Record<string, unknown>, permissions: string[]) => string | null
 }
 
+// The detail is a panel over the list, not its own route: `/orders/:id` is a 404.
 function adminOrderDetail(data: Record<string, unknown>): string | null {
-  return data.orderId ? `/orders/${data.orderId}` : null
+  return data.orderId ? `${ROUTE_PATHS.ORDERS}?order=${data.orderId}` : null
 }
 
 export const NOTIFICATION_CONFIG: Record<NotificationType, INotificationConfig> = {

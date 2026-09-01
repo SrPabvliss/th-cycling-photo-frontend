@@ -38,7 +38,7 @@ function stay() {
     @update:show="emit('update:show', $event)"
   >
     <div class="ce-exit" data-test="exit-modal">
-      <p class="ce-exit-sub">No hay borradores: si sales, se pierde lo que escribiste.</p>
+      <p class="ce-exit-sub">No guardamos lo que llevas: si sales, se pierde lo que escribiste.</p>
 
       <ul class="ce-loselist">
         <li class="bad" data-test="exit-lose">

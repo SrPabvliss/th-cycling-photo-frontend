@@ -11,6 +11,8 @@ export interface IPaymentDelivery {
 
 export interface IPaymentResult {
   approved: boolean
+  /** An approved charge whose orders could not be settled: money taken with nothing handed over. */
+  settled: boolean
   orderIds: string[]
   message: string | null
   deliveries: IPaymentDelivery[]

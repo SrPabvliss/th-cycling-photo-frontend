@@ -77,6 +77,8 @@ export const API_ROUTES = {
       CONFIRM: (id: string, assetType: string) =>
         `${EVENTS_BASE}/${id}/assets/${assetType}/confirm`,
       DELETE: (id: string, assetType: string) => `${EVENTS_BASE}/${id}/assets/${assetType}`,
+      FOCAL_POINT: (id: string, assetType: string) =>
+        `${EVENTS_BASE}/${id}/assets/${assetType}/focal-point`,
     },
   },
   PHOTOS: {

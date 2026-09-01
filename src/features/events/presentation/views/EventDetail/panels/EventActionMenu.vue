@@ -94,6 +94,7 @@ function pick(key: PickKey) {
       <button
         class="action-menu__item"
         type="button"
+        :disabled="!isVisibleInGallery"
         data-test="action-gallery"
         @click="pick('gallery')"
       >

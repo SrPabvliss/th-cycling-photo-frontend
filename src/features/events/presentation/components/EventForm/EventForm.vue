@@ -21,18 +21,18 @@ import { useEventTypesQuery } from '@/features/event-types/composables/queries/u
 import { useLocalAssetPreviews } from '@/features/event-assets/composables/use-local-asset-previews'
 import type { IEventAsset } from '@/features/event-assets/types/responses/event-asset.response'
 import AssetUploadZone from '@/features/event-assets/presentation/components/AssetUploadZone/AssetUploadZone.vue'
+import type { IFocalPoint } from '@/features/event-assets/composables/use-local-asset-previews'
 import EventCategoryPicker from '@/features/photo-categories/presentation/components/EventCategoryPicker/EventCategoryPicker.vue'
 import { useCreatePhotoCategory } from '@/features/photo-categories/composables/mutations/use-create-photo-category'
 import { EVENT_FORM_DEFAULTS, eventFormSchema } from '../../../constants/event-form.schema'
 import type { IEventFormData, IEventFormExtra } from '../../../types/event-form.types'
-
-
 
 const props = defineProps<{
   isSubmitting: boolean
   initialData?: IEventFormData
   submitLabel?: string
   hideAssetUpload?: boolean
+  hideFooter?: boolean
   existingAssets?: IEventAsset[]
   initialCategoryIds?: number[]
 }>()
@@ -49,6 +49,9 @@ const form = useForm({
     const files = assetPreviews.getPendingFiles() as Map<'cover_image', File> | undefined
     emit('submit', value, {
       assetFiles: files,
+      assetFocalPoints: assetPreviews.getPendingFocalPoints() as
+        | Map<'cover_image', IFocalPoint>
+        | undefined,
       assetRemovals: removals.length > 0 ? removals : undefined,
       categoryIds: selectedCategoryIds.value.length > 0 ? selectedCategoryIds.value : undefined,
     })
@@ -248,14 +251,30 @@ const eventTypeOptions = computed(
         <AssetUploadZone
           asset-type="cover_image"
           :current-url="assetPreviews.getAssetUrl('cover_image')"
+          :focal-x="assetPreviews.getFocalPoint('cover_image').focalX"
+          :focal-y="assetPreviews.getFocalPoint('cover_image').focalY"
           @upload="(file) => assetPreviews.addFile('cover_image', file)"
           @remove="assetPreviews.removeFile('cover_image')"
+          @update:focal-x="
+            (value) =>
+              assetPreviews.setFocalPoint('cover_image', {
+                ...assetPreviews.getFocalPoint('cover_image'),
+                focalX: value,
+              })
+          "
+          @update:focal-y="
+            (value) =>
+              assetPreviews.setFocalPoint('cover_image', {
+                ...assetPreviews.getFocalPoint('cover_image'),
+                focalY: value,
+              })
+          "
         />
       </div>
     </div>
 
     <!-- Footer -->
-    <div class="event-form__footer">
+    <div v-if="!props.hideFooter" class="event-form__footer">
       <NButton @click="emit('cancel')">Cancelar</NButton>
       <form.Subscribe>
         <template v-slot="{ canSubmit }">

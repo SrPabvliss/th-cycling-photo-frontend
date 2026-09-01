@@ -1,0 +1,22 @@
+.state-info {
+  width: 460px;
+  max-width: calc(100vw - 32px);
+}
+
+.state-info__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0a0a0a;
+  margin: 0 0 4px;
+}
+
+.state-info__subtitle {
+  font-size: 13px;
+  color: var(--tt-neutral-mid);
+  margin: 0 0 12px;
+}
+
+.state-info__carousel {
+  height: 300px;
+  margin-bottom: 16px;
+}

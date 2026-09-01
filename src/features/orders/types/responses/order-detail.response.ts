@@ -25,6 +25,7 @@ export interface IApiOrderDetailDeliveryLink {
   status: string
   expiresAt: string
   downloadCount: number
+  whatsappTemplate: string
 }
 
 /** Shared shape: no dates or decimals, so it serves both the API and domain types */
@@ -80,6 +81,7 @@ export interface IOrderDetailDeliveryLink {
   status: DeliveryLinkStatus
   expiresAt: Date
   downloadCount: number
+  whatsappTemplate: string
 }
 
 /** Frontend domain type */

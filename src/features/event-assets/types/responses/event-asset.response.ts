@@ -7,6 +7,8 @@ export interface IApiEventAsset {
   url: string
   fileSize: number | null
   mimeType: string | null
+  focalX: number
+  focalY: number
   uploadedAt: string
 }
 
@@ -17,5 +19,7 @@ export interface IEventAsset {
   url: string
   fileSize: number | null
   mimeType: string | null
+  focalX: number
+  focalY: number
   uploadedAt: Date
 }

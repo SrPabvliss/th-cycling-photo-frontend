@@ -7,6 +7,7 @@ import { PERMISSIONS } from '@/core/auth/permissions'
 import { usePermissions } from '@/core/auth/use-permissions'
 import { useUpdateTenantProfile } from '../../composables/mutations/use-update-tenant-profile'
 import { useUploadTenantWatermark } from '../../composables/mutations/use-upload-tenant-watermark'
+import { validateWatermarkFile } from '../../utils/watermark-file.utils'
 import type { TenantProfileResponse } from '../../types/responses/tenant-profile.response'
 
 const props = defineProps<{ profile: TenantProfileResponse }>()
@@ -17,9 +18,9 @@ const canEditProfile = computed(() => has(PERMISSIONS.TENANT_PROFILE_UPDATE))
 const publicName = ref(props.profile.publicName ?? '')
 
 watch(
-  () => props.profile,
-  (profile) => {
-    publicName.value = profile.publicName ?? ''
+  () => props.profile.publicName,
+  (serverPublicName) => {
+    publicName.value = serverPublicName ?? ''
   },
 )
 
@@ -40,6 +41,13 @@ function submit() {
 
 async function handleUpload({ file, onFinish, onError }: UploadCustomRequestOptions) {
   if (!file.file) return onError()
+
+  const problem = await validateWatermarkFile(file.file)
+  if (problem) {
+    message.error(problem)
+    return onError()
+  }
+
   try {
     await uploadWatermark(file.file)
     message.success('Marca de agua actualizada')
@@ -74,8 +82,8 @@ async function handleUpload({ file, onFinish, onError }: UploadCustomRequestOpti
         </NUpload>
 
         <p class="watermark__hint">
-          Usa un PNG con fondo transparente. Se aplicará sobre las fotos de la galería pública de
-          tus próximos eventos.
+          PNG con fondo transparente, entre 200 y 4000 px de ancho, máximo 2 MB. Se dibuja en
+          mosaico sobre las fotos de la galería pública de tus próximos eventos.
         </p>
       </div>
     </NFormItem>
