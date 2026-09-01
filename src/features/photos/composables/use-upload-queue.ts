@@ -57,7 +57,10 @@ export function useUploadQueue(eventId: Ref<string>) {
   async function uploadSingleFile(item: IUploadItem): Promise<void> {
     store.transitionStatus(item.id, 'uploading')
 
-    const result = await presignedUrlCache.fetch(item.fileName, item._file.type)
+    // The backend weighs the whole batch against the remaining quota before signing anything, so a
+    // batch that cannot fit is refused up front instead of landing in storage and being rejected
+    // afterwards.
+    const result = await presignedUrlCache.fetch(item.fileName, item._file.type, store.counts.total)
 
     // Duplicate: auto-confirm without uploading to B2
     if (result.isDuplicate) {

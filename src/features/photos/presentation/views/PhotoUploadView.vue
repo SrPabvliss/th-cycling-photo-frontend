@@ -23,6 +23,12 @@ const slug = computed(() => route.params.slug as string)
 const { data: event, isPending: isEventPending, isError: isEventError } = useEventDetailQuery(slug)
 
 const eventId = computed(() => event.value?.id ?? '')
+
+const quotaRemaining = computed(() => {
+  const detail = event.value
+  if (!detail || detail.photoQuota === null) return null
+  return Math.max(0, detail.photoQuota - detail.photosUploaded)
+})
 const { data: categories } = usePhotoCategoriesQuery(eventId)
 
 const categoryOptions = computed(
@@ -47,7 +53,7 @@ const {
   handleCancel,
   handleRemoveItem,
   handleNewUpload,
-} = useUploadOrchestration(eventId)
+} = useUploadOrchestration(eventId, quotaRemaining)
 
 function handleGoToGallery() {
   router.push({ name: PHOTO_ROUTE_NAMES.GALLERY, params: { slug: slug.value } })
@@ -114,7 +120,12 @@ function handleGoToGallery() {
             <div>
               <div class="upload-header__title">Seleccionar fotos</div>
               <p class="upload-header__subtitle">
-                Máximo {{ MAX_FILES }} archivos por carga. JPEG, PNG o WebP.
+                <template v-if="quotaRemaining !== null">
+                  Quedan {{ quotaRemaining }} foto{{ quotaRemaining !== 1 ? 's' : '' }} de cupo en
+                  este evento.
+                </template>
+                <template v-else>Máximo {{ MAX_FILES }} archivos por carga.</template>
+                JPEG, PNG o WebP.
               </p>
             </div>
           </template>
