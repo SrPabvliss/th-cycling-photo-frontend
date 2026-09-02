@@ -1,5 +1,6 @@
 import {
   MISSING_SUMMARY,
+  NEW_DATA_SAVED_SUMMARY,
   NEW_DATA_SUMMARY,
   NO_PAYOUT_METHOD_LEFT,
   UNVERIFIED_SUFFIX,
@@ -48,11 +49,14 @@ export function resolveItemSummary(
   profileLabel: string,
   currentValues: Record<ConfigurationItemId, string | null>,
   hasCurrent: boolean,
+  saveToProfile = false,
 ): string {
   if (state === 'missing') return MISSING_SUMMARY
   if (state === 'profile') return profileLabel
-  if (hasCurrent) return currentValues[id] ?? NEW_DATA_SUMMARY
-  return NEW_DATA_SUMMARY
+
+  const newDataSummary = saveToProfile ? NEW_DATA_SAVED_SUMMARY : NEW_DATA_SUMMARY
+  if (hasCurrent) return currentValues[id] ?? newDataSummary
+  return newDataSummary
 }
 
 export function resolveRemoveDisabledReason(

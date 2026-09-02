@@ -40,11 +40,7 @@ import type {
   IEventConfigurationPresetResponse,
   IEventConfigurationResponse,
 } from '../types/responses/event-configuration.response'
-import {
-  createDrafts,
-  invalidWhenFilled,
-  isPayoutItem,
-} from '../utils/configuration-draft.utils'
+import { createDrafts, invalidWhenFilled, isPayoutItem } from '../utils/configuration-draft.utils'
 import {
   resolveItemState,
   resolveItemSummary,
@@ -134,9 +130,7 @@ export function useConfigurationItems(
   const hasCurrentValues = computed(() =>
     buildHasCurrentValues(current?.value, currentValues.value),
   )
-  const currentPayoutIsFromProfile = computed(() =>
-    buildCurrentPayoutIsFromProfile(current?.value),
-  )
+  const currentPayoutIsFromProfile = computed(() => buildCurrentPayoutIsFromProfile(current?.value))
   const currentMatchesProfile = computed(() =>
     buildCurrentMatchesProfile(
       current?.value,
@@ -217,12 +211,7 @@ export function useConfigurationItems(
       const hasCurrent = hasCurrentValues.value
 
       if (currentValue) {
-        seedDraftsFromCurrent(
-          drafts,
-          currentValue,
-          seededEventPayoutDrafts,
-          seededNonPayoutDrafts,
-        )
+        seedDraftsFromCurrent(drafts, currentValue, seededEventPayoutDrafts, seededNonPayoutDrafts)
       }
 
       removedPayoutFlags.payphone = false
@@ -283,6 +272,7 @@ export function useConfigurationItems(
           profileLabel,
           currentValues.value,
           Boolean(current?.value),
+          saveToProfileFlags[definition.id],
         ),
         isReady: isReady(definition.id),
         isOpen: openIds.value.includes(definition.id),

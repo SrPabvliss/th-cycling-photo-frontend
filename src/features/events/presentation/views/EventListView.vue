@@ -10,6 +10,13 @@ import { ROUTE_NAMES } from '@/core/navigation/route-names'
 import { useOrganizersListQuery } from '@/features/organizers/composables/queries/use-organizers-list'
 import { useTenantProfile } from '@/features/tenant-profile/composables/queries/use-tenant-profile'
 import { useMyContracts } from '@/features/tenant-profile/composables/queries/use-my-contracts'
+import {
+  type ContractBlockReason,
+  findLastExpiry,
+  hasEventsLeft,
+  isContractCurrentlyValid,
+  readContractBlockReason,
+} from '@/features/tenant-profile/utils/contract-validity.utils'
 import PageHeader from '@/shared/components/PageHeader/PageHeader.vue'
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import {
@@ -99,22 +106,23 @@ const subtitle = computed(() => {
 
 const validContracts = computed(() =>
   (myContracts.value ?? []).filter(
-    (contract) => contract.status === 'accepted' && contract.validUntil.getTime() >= Date.now(),
+    (contract) => contract.status === 'accepted' && isContractCurrentlyValid(contract),
   ),
 )
 
-const hasCapacity = computed(() => {
-  if (role.value !== 'organizer') return true
-  if (myContracts.value == null) return true
-  return validContracts.value.some((contract) => contract.eventsUsed < contract.eventsTotal)
+const blockReason = computed<ContractBlockReason>(() => {
+  if (role.value !== 'organizer' || myContracts.value == null) return 'none'
+  return readContractBlockReason(myContracts.value)
 })
 
+const hasCapacity = computed(() => blockReason.value === 'none')
+
 const exhaustedContractTotal = computed<number | null>(() => {
-  const exhausted = validContracts.value.find(
-    (contract) => contract.eventsUsed >= contract.eventsTotal,
-  )
+  const exhausted = validContracts.value.find((contract) => !hasEventsLeft(contract))
   return exhausted?.eventsTotal ?? validContracts.value[0]?.eventsTotal ?? null
 })
+
+const lastExpiry = computed(() => findLastExpiry(myContracts.value ?? []))
 
 const showCreateAffordance = computed(() => role.value !== 'operator')
 
@@ -164,7 +172,9 @@ function handleCreate() {
 
       <NoQuotaNote
         v-if="role === 'organizer' && !hasCapacity"
+        :reason="blockReason"
         :events-total="exhaustedContractTotal"
+        :expired-on="lastExpiry"
       />
 
       <EventListStatCards :stats="stats" :role="role" />
@@ -199,7 +209,12 @@ function handleCreate() {
 
         <template v-else-if="events.length === 0">
           <OperatorEmpty v-if="role === 'operator' && !hasActiveFilters" />
-          <FirstRun v-else-if="!hasActiveFilters" />
+          <FirstRun
+            v-else-if="!hasActiveFilters"
+            :role="role"
+            :can-create="showCreateAffordance && hasCapacity"
+            @create="handleCreate"
+          />
           <NoResults v-else :query="filters.search" @clear="clearAll()" />
         </template>
 

@@ -10,6 +10,7 @@ export const CONFIGURATION_ITEMS: IConfigurationItemDefinition[] = [
 
 export const MISSING_SUMMARY = 'Tu perfil no tiene este dato · complétalo aquí'
 export const NEW_DATA_SUMMARY = 'Dato nuevo solo para este evento'
+export const NEW_DATA_SAVED_SUMMARY = 'Dato nuevo · se guardará también en tu perfil'
 export const UNVERIFIED_SUFFIX = ' · aún sin verificar'
 export const NO_PAYOUT_METHOD_LEFT = 'Un evento necesita al menos un método de cobro'
 export const EC_CALLING_CODE = '+593'

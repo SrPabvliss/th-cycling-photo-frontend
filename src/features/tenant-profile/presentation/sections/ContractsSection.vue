@@ -8,6 +8,7 @@ import type {
   IContractListItem,
 } from '../../types/responses/contract-list.response'
 import { useMyContracts } from '../../composables/queries/use-my-contracts'
+import { isContractCurrentlyValid } from '../../utils/contract-validity.utils'
 import { pluralize } from '@/shared/utils/format.utils'
 
 const { data: contracts, isLoading } = useMyContracts()
@@ -34,15 +35,9 @@ function photosPerEventLabel(contract: IContractListItem): string {
   return contract.photosPerEvent == null ? 'Sin límite' : String(contract.photosPerEvent)
 }
 
-function isCurrentlyValid(contract: IContractListItem): boolean {
-  const startOfToday = new Date()
-  startOfToday.setHours(0, 0, 0, 0)
-  return contract.validUntil >= startOfToday
-}
-
 const totalEventsRemaining = computed(() =>
   (contracts.value ?? [])
-    .filter((contract) => contract.status === 'accepted' && isCurrentlyValid(contract))
+    .filter((contract) => contract.status === 'accepted' && isContractCurrentlyValid(contract))
     .reduce((sum, contract) => sum + eventsRemaining(contract), 0),
 )
 </script>

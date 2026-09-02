@@ -1,8 +1,14 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { isAxiosError } from 'axios'
-import { NButton, NIcon, NModal } from 'naive-ui'
-import { AlertCircleOutline, RefreshOutline } from '@vicons/ionicons5'
+import { NButton, NDatePicker, NIcon, NInputNumber, NModal } from 'naive-ui'
+import {
+  AlertCircleOutline,
+  DocumentTextOutline,
+  PersonOutline,
+  RefreshOutline,
+  TicketOutline,
+} from '@vicons/ionicons5'
 
 import { message } from '@/core/ui/discrete-api'
 import { useIssueContract } from '../../composables/mutations/use-issue-contract'
@@ -14,6 +20,7 @@ import PersonPicker from '../components/PersonPicker/PersonPicker.vue'
 
 const PENDING_CONTRACT_CODE = 'contract.owner_has_pending_contract'
 const GENERIC_ERROR = 'No pudimos emitir el contrato.'
+const DAY_IN_MS = 86_400_000
 
 const props = withDefaults(
   defineProps<{
@@ -42,12 +49,14 @@ function pickedFromOrganizer(organizer: IOrganizerProp | null): IPickablePerson 
   }
 }
 
+const personPicker = ref<InstanceType<typeof PersonPicker> | null>(null)
+
 const picked = ref<IPickablePerson | null>(
   props.mode === 'renew' ? pickedFromOrganizer(props.organizer) : null,
 )
 const commercialName = ref(props.mode === 'renew' ? (props.organizer?.name ?? '') : '')
 const eventsTotal = ref<number | null>(null)
-const photosPerEvent = ref<number | ''>('')
+const photosPerEvent = ref<number | null>(null)
 const validUntil = ref('')
 const search = ref('')
 const pendingRejection = ref(false)
@@ -89,6 +98,12 @@ function handlePick(person: IPickablePerson) {
 function handleClear() {
   picked.value = null
   commercialName.value = ''
+  search.value = ''
+  void nextTick(() => personPicker.value?.focusSearch())
+}
+
+function isPastDate(timestamp: number): boolean {
+  return timestamp < Date.now() - DAY_IN_MS
 }
 
 const canSubmit = computed(
@@ -96,8 +111,10 @@ const canSubmit = computed(
     picked.value !== null &&
     commercialName.value.trim().length > 0 &&
     eventsTotal.value != null &&
-    photosPerEvent.value !== '' &&
-    validUntil.value.trim().length > 0,
+    eventsTotal.value > 0 &&
+    photosPerEvent.value != null &&
+    photosPerEvent.value > 0 &&
+    validUntil.value.length > 0,
 )
 
 function readErrorCode(caught: unknown): string | undefined {
@@ -120,7 +137,7 @@ function submit() {
       ownerEmail: picked.value.email,
       commercialName: commercialName.value,
       eventsTotal: eventsTotal.value as number,
-      photosPerEvent: Number(photosPerEvent.value),
+      photosPerEvent: photosPerEvent.value as number,
       validUntil: validUntil.value,
     },
     {
@@ -144,7 +161,7 @@ function reset() {
   picked.value = props.mode === 'renew' ? pickedFromOrganizer(props.organizer) : null
   commercialName.value = props.mode === 'renew' ? (props.organizer?.name ?? '') : ''
   eventsTotal.value = null
-  photosPerEvent.value = ''
+  photosPerEvent.value = null
   validUntil.value = ''
   search.value = ''
   pendingRejection.value = false
@@ -161,12 +178,27 @@ function close() {
     :show="show"
     @update:show="(v: boolean) => emit('update:show', v)"
     preset="card"
-    :title="mode === 'renew' ? 'Renovar contrato' : 'Emitir contrato'"
-    style="width: 520px"
+    :bordered="false"
+    class="icm-modal"
+    style="width: 560px; max-width: calc(100vw - 32px)"
   >
-    <template #header-extra>{{
-      mode === 'renew' ? organizer?.name : 'Un contrato da cupo de eventos a una persona con cuenta'
-    }}</template>
+    <template #header>
+      <div class="tt-modal-head">
+        <span class="tt-modal-head__icon">
+          <NIcon :component="mode === 'renew' ? RefreshOutline : DocumentTextOutline" :size="22" />
+        </span>
+        <div>
+          <h3>{{ mode === 'renew' ? 'Renovar contrato' : 'Emitir contrato' }}</h3>
+          <p>
+            {{
+              mode === 'renew'
+                ? `Se suma cupo nuevo a ${organizer?.name}.`
+                : 'Da cupo de eventos a una persona que ya tiene cuenta en Titan TV.'
+            }}
+          </p>
+        </div>
+      </div>
+    </template>
 
     <form class="icm-body" data-test="issue-contract-form" @submit.prevent="submit">
       <div v-if="isRenewal" class="icm-notice icm-notice--blue" data-test="renewal-notice">
@@ -192,73 +224,104 @@ function close() {
         </div>
       </div>
 
-      <label class="icm-field">
-        <span class="icm-field__label">Persona</span>
-        <PersonPicker
-          :picked="picked"
-          :users="searchResults ?? []"
-          :search="search"
-          :loading="isSearching"
-          :rejected="pendingRejection"
-          :locked="mode === 'renew'"
-          @update:search="(v: string) => (search = v)"
-          @pick="handlePick"
-          @clear="handleClear"
-        />
-        <span v-if="mode === 'renew'" class="icm-field__hint">
-          El titular del contrato no se puede cambiar en una renovación.
-        </span>
-      </label>
+      <section class="tt-fieldset">
+        <header class="tt-fieldset__head">
+          <span class="tt-fieldset__num">1</span>
+          <h4>Titular</h4>
+          <NIcon :component="PersonOutline" :size="16" />
+        </header>
 
-      <label class="icm-field">
-        <span class="icm-field__label">Nombre comercial</span>
-        <input
-          v-model="commercialName"
-          class="icm-input"
-          data-test="commercial-name"
-          :readonly="isRenewal"
-        />
-        <span class="icm-field__hint">
-          {{
-            isRenewal
-              ? 'Se mantiene el del organizador.'
-              : 'Queda fijado al emitir: el titular lo acepta tal cual, no puede cambiarlo.'
-          }}
-        </span>
-      </label>
-
-      <div class="icm-row">
-        <label class="icm-field icm-field--half">
-          <span class="icm-field__label">Eventos</span>
-          <input
-            v-model.number="eventsTotal"
-            type="number"
-            min="1"
-            class="icm-input"
-            data-test="events-total"
+        <div class="tt-form-field">
+          <span>Persona</span>
+          <PersonPicker
+            ref="personPicker"
+            :picked="picked"
+            :users="searchResults ?? []"
+            :search="search"
+            :loading="isSearching"
+            :rejected="pendingRejection"
+            :locked="mode === 'renew'"
+            @update:search="(v: string) => (search = v)"
+            @pick="handlePick"
+            @clear="handleClear"
           />
-        </label>
-        <label class="icm-field icm-field--half">
-          <span class="icm-field__label">Fotos por evento</span>
-          <input
-            v-model="photosPerEvent"
-            type="number"
-            min="1"
-            placeholder="Ej. 2000"
-            class="icm-input"
-            data-test="photos-per-event"
-          />
-          <span class="icm-field__hint"
-            >Límite de este contrato. Se elige cada vez que se emite.</span
-          >
-        </label>
-      </div>
+          <p v-if="mode === 'renew'" class="tt-form-hint">
+            El titular del contrato no se puede cambiar en una renovación.
+          </p>
+        </div>
 
-      <label class="icm-field icm-field--half">
-        <span class="icm-field__label">Vence el</span>
-        <input v-model="validUntil" type="date" class="icm-input" data-test="valid-until" />
-        <span class="icm-field__hint">No se puede cambiar después de emitir.</span>
-      </label>
+        <label class="tt-form-field">
+          <span>Nombre comercial</span>
+          <input
+            v-model="commercialName"
+            class="icm-input"
+            placeholder="Ej. Andes Bike Photo"
+            data-test="commercial-name"
+            :readonly="isRenewal"
+          />
+          <p class="tt-form-hint">
+            {{
+              isRenewal
+                ? 'Se mantiene el del organizador.'
+                : 'Queda fijado al emitir: el titular lo acepta tal cual, no puede cambiarlo.'
+            }}
+          </p>
+        </label>
+      </section>
+
+      <section class="tt-fieldset">
+        <header class="tt-fieldset__head">
+          <span class="tt-fieldset__num">2</span>
+          <h4>Cupo del contrato</h4>
+          <NIcon :component="TicketOutline" :size="16" />
+        </header>
+
+        <div class="icm-row">
+          <label class="tt-form-field icm-field--half">
+            <span>Eventos</span>
+            <NInputNumber
+              v-model:value="eventsTotal"
+              :min="1"
+              :show-button="false"
+              placeholder="Ej. 5"
+              data-test="events-total"
+            />
+          </label>
+          <label class="tt-form-field icm-field--half">
+            <span>Fotos por evento</span>
+            <NInputNumber
+              v-model:value="photosPerEvent"
+              :min="1"
+              :show-button="false"
+              placeholder="Ej. 2000"
+              data-test="photos-per-event"
+            />
+          </label>
+        </div>
+        <p class="tt-form-hint">
+          Cuántos eventos puede crear y cuántas fotos caben en cada uno. Se elige cada vez que se
+          emite un contrato.
+        </p>
+
+        <div class="tt-form-field">
+          <span>Vence el</span>
+          <NDatePicker
+            type="date"
+            format="dd MMM yyyy"
+            value-format="yyyy-MM-dd"
+            placeholder="Elegir fecha"
+            style="width: 100%"
+            :formatted-value="validUntil.length > 0 ? validUntil : null"
+            :is-date-disabled="isPastDate"
+            data-test="valid-until"
+            @update:formatted-value="(v: string | null) => (validUntil = v ?? '')"
+          />
+          <p class="tt-form-hint">
+            Después de esta fecha el organizador deja de poder crear eventos. No se puede cambiar
+            luego de emitir.
+          </p>
+        </div>
+      </section>
 
       <p class="icm-note">
         Un contrato no se puede editar después de emitirlo. Las únicas correcciones son revocarlo y
@@ -267,7 +330,7 @@ function close() {
     </form>
 
     <template #footer>
-      <div class="icm-footer">
+      <div class="tt-modal-foot">
         <NButton @click="close">Cancelar</NButton>
         <NButton
           type="primary"

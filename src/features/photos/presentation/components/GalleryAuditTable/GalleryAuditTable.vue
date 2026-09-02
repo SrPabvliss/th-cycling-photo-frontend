@@ -10,7 +10,10 @@ import {
 } from '@vicons/ionicons5'
 
 import { formatRelativeTime } from '@/shared/utils/date.utils'
-import type { IPhotoBib, IPhotoListItem } from '@/features/photos/types/responses/photo-list.response'
+import type {
+  IPhotoBib,
+  IPhotoListItem,
+} from '@/features/photos/types/responses/photo-list.response'
 import GalleryBibChips from '../GalleryBibChips/GalleryBibChips.vue'
 
 const props = defineProps<{
@@ -117,12 +120,16 @@ function isSelected(id: string): boolean {
             <img :src="photo.thumbnailUrl" :alt="photo.filename" loading="lazy" decoding="async" />
           </td>
           <td class="c-bib">
-            <GalleryBibChips :bibs="photo.bibs" />
+            <GalleryBibChips :bibs="photo.bibs" :status="photo.status" />
           </td>
           <td class="c-src">
             <span
               class="gp-src"
-              :class="{ ok: reading.tone === 'ok', amber: reading.tone === 'amber', red: reading.tone === 'red' }"
+              :class="{
+                ok: reading.tone === 'ok',
+                amber: reading.tone === 'amber',
+                red: reading.tone === 'red',
+              }"
             >
               <NIcon v-if="reading.tone === 'ok'" :component="CheckmarkOutline" :size="11" />
               <NIcon v-else-if="reading.tone === 'amber'" :component="WarningOutline" :size="11" />
