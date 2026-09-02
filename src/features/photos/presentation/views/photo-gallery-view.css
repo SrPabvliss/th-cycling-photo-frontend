@@ -144,3 +144,23 @@
 .tt-iconbtn:hover {
   background: var(--tt-neutral-light, #f3f4f6);
 }
+
+/* El aviso de evento congelado se dibuja aquí, pero sus estilos vivían solo en el detalle. */
+.gp-alert {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+}
+
+.gp-alert .dt-alert-t {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
