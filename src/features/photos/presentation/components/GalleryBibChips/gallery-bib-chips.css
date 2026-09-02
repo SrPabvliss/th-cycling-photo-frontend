@@ -8,7 +8,11 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  font:
+    800 12px/1 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
   letter-spacing: 0.02em;
   background: #16294d;
   color: #fff;
@@ -41,4 +45,19 @@
   background: var(--tt-error);
   border-color: var(--tt-error);
   color: #fff;
+}
+
+.gp-bib.none.pending {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-style: solid;
+  border-color: var(--tt-neutral-light, #d4d4d8);
+  color: var(--tt-neutral-mid);
+}
+
+.gp-bib.none.big.pending {
+  background: var(--tt-background);
+  border-color: var(--tt-neutral-light, #d4d4d8);
+  color: var(--tt-neutral-mid);
 }

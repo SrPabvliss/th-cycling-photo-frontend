@@ -69,7 +69,7 @@ function handleClick() {
         <NIcon :component="TrashOutline" :size="14" />
       </button>
       <div class="gp-bibbar">
-        <GalleryBibChips :bibs="photo.bibs" large />
+        <GalleryBibChips :bibs="photo.bibs" :status="photo.status" large />
       </div>
     </div>
     <figcaption>

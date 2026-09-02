@@ -12,11 +12,15 @@ const emit = defineEmits<{
   'update:modelValue': [boolean]
 }>()
 
-const note = computed(() =>
-  props.hasProfileValue
-    ? 'Desactivado: es un dato solo para este evento y no queremos sobrescribir tu perfil.'
-    : 'Activado: así no vuelves a escribirlo en tus próximos eventos.',
-)
+const note = computed(() => {
+  if (!props.modelValue) {
+    return 'Es un dato solo para este evento: tu perfil se queda como está.'
+  }
+
+  return props.hasProfileValue
+    ? 'Se guardará en tu perfil y reemplazará el que tenías, así que tus próximos eventos usarán este.'
+    : 'Se guardará en tu perfil, así no vuelves a escribirlo en tus próximos eventos.'
+})
 </script>
 
 <template>
@@ -33,7 +37,7 @@ const note = computed(() =>
     </span>
     <span class="ce-check-t">
       <b>Guardar también en mi perfil</b>
-      <i>{{ note }}</i>
+      <i data-test="save-to-profile-note">{{ note }}</i>
     </span>
   </button>
 </template>

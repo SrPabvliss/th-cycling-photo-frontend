@@ -28,6 +28,7 @@ export const PERMISSIONS = {
   ORDER_GIFT: 'order.gift',
   ORDER_CONVERT_TO_GIFT: 'order.convert_to_gift',
   ORDER_CONVERT_TO_SALE: 'order.convert_to_sale',
+  NOTIFICATION_READ: 'notification.read',
 } as const
 
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]
