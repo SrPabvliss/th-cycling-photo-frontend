@@ -1,39 +1,58 @@
-/* Page padding */
-.list-content {
+.orders-view {
+  display: flex;
+  flex-direction: column;
+}
+
+.orders-content {
+  display: flex;
+  flex-direction: column;
   padding: 24px 32px;
+}
+
+/* La cabecera (stats, pestañas, filtros) no debe comprimirse dentro del flex column. */
+.orders-content > * {
+  flex: none;
+}
+
+.orders-body {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
-.orders-list-view__header {
+.orders-result-line {
+  margin: 18px 0 12px;
+  font-size: 13px;
+  color: var(--tt-neutral-dark, #16233a);
+}
+
+.orders-result-line__sub {
+  color: var(--tt-neutral-mid, #6a7380);
+  font-weight: 400;
+}
+
+.orders-groups {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  background: var(--tt-background, #ffffff);
+  gap: 18px;
 }
 
-.orders-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+.orders-detail-host {
+  position: relative;
+  z-index: 40;
 }
 
-.orders-sentinel {
-  grid-column: 1 / -1;
-  width: 100%;
-  height: 1px;
-}
-
-.orders-loading {
-  display: flex;
-  justify-content: center;
-  padding: 60px 0;
-}
-
+.orders-error,
+.orders-loading,
 .orders-empty {
   display: flex;
   justify-content: center;
   padding: 60px 0;
+}
+
+.orders-sentinel {
+  width: 100%;
+  height: 1px;
 }
 
 .orders-loading-more,
@@ -43,45 +62,27 @@
   justify-content: center;
   gap: 8px;
   padding: 24px;
-  color: var(--tt-neutral-mid, #6b7280);
-  font-size: 13px;
   margin: 0;
+  font-size: 13px;
+  color: var(--tt-neutral-mid, #6b7280);
 }
 
-/* >= 768px and < 1024px: 2 columns */
-@media (max-width: 1023px) {
-  .orders-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* < 768px: single column + sticky header */
 @media (max-width: 767px) {
-  .orders-grid {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .list-content {
+  .orders-content {
     padding: 12px 16px;
-    gap: 6px;
   }
 
-  .orders-list-view__header {
-    gap: 6px;
-    padding: 4px 16px;
-    margin: 0 -16px;
+  .orders-groups {
+    gap: 14px;
+  }
+
+  .orders-result-line {
+    margin: 14px 0 10px;
   }
 }
 
-/* < 480px: keep single column (already 1fr) */
 @media (max-width: 479px) {
-  .list-content {
+  .orders-content {
     padding: 10px 12px;
-  }
-
-  .orders-list-view__header {
-    padding: 4px 12px;
-    margin: 0 -12px;
   }
 }
