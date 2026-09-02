@@ -9,6 +9,11 @@
   padding: 24px 32px;
 }
 
+/* La cabecera (stats, pestañas, filtros) no debe comprimirse dentro del flex column. */
+.orders-content > * {
+  flex: none;
+}
+
 .orders-body {
   display: flex;
   flex-direction: column;

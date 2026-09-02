@@ -18,7 +18,6 @@ import {
   useOrganizerFilters,
 } from '../../composables/use-organizer-filters'
 import { useRevokeContract } from '../../composables/mutations/use-revoke-contract'
-import { ORGANIZER_ROUTE_NAMES } from '../../routes'
 import type {
   IInvitationCard,
   IOrganizerCard,
@@ -29,6 +28,7 @@ import type { IPickableOrganizer } from '../../types/responses/pickable-person.r
 import IssueContractModal from '../modals/IssueContractModal.vue'
 import LinkResultModal from '../modals/LinkResultModal.vue'
 import ResendConfirmModal from '../modals/ResendConfirmModal.vue'
+import OrganizerDetailDrawer from '../components/OrganizerDetail/OrganizerDetailDrawer.vue'
 import OrganizerCard from '../components/OrganizerCard/OrganizerCard.vue'
 import InvitationCard from '../components/InvitationCard/InvitationCard.vue'
 import OrganizerStatsCards from '../components/OrganizerStatsCards/OrganizerStatsCards.vue'
@@ -112,8 +112,12 @@ function handleIssue() {
   showIssueModal.value = true
 }
 
+const openOrganizerId = ref<string | null>(null)
+const showDetail = ref(false)
+
 function handleOpenOrganizer(organizer: IOrganizerCard) {
-  router.push({ name: ORGANIZER_ROUTE_NAMES.DETAIL, params: { id: organizer.id } })
+  openOrganizerId.value = organizer.id
+  showDetail.value = true
 }
 
 function handleRenew(organizer: IOrganizerCard) {
@@ -265,6 +269,8 @@ function showIssuedLink(result: IContractIssued, isResend: boolean) {
       :url="linkResult.url"
       :resend="linkIsResend"
     />
+
+    <OrganizerDetailDrawer v-model:show="showDetail" :organizer-id="openOrganizerId" />
   </div>
 </template>
 
