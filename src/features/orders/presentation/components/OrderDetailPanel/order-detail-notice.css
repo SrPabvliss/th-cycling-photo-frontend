@@ -1,0 +1,42 @@
+.odp__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 13px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.odp__notice div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.odp__notice b {
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.odp__notice--success {
+  background: #e8f6ee;
+  color: #14663a;
+}
+
+.odp__notice--warning {
+  background: #fdf3e0;
+  color: #8a5200;
+}
+
+.odp__notice--error {
+  background: #fdeaee;
+  color: #a01f3c;
+}
+
+.odp__notice--info {
+  background: #e8f1fd;
+  color: #1a5fb4;
+}

@@ -70,7 +70,11 @@
 .pd-acts {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
+}
+
+.pd-acts .tt-btn {
+  justify-content: flex-start;
 }
 
 .pd-card .tt-btn {
@@ -89,31 +93,37 @@
 }
 
 .pd-card .tt-btn-ghost {
-  background: transparent;
+  background: #fff;
   border-color: var(--tt-neutral-light);
   color: var(--tt-neutral-dark);
 }
 
 .pd-card .tt-btn-ghost:hover {
-  background: var(--tt-background);
+  border-color: #bcd4fb;
+  background: var(--tt-primary-tint, #eaf1fe);
+  color: var(--tt-primary, #2563eb);
 }
 
 .pd-card .tt-btn-ghost.danger {
   color: var(--tt-error);
-  border-color: color-mix(in srgb, var(--tt-error) 35%, var(--tt-neutral-light));
 }
 
 .pd-card .tt-btn-ghost.danger:hover {
-  background: color-mix(in srgb, var(--tt-error) 7%, transparent);
+  border-color: #f6c4c4;
+  background: #fdecec;
+  color: var(--tt-error);
 }
 
 .dt-blocked {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 9px 12px;
+  gap: 7px;
+  padding: 10px 12px;
+  border: 1px solid var(--tt-neutral-light);
   border-radius: 9px;
-  background: var(--tt-background);
+  background: #eef2f7;
   font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
   color: var(--tt-neutral-mid);
 }

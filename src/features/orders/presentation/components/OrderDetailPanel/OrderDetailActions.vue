@@ -67,3 +67,5 @@ function handleActionClick(id: OrderActionId) {
     </button>
   </div>
 </template>
+
+<style scoped src="./order-detail-actions.css" />
