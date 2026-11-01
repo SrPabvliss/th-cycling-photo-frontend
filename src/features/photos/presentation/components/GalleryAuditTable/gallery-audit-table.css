@@ -175,3 +175,15 @@
   border-color: var(--tt-error);
   color: var(--tt-error);
 }
+
+.gp-audit-failed {
+  margin-left: 6px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: var(--tt-error, #dc2626);
+  color: #fff;
+  border-radius: 6px;
+  padding: 2px 6px;
+}

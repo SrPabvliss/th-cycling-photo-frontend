@@ -4,25 +4,32 @@ import { NIcon } from 'naive-ui'
 import {
   CartOutline,
   CheckmarkOutline,
+  RefreshOutline,
   SparklesOutline,
   TrashOutline,
   WarningOutline,
 } from '@vicons/ionicons5'
 
 import { formatRelativeTime } from '@/shared/utils/date.utils'
-import type { IPhotoBib, IPhotoListItem } from '@/features/photos/types/responses/photo-list.response'
+import type {
+  IPhotoBib,
+  IPhotoListItem,
+} from '@/features/photos/types/responses/photo-list.response'
 import GalleryBibChips from '../GalleryBibChips/GalleryBibChips.vue'
 
 const props = defineProps<{
   photos: IPhotoListItem[]
   selectedIds: string[]
   deletable?: boolean
+  retryable?: boolean
+  retryingIds?: string[]
 }>()
 
 const emit = defineEmits<{
   open: [slug: string]
   toggle: [id: string]
   delete: [id: string]
+  retry: [id: string]
 }>()
 
 type ReadingTone = 'red' | 'ok' | 'amber' | 'ai'
@@ -122,7 +129,11 @@ function isSelected(id: string): boolean {
           <td class="c-src">
             <span
               class="gp-src"
-              :class="{ ok: reading.tone === 'ok', amber: reading.tone === 'amber', red: reading.tone === 'red' }"
+              :class="{
+                ok: reading.tone === 'ok',
+                amber: reading.tone === 'amber',
+                red: reading.tone === 'red',
+              }"
             >
               <NIcon v-if="reading.tone === 'ok'" :component="CheckmarkOutline" :size="11" />
               <NIcon v-else-if="reading.tone === 'amber'" :component="WarningOutline" :size="11" />
@@ -140,9 +151,29 @@ function isSelected(id: string): boolean {
               Vendida
             </span>
           </td>
-          <td class="c-file">{{ photo.filename }}</td>
+          <td class="c-file">
+            {{ photo.filename }}
+            <span
+              v-if="photo.status === 'failed'"
+              class="gp-audit-failed"
+              data-test="photo-failed-badge"
+            >
+              Fallida
+            </span>
+          </td>
           <td class="c-time">{{ formatRelativeTime(photo.uploadedAt) }}</td>
           <td class="c-act">
+            <button
+              v-if="retryable && photo.status === 'failed'"
+              type="button"
+              class="gp-audit-del"
+              title="Reintentar clasificación"
+              data-test="retry-photo-classification"
+              :disabled="retryingIds?.includes(photo.id)"
+              @click.stop="emit('retry', photo.id)"
+            >
+              <NIcon :component="RefreshOutline" :size="14" />
+            </button>
             <button
               v-if="deletable"
               type="button"

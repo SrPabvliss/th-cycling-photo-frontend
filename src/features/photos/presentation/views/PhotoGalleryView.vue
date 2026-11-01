@@ -7,6 +7,7 @@ import {
   PHOTOS_PER_PAGE,
 } from '../../constants/photo-gallery.constants'
 import { usePhotoGalleryView } from '../../composables/use-photo-gallery-view'
+import ClassificationFailuresBanner from '../components/ClassificationFailuresBanner/ClassificationFailuresBanner.vue'
 import GalleryHeader from '../components/GalleryHeader/GalleryHeader.vue'
 import GalleryToolbar from '../components/GalleryToolbar/GalleryToolbar.vue'
 import GalleryFilterPanel from '../components/GalleryFilterPanel/GalleryFilterPanel.vue'
@@ -53,6 +54,12 @@ const {
   selectionCount,
   showSelectionBar,
   canReview,
+  canRetryClassification,
+  failedCount,
+  isRetryingClassification,
+  retryAllClassification,
+  retryPhotoClassification,
+  retryingIds,
   photoToDelete,
   showDeleteModal,
   showCategoryModal,
@@ -122,6 +129,13 @@ const {
                 </div>
               </div>
 
+              <ClassificationFailuresBanner
+                v-if="canRetryClassification"
+                :failed-count="failedCount ?? 0"
+                :loading="isRetryingClassification"
+                @retry-all="retryAllClassification"
+              />
+
               <GalleryToolbar
                 :loaded="allItems.length"
                 :total="totalResults"
@@ -147,9 +161,12 @@ const {
                 :photos="allItems"
                 :selected-ids="selectionStore.selectedIds"
                 :deletable="!event.isFrozen"
+                :retryable="canRetryClassification"
+                :retrying-ids="retryingIds"
                 @open="handlePhotoClick"
                 @toggle="onTogglePhoto"
                 @delete="requestDelete"
+                @retry="retryPhotoClassification"
               />
 
               <div v-else class="gp-grid" :class="density" data-test="gallery-grid">
@@ -161,9 +178,12 @@ const {
                   :selected="selectionStore.isSelected(photo.id)"
                   :any-selected="selectionStore.hasSelection"
                   :deletable="!event.isFrozen"
+                  :retryable="canRetryClassification"
+                  :retrying="retryingIds.includes(photo.id)"
                   @open="handlePhotoClick"
                   @toggle="onTogglePhoto"
                   @delete="requestDelete"
+                  @retry="retryPhotoClassification"
                 />
               </div>
 
