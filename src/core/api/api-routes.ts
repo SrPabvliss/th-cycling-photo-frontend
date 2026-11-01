@@ -91,6 +91,9 @@ export const API_ROUTES = {
     UPLOAD: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos`,
     PRESIGNED_URL: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/presigned-url`,
     CONFIRM_BATCH: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/confirm-batch`,
+    RECLASSIFY: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/reclassify`,
+    CLASSIFICATION_FAILURES: (eventId: string) =>
+      `${EVENTS_BASE}/${eventId}/photos/classification-failures`,
     RETOUCHED_PRESIGNED_URL: (id: string) => `${PHOTOS_BASE}/${id}/retouched/presigned-url`,
     RETOUCHED_CONFIRM: (id: string) => `${PHOTOS_BASE}/${id}/retouched/confirm`,
     DOWNLOAD: (id: string) => `${PHOTOS_BASE}/${id}/download`,

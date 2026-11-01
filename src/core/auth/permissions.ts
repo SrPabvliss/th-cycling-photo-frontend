@@ -9,6 +9,7 @@ export const PERMISSIONS = {
   EVENT_RESTORE: 'event.restore',
   PHOTO_READ: 'photo.read',
   PHOTO_RETOUCH_READ: 'photo.retouch.read',
+  PHOTO_CLASSIFICATION_RETRY: 'photo.classification.retry',
   REVIEW_QUEUE_READ: 'dashboard.review_queue.read',
   ORDER_READ: 'order.read',
   CART_CHECKOUT: 'cart.checkout',

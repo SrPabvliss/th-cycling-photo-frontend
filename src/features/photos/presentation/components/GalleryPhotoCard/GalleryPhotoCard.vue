@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { NIcon } from 'naive-ui'
-import { CartOutline, TrashOutline } from '@vicons/ionicons5'
+import { CartOutline, RefreshOutline, TrashOutline } from '@vicons/ionicons5'
 
 import { formatRelativeTime } from '@/shared/utils/date.utils'
 import type { IPhotoListItem } from '@/features/photos/types/responses/photo-list.response'
@@ -12,12 +12,15 @@ const props = defineProps<{
   selected?: boolean
   anySelected?: boolean
   deletable?: boolean
+  retryable?: boolean
+  retrying?: boolean
 }>()
 
 const emit = defineEmits<{
   open: [slug: string]
   toggle: [id: string]
   delete: [id: string]
+  retry: [id: string]
 }>()
 
 function handleClick() {
@@ -54,6 +57,20 @@ function handleClick() {
             />
           </svg>
         </span>
+      </button>
+      <span v-if="photo.status === 'failed'" class="gp-failed" data-test="photo-failed-badge">
+        Fallida
+      </span>
+      <button
+        v-if="retryable && photo.status === 'failed'"
+        type="button"
+        class="gp-retry"
+        title="Reintentar clasificación"
+        data-test="retry-photo-classification"
+        :disabled="retrying"
+        @click.stop="emit('retry', photo.id)"
+      >
+        <NIcon :component="RefreshOutline" :size="14" />
       </button>
       <span v-if="photo.sold" class="gp-sold">
         <NIcon :component="CartOutline" :size="12" />
