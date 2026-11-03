@@ -14,11 +14,18 @@ import { useMergeCart } from '../../composables/mutations/use-merge-cart'
 import CheckoutSummary from '../components/CheckoutSummary/CheckoutSummary.vue'
 import { useCartPricing } from '../../composables/use-cart-pricing'
 import PricingTotalBlock from '@/features/pricing/presentation/components/PricingTotalBlock/PricingTotalBlock.vue'
+import { useMyBillingAccountsQuery } from '@/features/account/composables/queries/use-my-billing-accounts'
+import { useSetDefaultBillingAccount } from '@/features/account/composables/mutations/use-set-default-billing-account'
+import { useRecordInvoiceConsent } from '@/features/account/composables/mutations/use-record-invoice-consent'
+import BillingAccountForm from '@/features/account/presentation/components/BillingAccountForm/BillingAccountForm.vue'
+import BillingCard from '../components/BillingCard/BillingCard.vue'
+import BillingSheet from '../components/BillingSheet/BillingSheet.vue'
+import BillingAccountPicker from '../components/BillingAccountPicker/BillingAccountPicker.vue'
 
 const route = useRoute()
 const router = useRouter()
 const cartStore = useCartStore()
-const { isAuthenticated } = useAuth()
+const { isAuthenticated, currentUser } = useAuth()
 const { mutateAsync: mergeCart, isPending: isMerging } = useMergeCart()
 
 const eventId = computed(() => route.params.eventId as string)
@@ -40,6 +47,56 @@ const cartPricing = useCartPricing(checkoutCount)
 const orderResults = ref<ICheckoutOrderResult[] | null>(null)
 const showMethodModal = ref(false)
 
+const billingQuery = useMyBillingAccountsQuery({ enabled: () => isAuthenticated.value })
+const { mutateAsync: setDefaultBillingAccount, isPending: isSettingDefault } =
+  useSetDefaultBillingAccount()
+const { mutateAsync: recordInvoiceConsent, isPending: isRecordingConsent } =
+  useRecordInvoiceConsent()
+
+const billingAccounts = computed(() => billingQuery.data.value?.accounts ?? [])
+const needsInvoiceConsent = computed(
+  () => billingQuery.data.value !== undefined && !billingQuery.data.value.invoiceConsentGiven,
+)
+const selectedBillingAccountId = ref<string | null>(null)
+const invoiceConsentChecked = ref(false)
+const billingSheet = ref<'form' | 'picker' | null>(null)
+
+watch(
+  billingAccounts,
+  (accounts) => {
+    if (accounts.some((account) => account.id === selectedBillingAccountId.value)) return
+    selectedBillingAccountId.value =
+      accounts.find((account) => account.isDefault)?.id ?? accounts[0]?.id ?? null
+  },
+  { immediate: true },
+)
+
+const billingPrefill = computed(() => ({
+  legalName: [currentUser.value?.firstName, currentUser.value?.lastName]
+    .filter(Boolean)
+    .join(' ')
+    .trim(),
+  email: currentUser.value?.email ?? '',
+}))
+
+const isBillingReady = computed(
+  () =>
+    selectedBillingAccountId.value !== null &&
+    (!needsInvoiceConsent.value || invoiceConsentChecked.value),
+)
+
+function handleBillingSaved(billingAccountId: string) {
+  selectedBillingAccountId.value = billingAccountId
+  invoiceConsentChecked.value = false
+  billingSheet.value = null
+}
+
+async function handleBillingChosen(choice: { id: string; makeDefault: boolean }) {
+  selectedBillingAccountId.value = choice.id
+  if (choice.makeDefault) await setDefaultBillingAccount(choice.id)
+  billingSheet.value = null
+}
+
 async function handleConfirm() {
   if (!eventId.value) return
 
@@ -48,11 +105,15 @@ async function handleConfirm() {
     return
   }
 
+  if (!isBillingReady.value) return
+
   try {
     await mergeCart()
   } catch {
     /* already merged */
   }
+
+  if (needsInvoiceConsent.value) await recordInvoiceConsent()
 
   showMethodModal.value = true
 }
@@ -162,12 +223,25 @@ function handlePaidOrders(orders: ICheckoutOrderResult[]) {
                 <div v-else class="checkout-summary__totals-loading">Calculando precio…</div>
               </div>
 
+              <BillingCard
+                v-if="isAuthenticated"
+                v-model:consented="invoiceConsentChecked"
+                :accounts="billingAccounts"
+                :selected-id="selectedBillingAccountId"
+                :needs-consent="needsInvoiceConsent && billingAccounts.length > 0"
+                @add="billingSheet = 'form'"
+                @change="billingSheet = 'picker'"
+              />
+
               <NButton
                 type="primary"
                 size="large"
                 block
-                :loading="isMerging"
-                :disabled="isMerging || cartPricing.isLoading.value"
+                data-test="checkout-confirm"
+                :loading="isMerging || isRecordingConsent"
+                :disabled="
+                  isMerging || cartPricing.isLoading.value || (isAuthenticated && !isBillingReady)
+                "
                 @click="handleConfirm"
               >
                 Confirmar pedido
@@ -186,8 +260,31 @@ function handlePaidOrders(orders: ICheckoutOrderResult[]) {
         :event-id="eventId"
         :total="cartPricing.subtotal.value"
         :currency="cartPricing.currency.value"
+        :billing-account-id="selectedBillingAccountId ?? undefined"
         @paid-orders="handlePaidOrders"
       />
+
+      <BillingSheet
+        v-if="billingSheet"
+        :title="billingSheet === 'form' ? 'Datos de facturación' : '¿A nombre de quién?'"
+        @close="billingSheet = null"
+      >
+        <BillingAccountForm
+          v-if="billingSheet === 'form'"
+          :needs-consent="needsInvoiceConsent"
+          :prefill="billingPrefill"
+          @saved="handleBillingSaved"
+          @cancel="billingSheet = null"
+        />
+        <BillingAccountPicker
+          v-else
+          :accounts="billingAccounts"
+          :selected-id="selectedBillingAccountId"
+          :is-saving="isSettingDefault"
+          @choose="handleBillingChosen"
+          @add="billingSheet = 'form'"
+        />
+      </BillingSheet>
     </template>
   </PublicLayout>
 </template>

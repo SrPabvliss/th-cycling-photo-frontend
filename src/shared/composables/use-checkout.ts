@@ -7,15 +7,21 @@ import { useCartStore } from '@/shared/stores/cart.store'
 import type { ICheckoutOrderResult } from '@/shared/types/cart.types'
 import type { PaymentMethod } from '@/shared/types/payment-method.types'
 
+interface ICheckoutInput {
+  eventId: string
+  method: PaymentMethod
+  billingAccountId: string
+}
+
 export function useCheckout() {
   const queryClient = useQueryClient()
   const cartStore = useCartStore()
 
   return useMutation({
-    mutationFn: async ({ eventId, method }: { eventId: string; method: PaymentMethod }) => {
+    mutationFn: async ({ eventId, method, billingAccountId }: ICheckoutInput) => {
       const response = await httpClient.post<{ orders: ICheckoutOrderResult[] }>(
         API_ROUTES.CART.CHECKOUT,
-        { items: [{ eventId }], method },
+        { items: [{ eventId }], method, billingAccountId },
       )
       return response.data.orders
     },

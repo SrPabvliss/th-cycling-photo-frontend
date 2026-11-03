@@ -39,7 +39,14 @@ afterEach(() => {
 
 function mountModal(orderIds?: string[]) {
   return mount(PaymentMethodModal, {
-    props: { show: true, total: 25, currency: 'USD', orderIds, eventId: 'event-1' },
+    props: {
+      show: true,
+      total: 25,
+      currency: 'USD',
+      orderIds,
+      eventId: 'event-1',
+      billingAccountId: 'ba-1',
+    },
     global: { stubs: { Modal: { template: '<div><slot /></div>' } } },
   })
 }
@@ -51,7 +58,11 @@ describe('PaymentMethodModal — new checkout (no orderIds)', () => {
     await wrapper.get('[data-test="method-transfer"]').trigger('click')
     await flushPromises()
 
-    expect(checkout).toHaveBeenCalledWith({ eventId: 'event-1', method: 'transfer' })
+    expect(checkout).toHaveBeenCalledWith({
+      eventId: 'event-1',
+      method: 'transfer',
+      billingAccountId: 'ba-1',
+    })
     expect(chooseMethod).not.toHaveBeenCalled()
     expect(wrapper.emitted('paid-orders')).toHaveLength(1)
     expect(wrapper.emitted('paid-orders')?.[0]).toEqual([
@@ -76,7 +87,11 @@ describe('PaymentMethodModal — new checkout (no orderIds)', () => {
     await wrapper.get('[data-test="method-card"]').trigger('click')
     await flushPromises()
 
-    expect(checkout).toHaveBeenCalledWith({ eventId: 'event-1', method: 'card' })
+    expect(checkout).toHaveBeenCalledWith({
+      eventId: 'event-1',
+      method: 'card',
+      billingAccountId: 'ba-1',
+    })
     expect(chooseMethod).not.toHaveBeenCalled()
     expect(push).toHaveBeenCalledWith({
       name: 'payment-box',
