@@ -48,6 +48,10 @@ export const API_ROUTES = {
     BY_ID: (phoneId: string) => `/users/me/phones/${phoneId}`,
     SET_PRIMARY: (phoneId: string) => `/users/me/phones/${phoneId}/primary`,
   },
+  BILLING_ACCOUNTS: {
+    BASE: '/users/me/billing-accounts',
+    DEFAULT: (billingAccountId: string) => `/users/me/billing-accounts/${billingAccountId}/default`,
+  },
   MY_PROFILE: {
     BASE: '/users/me',
     AVATAR_PRESIGNED_URL: '/users/me/avatar/presigned-url',

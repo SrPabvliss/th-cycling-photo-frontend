@@ -18,6 +18,7 @@ const props = defineProps<{
   currency: string
   orderIds?: string[]
   eventId?: string
+  billingAccountId?: string
 }>()
 
 const emit = defineEmits<{
@@ -75,10 +76,19 @@ async function chooseNew(method: PaymentMethod) {
     return
   }
 
+  if (!props.billingAccountId) {
+    error.value = 'Elige tus datos de facturación antes de continuar.'
+    return
+  }
+
   let orders: ICheckoutOrderResult[]
 
   try {
-    orders = await checkout({ eventId: props.eventId, method })
+    orders = await checkout({
+      eventId: props.eventId,
+      method,
+      billingAccountId: props.billingAccountId,
+    })
   } catch {
     error.value = 'No pudimos registrar tu pedido. Intenta nuevamente.'
     return
