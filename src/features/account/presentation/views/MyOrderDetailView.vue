@@ -1,15 +1,21 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { NButton, NIcon, NPopconfirm, NResult, NSkeleton } from 'naive-ui'
 import { CloudDownloadOutline } from '@vicons/ionicons5'
 import { isAxiosError } from 'axios'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
+import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
 import { ACCOUNT_ROUTE_NAMES } from '../../routes'
 import { useMyOrderDetailQuery } from '../../composables/queries/use-my-order-detail'
 import { useOrderDownloads } from '../../composables/use-order-downloads'
 import { useCancelMyOrder } from '../../composables/mutations/use-cancel-my-order'
+import { useDownloadMyTaxDocument } from '../../composables/mutations/use-download-my-tax-document'
+import { useCorrectMyOrderBilling } from '../../composables/mutations/use-correct-my-order-billing'
+import BillingAccountForm from '../components/BillingAccountForm/BillingAccountForm.vue'
+import InvoiceCard from '../components/InvoiceCard/InvoiceCard.vue'
+import { readBillingServerError } from '../../utils/billing-server-error'
 import OrderDetailHeader from '../components/OrderDetailHeader/OrderDetailHeader.vue'
 import OrderPhotoGrid from '../components/OrderPhotoGrid/OrderPhotoGrid.vue'
 
@@ -21,6 +27,45 @@ const { data: order, isPending, isError, error, refetch } = useMyOrderDetailQuer
 const { downloadOne, downloadAll, isDownloadingAll, downloadingPhotoId } =
   useOrderDownloads(orderId)
 const cancelOrder = useCancelMyOrder()
+const downloadTaxDocument = useDownloadMyTaxDocument(orderId)
+const correctBilling = useCorrectMyOrderBilling(orderId)
+
+const CORRECTION_FALLBACK = 'No pudimos enviar la corrección. Intenta de nuevo.'
+
+const isCorrecting = ref(false)
+
+const invoiceBusyKey = computed(() => {
+  const variables = downloadTaxDocument.variables.value
+  return downloadTaxDocument.isPending.value && variables
+    ? `${variables.docId}:${variables.file}`
+    : null
+})
+
+const billingInitial = computed(() => {
+  const billing = order.value?.billing
+  if (!billing) return undefined
+  return {
+    idType: billing.idType,
+    idNumber: billing.idNumber,
+    legalName: billing.legalName,
+    email: billing.email,
+    ...(billing.address ? { address: billing.address } : {}),
+  }
+})
+
+const correctionError = computed(() => {
+  const caught = correctBilling.error.value
+  return caught ? readBillingServerError(caught, CORRECTION_FALLBACK) : null
+})
+
+function openCorrection() {
+  correctBilling.reset()
+  isCorrecting.value = true
+}
+
+function submitCorrection(request: Parameters<typeof correctBilling.mutate>[0]) {
+  correctBilling.mutate(request, { onSuccess: () => (isCorrecting.value = false) })
+}
 
 const isNotFound = computed(() => isAxiosError(error.value) && error.value.response?.status === 404)
 </script>
@@ -74,6 +119,34 @@ const isNotFound = computed(() => isAxiosError(error.value) && error.value.respo
             ¿Seguro que quieres cancelar esta orden?
           </NPopconfirm>
         </div>
+
+        <InvoiceCard
+          v-if="order.invoice"
+          class="my-order-detail-view__invoice"
+          :invoice="order.invoice"
+          audience="buyer"
+          :busy-key="invoiceBusyKey"
+          @download="(docId, file) => downloadTaxDocument.mutate({ docId, file })"
+          @correct="openCorrection"
+        />
+
+        <BillingSheet
+          v-if="isCorrecting && billingInitial"
+          title="Corregir datos de facturación"
+          @close="isCorrecting = false"
+        >
+          <BillingAccountForm
+            mode="correct"
+            :needs-consent="false"
+            :prefill="{ legalName: billingInitial.legalName, email: billingInitial.email }"
+            :initial="billingInitial"
+            submit-label="Enviar corrección"
+            :submitting="correctBilling.isPending.value"
+            :server-error="correctionError"
+            @submit="submitCorrection"
+            @cancel="isCorrecting = false"
+          />
+        </BillingSheet>
 
         <OrderPhotoGrid
           class="my-order-detail-view__photos"

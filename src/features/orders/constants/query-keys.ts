@@ -8,6 +8,7 @@ export const ORDER_QUERY_KEYS = {
     eventId?: string
     search?: string
     tab?: string
+    invoiceState?: string
   }) => [API_ROUTES.ORDERS.BASE, 'list', filters] as const,
   detail: (id: string) => [API_ROUTES.ORDERS.BASE, 'detail', id] as const,
   stats: (eventId?: string, search?: string) =>

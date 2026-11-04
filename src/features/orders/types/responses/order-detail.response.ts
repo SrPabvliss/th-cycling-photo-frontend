@@ -2,6 +2,11 @@ import type {
   PayoutMethodAccountType,
   PayoutMethodProvider,
 } from '@/features/tenant-profile/types/responses/payout-method.response'
+import type {
+  IApiOrderInvoice,
+  IOrderInvoice,
+} from '@/features/account/types/responses/order-invoice.response'
+import type { ICreateBillingAccountRequest } from '@/features/account/types/requests/billing-account.request'
 import type { OrderStatus } from './order-list.response'
 
 export const DELIVERY_LINK_STATUS = {
@@ -67,6 +72,8 @@ export interface IApiOrderDetail {
   deliveryLink: IApiOrderDetailDeliveryLink | null
   retouchProgress?: { total: number; retouched: number }
   payoutMethods?: IOrderPayoutMethod[]
+  invoice: IApiOrderInvoice | null
+  billing: ICreateBillingAccountRequest | null
 }
 
 export interface IOrderDetailPhoto {
@@ -111,4 +118,6 @@ export interface IOrderDetail {
   deliveryLink: IOrderDetailDeliveryLink | null
   retouchProgress?: { total: number; retouched: number }
   payoutMethods?: IOrderPayoutMethod[]
+  invoice: IOrderInvoice | null
+  billing: ICreateBillingAccountRequest | null
 }

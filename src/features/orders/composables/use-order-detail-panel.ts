@@ -1,4 +1,4 @@
-import type { Ref } from 'vue'
+import { computed, type Ref } from 'vue'
 import { useMessage } from 'naive-ui'
 
 import { openWhatsApp } from '@/shared/utils/whatsapp.utils'
@@ -22,6 +22,8 @@ export function useOrderDetailPanel(orderId: Ref<string>) {
     handleRegenerate,
     isRegenerating,
   } = useOrderActions()
+
+  const invoiceState = computed(() => order.value?.invoice?.state ?? null)
 
   async function onSendPaymentInfo() {
     const o = order.value
@@ -61,10 +63,20 @@ export function useOrderDetailPanel(orderId: Ref<string>) {
       regenerate: onRegenerateDelivery,
       gift: () => handleMarkGift(o.id),
       to_sale: () =>
-        handleConvertToSale({ id: o.id, subtotal: o.subtotal, snapCurrency: o.snapCurrency }),
+        handleConvertToSale({
+          id: o.id,
+          subtotal: o.subtotal,
+          snapCurrency: o.snapCurrency,
+          invoiceState: invoiceState.value,
+        }),
       to_gift: () =>
-        handleConvertToGift({ id: o.id, subtotal: o.subtotal, snapCurrency: o.snapCurrency }),
-      cancel: () => handleCancel(o.id, o.userName),
+        handleConvertToGift({
+          id: o.id,
+          subtotal: o.subtotal,
+          snapCurrency: o.snapCurrency,
+          invoiceState: invoiceState.value,
+        }),
+      cancel: () => handleCancel(o.id, o.userName, invoiceState.value),
     }
 
     actions[id]?.()

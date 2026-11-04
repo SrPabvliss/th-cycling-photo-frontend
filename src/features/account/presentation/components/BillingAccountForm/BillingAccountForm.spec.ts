@@ -114,4 +114,107 @@ describe('BillingAccountForm', () => {
     expect(createAccount).not.toHaveBeenCalled()
     expect(wrapper.text()).toContain('Revisa el número')
   })
+
+  describe('correct mode', () => {
+    const initial = {
+      idType: 'ruc' as const,
+      idNumber: '1790012345001',
+      legalName: 'Bicicletas SA',
+      email: 'facturas@bicis.com',
+      address: 'Av. Amazonas',
+    }
+
+    function mountCorrect(extra: Record<string, unknown> = {}) {
+      return mount(BillingAccountForm, {
+        props: {
+          needsConsent: true,
+          prefill: { legalName: 'Otro', email: 'otro@correo.com' },
+          mode: 'correct',
+          initial,
+          submitLabel: 'Enviar corrección',
+          ...extra,
+        },
+      })
+    }
+
+    it('prefills every field and hides consent in correct mode', () => {
+      const wrapper = mountCorrect()
+      const value = (selector: string) => (wrapper.find(selector).element as HTMLInputElement).value
+
+      expect(value('[data-test="billing-id-number"] input')).toBe('1790012345001')
+      expect(value('[data-test="billing-legal-name"] input')).toBe('Bicicletas SA')
+      expect(value('[data-test="billing-email"] input')).toBe('facturas@bicis.com')
+      expect(value('[data-test="billing-address"] input')).toBe('Av. Amazonas')
+      expect(wrapper.find('[data-test="billing-consent"]').exists()).toBe(false)
+      expect(wrapper.find('[data-test="billing-submit"]').text()).toContain('Enviar corrección')
+    })
+
+    it('emits submit instead of creating an account in correct mode', async () => {
+      const wrapper = mountCorrect()
+
+      await submit(wrapper as unknown as ReturnType<typeof mountForm>)
+
+      expect(createAccount).not.toHaveBeenCalled()
+      expect(recordConsents).not.toHaveBeenCalled()
+      expect(wrapper.emitted('submit')).toEqual([[initial]])
+    })
+
+    const alertOf = (wrapper: ReturnType<typeof mountCorrect>) =>
+      wrapper.find('.billing-account-form__alert')
+
+    it('shows an identification error of the legacy under the number', () => {
+      const wrapper = mountCorrect({
+        serverError: {
+          message: 'RUC no registrado',
+          messageKey: 'billing.identification_invalid',
+          fields: null,
+        },
+      })
+
+      expect(wrapper.text()).toContain('RUC no registrado')
+      expect(alertOf(wrapper).exists()).toBe(false)
+    })
+
+    it('shows the identification field of a validation answer under the number', () => {
+      const wrapper = mountCorrect({
+        serverError: {
+          message: 'Datos inválidos',
+          messageKey: 'errors.VALIDATION_FAILED',
+          fields: { idNumber: ['El número es obligatorio'] },
+        },
+      })
+
+      expect(wrapper.text()).toContain('El número es obligatorio')
+      expect(alertOf(wrapper).exists()).toBe(false)
+    })
+
+    it('sends every other server error to the alert', async () => {
+      const wrapper = mountCorrect({
+        serverError: {
+          message: 'La razón social no es válida',
+          messageKey: 'billing.legal_name_invalid',
+          fields: null,
+        },
+      })
+      expect(alertOf(wrapper).text()).toContain('La razón social no es válida')
+
+      await wrapper.setProps({
+        serverError: {
+          message: 'Ya no se puede corregir',
+          messageKey: 'order.invoice_not_correctable',
+          fields: null,
+        },
+      })
+      expect(alertOf(wrapper).text()).toContain('Ya no se puede corregir')
+
+      await wrapper.setProps({
+        serverError: {
+          message: 'No pudimos enviar la corrección. Intenta de nuevo.',
+          messageKey: null,
+          fields: null,
+        },
+      })
+      expect(alertOf(wrapper).text()).toContain('No pudimos enviar la corrección')
+    })
+  })
 })

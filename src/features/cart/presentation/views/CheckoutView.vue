@@ -19,7 +19,7 @@ import { useSetDefaultBillingAccount } from '@/features/account/composables/muta
 import { useRecordInvoiceConsent } from '@/features/account/composables/mutations/use-record-invoice-consent'
 import BillingAccountForm from '@/features/account/presentation/components/BillingAccountForm/BillingAccountForm.vue'
 import BillingCard from '../components/BillingCard/BillingCard.vue'
-import BillingSheet from '../components/BillingSheet/BillingSheet.vue'
+import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
 import BillingAccountPicker from '../components/BillingAccountPicker/BillingAccountPicker.vue'
 
 const route = useRoute()

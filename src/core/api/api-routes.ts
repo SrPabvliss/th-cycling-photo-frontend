@@ -179,6 +179,12 @@ export const API_ROUTES = {
     SEND_DELIVERY: (id: string) => `${ORDERS_BASE}/${id}/send-delivery`,
     REGENERATE_DELIVERY: (id: string) => `${ORDERS_BASE}/${id}/regenerate-delivery`,
     PAYMENT_METHOD: `${ORDERS_BASE}/payment-method`,
+    TAX_DOCUMENT_FILES: (id: string, taxDocumentId: string) =>
+      `${ORDERS_BASE}/${id}/tax-documents/${taxDocumentId}/files`,
+    TAX_DOCUMENT_RESENDS: (id: string, taxDocumentId: string) =>
+      `${ORDERS_BASE}/${id}/tax-documents/${taxDocumentId}/resends`,
+    ANNULMENT_RETRIES: (id: string) => `${ORDERS_BASE}/${id}/invoice/annulment-retries`,
+    BILLING: (id: string) => `${ORDERS_BASE}/${id}/billing`,
   },
   MY_ORDERS: {
     BASE: `${ORDERS_BASE}/me`,
@@ -186,6 +192,9 @@ export const API_ROUTES = {
     DOWNLOADS: (id: string) => `${ORDERS_BASE}/me/${id}/downloads`,
     CANCEL: (id: string) => `${ORDERS_BASE}/me/${id}/cancel`,
     SUMMARY: `${ORDERS_BASE}/me/summary`,
+    TAX_DOCUMENT_FILES: (id: string, taxDocumentId: string) =>
+      `${ORDERS_BASE}/me/${id}/tax-documents/${taxDocumentId}/files`,
+    BILLING: (id: string) => `${ORDERS_BASE}/me/${id}/billing`,
   },
   BUYERS: {
     BASE: BUYERS_BASE,
