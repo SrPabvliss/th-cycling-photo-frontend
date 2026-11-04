@@ -173,7 +173,7 @@ function showIssuedLink(result: IContractIssued, isResend: boolean) {
 
       <OrganizerStatsCards :stats="stats" />
 
-      <div class="organizers-panel">
+      <div class="list-panel">
         <OrganizerTabs
           :active="filterState.tab.value"
           :counts="stats?.tabs"

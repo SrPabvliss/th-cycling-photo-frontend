@@ -18,14 +18,21 @@ export interface IEventFilters {
   sort: EventSort
 }
 
-export function toEventFiltersParams(filters: IEventFilters): Record<string, unknown> {
-  const params: Record<string, unknown> = {
-    tab: filters.tab,
-    sort: filters.sort,
-  }
+export type IEventsStatsScope = Pick<IEventFilters, 'search' | 'organizerId'>
 
-  if (filters.search) params.search = filters.search
-  if (filters.organizerId) params.organizerId = filters.organizerId
+export function toEventsStatsParams(scope: IEventsStatsScope): Record<string, unknown> {
+  const params: Record<string, unknown> = {}
+
+  if (scope.search) params.search = scope.search
+  if (scope.organizerId) params.organizerId = scope.organizerId
 
   return params
+}
+
+export function toEventFiltersParams(filters: IEventFilters): Record<string, unknown> {
+  return {
+    tab: filters.tab,
+    sort: filters.sort,
+    ...toEventsStatsParams(filters),
+  }
 }

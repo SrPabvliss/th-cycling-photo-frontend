@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
   gap: 16px;
 }
 
@@ -37,7 +37,7 @@
 .page-header__title {
   font-size: 20px;
   font-weight: 700;
-  color: #111827;
+  color: var(--tt-neutral-dark);
   margin: 0;
   line-height: 1.2;
 }
@@ -58,7 +58,6 @@
 /* Tablet: ligera compresión */
 @media (max-width: 767px) {
   .page-header {
-    margin-bottom: 12px;
     gap: 10px;
   }
 
@@ -74,7 +73,6 @@
 /* Mobile estricto: header en 1 sola fila compacta, sin subtítulo */
 @media (max-width: 479px) {
   .page-header {
-    margin-bottom: 8px;
     gap: 8px;
   }
 

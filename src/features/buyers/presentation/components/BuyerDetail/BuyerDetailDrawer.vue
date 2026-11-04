@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { NButton, NDrawer, NDrawerContent, NResult, NSpin } from 'naive-ui'
+import { NButton, NResult, NSpin } from 'naive-ui'
+
+import DetailDrawer from '@/shared/components/DetailDrawer/DetailDrawer.vue'
 
 import { useBuyerDetailQuery } from '../../../composables/queries/use-buyer-detail'
 import BuyerDetailBody from './BuyerDetailBody.vue'
@@ -23,21 +25,19 @@ function close() {
 </script>
 
 <template>
-  <NDrawer :show="show" :width="520" placement="right" @update:show="close">
-    <NDrawerContent title="Perfil del comprador" closable class="bdd-content">
-      <div v-if="isPending" class="bdd-loading">
-        <NSpin size="large" />
-      </div>
+  <DetailDrawer :show="show" title="Perfil del comprador" @close="close">
+    <div v-if="isPending" class="bdd-loading">
+      <NSpin size="large" />
+    </div>
 
-      <NResult v-else-if="isError" status="error" title="Error al cargar el comprador">
-        <template #footer>
-          <NButton @click="refetch()">Reintentar</NButton>
-        </template>
-      </NResult>
+    <NResult v-else-if="isError" status="error" title="Error al cargar el comprador">
+      <template #footer>
+        <NButton @click="refetch()">Reintentar</NButton>
+      </template>
+    </NResult>
 
-      <BuyerDetailBody v-else-if="buyer" :buyer="buyer" />
-    </NDrawerContent>
-  </NDrawer>
+    <BuyerDetailBody v-else-if="buyer" :buyer="buyer" />
+  </DetailDrawer>
 </template>
 
 <style scoped src="./buyer-detail-drawer.css" />

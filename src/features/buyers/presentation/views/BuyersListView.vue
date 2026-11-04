@@ -51,7 +51,9 @@ const { data: stats } = useBuyersStatsQuery(filters)
 
 const buyers = computed(() => data.value?.pages.flatMap((page) => page.items) ?? [])
 const hasFilters = computed(() => activeChips.value.length > 0)
-const resultsCount = computed(() => stats.value?.totalBuyers ?? null)
+const resultsCount = computed(
+  () => data.value?.pages[data.value.pages.length - 1]?.pagination.total ?? null,
+)
 
 const sentinelRef = useInfiniteScrollTrigger(() => fetchNextPage(), {
   isBusy: computed(() => isFetchingNextPage.value),
@@ -87,7 +89,7 @@ function openBuyer(buyer: IBuyerListItem) {
 
       <BuyerStatsCards :stats="stats" />
 
-      <div class="buyers-panel">
+      <div class="list-panel">
         <BuyerTabs :tabs="stats?.tabs" />
         <BuyerFilterBar :results-count="resultsCount" />
 

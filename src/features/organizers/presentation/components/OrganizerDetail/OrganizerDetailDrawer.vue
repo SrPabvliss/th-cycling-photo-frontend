@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { NButton, NDrawer, NDrawerContent, NResult, NSpin } from 'naive-ui'
+import { NButton, NResult, NSpin } from 'naive-ui'
+
+import DetailDrawer from '@/shared/components/DetailDrawer/DetailDrawer.vue'
 
 import { PERMISSIONS } from '@/core/auth/permissions'
 import { usePermissions } from '@/core/auth/use-permissions'
@@ -59,27 +61,25 @@ function close() {
 </script>
 
 <template>
-  <NDrawer :show="show" :width="560" placement="right" @update:show="close">
-    <NDrawerContent title="Organizador" closable class="odd-content">
-      <div v-if="isPending" class="odd-loading">
-        <NSpin size="large" />
-      </div>
+  <DetailDrawer :show="show" title="Organizador" @close="close">
+    <div v-if="isPending" class="odd-loading">
+      <NSpin size="large" />
+    </div>
 
-      <NResult v-else-if="isError" status="error" title="Error al cargar el organizador">
-        <template #footer>
-          <NButton @click="refetch()">Reintentar</NButton>
-        </template>
-      </NResult>
+    <NResult v-else-if="isError" status="error" title="Error al cargar el organizador">
+      <template #footer>
+        <NButton @click="refetch()">Reintentar</NButton>
+      </template>
+    </NResult>
 
-      <OrganizerDetailBody
-        v-else-if="organizer"
-        :organizer="organizer"
-        :events="events"
-        :can-edit-quota="canEditQuota"
-        @update-quota="handleUpdateQuota"
-      />
-    </NDrawerContent>
-  </NDrawer>
+    <OrganizerDetailBody
+      v-else-if="organizer"
+      :organizer="organizer"
+      :events="events"
+      :can-edit-quota="canEditQuota"
+      @update-quota="handleUpdateQuota"
+    />
+  </DetailDrawer>
 </template>
 
 <style scoped src="./organizer-detail-drawer.css" />

@@ -25,7 +25,10 @@
 .ofb-search input {
   border: 0;
   outline: 0;
-  font: 500 13px/1 inherit;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
   color: inherit;
   width: 100%;
   background: transparent;

@@ -13,10 +13,6 @@
   padding-top: 16px;
 }
 
-.event-settings-container :deep(.page-header) {
-  margin-bottom: 8px;
-}
-
 .event-settings-layout {
   display: grid;
   grid-template-columns: 200px minmax(0, 1fr);

@@ -15,7 +15,8 @@
 .gp-head-t h1 {
   margin: 0;
   font-size: 24px;
-  font-weight: 800;
+  font-weight: 700;
+  color: var(--tt-neutral-dark);
   letter-spacing: -0.025em;
   line-height: 1.15;
 }

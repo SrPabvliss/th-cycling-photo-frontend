@@ -23,23 +23,31 @@ export interface IBuyerFilters {
   sort: BuyerSort
 }
 
-/** Same builder for GET /buyers and GET /buyers/stats — they must share the exact filter set */
-export function toBuyerFiltersParams(filters: IBuyerFilters): Record<string, unknown> {
-  const params: Record<string, unknown> = {
-    purchase: filters.purchase,
-    sort: filters.sort,
-  }
+/** Every filter GET /buyers/stats honours — all of them but the purchase tab and the sort */
+export type IBuyersStatsScope = Omit<IBuyerFilters, 'purchase' | 'sort'>
 
-  if (filters.search) params.search = filters.search
-  if (filters.countryId != null) params.countryId = filters.countryId
-  if (filters.provinceId != null) params.provinceId = filters.provinceId
-  if (filters.registeredFrom) params.registeredFrom = filters.registeredFrom
-  if (filters.registeredTo) params.registeredTo = filters.registeredTo
-  if (filters.gender) params.gender = filters.gender
-  if (filters.ageFrom != null) params.ageFrom = filters.ageFrom
-  if (filters.ageTo != null) params.ageTo = filters.ageTo
-  if (filters.emailVerified != null) params.emailVerified = filters.emailVerified
-  if (filters.hasWhatsapp != null) params.hasWhatsapp = filters.hasWhatsapp
+export function toBuyersStatsParams(scope: IBuyersStatsScope): Record<string, unknown> {
+  const params: Record<string, unknown> = {}
+
+  if (scope.search) params.search = scope.search
+  if (scope.countryId != null) params.countryId = scope.countryId
+  if (scope.provinceId != null) params.provinceId = scope.provinceId
+  if (scope.registeredFrom) params.registeredFrom = scope.registeredFrom
+  if (scope.registeredTo) params.registeredTo = scope.registeredTo
+  if (scope.gender) params.gender = scope.gender
+  if (scope.ageFrom != null) params.ageFrom = scope.ageFrom
+  if (scope.ageTo != null) params.ageTo = scope.ageTo
+  if (scope.emailVerified != null) params.emailVerified = scope.emailVerified
+  if (scope.hasWhatsapp != null) params.hasWhatsapp = scope.hasWhatsapp
 
   return params
+}
+
+/** GET /buyers takes the stats scope plus the purchase tab and the sort */
+export function toBuyerFiltersParams(filters: IBuyerFilters): Record<string, unknown> {
+  return {
+    purchase: filters.purchase,
+    sort: filters.sort,
+    ...toBuyersStatsParams(filters),
+  }
 }
