@@ -8,6 +8,7 @@ import type {
   IMyOrderListItem,
   IMyOrdersSummary,
 } from '../types/responses/my-order.response'
+import { toMyOrderInvoice } from './order-invoice.mapper'
 
 export function toMyOrderList(api: IApiMyOrderListItem[]): IMyOrderListItem[] {
   return api.map((order) => ({
@@ -33,6 +34,8 @@ export function toMyOrderDetail(api: IApiMyOrderDetail): IMyOrderDetail {
     canDownload: api.canDownload,
     canCancel: api.canCancel,
     photos: api.photos,
+    invoice: api.invoice ? toMyOrderInvoice(api.invoice) : null,
+    billing: api.billing,
   }
 }
 

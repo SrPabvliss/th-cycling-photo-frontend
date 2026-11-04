@@ -13,7 +13,7 @@ describe('useOrderFilters', () => {
     expect(search.value).toBe('')
     expect(eventId.value).toBeNull()
     expect(tab.value).toBe('all')
-    expect(filters.value).toEqual({ search: null, eventId: null, tab: 'all' })
+    expect(filters.value).toEqual({ search: null, eventId: null, tab: 'all', invoiceState: null })
   })
 
   it('reflects ref changes in the filters computed', () => {
@@ -22,7 +22,12 @@ describe('useOrderFilters', () => {
     eventId.value = 'evt-1'
     tab.value = 'pending'
 
-    expect(filters.value).toEqual({ search: 'andrea', eventId: 'evt-1', tab: 'pending' })
+    expect(filters.value).toEqual({
+      search: 'andrea',
+      eventId: 'evt-1',
+      tab: 'pending',
+      invoiceState: null,
+    })
   })
 
   it('clearAll resets everything including the tab, which returns to "all"', () => {
@@ -57,6 +62,28 @@ describe('useOrderFilters', () => {
     seedOrderFiltersFromQuery(state, { tab: 'bogus' })
 
     expect(state.tab.value).toBe('all')
+  })
+
+  it('seeds the invoice filter from the URL and drops unknown values', () => {
+    const state = useOrderFilters()
+    seedOrderFiltersFromQuery(state, { invoiceState: 'authorized' })
+
+    expect(state.invoiceState.value).toBe('authorized')
+    expect(orderFiltersToQuery(state.filters.value)).toEqual({ invoiceState: 'authorized' })
+
+    const other = useOrderFilters()
+    seedOrderFiltersFromQuery(other, { invoiceState: 'bogus' })
+
+    expect(other.invoiceState.value).toBeNull()
+  })
+
+  it('clearAll resets the invoice filter', () => {
+    const { invoiceState, clearAll } = useOrderFilters()
+    invoiceState.value = 'rejected'
+
+    clearAll()
+
+    expect(invoiceState.value).toBeNull()
   })
 
   it('drops default tab and empty filters from the query representation', () => {

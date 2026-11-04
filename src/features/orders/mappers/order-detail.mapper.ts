@@ -1,3 +1,4 @@
+import { toOrderInvoice } from '@/features/account/mappers/order-invoice.mapper'
 import type {
   DeliveryLinkStatus,
   IApiOrderDetail,
@@ -28,6 +29,18 @@ function toOrderDetailDeliveryLink(api: IApiOrderDetailDeliveryLink): IOrderDeta
   }
 }
 
+function toBilling(
+  api: NonNullable<IApiOrderDetail['billing']>,
+): NonNullable<IOrderDetail['billing']> {
+  return {
+    idType: api.idType,
+    idNumber: api.idNumber,
+    legalName: api.legalName,
+    email: api.email,
+    ...(api.address ? { address: api.address } : {}),
+  }
+}
+
 export function toOrderDetail(api: IApiOrderDetail): IOrderDetail {
   return {
     id: api.id,
@@ -55,5 +68,7 @@ export function toOrderDetail(api: IApiOrderDetail): IOrderDetail {
     deliveryLink: api.deliveryLink ? toOrderDetailDeliveryLink(api.deliveryLink) : null,
     retouchProgress: api.retouchProgress,
     payoutMethods: api.payoutMethods,
+    invoice: api.invoice ? toOrderInvoice(api.invoice) : null,
+    billing: api.billing ? toBilling(api.billing) : null,
   }
 }

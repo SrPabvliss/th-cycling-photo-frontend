@@ -23,6 +23,7 @@ import OrderTimeline from '../OrderTimeline/OrderTimeline.vue'
 import OrderPhotosCarousel from '../OrderPhotosCarousel/OrderPhotosCarousel.vue'
 import DeliveryLinkCard from '../DeliveryLinkCard/DeliveryLinkCard.vue'
 import PayoutMethodsCard from '../PayoutMethodsCard/PayoutMethodsCard.vue'
+import OrderInvoiceSection from './OrderInvoiceSection.vue'
 import OrderDetailNotice from './OrderDetailNotice.vue'
 import OrderDetailIdentity from './OrderDetailIdentity.vue'
 import OrderDetailActions from './OrderDetailActions.vue'
@@ -139,6 +140,15 @@ const paymentMethodLabel = computed(() => getPaymentMethodLabel(props.order.paym
             descargar.</span
           >
         </div>
+      </section>
+
+      <section v-if="order.invoice" class="odp__sec">
+        <h4>Factura</h4>
+        <OrderInvoiceSection
+          :order-id="order.id"
+          :invoice="order.invoice"
+          :billing="order.billing"
+        />
       </section>
 
       <section class="odp__sec">

@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useForm } from '@tanstack/vue-form'
-import { isAxiosError } from 'axios'
 import { NAlert, NButton, NCheckbox, NFormItem, NInput, NRadioButton, NRadioGroup } from 'naive-ui'
 
 import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
@@ -15,34 +14,53 @@ import {
 } from '../../../constants/billing-account-form.schema'
 import { INVOICE_CONSENT } from '../../../constants/invoice-consent'
 import { isWellFormedIdNumber, normalizeIdNumber } from '../../../utils/billing-identification'
+import {
+  identificationMessageOf,
+  readBillingServerError,
+  type IBillingServerError,
+} from '../../../utils/billing-server-error'
 import type { ICreateBillingAccountRequest } from '../../../types/requests/billing-account.request'
 
-const props = defineProps<{
-  needsConsent: boolean
-  prefill: { legalName: string; email: string }
-}>()
+const props = withDefaults(
+  defineProps<{
+    needsConsent: boolean
+    prefill: { legalName: string; email: string }
+    mode?: 'create' | 'correct'
+    initial?: ICreateBillingAccountRequest
+    submitLabel?: string
+    submitting?: boolean
+    serverError?: IBillingServerError | null
+  }>(),
+  { mode: 'create', initial: undefined, submitLabel: 'Guardar y usar', serverError: null },
+)
 
 const emit = defineEmits<{
   saved: [id: string]
+  submit: [request: ICreateBillingAccountRequest]
   cancel: []
 }>()
 
-const asksConsent = props.needsConsent
+const isCorrecting = props.mode === 'correct'
+const asksConsent = !isCorrecting && props.needsConsent
 const recordInvoiceConsent = useRecordInvoiceConsent()
 const createBillingAccount = useCreateBillingAccount()
 
 const idNumberServerError = ref<string | null>(null)
-const serverError = ref<string | null>(null)
+const createError = ref<string | null>(null)
 const showConsentDetails = ref(false)
 
-function readServerError(caught: unknown): { key: string | null; message: string } {
-  const fallback = 'No pudimos guardar tus datos de facturación. Intenta de nuevo.'
-  if (!isAxiosError(caught)) return { key: null, message: fallback }
-  const apiError = caught.response?.data?.error as
-    | { message?: string; messageKey?: string }
-    | undefined
-  return { key: apiError?.messageKey ?? null, message: apiError?.message ?? fallback }
-}
+const CREATE_FALLBACK = 'No pudimos guardar tus datos de facturación. Intenta de nuevo.'
+
+const serverIdNumberError = computed(() =>
+  props.serverError ? identificationMessageOf(props.serverError) : null,
+)
+
+const idNumberError = computed(() => idNumberServerError.value ?? serverIdNumberError.value)
+
+const alertError = computed(() => {
+  if (createError.value) return createError.value
+  return props.serverError && !serverIdNumberError.value ? props.serverError.message : null
+})
 
 function toRequest(value: IBillingAccountFormData): ICreateBillingAccountRequest {
   const address = value.address.trim()
@@ -57,24 +75,29 @@ function toRequest(value: IBillingAccountFormData): ICreateBillingAccountRequest
 
 const form = useForm({
   defaultValues: {
-    idType: 'national_id',
-    idNumber: '',
-    legalName: props.prefill.legalName,
-    email: props.prefill.email,
-    address: '',
+    idType: props.initial?.idType ?? 'national_id',
+    idNumber: props.initial?.idNumber ?? '',
+    legalName: props.initial?.legalName ?? props.prefill.legalName,
+    email: props.initial?.email ?? props.prefill.email,
+    address: props.initial?.address ?? '',
     consent: false,
   } as IBillingAccountFormData,
   onSubmit: async ({ value }) => {
+    if (isCorrecting) {
+      emit('submit', toRequest(value))
+      return
+    }
     idNumberServerError.value = null
-    serverError.value = null
+    createError.value = null
     try {
       if (asksConsent) await recordInvoiceConsent.mutateAsync()
       const created = await createBillingAccount.mutateAsync(toRequest(value))
       emit('saved', created.id)
     } catch (caught) {
-      const { key, message } = readServerError(caught)
-      if (key?.startsWith('billing.identification')) idNumberServerError.value = message
-      else serverError.value = message
+      const serverError = readBillingServerError(caught, CREATE_FALLBACK)
+      const identificationMessage = identificationMessageOf(serverError)
+      if (identificationMessage) idNumberServerError.value = identificationMessage
+      else createError.value = serverError.message
     }
   },
 })
@@ -134,8 +157,8 @@ function idNumberPlaceholder(): string {
           label="Número"
           required
           v-bind="fieldStatus(field)"
-          :validation-status="idNumberServerError ? 'error' : fieldStatus(field).validationStatus"
-          :feedback="idNumberServerError ?? fieldStatus(field).feedback"
+          :validation-status="idNumberError ? 'error' : fieldStatus(field).validationStatus"
+          :feedback="idNumberError ?? fieldStatus(field).feedback"
         >
           <NInput
             data-test="billing-id-number"
@@ -204,8 +227,8 @@ function idNumberPlaceholder(): string {
       </template>
     </form.Field>
 
-    <NAlert v-if="serverError" type="error" class="billing-account-form__alert">
-      {{ serverError }}
+    <NAlert v-if="alertError" type="error" class="billing-account-form__alert">
+      {{ alertError }}
     </NAlert>
 
     <div class="billing-account-form__actions">
@@ -215,9 +238,11 @@ function idNumberPlaceholder(): string {
         block
         attr-type="submit"
         data-test="billing-submit"
-        :loading="recordInvoiceConsent.isPending.value || createBillingAccount.isPending.value"
+        :loading="
+          submitting || recordInvoiceConsent.isPending.value || createBillingAccount.isPending.value
+        "
       >
-        Guardar y usar
+        {{ submitLabel }}
       </NButton>
       <NButton quaternary block @click="emit('cancel')">Cancelar</NButton>
     </div>

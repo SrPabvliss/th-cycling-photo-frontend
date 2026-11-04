@@ -35,7 +35,8 @@
   color: var(--tt-neutral-mid, #6b7280);
 }
 
-.of-event {
+.of-event,
+.of-invoice {
   width: 220px;
   flex: none;
 }
@@ -49,7 +50,8 @@
   }
 
   .of-search,
-  .of-event {
+  .of-event,
+  .of-invoice {
     flex: none;
     max-width: none;
     width: 100%;
