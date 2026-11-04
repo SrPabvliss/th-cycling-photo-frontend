@@ -246,6 +246,30 @@
   flex: 1;
   justify-content: center;
 }
+.oc-view {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: var(--tt-primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  flex: none;
+  white-space: nowrap;
+}
+
+.oc-view:hover {
+  background: var(--tt-primary-dark, #1d4ed8);
+}
+
+.oc-ghost:hover {
+  background: var(--tt-background);
+}
+
 .oc-solid {
   border: 0;
   background: var(--tt-primary);

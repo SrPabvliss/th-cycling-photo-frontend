@@ -16,8 +16,7 @@ const identityDiffs = computed(() => getOrderIdentityDiffs(props.order))
 <template>
   <div v-if="identityDiffs.length > 0" class="odp__ident">
     <b
-      ><NIcon :component="AlertCircleOutline" :size="13" />Los datos cambiaron después del
-      pedido</b
+      ><NIcon :component="AlertCircleOutline" :size="13" />Los datos cambiaron después del pedido</b
     >
     <div v-for="diff in identityDiffs" :key="diff.label" class="odp__ident-row">
       <span>{{ diff.label }}</span>
@@ -31,3 +30,5 @@ const identityDiffs = computed(() => getOrderIdentityDiffs(props.order))
     </p>
   </div>
 </template>
+
+<style scoped src="./order-detail-identity.css" />

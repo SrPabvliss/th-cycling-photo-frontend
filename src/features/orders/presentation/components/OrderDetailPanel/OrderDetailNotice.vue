@@ -11,9 +11,7 @@ const props = defineProps<{
   role: OrderOperatorRole
 }>()
 
-const notice = computed(() =>
-  buildOrderDetailNotice(props.order, isPlatformRole(props.role)),
-)
+const notice = computed(() => buildOrderDetailNotice(props.order, isPlatformRole(props.role)))
 </script>
 
 <template>
@@ -25,3 +23,5 @@ const notice = computed(() =>
     </div>
   </div>
 </template>
+
+<style scoped src="./order-detail-notice.css" />

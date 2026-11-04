@@ -19,7 +19,14 @@
 
 .og__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 14px;
   padding: 12px 16px 16px;
+}
+
+/* Con más de cuatro por fila la tarjeta se estrecha y las acciones saltan de línea. */
+@media (min-width: 1380px) {
+  .og__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
