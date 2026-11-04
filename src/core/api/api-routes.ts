@@ -48,6 +48,10 @@ export const API_ROUTES = {
     BY_ID: (phoneId: string) => `/users/me/phones/${phoneId}`,
     SET_PRIMARY: (phoneId: string) => `/users/me/phones/${phoneId}/primary`,
   },
+  BILLING_ACCOUNTS: {
+    BASE: '/users/me/billing-accounts',
+    DEFAULT: (billingAccountId: string) => `/users/me/billing-accounts/${billingAccountId}/default`,
+  },
   MY_PROFILE: {
     BASE: '/users/me',
     AVATAR_PRESIGNED_URL: '/users/me/avatar/presigned-url',
@@ -91,6 +95,9 @@ export const API_ROUTES = {
     UPLOAD: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos`,
     PRESIGNED_URL: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/presigned-url`,
     CONFIRM_BATCH: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/confirm-batch`,
+    RECLASSIFY: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/reclassify`,
+    CLASSIFICATION_FAILURES: (eventId: string) =>
+      `${EVENTS_BASE}/${eventId}/photos/classification-failures`,
     RETOUCHED_PRESIGNED_URL: (id: string) => `${PHOTOS_BASE}/${id}/retouched/presigned-url`,
     RETOUCHED_CONFIRM: (id: string) => `${PHOTOS_BASE}/${id}/retouched/confirm`,
     DOWNLOAD: (id: string) => `${PHOTOS_BASE}/${id}/download`,
@@ -172,6 +179,12 @@ export const API_ROUTES = {
     SEND_DELIVERY: (id: string) => `${ORDERS_BASE}/${id}/send-delivery`,
     REGENERATE_DELIVERY: (id: string) => `${ORDERS_BASE}/${id}/regenerate-delivery`,
     PAYMENT_METHOD: `${ORDERS_BASE}/payment-method`,
+    TAX_DOCUMENT_FILES: (id: string, taxDocumentId: string) =>
+      `${ORDERS_BASE}/${id}/tax-documents/${taxDocumentId}/files`,
+    TAX_DOCUMENT_RESENDS: (id: string, taxDocumentId: string) =>
+      `${ORDERS_BASE}/${id}/tax-documents/${taxDocumentId}/resends`,
+    ANNULMENT_RETRIES: (id: string) => `${ORDERS_BASE}/${id}/invoice/annulment-retries`,
+    BILLING: (id: string) => `${ORDERS_BASE}/${id}/billing`,
   },
   MY_ORDERS: {
     BASE: `${ORDERS_BASE}/me`,
@@ -179,6 +192,9 @@ export const API_ROUTES = {
     DOWNLOADS: (id: string) => `${ORDERS_BASE}/me/${id}/downloads`,
     CANCEL: (id: string) => `${ORDERS_BASE}/me/${id}/cancel`,
     SUMMARY: `${ORDERS_BASE}/me/summary`,
+    TAX_DOCUMENT_FILES: (id: string, taxDocumentId: string) =>
+      `${ORDERS_BASE}/me/${id}/tax-documents/${taxDocumentId}/files`,
+    BILLING: (id: string) => `${ORDERS_BASE}/me/${id}/billing`,
   },
   BUYERS: {
     BASE: BUYERS_BASE,

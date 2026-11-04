@@ -45,6 +45,7 @@ export function useOrdersListQuery(filters: Ref<IOrderFilters>, limit = 20) {
         eventId: filters.value.eventId ?? undefined,
         search: filters.value.search ?? undefined,
         tab: filters.value.tab,
+        invoiceState: filters.value.invoiceState ?? undefined,
       }),
     ),
     initialPageParam: { page: 1 } satisfies IPageParams,

@@ -9,6 +9,7 @@ export const PERMISSIONS = {
   EVENT_RESTORE: 'event.restore',
   PHOTO_READ: 'photo.read',
   PHOTO_RETOUCH_READ: 'photo.retouch.read',
+  PHOTO_CLASSIFICATION_RETRY: 'photo.classification.retry',
   REVIEW_QUEUE_READ: 'dashboard.review_queue.read',
   ORDER_READ: 'order.read',
   CART_CHECKOUT: 'cart.checkout',
@@ -28,6 +29,7 @@ export const PERMISSIONS = {
   ORDER_GIFT: 'order.gift',
   ORDER_CONVERT_TO_GIFT: 'order.convert_to_gift',
   ORDER_CONVERT_TO_SALE: 'order.convert_to_sale',
+  ORDER_INVOICE_MANAGE: 'order.invoice.manage',
 } as const
 
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]

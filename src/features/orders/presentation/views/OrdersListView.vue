@@ -123,7 +123,10 @@ const customerGroups = computed<IOrderCustomerGroup[]>(() =>
 
 const hasActiveFilters = computed(
   () =>
-    filters.value.search !== null || filters.value.eventId !== null || filters.value.tab !== 'all',
+    filters.value.search !== null ||
+    filters.value.eventId !== null ||
+    filters.value.tab !== 'all' ||
+    filters.value.invoiceState !== null,
 )
 
 const totalOrders = computed(

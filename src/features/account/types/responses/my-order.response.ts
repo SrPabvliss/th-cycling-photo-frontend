@@ -1,3 +1,6 @@
+import type { BillingIdType } from './billing-account.response'
+import type { IApiMyOrderInvoice, IMyOrderInvoice } from './my-order-invoice.response'
+
 export type MyOrderState = 'in_process' | 'ready' | 'gifted' | 'cancelled'
 
 export interface IApiMyOrderPreviewPhoto {
@@ -21,6 +24,14 @@ export interface IApiMyOrderPhoto {
   galleryUrl: string
 }
 
+export interface IMyOrderBilling {
+  idType: BillingIdType
+  idNumber: string
+  legalName: string
+  email: string
+  address: string | null
+}
+
 export interface IApiMyOrderDetail {
   id: string
   state: MyOrderState
@@ -31,6 +42,8 @@ export interface IApiMyOrderDetail {
   canDownload: boolean
   canCancel: boolean
   photos: IApiMyOrderPhoto[]
+  invoice: IApiMyOrderInvoice | null
+  billing: IMyOrderBilling | null
 }
 
 export interface IApiMyOrderDownloadPhoto {
@@ -66,6 +79,8 @@ export interface IMyOrderDetail {
   canDownload: boolean
   canCancel: boolean
   photos: IApiMyOrderPhoto[]
+  invoice: IMyOrderInvoice | null
+  billing: IMyOrderBilling | null
 }
 
 export interface IMyOrderDownloads {

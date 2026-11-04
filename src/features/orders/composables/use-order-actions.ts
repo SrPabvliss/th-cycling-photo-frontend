@@ -10,6 +10,7 @@ import { useSendDelivery } from './mutations/use-send-delivery'
 import { useCancelOrder } from './mutations/use-cancel-order'
 import { useRegenerateDelivery } from './mutations/use-regenerate-delivery'
 import { buildConversionMessage } from '../utils/conversion-message'
+import { withCreditNoteWarning } from '../utils/credit-note-warning'
 import { useConvertToGift } from './mutations/use-convert-to-gift'
 import { useConvertToSale } from './mutations/use-convert-to-sale'
 import type { IOrderListItem } from '../types/responses/order-list.response'
@@ -18,6 +19,7 @@ interface IConvertibleOrder {
   id: string
   subtotal: number | null
   snapCurrency: string | null
+  invoiceState: string | null
 }
 
 export function useOrderActions() {
@@ -78,7 +80,10 @@ export function useOrderActions() {
   function handleConvertToGift(order: IConvertibleOrder) {
     dialog.create({
       title: 'Cambiar a regalo',
-      content: buildConversionMessage('gift', order.subtotal, order.snapCurrency),
+      content: withCreditNoteWarning(
+        buildConversionMessage('gift', order.subtotal, order.snapCurrency),
+        order.invoiceState,
+      ),
       icon: () => h(NIcon, { color: '#7c3aed' }, { default: () => h(GiftOutline) }),
       positiveText: 'Cambiar a regalo',
       negativeText: 'Cancelar',
@@ -112,12 +117,18 @@ export function useOrderActions() {
     })
   }
 
-  function handleCancel(orderId: string, userName?: string) {
+  function handleCancel(
+    orderId: string,
+    userName: string | undefined,
+    invoiceState: string | null,
+  ) {
+    const content = userName
+      ? `¿Estás seguro de cancelar el pedido de ${userName}? Esta acción no se puede deshacer.`
+      : '¿Estás seguro de cancelar este pedido? Esta acción no se puede deshacer.'
+
     dialog.error({
       title: 'Cancelar pedido',
-      content: userName
-        ? `¿Estás seguro de cancelar el pedido de ${userName}? Esta acción no se puede deshacer.`
-        : '¿Estás seguro de cancelar este pedido? Esta acción no se puede deshacer.',
+      content: withCreditNoteWarning(content, invoiceState),
       positiveText: 'Cancelar pedido',
       negativeText: 'Volver',
       onPositiveClick: async () => {

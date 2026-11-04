@@ -1,0 +1,44 @@
+.billing-account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.billing-account-form__consent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.billing-account-form__more {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--n-color-target, #2080f0);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.billing-account-form__details {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #6b7280;
+}
+
+.billing-account-form__details p {
+  margin: 0 0 6px;
+}
+
+.billing-account-form__alert {
+  margin-bottom: 12px;
+}
+
+.billing-account-form__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}

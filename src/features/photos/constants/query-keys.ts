@@ -15,4 +15,6 @@ export const PHOTO_QUERY_KEYS = {
   gallery: (filters: Record<string, unknown>) =>
     [...PHOTO_QUERY_KEYS.all(), 'gallery', filters] as const,
   facets: (eventId: string) => [...PHOTO_QUERY_KEYS.all(), 'facets', eventId] as const,
+  classificationFailures: (eventId: string) =>
+    [...PHOTO_QUERY_KEYS.all(), 'classification-failures', eventId] as const,
 } as const

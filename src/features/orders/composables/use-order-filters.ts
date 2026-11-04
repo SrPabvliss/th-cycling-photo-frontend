@@ -1,8 +1,10 @@
 import { computed, inject, ref, type InjectionKey } from 'vue'
 import type { LocationQuery, LocationQueryRaw } from 'vue-router'
 import {
+  ORDER_INVOICE_FILTERS,
   ORDER_TABS,
   type IOrderFilters,
+  type OrderInvoiceFilter,
   type OrderTab,
 } from '../types/requests/order-filters.request'
 
@@ -22,23 +24,27 @@ export function useOrderFilters() {
   const search = ref('')
   const eventId = ref<string | null>(null)
   const tab = ref<OrderTab>(DEFAULT_TAB)
+  const invoiceState = ref<OrderInvoiceFilter | null>(null)
 
   const filters = computed<IOrderFilters>(() => ({
     search: search.value ? search.value : null,
     eventId: eventId.value,
     tab: tab.value,
+    invoiceState: invoiceState.value,
   }))
 
   function clearAll() {
     search.value = ''
     eventId.value = null
     tab.value = DEFAULT_TAB
+    invoiceState.value = null
   }
 
   return {
     search,
     eventId,
     tab,
+    invoiceState,
     filters,
     clearAll,
   }
@@ -74,6 +80,11 @@ export function seedOrderFiltersFromQuery(state: IOrderFilterState, query: Locat
   if (tab !== null && ORDER_TABS.includes(tab as OrderTab)) {
     state.tab.value = tab as OrderTab
   }
+
+  const invoiceState = queryString(query.invoiceState)
+  if (invoiceState !== null && ORDER_INVOICE_FILTERS.includes(invoiceState as OrderInvoiceFilter)) {
+    state.invoiceState.value = invoiceState as OrderInvoiceFilter
+  }
 }
 
 export function orderFiltersToQuery(filters: IOrderFilters): LocationQueryRaw {
@@ -81,6 +92,7 @@ export function orderFiltersToQuery(filters: IOrderFilters): LocationQueryRaw {
     ['search', filters.search],
     ['eventId', filters.eventId],
     ['tab', filters.tab !== DEFAULT_TAB ? filters.tab : null],
+    ['invoiceState', filters.invoiceState],
   ]
 
   return Object.fromEntries(entries.filter((entry): entry is [string, string] => entry[1] !== null))

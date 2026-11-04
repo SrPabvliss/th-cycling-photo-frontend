@@ -169,3 +169,36 @@
   border: 1px dashed #d8e0e9;
   color: #a86200;
 }
+
+.gp-failed {
+  position: absolute;
+  top: 7px;
+  left: 36px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: var(--tt-error, #dc2626);
+  color: #fff;
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+
+.gp-retry {
+  position: absolute;
+  bottom: 7px;
+  right: 39px;
+  border: 0;
+  background: rgba(16, 35, 58, 0.72);
+  color: #fff;
+  border-radius: 7px;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.gp-retry:hover {
+  background: #d97706;
+}

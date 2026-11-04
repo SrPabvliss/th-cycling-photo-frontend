@@ -6,6 +6,11 @@ import { SearchOutline } from '@vicons/ionicons5'
 
 import { useEventsDropdownQuery } from '../../../composables/queries/use-events-dropdown'
 import { useInjectedOrderFilterState } from '../../../composables/use-order-filters'
+import {
+  ORDER_INVOICE_FILTER_LABELS,
+  ORDER_INVOICE_FILTERS,
+  type OrderInvoiceFilter,
+} from '../../../types/requests/order-filters.request'
 
 const filterState = useInjectedOrderFilterState()
 
@@ -21,6 +26,11 @@ watch(
     if (value !== searchInput.value) searchInput.value = value ?? ''
   },
 )
+
+const invoiceOptions = ORDER_INVOICE_FILTERS.map((value) => ({
+  label: ORDER_INVOICE_FILTER_LABELS[value],
+  value,
+}))
 
 const eventSearch = ref('')
 const debouncedEventSearch = ref('')
@@ -57,6 +67,16 @@ const { options: eventOptions, isLoading: loadingEvents } =
       :loading="loadingEvents"
       @search="(query: string) => (eventSearch = query)"
       @update:value="(value: string | null) => (filterState.eventId.value = value)"
+    />
+
+    <NSelect
+      class="of-invoice"
+      data-test="invoice-filter"
+      :value="filterState.invoiceState.value"
+      placeholder="Factura"
+      clearable
+      :options="invoiceOptions"
+      @update:value="(value: OrderInvoiceFilter | null) => (filterState.invoiceState.value = value)"
     />
   </div>
 </template>

@@ -10,6 +10,8 @@ import { useBulkAssignCategory } from '@/features/photo-categories/composables/m
 import { usePhotoSelectionStore } from '@/shared/stores/photo-selection.store'
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import { useDeletePhoto } from './mutations/use-delete-photo'
+import { useReclassifyPhotos } from './mutations/use-reclassify-photos'
+import { useClassificationFailuresQuery } from './queries/use-classification-failures'
 import { useGalleryPhotosInfiniteQuery } from './queries/use-gallery-photos'
 import { useGalleryFacetsQuery } from './queries/use-gallery-facets'
 import { useGalleryFilters } from './use-gallery-filters'
@@ -61,8 +63,12 @@ export function usePhotoGalleryView() {
   const totalResults = computed(() => photosData.value?.pages[0]?.pagination.total ?? 0)
   const visibleItems = computed(() => (allItems.value.length > 0 ? allItems.value : undefined))
 
-  const { allVisibleSelected, handlePhotoSelect, toggleSelectAllVisible, selectAllMatchingResults } =
-    usePhotoSelection(visibleItems, totalResults, filters)
+  const {
+    allVisibleSelected,
+    handlePhotoSelect,
+    toggleSelectAllVisible,
+    selectAllMatchingResults,
+  } = usePhotoSelection(visibleItems, totalResults, filters)
 
   const sentinel = useInfiniteScrollTrigger(() => fetchNextPage(), {
     isBusy: computed(() => isFetchingNextPage.value),
@@ -136,6 +142,31 @@ export function usePhotoGalleryView() {
   }
 
   const canReview = computed(() => has(PERMISSIONS.REVIEW_QUEUE_READ))
+  const canRetryClassification = computed(
+    () => has(PERMISSIONS.PHOTO_CLASSIFICATION_RETRY) && !event.value?.isFrozen,
+  )
+  const { data: failedCount } = useClassificationFailuresQuery(eventId, canRetryClassification)
+  const { mutate: reclassify, isPending: isRetryingClassification } = useReclassifyPhotos()
+
+  function retryAllClassification() {
+    if (!eventId.value) return
+    reclassify({ eventId: eventId.value })
+  }
+
+  const retryingIds = ref<string[]>([])
+
+  function retryPhotoClassification(id: string) {
+    if (!eventId.value || retryingIds.value.includes(id)) return
+    retryingIds.value = [...retryingIds.value, id]
+    reclassify(
+      { eventId: eventId.value, photoIds: [id] },
+      {
+        onSettled: () => {
+          retryingIds.value = retryingIds.value.filter((pending) => pending !== id)
+        },
+      },
+    )
+  }
 
   const deletingIds = ref(new Set<string>())
   const photoToDelete = ref<IPhotoListItem | null>(null)
@@ -245,6 +276,12 @@ export function usePhotoGalleryView() {
     selectionCount,
     showSelectionBar,
     canReview,
+    canRetryClassification,
+    failedCount,
+    isRetryingClassification,
+    retryAllClassification,
+    retryPhotoClassification,
+    retryingIds,
     photoToDelete,
     showDeleteModal,
     showCategoryModal,
