@@ -169,7 +169,7 @@ function handleCreate() {
 
       <EventListStatCards :stats="stats" :role="role" />
 
-      <div class="events-panel">
+      <div class="list-panel">
         <EventTabs
           :active="filterState.tab.value"
           :counts="stats?.tabs"

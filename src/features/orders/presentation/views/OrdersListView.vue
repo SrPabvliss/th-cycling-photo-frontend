@@ -168,76 +168,78 @@ function handleSendPaymentInfo(order: IOrderListItem) {
 
       <OrderStatsCards :stats="stats" />
 
-      <OrderStatusTabs
-        :active="filters.tab"
-        :counts="stats?.tabs"
-        @update:active="(t) => (filters.tab = t)"
-      />
+      <div class="list-panel">
+        <OrderStatusTabs
+          :active="filters.tab"
+          :counts="stats?.tabs"
+          @update:active="(tab) => (filterState.tab.value = tab)"
+        />
 
-      <OrderFilters />
+        <OrderFilters />
 
-      <div class="orders-body">
-        <div v-if="isError" class="orders-error">
-          <NResult
-            status="error"
-            title="Error al cargar pedidos"
-            description="No se pudo obtener la lista de pedidos."
-          >
-            <template #footer>
-              <NButton @click="refetch()">Reintentar</NButton>
-            </template>
-          </NResult>
-        </div>
-
-        <div v-else-if="isPending" class="orders-loading">
-          <NSpin size="medium" />
-        </div>
-
-        <template v-else-if="orders.length === 0">
-          <OperatorEmpty v-if="role === 'operator' && !hasActiveFilters" />
-          <FirstRun v-else-if="!hasActiveFilters" />
-          <NoResults v-else :query="filters.search" @clear="clearAll()" />
-        </template>
-
-        <template v-else>
-          <ReceivablesNote
-            v-if="showCobrarNote && stats"
-            :open-count="stats.openCount"
-            :open-amount="stats.openAmount"
-            :pending-count="stats.pendingCount"
-            :info-sent-count="stats.paymentInfoSentCount"
-          />
-
-          <div class="orders-result-line">
-            <b>{{ totalOrders.toLocaleString('de-DE') }}</b>
-            {{ orderCountLabel }}
-            <span class="orders-result-line__sub">
-              · {{ customerGroups.length.toLocaleString('de-DE') }} {{ customerCountLabel }}
-              cargados · agrupados por cliente · desplaza para cargar más
-            </span>
+        <div class="orders-body">
+          <div v-if="isError" class="orders-error">
+            <NResult
+              status="error"
+              title="Error al cargar pedidos"
+              description="No se pudo obtener la lista de pedidos."
+            >
+              <template #footer>
+                <NButton @click="refetch()">Reintentar</NButton>
+              </template>
+            </NResult>
           </div>
 
-          <div class="orders-groups" data-test="orders-list">
-            <OrderGroup
-              v-for="group in customerGroups"
-              :key="group.key"
-              :group="group"
-              :role="role"
-              @view="handleView"
-              @confirm-payment="handleConfirmPayment"
-              @send-delivery="handleSendDelivery"
-              @resend-delivery="handleRegenerate"
-              @send-payment-info="handleSendPaymentInfo"
+          <div v-else-if="isPending" class="orders-loading">
+            <NSpin size="medium" />
+          </div>
+
+          <template v-else-if="orders.length === 0">
+            <OperatorEmpty v-if="role === 'operator' && !hasActiveFilters" />
+            <FirstRun v-else-if="!hasActiveFilters" />
+            <NoResults v-else :query="filters.search" @clear="clearAll()" />
+          </template>
+
+          <template v-else>
+            <ReceivablesNote
+              v-if="showCobrarNote && stats"
+              :open-count="stats.openCount"
+              :open-amount="stats.openAmount"
+              :pending-count="stats.pendingCount"
+              :info-sent-count="stats.paymentInfoSentCount"
             />
 
-            <div ref="sentinelRef" class="orders-sentinel" aria-hidden="true" />
-          </div>
+            <div class="orders-result-line">
+              <b>{{ totalOrders.toLocaleString('de-DE') }}</b>
+              {{ orderCountLabel }}
+              <span class="orders-result-line__sub">
+                · {{ customerGroups.length.toLocaleString('de-DE') }} {{ customerCountLabel }}
+                cargados · agrupados por cliente · desplaza para cargar más
+              </span>
+            </div>
 
-          <div v-if="isFetchingNextPage" class="orders-loading-more">
-            <NSpin :size="20" /> <span>Cargando más...</span>
-          </div>
-          <p v-else-if="!hasNextPage" class="orders-end-marker">No hay más pedidos</p>
-        </template>
+            <div class="orders-groups" data-test="orders-list">
+              <OrderGroup
+                v-for="group in customerGroups"
+                :key="group.key"
+                :group="group"
+                :role="role"
+                @view="handleView"
+                @confirm-payment="handleConfirmPayment"
+                @send-delivery="handleSendDelivery"
+                @resend-delivery="handleRegenerate"
+                @send-payment-info="handleSendPaymentInfo"
+              />
+
+              <div ref="sentinelRef" class="orders-sentinel" aria-hidden="true" />
+            </div>
+
+            <div v-if="isFetchingNextPage" class="orders-loading-more">
+              <NSpin :size="20" /> <span>Cargando más...</span>
+            </div>
+            <p v-else-if="!hasNextPage" class="orders-end-marker">No hay más pedidos</p>
+          </template>
+        </div>
       </div>
     </div>
 

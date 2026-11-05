@@ -1,11 +1,14 @@
 .profile-content {
   display: flex;
   flex-direction: column;
-  gap: 20px;
 }
 
-.profile-content :deep(.page-header) {
-  margin-bottom: 0;
+.profile-content > * + * {
+  margin-top: 20px;
+}
+
+.profile-content > :deep(.page-header) + * {
+  margin-top: 0;
 }
 
 .profile-content__spin {

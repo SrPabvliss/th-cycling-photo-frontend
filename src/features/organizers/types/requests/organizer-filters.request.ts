@@ -1,10 +1,4 @@
-export const ORGANIZER_TABS = [
-  'all',
-  'active',
-  'no_quota',
-  'expiring',
-  'invitations',
-] as const
+export const ORGANIZER_TABS = ['all', 'active', 'no_quota', 'expiring', 'invitations'] as const
 export type OrganizerTab = (typeof ORGANIZER_TABS)[number]
 
 export const ORGANIZER_SORTS = ['recent', 'available', 'expiry', 'events'] as const
@@ -16,13 +10,16 @@ export interface IOrganizerFilters {
   sort: OrganizerSort
 }
 
+export type IOrganizersStatsScope = Pick<IOrganizerFilters, 'search'>
+
+export function toOrganizersStatsParams(scope: IOrganizersStatsScope): Record<string, unknown> {
+  return scope.search ? { search: scope.search } : {}
+}
+
 export function toOrganizerFiltersParams(filters: IOrganizerFilters): Record<string, unknown> {
-  const params: Record<string, unknown> = {
+  return {
     tab: filters.tab,
     sort: filters.sort,
+    ...toOrganizersStatsParams(filters),
   }
-
-  if (filters.search) params.search = filters.search
-
-  return params
 }

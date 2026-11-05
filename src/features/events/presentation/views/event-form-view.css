@@ -13,10 +13,6 @@
   padding-top: 16px;
 }
 
-.event-form-container :deep(.page-header) {
-  margin-bottom: 8px;
-}
-
 .event-form-container > :last-child {
   flex: 1;
 }
