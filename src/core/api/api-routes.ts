@@ -276,6 +276,7 @@ export const API_ROUTES = {
     CONFIRM: `${PAYMENTS_BASE}/confirm`,
     TRANSACTION: (clientTransactionId: string) =>
       `${PAYMENTS_BASE}/transactions/${clientTransactionId}`,
+    EVENT_OPTIONS: (eventId: string) => `${PAYMENTS_BASE}/events/${eventId}/options`,
   },
   TENANT_PROFILE: {
     BASE: '/tenants/me/profile',

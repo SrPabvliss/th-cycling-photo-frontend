@@ -210,6 +210,13 @@
   color: #6b7280;
 }
 
+.checkout-summary__method-hint {
+  margin: -4px 0 0;
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
+}
+
 .checkout-summary__totals-loading {
   font-size: 14px;
   color: #6b7280;

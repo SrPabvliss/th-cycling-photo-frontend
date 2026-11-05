@@ -8,9 +8,12 @@ import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { checkoutPath } from '@/core/navigation/route-paths'
 import { useAuth } from '@/features/auth/composables/use-auth'
 import PaymentMethodModal from '@/shared/components/PaymentMethodModal/PaymentMethodModal.vue'
+import { useCheckout } from '@/shared/composables/use-checkout'
+import { PAYMENT_METHOD } from '@/shared/types/payment-method.types'
 import { useCartStore } from '@/shared/stores/cart.store'
 import type { ICheckoutOrderResult } from '@/shared/types/cart.types'
 import { useMergeCart } from '../../composables/mutations/use-merge-cart'
+import { useEventPaymentOptionsQuery } from '@/shared/composables/use-event-payment-options'
 import CheckoutSummary from '../components/CheckoutSummary/CheckoutSummary.vue'
 import { useCartPricing } from '../../composables/use-cart-pricing'
 import PricingTotalBlock from '@/features/pricing/presentation/components/PricingTotalBlock/PricingTotalBlock.vue'
@@ -29,6 +32,12 @@ const { isAuthenticated, currentUser } = useAuth()
 const { mutateAsync: mergeCart, isPending: isMerging } = useMergeCart()
 
 const eventId = computed(() => route.params.eventId as string)
+const { data: paymentOptions, isLoading: isLoadingPaymentOptions } = useEventPaymentOptionsQuery(
+  eventId,
+  isAuthenticated,
+)
+const cardAvailable = computed(() => paymentOptions.value?.cardAvailable ?? false)
+const { mutateAsync: checkout, isPending: isPlacingOrder } = useCheckout()
 
 watch(
   eventId,
@@ -115,7 +124,24 @@ async function handleConfirm() {
 
   if (needsInvoiceConsent.value) await recordInvoiceConsent()
 
+  if (!cardAvailable.value) {
+    await placeTransferOrder()
+    return
+  }
+
   showMethodModal.value = true
+}
+
+async function placeTransferOrder() {
+  if (!selectedBillingAccountId.value) return
+
+  const orders = await checkout({
+    eventId: eventId.value,
+    method: PAYMENT_METHOD.TRANSFER,
+    billingAccountId: selectedBillingAccountId.value,
+  }).catch(() => null)
+
+  if (orders) orderResults.value = orders
 }
 
 function handlePaidOrders(orders: ICheckoutOrderResult[]) {
@@ -238,14 +264,24 @@ function handlePaidOrders(orders: ICheckoutOrderResult[]) {
                 size="large"
                 block
                 data-test="checkout-confirm"
-                :loading="isMerging || isRecordingConsent"
+                :loading="isMerging || isRecordingConsent || isPlacingOrder"
                 :disabled="
-                  isMerging || cartPricing.isLoading.value || (isAuthenticated && !isBillingReady)
+                  isMerging ||
+                  isPlacingOrder ||
+                  cartPricing.isLoading.value ||
+                  (isAuthenticated && (!isBillingReady || isLoadingPaymentOptions))
                 "
                 @click="handleConfirm"
               >
                 Confirmar pedido
               </NButton>
+
+              <p
+                v-if="isAuthenticated && paymentOptions && !cardAvailable"
+                class="checkout-summary__method-hint"
+              >
+                Pagas por transferencia bancaria: al confirmar te enviamos los datos.
+              </p>
 
               <NButton quaternary size="medium" block @click="router.push('/gallery')">
                 Seguir explorando
