@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { NButton, NCard, NFormItem, NInput, NUpload, useMessage } from 'naive-ui'
-import type { UploadCustomRequestOptions } from 'naive-ui'
+import type { UploadCustomRequestOptions, UploadInst } from 'naive-ui'
 
 import { PERMISSIONS } from '@/core/auth/permissions'
 import { usePermissions } from '@/core/auth/use-permissions'
@@ -29,6 +29,7 @@ const hasChanges = computed(() => publicName.value !== (props.profile.publicName
 const { mutate, isPending } = useUpdateTenantProfile()
 const { mutateAsync: uploadWatermark, isPending: isUploading } = useUploadTenantWatermark()
 const message = useMessage()
+const uploadRef = ref<UploadInst | null>(null)
 
 function submit() {
   if (!hasChanges.value) return
@@ -40,21 +41,23 @@ function submit() {
 }
 
 async function handleUpload({ file, onFinish, onError }: UploadCustomRequestOptions) {
-  if (!file.file) return onError()
-
-  const problem = await validateWatermarkFile(file.file)
-  if (problem) {
-    message.error(problem)
-    return onError()
-  }
-
   try {
+    if (!file.file) return onError()
+
+    const problem = await validateWatermarkFile(file.file)
+    if (problem) {
+      message.error(problem)
+      return onError()
+    }
+
     await uploadWatermark(file.file)
     message.success('Marca de agua actualizada')
     onFinish()
   } catch {
     message.error('No se pudo subir la marca de agua')
     onError()
+  } finally {
+    uploadRef.value?.clear()
   }
 }
 </script>
@@ -72,8 +75,8 @@ async function handleUpload({ file, onFinish, onError }: UploadCustomRequestOpti
 
         <NUpload
           v-if="canEditProfile"
+          ref="uploadRef"
           accept="image/png"
-          :max="1"
           :show-file-list="false"
           :disabled="isUploading"
           :custom-request="handleUpload"
