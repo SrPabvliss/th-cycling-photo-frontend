@@ -32,6 +32,7 @@ export const PERMISSIONS = {
   TENANT_PAYOUT_METHOD_MANAGE: 'tenant.payout_method.manage',
   TENANT_QUOTA_SET: 'tenant.quota.set',
   DASHBOARD_OPERATOR_READ: 'dashboard.operator.read',
+  NOTIFICATION_READ: 'notification.read',
   ORDER_GIFT: 'order.gift',
   ORDER_CONVERT_TO_GIFT: 'order.convert_to_gift',
   ORDER_CONVERT_TO_SALE: 'order.convert_to_sale',

@@ -1,5 +1,6 @@
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { PERMISSIONS, type PermissionKey } from './permissions'
+import type { ICurrentUser } from './current-user'
 import type { Hat } from './stores/hat.store'
 
 export interface INavLink {
@@ -38,4 +39,14 @@ export function getHomePath(permissions: string[]): string {
 export function getPrincipalLabel(hat: Hat, isPlatform: boolean): string {
   if (isPlatform) return 'TitanTV'
   return hat === 'operating' ? 'Organizador' : 'Cliente'
+}
+
+export function getPanelLabel(
+  user: Pick<ICurrentUser, 'permissions' | 'isPlatform' | 'permissionTemplate' | 'tenantName'>,
+): string {
+  if (user.permissionTemplate === 'platform_admin') return 'Admin'
+  if (user.permissionTemplate === 'platform_staff') return 'Staff'
+  if (user.isPlatform) return 'TitanTV'
+  if (getNavLinks(user.permissions).length === 0) return 'Comprador'
+  return user.tenantName ? `Organizador · ${user.tenantName}` : 'Organizador'
 }

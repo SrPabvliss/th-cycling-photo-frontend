@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { PERMISSIONS } from './permissions'
-import { getHomePath, getNavLinks, getPrincipalLabel } from './nav-config'
+import { getHomePath, getNavLinks, getPanelLabel, getPrincipalLabel } from './nav-config'
 
 const TENANT_PERMISSIONS = [PERMISSIONS.EVENT_READ, PERMISSIONS.PHOTO_READ, PERMISSIONS.ORDER_READ]
 
@@ -64,5 +64,33 @@ describe('getPrincipalLabel', () => {
   it('says TitanTV for a platform principal, whatever the hat', () => {
     expect(getPrincipalLabel('operating', true)).toBe('TitanTV')
     expect(getPrincipalLabel('shopping', true)).toBe('TitanTV')
+  })
+})
+
+describe('getPanelLabel', () => {
+  const base = { permissions: [], isPlatform: false, permissionTemplate: null, tenantName: null }
+
+  it('names the platform roles by their template', () => {
+    expect(getPanelLabel({ ...base, isPlatform: true, permissionTemplate: 'platform_admin' })).toBe(
+      'Admin',
+    )
+    expect(getPanelLabel({ ...base, isPlatform: true, permissionTemplate: 'platform_staff' })).toBe(
+      'Staff',
+    )
+  })
+
+  it('names an organizer after their business, whatever user_roles says', () => {
+    expect(
+      getPanelLabel({
+        ...base,
+        permissions: ['event.read'],
+        permissionTemplate: 'tenant',
+        tenantName: 'Andes Bike QA',
+      }),
+    ).toBe('Organizador · Andes Bike QA')
+  })
+
+  it('calls someone who cannot operate a buyer', () => {
+    expect(getPanelLabel({ ...base, permissionTemplate: 'customer' })).toBe('Comprador')
   })
 })

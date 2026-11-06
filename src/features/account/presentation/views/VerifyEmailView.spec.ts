@@ -3,8 +3,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ref } from 'vue'
 
 const push = vi.fn()
+const routeQuery: { redirect?: string } = {}
 vi.mock('vue-router', () => ({
   useRouter: () => ({ push }),
+  useRoute: () => ({ query: routeQuery }),
 }))
 
 vi.mock('@/core/layout/public/PublicLayout.vue', () => ({
@@ -94,6 +96,7 @@ const expiredChangeEmail: EmailVerificationStatus = {
 
 beforeEach(() => {
   push.mockClear()
+  delete routeQuery.redirect
   sendMutate.mockClear()
   resendMutate.mockClear()
   confirmMutate.mockClear()
@@ -154,6 +157,43 @@ describe('VerifyEmailView', () => {
     await confirmButton!.trigger('click')
 
     expect(confirmMutate).toHaveBeenCalledWith({ code: '123456' }, expect.any(Object))
+  })
+
+  it('takes the user back to the contract once the email is verified', async () => {
+    routeQuery.redirect = '/contracts/abc123'
+    statusData.value = { ...pendingVerifyCurrent }
+
+    const w = mountView()
+    await flushPromises()
+
+    await w.find('input').setValue('123456')
+    await w
+      .findAll('button')
+      .find((b) => b.text().includes('Confirmar código'))!
+      .trigger('click')
+    await flushPromises()
+
+    const back = w.get('[data-test="verify-continue"]')
+    expect(back.text()).toBe('Volver al contrato')
+    await back.trigger('click')
+    expect(push).toHaveBeenCalledWith('/contracts/abc123')
+  })
+
+  it('ignores a redirect that points outside the app', async () => {
+    routeQuery.redirect = '//evil.example/contracts/x'
+    statusData.value = { ...pendingVerifyCurrent }
+
+    const w = mountView()
+    await flushPromises()
+
+    await w.find('input').setValue('123456')
+    await w
+      .findAll('button')
+      .find((b) => b.text().includes('Confirmar código'))!
+      .trigger('click')
+    await flushPromises()
+
+    expect(w.get('[data-test="verify-continue"]').text()).toBe('Volver al perfil')
   })
 
   it('does not clear the code field when the confirmation fails', async () => {

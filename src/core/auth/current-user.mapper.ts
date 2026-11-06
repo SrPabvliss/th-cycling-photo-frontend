@@ -12,6 +12,8 @@ export function toCurrentUser(api: IApiCurrentUser): ICurrentUser {
     eventPermissions: api.eventPermissions ?? {},
     tenantId: api.tenantId ?? null,
     isPlatform: api.isPlatform ?? false,
+    permissionTemplate: api.permissionTemplate ?? null,
+    tenantName: api.tenantName ?? null,
     emailVerified: api.emailVerified ?? false,
     pendingPrompts: api.pendingPrompts ?? [],
   }

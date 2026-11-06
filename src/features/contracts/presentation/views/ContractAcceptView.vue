@@ -26,7 +26,7 @@ const route = useRoute()
 const router = useRouter()
 const token = computed(() => route.params.token as string)
 
-const { data: offer, isPending, isError, refetch } = useContractByToken(token)
+const { data: offer, isPending, isFetchedAfterMount, isError, refetch } = useContractByToken(token)
 const { mutate: acceptContract, isPending: isAccepting } = useAcceptContract()
 
 const hasAccepted = ref(false)
@@ -56,7 +56,7 @@ function readErrorMessage(caught: unknown, fallback: string): string {
 }
 
 function goToVerifyEmail() {
-  router.push({ name: ROUTE_NAMES.ACCOUNT_VERIFY_EMAIL })
+  router.push({ name: ROUTE_NAMES.ACCOUNT_VERIFY_EMAIL, query: { redirect: route.fullPath } })
 }
 
 function handleAccept() {
@@ -76,7 +76,7 @@ function handleAccept() {
     <div class="page-view__content contract-accept-content">
       <PageHeader title="Contrato de servicio" subtitle="Revisa las condiciones antes de aceptar" />
 
-      <div v-if="isPending" class="contract-accept-loading">
+      <div v-if="isPending || !isFetchedAfterMount" class="contract-accept-loading">
         <NSpin size="large" />
       </div>
 

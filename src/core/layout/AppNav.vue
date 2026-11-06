@@ -6,7 +6,7 @@ import { NAvatar, NDrawer, NDrawerContent, NIcon } from 'naive-ui'
 import { LogOutOutline, MenuOutline, CloseOutline } from '@vicons/ionicons5'
 
 import { useSession } from '@/core/auth/use-session'
-import { getHomePath, getNavLinks, getPrincipalLabel } from '@/core/auth/role-config'
+import { getHomePath, getNavLinks, getPanelLabel } from '@/core/auth/role-config'
 import { canShop } from '@/core/auth/capabilities'
 import { useHatStore } from '@/core/auth/stores/hat.store'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
@@ -21,9 +21,7 @@ const hatStore = useHatStore()
 const navLinks = computed(() => getNavLinks(currentUser.value?.permissions ?? []))
 const homePath = computed(() => getHomePath(currentUser.value?.permissions ?? []))
 const permissions = computed(() => currentUser.value?.permissions ?? [])
-const principalLabel = computed(() =>
-  getPrincipalLabel(hatStore.activeHat, currentUser.value?.isPlatform ?? false),
-)
+const principalLabel = computed(() => (currentUser.value ? getPanelLabel(currentUser.value) : ''))
 const showShoppingSwitch = computed(() => canShop(permissions.value))
 
 const isMobile = useMediaQuery('(max-width: 767px)')
@@ -125,6 +123,14 @@ function goShopping() {
           <button class="app-nav-menu__close" aria-label="Cerrar menú" @click="showMenu = false">
             <NIcon :component="CloseOutline" :size="22" />
           </button>
+        </div>
+
+        <div v-if="currentUser" class="app-nav-menu__user" data-test="app-nav-menu-user">
+          <NAvatar :size="36" round>{{ userInitials }}</NAvatar>
+          <div class="app-nav-user-info">
+            <span class="app-nav-user-name">{{ displayName }}</span>
+            <span class="app-nav-user-role">{{ principalLabel }}</span>
+          </div>
         </div>
 
         <nav class="app-nav-menu__nav">
