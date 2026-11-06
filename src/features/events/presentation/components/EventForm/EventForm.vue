@@ -53,7 +53,7 @@ const form = useForm({
         | Map<'cover_image', IFocalPoint>
         | undefined,
       assetRemovals: removals.length > 0 ? removals : undefined,
-      categoryIds: selectedCategoryIds.value.length > 0 ? selectedCategoryIds.value : undefined,
+      categoryIds: [...selectedCategoryIds.value],
     })
   },
 })

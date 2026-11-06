@@ -16,5 +16,6 @@ export function useEventAssetsQuery(eventId: MaybeRefOrGetter<string>) {
       )
       return data.map(toEventAsset)
     },
+    enabled: computed(() => !!toValue(eventId)),
   })
 }

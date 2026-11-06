@@ -26,6 +26,7 @@ function makeApiDetail(overrides: Partial<IApiEventDetail> = {}): IApiEventDetai
     isFrozen: false,
     frozenAt: null,
     organizerName: 'Andes Photo',
+    eventTypeId: 3,
     eventTypeName: 'Ruta',
     contractName: 'Contrato 2026-A',
     reviewedCount: 1200,

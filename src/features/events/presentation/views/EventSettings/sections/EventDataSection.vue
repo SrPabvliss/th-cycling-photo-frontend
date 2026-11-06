@@ -31,10 +31,10 @@ const { data: event, isPending, isError, refetch } = useEventDetailQuery(slug)
 const id = computed(() => event.value?.id ?? '')
 
 const { data: assets } = useEventAssetsQuery(id)
-const { data: assignedCategories } = usePhotoCategoriesQuery(id)
+const { data: assignedCategories, isPending: isCategoriesPending } = usePhotoCategoriesQuery(id)
 const { mutateAsync: updateEvent, isPending: isUpdating } = useUpdateEvent(id)
 const { mutateAsync: uploadAssetsBatch } = useUploadAssetsBatch()
-const { mutateAsync: setAssetFocalPoint } = useSetAssetFocalPoint(id.value)
+const { mutateAsync: setAssetFocalPoint } = useSetAssetFocalPoint(id)
 const { mutateAsync: removeAssetsBatch } = useRemoveAssetsBatch()
 const { mutateAsync: assignCategoriesBatch } = useAssignPhotoCategoriesBatch()
 const { mutateAsync: unassignCategoriesBatch } = useUnassignPhotoCategoriesBatch()
@@ -101,7 +101,7 @@ async function handleSubmit(formData: IEventFormData, extra: IEventFormExtra) {
 
 <template>
   <div class="event-data-section">
-    <EventFormSkeleton v-if="isPending" />
+    <EventFormSkeleton v-if="isPending || (event && isCategoriesPending)" />
 
     <div v-else-if="isError" class="error-container">
       <NResult

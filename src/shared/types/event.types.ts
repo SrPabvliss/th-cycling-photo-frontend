@@ -93,6 +93,7 @@ export interface IApiEventDetail {
   isFrozen: boolean
   frozenAt: string | null
   organizerName: string
+  eventTypeId: number
   eventTypeName: string
   contractName: string | null
   reviewedCount: number
@@ -126,6 +127,7 @@ export interface IEventDetail {
   isFrozen: boolean
   frozenAt: Date | null
   organizerName: string
+  eventTypeId: number
   eventTypeName: string
   contractName: string | null
   reviewedCount: number

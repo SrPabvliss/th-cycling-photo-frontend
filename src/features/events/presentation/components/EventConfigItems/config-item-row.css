@@ -47,6 +47,17 @@
   color: #16294d;
 }
 
+.ce-item-ic--thumb {
+  overflow: hidden;
+  background: repeating-conic-gradient(#e5e7eb 0% 25%, #f9fafb 0% 50%) 50% / 10px 10px;
+}
+
+.ce-item-ic--thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .ce-item.missing .ce-item-ic {
   background: #fdecec;
   color: #dc2626;

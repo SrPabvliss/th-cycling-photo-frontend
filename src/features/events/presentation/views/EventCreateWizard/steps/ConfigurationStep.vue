@@ -25,6 +25,7 @@ const {
   items,
   drafts,
   readyCount,
+  watermarkPreviewUrl,
   isComplete,
   totalCount,
   toggle,
@@ -93,6 +94,7 @@ defineExpose(configuration)
           :state="item.state"
           :summary="item.summary"
           :open="item.isOpen"
+          :thumbnail-url="item.id === 'watermark' ? watermarkPreviewUrl : null"
           @toggle="toggle(item.id)"
         >
           <PublicNameBody

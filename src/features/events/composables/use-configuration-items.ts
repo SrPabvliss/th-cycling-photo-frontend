@@ -296,6 +296,15 @@ export function useConfigurationItems(
   const readyCount = computed(() => requirementsMet.value.filter(Boolean).length)
   const totalCount = REQUIRED_CONFIGURATION_COUNT
 
+  const watermarkPreviewUrl = computed<string | null>(() => {
+    if (useProfileFlags.watermark) return preset.value?.watermarkUrl ?? null
+    const stored = current?.value
+    if (stored?.watermarkStorageKey && drafts.watermark.storageKey === stored.watermarkStorageKey) {
+      return stored.watermarkUrl ?? null
+    }
+    return null
+  })
+
   const itemsSavedToProfile = computed<ConfigurationItemId[]>(() =>
     items.value.filter((item) => !item.useProfile && item.saveToProfile).map((item) => item.id),
   )
@@ -355,10 +364,14 @@ export function useConfigurationItems(
     CONFIGURATION_ITEMS.some((definition) => isFieldInvalid(definition.id)),
   )
 
+  function isClearingStoredValue(id: 'publicName' | 'whatsapp'): boolean {
+    return hasCurrentValues.value[id] && !isReady(id)
+  }
+
   const canSave = computed(
     () =>
-      isReady('publicName') &&
-      isReady('whatsapp') &&
+      !isClearingStoredValue('publicName') &&
+      !isClearingStoredValue('whatsapp') &&
       hasActivePayoutMethod.value &&
       !hasInvalidField.value,
   )
@@ -388,6 +401,7 @@ export function useConfigurationItems(
     isComplete,
     canSave,
     itemsSavedToProfile,
+    watermarkPreviewUrl,
     totalCount,
     toggle,
     setUseProfile,
