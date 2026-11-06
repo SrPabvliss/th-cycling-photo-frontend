@@ -20,6 +20,7 @@ export function useUpdatePhone() {
       const response = await httpClient.patch<{ id: string }>(
         API_ROUTES.USER_PHONES.BY_ID(phoneId),
         payload,
+        { silentSuccess: true },
       )
       return response.data
     },

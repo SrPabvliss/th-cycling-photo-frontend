@@ -72,7 +72,7 @@ function goToLogin() {
 <template>
   <NDrawer
     :show="cartStore.isDrawerOpen"
-    :width="420"
+    width="min(420px, 100vw)"
     placement="right"
     @update:show="cartStore.setDrawerOpen($event)"
   >

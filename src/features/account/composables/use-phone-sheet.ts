@@ -79,11 +79,15 @@ export function usePhoneSheet() {
   async function submitAdd() {
     if (!canSubmitSheet.value) return
 
-    await addPhone.mutateAsync({
-      phoneNumber: sheetForm.phoneNumber,
-      label: sheetForm.label.trim() || undefined,
-      isWhatsapp: sheetForm.isWhatsapp,
-    })
+    try {
+      await addPhone.mutateAsync({
+        phoneNumber: sheetForm.phoneNumber,
+        label: sheetForm.label.trim() || undefined,
+        isWhatsapp: sheetForm.isWhatsapp,
+      })
+    } catch {
+      return
+    }
     message.success('Teléfono agregado')
     closeSheet()
   }
@@ -98,12 +102,16 @@ export function usePhoneSheet() {
     const hasFieldChanges = Object.keys(payload).length > 0
     const shouldSetPrimary = sheetForm.makePrimary && !phone.isPrimary
 
-    if (hasFieldChanges) {
-      await updatePhone.mutateAsync({ phoneId: phone.id, payload })
-    }
+    try {
+      if (hasFieldChanges) {
+        await updatePhone.mutateAsync({ phoneId: phone.id, payload })
+      }
 
-    if (shouldSetPrimary) {
-      await setPrimaryPhone.mutateAsync(phone.id)
+      if (shouldSetPrimary) {
+        await setPrimaryPhone.mutateAsync(phone.id)
+      }
+    } catch {
+      return
     }
 
     if (hasFieldChanges || shouldSetPrimary) {
@@ -122,7 +130,11 @@ export function usePhoneSheet() {
   }
 
   async function removePhone(phone: IUserPhone) {
-    await deletePhone.mutateAsync(phone.id)
+    try {
+      await deletePhone.mutateAsync(phone.id)
+    } catch {
+      return
+    }
     message.success('Teléfono eliminado')
     closeSheet()
   }

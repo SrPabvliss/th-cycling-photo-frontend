@@ -101,6 +101,7 @@ const brandMetaLabel = computed(() =>
       :email="currentUser?.email ?? myProfile.email"
       :email-verified="currentUser?.emailVerified ?? false"
       :pending="pendingItems"
+      is-organizer
       compact
     />
 

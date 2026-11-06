@@ -10,7 +10,9 @@ export function useAddPhone() {
 
   return useMutation({
     mutationFn: async (payload: IAddPhoneRequest) => {
-      const response = await httpClient.post<{ id: string }>(API_ROUTES.USER_PHONES.BASE, payload)
+      const response = await httpClient.post<{ id: string }>(API_ROUTES.USER_PHONES.BASE, payload, {
+        silentSuccess: true,
+      })
       return response.data
     },
     onSuccess: () => {

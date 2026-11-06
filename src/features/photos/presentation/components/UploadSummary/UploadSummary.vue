@@ -52,10 +52,11 @@ const emit = defineEmits<{
         <NIcon :component="AlertCircleOutline" :size="20" />
       </div>
       <NText depth="3" style="font-size: 13px">
-        {{ failedCount }} archivo{{ failedCount !== 1 ? 's' : '' }} no se pudo{{
-          failedCount !== 1 ? 'ieron' : ''
+        {{
+          failedCount === 1
+            ? '1 archivo no se pudo subir'
+            : `${failedCount} archivos no se pudieron subir`
         }}
-        subir
       </NText>
     </NFlex>
 
