@@ -13,6 +13,16 @@ export function parseDateOnly(isoString: string): Date {
 }
 
 /**
+ * True while a date-only value (e.g. a contract's `validUntil`, parsed with
+ * `parseDateOnly`) is still today or later. The whole last day counts.
+ */
+export function isOnOrAfterToday(dateOnly: Date): boolean {
+  const startOfToday = new Date()
+  startOfToday.setHours(0, 0, 0, 0)
+  return dateOnly >= startOfToday
+}
+
+/**
  * Formats a date for display: "21 feb 2026"
  */
 export function formatDate(date: Date): string {
