@@ -50,7 +50,7 @@ const authStore = useSessionStore()
 const role = computed<EventRole>(() => {
   const user = authStore.currentUser
   if (user?.permissions.includes(PERMISSIONS.EVENT_READ_ALL)) return 'titan'
-  return user?.tenantId ? 'organizer' : 'operator'
+  return user?.tenantId && !user.isPlatform ? 'organizer' : 'operator'
 })
 
 const filterState = useEventFilters()

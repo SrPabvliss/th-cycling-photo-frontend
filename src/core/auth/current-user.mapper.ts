@@ -9,6 +9,7 @@ export function toCurrentUser(api: IApiCurrentUser): ICurrentUser {
     role: api.role,
     pendingConsents: api.pendingConsents ?? [],
     permissions: api.permissions ?? [],
+    eventPermissions: api.eventPermissions ?? {},
     tenantId: api.tenantId ?? null,
     isPlatform: api.isPlatform ?? false,
     emailVerified: api.emailVerified ?? false,

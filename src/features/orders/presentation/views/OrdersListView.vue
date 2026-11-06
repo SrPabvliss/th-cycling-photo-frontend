@@ -52,7 +52,8 @@ const { has } = usePermissions()
 
 const role = computed<OrderOperatorRole>(() => {
   if (has(PERMISSIONS.EVENT_READ_ALL)) return 'titan'
-  return sessionStore.currentUser?.tenantId ? 'organizer' : 'operator'
+  const user = sessionStore.currentUser
+  return user?.tenantId && !user.isPlatform ? 'organizer' : 'operator'
 })
 
 const filterState = useOrderFilters()

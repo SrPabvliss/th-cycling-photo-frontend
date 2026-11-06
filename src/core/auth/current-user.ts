@@ -6,6 +6,7 @@ export interface IApiCurrentUser {
   role: string
   pendingConsents?: string[]
   permissions?: string[]
+  eventPermissions?: Record<string, string[]>
   tenantId?: string | null
   isPlatform?: boolean
   emailVerified?: boolean
@@ -20,6 +21,7 @@ export interface ICurrentUser {
   role: string
   pendingConsents: string[]
   permissions: string[]
+  eventPermissions: Record<string, string[]>
   tenantId: string | null
   isPlatform: boolean
   emailVerified: boolean

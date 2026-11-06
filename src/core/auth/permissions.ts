@@ -9,6 +9,7 @@ export const PERMISSIONS = {
   EVENT_RESTORE: 'event.restore',
   PHOTO_READ: 'photo.read',
   PHOTO_RETOUCH_READ: 'photo.retouch.read',
+  PHOTO_RETOUCH_UPLOAD: 'photo.retouch.upload',
   PHOTO_CLASSIFICATION_RETRY: 'photo.classification.retry',
   REVIEW_QUEUE_READ: 'dashboard.review_queue.read',
   ORDER_READ: 'order.read',
@@ -31,5 +32,16 @@ export const PERMISSIONS = {
   ORDER_CONVERT_TO_SALE: 'order.convert_to_sale',
   ORDER_INVOICE_MANAGE: 'order.invoice.manage',
 } as const
+
+export function holdsPermission(
+  user: { permissions: string[]; eventPermissions: Record<string, string[]> } | null | undefined,
+  key: string,
+  eventId?: string | null,
+): boolean {
+  if (!user) return false
+  if (user.permissions.includes(key)) return true
+  if (eventId) return user.eventPermissions[eventId]?.includes(key) ?? false
+  return Object.values(user.eventPermissions).some((keys) => keys.includes(key))
+}
 
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]
