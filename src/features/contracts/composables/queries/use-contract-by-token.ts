@@ -17,5 +17,6 @@ export function useContractByToken(token: Ref<string>) {
       return toContractOffer(response.data)
     },
     enabled: computed(() => !!token.value),
+    refetchOnMount: 'always',
   })
 }

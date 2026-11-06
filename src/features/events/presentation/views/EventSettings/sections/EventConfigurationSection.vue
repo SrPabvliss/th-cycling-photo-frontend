@@ -41,6 +41,7 @@ const {
   isComplete,
   canSave,
   readyCount,
+  watermarkPreviewUrl,
   totalCount,
   toggle,
   setUseProfile,
@@ -105,6 +106,7 @@ async function handleSave() {
           :state="item.state"
           :summary="item.summary"
           :open="item.isOpen"
+          :thumbnail-url="item.id === 'watermark' ? watermarkPreviewUrl : null"
           @toggle="toggle(item.id)"
         >
           <PublicNameBody

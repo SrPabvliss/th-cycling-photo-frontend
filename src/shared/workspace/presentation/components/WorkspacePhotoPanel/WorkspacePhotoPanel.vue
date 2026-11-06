@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
+import { PERMISSIONS } from '@/core/auth/permissions'
+import { usePermissions } from '@/core/auth/use-permissions'
 import type { IWorkspacePhotoDetail } from '@/shared/workspace/types/workspace-photo.types'
 import { useImageZoom } from '@/shared/composables/use-image-zoom'
 import { usePhotoFileOps } from '@/shared/composables/use-photo-file-ops'
@@ -20,6 +22,10 @@ const emit = defineEmits<{
 }>()
 
 const fileOps = usePhotoFileOps()
+const { hasForEvent } = usePermissions()
+const canUploadRetouched = computed(() =>
+  hasForEvent(PERMISSIONS.PHOTO_RETOUCH_UPLOAD, props.photo.eventId),
+)
 const showComparison = ref(false)
 type CompareView = 'original' | 'compare' | 'retouched'
 const comparisonView = ref<CompareView>('compare')
@@ -50,7 +56,9 @@ const bibsCount = computed(() => props.photo.bibs?.length ?? 0)
 const colorsCount = computed(() => props.photo.colors?.length ?? 0)
 
 const handleDownload = () => fileOps.download(props.photo.id, props.photo.filename)
-const triggerUpload = () => fileOps.triggerUpload()
+const triggerUpload = () => {
+  if (canUploadRetouched.value) fileOps.triggerUpload()
+}
 const handleFileSelected = (e: Event) =>
   fileOps.handleFileSelected(e, props.photo.id, () => emit('retouched', props.photo.id))
 
@@ -131,7 +139,12 @@ defineExpose({
         Descargar
         <span class="rv-kbd">D</span>
       </button>
-      <button class="rv-btn" :disabled="fileOps.isUploading.value" @click="triggerUpload">
+      <button
+        v-if="canUploadRetouched"
+        class="rv-btn"
+        :disabled="fileOps.isUploading.value"
+        @click="triggerUpload"
+      >
         <svg
           width="14"
           height="14"

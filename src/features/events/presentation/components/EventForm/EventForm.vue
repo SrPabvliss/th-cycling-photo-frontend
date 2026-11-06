@@ -53,14 +53,17 @@ const form = useForm({
         | Map<'cover_image', IFocalPoint>
         | undefined,
       assetRemovals: removals.length > 0 ? removals : undefined,
-      categoryIds: selectedCategoryIds.value.length > 0 ? selectedCategoryIds.value : undefined,
+      categoryIds: [...selectedCategoryIds.value],
     })
   },
 })
 
+const formCanSubmit = form.useStore((s) => s.canSubmit)
+const hasDates = form.useStore((s) => s.values.startDate !== null && s.values.endDate !== null)
+
 defineExpose({
   submit: () => form.handleSubmit(),
-  canSubmit: computed(() => form.state.canSubmit),
+  canSubmit: computed(() => formCanSubmit.value && hasDates.value),
 })
 
 const assetPreviews = useLocalAssetPreviews(() => props.existingAssets)
@@ -145,9 +148,21 @@ const eventTypeOptions = computed(
           </template>
         </form.Field>
 
-        <form.Field name="startDate">
+        <form.Field
+          name="startDate"
+          :validators="{
+            onChange: eventFormSchema.shape.startDate,
+            onSubmit: eventFormSchema.shape.startDate,
+          }"
+        >
           <template v-slot="{ field: startField }">
-            <form.Field name="endDate">
+            <form.Field
+              name="endDate"
+              :validators="{
+                onChange: eventFormSchema.shape.endDate,
+                onSubmit: eventFormSchema.shape.endDate,
+              }"
+            >
               <template v-slot="{ field: endField }">
                 <NFormItem
                   label="Fechas del evento"
@@ -156,6 +171,12 @@ const eventTypeOptions = computed(
                     (startField.state.meta.isTouched && !startField.state.meta.isValid) ||
                     (endField.state.meta.isTouched && !endField.state.meta.isValid)
                       ? 'error'
+                      : undefined
+                  "
+                  :feedback="
+                    (startField.state.meta.isTouched && !startField.state.meta.isValid) ||
+                    (endField.state.meta.isTouched && !endField.state.meta.isValid)
+                      ? 'Elige la fecha de inicio y la de fin'
                       : undefined
                   "
                 >

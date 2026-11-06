@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { NButton, NIcon, NTag } from 'naive-ui'
-import { LogoWhatsapp, CopyOutline, RefreshOutline } from '@vicons/ionicons5'
+import { NButton, NIcon, NTag, NTooltip } from 'naive-ui'
+import {
+  CopyOutline,
+  InformationCircleOutline,
+  LogoWhatsapp,
+  RefreshOutline,
+} from '@vicons/ionicons5'
 import { useClipboard } from '@vueuse/core'
 
 import { formatDate } from '@/shared/utils/date.utils'
@@ -50,7 +55,16 @@ const { copy, copied } = useClipboard({ source: deliveryUrl })
 
       <div class="dl-card__meta">
         <span>Expira: {{ formatDate(deliveryLink.expiresAt) }}</span>
-        <span>Descargas: {{ deliveryLink.downloadCount }}</span>
+        <NTooltip trigger="hover">
+          <template #trigger>
+            <span class="dl-card__opens" data-test="delivery-open-count">
+              Aperturas de este enlace: {{ deliveryLink.downloadCount }}
+              <NIcon :component="InformationCircleOutline" :size="13" />
+            </span>
+          </template>
+          Cuenta las veces que se abrió este enlace, no las descargas. Se reinicia al regenerar el
+          enlace.
+        </NTooltip>
       </div>
 
       <NButton type="success" size="small" @click="emit('sendWhatsApp')">

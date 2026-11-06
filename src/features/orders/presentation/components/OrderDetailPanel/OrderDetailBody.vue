@@ -220,7 +220,7 @@ const paymentMethodLabel = computed(() => getPaymentMethodLabel(props.order.paym
       </section>
     </div>
 
-    <OrderDetailActions :order="order" :role="role" @action="emit('action', $event)" />
+    <OrderDetailActions :order="order" @action="emit('action', $event)" />
   </div>
 </template>
 

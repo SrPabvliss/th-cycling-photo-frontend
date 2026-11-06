@@ -3,6 +3,8 @@ import { computed, ref } from 'vue'
 import { NButton, NEmpty, NIcon, NInput, NPopconfirm, NSelect } from 'naive-ui'
 import { AddOutline, CloseCircleOutline } from '@vicons/ionicons5'
 
+import { PERMISSIONS } from '@/core/auth/permissions'
+import { usePermissions } from '@/core/auth/use-permissions'
 import CollapsibleCard from '@/shared/components/CollapsibleCard/CollapsibleCard.vue'
 import { usePhotoCategoriesQuery } from '../../../composables/queries/use-photo-categories'
 import { usePhotoCategoriesGlobalQuery } from '../../../composables/queries/use-photo-categories-global'
@@ -17,6 +19,9 @@ const props = withDefaults(
   }>(),
   { editable: true },
 )
+
+const { has } = usePermissions()
+const canCreateCategory = computed(() => has(PERMISSIONS.PHOTO_CATEGORY_CREATE))
 
 const { data: assignedCategories } = usePhotoCategoriesQuery(() => props.eventId)
 const { data: globalCategories } = usePhotoCategoriesGlobalQuery()
@@ -97,7 +102,7 @@ async function handleCreateAndAssign() {
       </NButton>
     </div>
 
-    <div v-if="editable" class="category-add">
+    <div v-if="editable && canCreateCategory" class="category-add">
       <NInput
         v-model:value="newCategoryName"
         size="small"

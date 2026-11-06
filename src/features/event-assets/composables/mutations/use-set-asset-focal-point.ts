@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
+import { type MaybeRefOrGetter, toValue } from 'vue'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
@@ -11,18 +12,18 @@ interface ISetFocalPointParams {
   focalY: number
 }
 
-export function useSetAssetFocalPoint(eventId: string) {
+export function useSetAssetFocalPoint(eventId: MaybeRefOrGetter<string>) {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async ({ assetType, focalX, focalY }: ISetFocalPointParams) => {
-      await httpClient.patch(API_ROUTES.EVENTS.ASSETS.FOCAL_POINT(eventId, assetType), {
+      await httpClient.patch(API_ROUTES.EVENTS.ASSETS.FOCAL_POINT(toValue(eventId), assetType), {
         focalX,
         focalY,
       })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: EVENT_ASSET_QUERY_KEYS.byEvent(eventId) })
+      queryClient.invalidateQueries({ queryKey: EVENT_ASSET_QUERY_KEYS.byEvent(toValue(eventId)) })
       queryClient.invalidateQueries({ queryKey: [API_ROUTES.EVENTS.BASE] })
     },
   })

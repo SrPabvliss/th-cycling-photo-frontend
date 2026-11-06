@@ -13,6 +13,8 @@ export function useRegenerateDelivery() {
     mutationFn: async (orderId: string) => {
       const response = await httpClient.post<IApiOrderPaymentConfirmed>(
         API_ROUTES.ORDERS.REGENERATE_DELIVERY(orderId),
+        undefined,
+        { silentSuccess: true },
       )
       return toOrderPaymentConfirmed(response.data)
     },

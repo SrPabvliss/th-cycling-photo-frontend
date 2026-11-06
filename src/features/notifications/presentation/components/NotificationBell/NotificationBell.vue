@@ -1,18 +1,29 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { NIcon, NPopover, NBadge } from 'naive-ui'
 import { NotificationsOutline } from '@vicons/ionicons5'
 
+import { PERMISSIONS } from '@/core/auth/permissions'
+import { usePermissions } from '@/core/auth/use-permissions'
 import { useNotificationStore } from '../../../stores/notification.store'
 import { useUnreadCountQuery } from '../../../composables/queries/use-unread-count'
 import NotificationDropdown from '../NotificationDropdown/NotificationDropdown.vue'
 
 const store = useNotificationStore()
+const { has } = usePermissions()
+const canReadNotifications = computed(() => has(PERMISSIONS.NOTIFICATION_READ))
 
-useUnreadCountQuery()
+useUnreadCountQuery(canReadNotifications)
 </script>
 
 <template>
-  <NPopover trigger="click" placement="bottom-end" :show-arrow="false" raw>
+  <NPopover
+    v-if="canReadNotifications"
+    trigger="click"
+    placement="bottom-end"
+    :show-arrow="false"
+    raw
+  >
     <template #trigger>
       <button class="bell-btn">
         <NBadge :value="store.unreadCount" :max="99" :show="store.unreadCount > 0">

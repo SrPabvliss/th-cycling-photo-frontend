@@ -38,11 +38,6 @@ export function useMarkPhotoReviewed() {
         queryClient.invalidateQueries({ queryKey: [API_ROUTES.EVENTS.BASE, 'review'] })
       }
 
-      if (variables.photoSlug) {
-        queryClient.invalidateQueries({
-          queryKey: [API_ROUTES.PHOTOS.BASE, 'detail', variables.photoSlug],
-        })
-      }
       queryClient.invalidateQueries({ queryKey: [API_ROUTES.PHOTOS.BASE] })
     },
   })

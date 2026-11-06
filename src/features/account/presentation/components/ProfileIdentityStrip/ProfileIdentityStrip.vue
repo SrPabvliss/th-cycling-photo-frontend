@@ -20,8 +20,9 @@ const props = withDefaults(
     pending: IProfilePendingItem[]
     reachableSections?: Set<ProfilePendingSection>
     compact?: boolean
+    isOrganizer?: boolean
   }>(),
-  { compact: false },
+  { compact: false, isOrganizer: false },
 )
 
 const emit = defineEmits<{ (e: 'select', item: IProfilePendingItem): void }>()
@@ -49,7 +50,11 @@ const statusHeadline = computed(() => {
 })
 
 const statusSub = computed(() =>
-  isComplete.value ? 'Todo listo para publicar y cobrar.' : 'Toca cualquiera para resolverla.',
+  isComplete.value
+    ? props.isOrganizer
+      ? 'Todo listo para publicar y cobrar.'
+      : 'Todo listo para comprar tus fotos.'
+    : 'Toca cualquiera para resolverla.',
 )
 </script>
 

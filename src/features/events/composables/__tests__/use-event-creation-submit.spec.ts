@@ -312,6 +312,35 @@ describe('useEventCreationSubmit', () => {
     expect(wrapper.get('[data-test="confirmation-heading"]').text()).toBe('Evento creado')
   })
 
+  it('neither asks for the password nor writes the profile for empty items left on save to profile', async () => {
+    const items = reusedItems().map((item) =>
+      item.id === 'payphone' || item.id === 'watermark'
+        ? {
+            ...item,
+            state: 'missing' as const,
+            isReady: false,
+            useProfile: false,
+            saveToProfile: true,
+          }
+        : item,
+    )
+    const selection: IEventConfigurationSelectionRequest = {
+      ...reusedSelection(),
+      watermarkStorageKey: null,
+      payoutMethods: [{ source: 'profile', id: BANK_ID }],
+    }
+    const wrapper = mountHarness({ items, selection })
+
+    await wrapper.get('[data-test="do-submit"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.find('[data-test="password-modal"]').exists()).toBe(false)
+    expect(createPayoutMethod).not.toHaveBeenCalled()
+    expect(updateTenantProfile).not.toHaveBeenCalled()
+    expect(confirmWatermark).not.toHaveBeenCalled()
+    expect(createEvent).toHaveBeenCalledTimes(1)
+  })
+
   it('opens it once, listing both, when two payout items save to the profile', async () => {
     createPayoutMethod
       .mockResolvedValueOnce({ id: 'payphone-new' })

@@ -52,7 +52,8 @@ const { has } = usePermissions()
 
 const role = computed<OrderOperatorRole>(() => {
   if (has(PERMISSIONS.EVENT_READ_ALL)) return 'titan'
-  return sessionStore.currentUser?.tenantId ? 'organizer' : 'operator'
+  const user = sessionStore.currentUser
+  return user?.tenantId && !user.isPlatform ? 'organizer' : 'operator'
 })
 
 const filterState = useOrderFilters()
@@ -94,8 +95,13 @@ const subtitle = computed(() => {
   return SUBTITLES.organizer.replace('{organizador}', name)
 })
 
-const { handleConfirmPayment, handleNotifyPaymentInfo, handleSendDelivery, handleRegenerate } =
-  useOrderActions()
+const {
+  handleConfirmPayment,
+  handleMarkGift,
+  handleNotifyPaymentInfo,
+  handleSendDelivery,
+  handleRegenerate,
+} = useOrderActions()
 
 const orders = computed<IOrderListItem[]>(() => data.value?.pages.flatMap((p) => p.items) ?? [])
 
@@ -223,12 +229,13 @@ function handleSendPaymentInfo(order: IOrderListItem) {
                 v-for="group in customerGroups"
                 :key="group.key"
                 :group="group"
-                :role="role"
                 @view="handleView"
                 @confirm-payment="handleConfirmPayment"
                 @send-delivery="handleSendDelivery"
                 @resend-delivery="handleRegenerate"
                 @send-payment-info="handleSendPaymentInfo"
+                @mark-gift="handleMarkGift"
+                @regenerate="handleRegenerate"
               />
 
               <div ref="sentinelRef" class="orders-sentinel" aria-hidden="true" />

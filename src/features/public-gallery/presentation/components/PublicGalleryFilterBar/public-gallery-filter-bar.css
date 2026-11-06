@@ -37,11 +37,14 @@
   color: #1a1f2c;
 }
 
-.pgfb__chip:hover {
-  background: #f3f4f6;
+@media (hover: hover) {
+  .pgfb__chip:hover {
+    background: #f3f4f6;
+  }
 }
 
-.pgfb__chip--active {
+.pgfb__chip--active,
+.pgfb__chip--active:hover {
   background: var(--tt-primary, #105080);
   border-color: var(--tt-primary, #105080);
   color: #fff;

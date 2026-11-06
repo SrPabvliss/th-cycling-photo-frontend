@@ -9,11 +9,8 @@ import { formatCurrency } from '@/shared/utils/currency.utils'
 import { ORDER_STATUS, type IOrderListItem } from '../../../types/responses/order-list.response'
 import { PAYMENT_METHOD_LABELS } from '../../../constants/status-config'
 import { getOrderStatusPresentation } from '../../../utils/order-status-presentation'
-import {
-  primaryOrderAction,
-  isPlatformRole,
-  type OrderOperatorRole,
-} from '../../../utils/order-actions'
+import { usePermissions } from '@/core/auth/use-permissions'
+import { primaryOrderAction } from '../../../utils/order-actions'
 import OrderTimeline from '../OrderTimeline/OrderTimeline.vue'
 import { pluralize } from '@/shared/utils/format.utils'
 
@@ -22,7 +19,6 @@ const MAX_THUMBS = 3
 const props = withDefaults(
   defineProps<{
     order: IOrderListItem
-    role: OrderOperatorRole
     showCustomer?: boolean
     customerLabel?: string
     customerPhone?: string | null
@@ -79,13 +75,10 @@ const paymentMethodLabel = computed(() =>
     : 'Sin método',
 )
 
-const isPlatform = computed(() => isPlatformRole(props.role))
+const { has } = usePermissions()
 
 const primaryAction = computed(() =>
-  primaryOrderAction(
-    { status: props.order.status, deliveredAt: props.order.deliveredAt },
-    isPlatform.value,
-  ),
+  primaryOrderAction({ status: props.order.status, deliveredAt: props.order.deliveredAt }, has),
 )
 
 function handlePrimaryAction() {
@@ -192,7 +185,7 @@ function handlePrimaryAction() {
         {{ primaryAction.label }}
       </button>
       <button class="or__btn or__btn--ghost" @click.stop="emit('view', order.id)">
-        {{ primaryAction ? 'Detalle' : 'Ver detalle' }}
+        Ver detalle
         <NIcon :component="ChevronForwardOutline" :size="12" />
       </button>
     </div>

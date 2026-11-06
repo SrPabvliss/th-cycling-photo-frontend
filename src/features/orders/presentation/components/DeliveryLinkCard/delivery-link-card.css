@@ -52,3 +52,10 @@
   color: #6b7280;
   margin: 0;
 }
+
+.dl-card__opens {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: help;
+}

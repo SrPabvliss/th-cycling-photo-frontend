@@ -1,7 +1,7 @@
 import { computed } from 'vue'
 
 import { useSessionStore } from '@/core/auth/stores/session.store'
-import type { PermissionKey } from './permissions'
+import { holdsPermission, type PermissionKey } from './permissions'
 
 export function usePermissions() {
   const authStore = useSessionStore()
@@ -16,5 +16,9 @@ export function usePermissions() {
     return keys.some((key) => permissions.value.includes(key))
   }
 
-  return { permissions, has, hasAny }
+  function hasForEvent(key: PermissionKey, eventId: string | null | undefined): boolean {
+    return holdsPermission(authStore.currentUser, key, eventId ?? null)
+  }
+
+  return { permissions, has, hasAny, hasForEvent }
 }

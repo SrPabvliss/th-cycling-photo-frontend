@@ -12,6 +12,8 @@ export function useSetPrimaryPhone() {
     mutationFn: async (phoneId: IUserPhone['id']) => {
       const response = await httpClient.patch<{ id: string }>(
         API_ROUTES.USER_PHONES.SET_PRIMARY(phoneId),
+        undefined,
+        { silentSuccess: true },
       )
       return response.data
     },

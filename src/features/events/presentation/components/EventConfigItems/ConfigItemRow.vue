@@ -22,6 +22,7 @@ const props = defineProps<{
   state: ConfigurationItemState
   summary: string
   open: boolean
+  thumbnailUrl?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -53,7 +54,10 @@ const actionLabel = computed(() => {
 <template>
   <section class="ce-item" :class="[state, { open }]" data-test="config-item">
     <button class="ce-item-head" type="button" data-test="config-item-head" @click="emit('toggle')">
-      <span class="ce-item-ic"><NIcon :component="iconComponent" :size="17" /></span>
+      <span v-if="thumbnailUrl" class="ce-item-ic ce-item-ic--thumb">
+        <img :src="thumbnailUrl" :alt="label" data-test="config-item-thumbnail" />
+      </span>
+      <span v-else class="ce-item-ic"><NIcon :component="iconComponent" :size="17" /></span>
       <span class="ce-item-t">
         <b>{{ label }}</b>
         <i data-test="config-item-summary">{{ summary }}</i>

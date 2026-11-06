@@ -24,6 +24,7 @@ export function toEventDetail(api: IApiEventDetail): IEventDetail {
     isFrozen: api.isFrozen,
     frozenAt: api.frozenAt ? new Date(api.frozenAt) : null,
     organizerName: api.organizerName,
+    eventTypeId: api.eventTypeId,
     eventTypeName: api.eventTypeName,
     contractName: api.contractName,
     reviewedCount: api.reviewedCount,

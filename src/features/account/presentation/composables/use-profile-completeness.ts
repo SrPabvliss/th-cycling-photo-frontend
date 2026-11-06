@@ -35,10 +35,8 @@ export function useProfileCompleteness({
   payoutMethods,
   isOperator,
 }: IUseProfileCompletenessArgs) {
-  const hasVerifiedPayphone = computed(() =>
-    (payoutMethods.value ?? []).some(
-      (method) => method.provider === 'payphone' && method.status === 'verified',
-    ),
+  const hasActivePayoutMethod = computed(() =>
+    (payoutMethods.value ?? []).some((method) => method.isActive),
   )
 
   const pendingItems = computed<IProfilePendingItem[]>(() => {
@@ -58,9 +56,9 @@ export function useProfileCompleteness({
     }
 
     if (isOperator.value) {
-      if (!hasVerifiedPayphone.value) {
+      if (payoutMethods.value && !hasActivePayoutMethod.value) {
         items.push({
-          label: 'Configura Payphone',
+          label: 'Método de cobro',
           urgent: true,
           group: 'business',
           section: 'payouts',
@@ -68,9 +66,6 @@ export function useProfileCompleteness({
       }
       if (tenantProfile.value && !tenantProfile.value.publicName) {
         items.push({ label: 'Nombre público', urgent: false, group: 'business', section: 'brand' })
-      }
-      if (tenantProfile.value && !tenantProfile.value.watermarkUrl) {
-        items.push({ label: 'Marca de agua', urgent: false, group: 'business', section: 'brand' })
       }
       if (tenantProfile.value && !tenantProfile.value.whatsappNumber) {
         items.push({
@@ -92,5 +87,5 @@ export function useProfileCompleteness({
     pendingItems.value.filter((item) => item.group === 'business'),
   )
 
-  return { pendingItems, accountPending, businessPending, hasVerifiedPayphone }
+  return { pendingItems, accountPending, businessPending, hasActivePayoutMethod }
 }

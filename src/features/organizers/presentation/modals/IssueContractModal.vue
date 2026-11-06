@@ -162,7 +162,7 @@ function close() {
     @update:show="(v: boolean) => emit('update:show', v)"
     preset="card"
     :title="mode === 'renew' ? 'Renovar contrato' : 'Emitir contrato'"
-    style="width: 520px"
+    style="width: 520px; max-width: calc(100vw - 32px)"
   >
     <template #header-extra>{{
       mode === 'renew' ? organizer?.name : 'Un contrato da cupo de eventos a una persona con cuenta'
@@ -192,7 +192,7 @@ function close() {
         </div>
       </div>
 
-      <label class="icm-field">
+      <div class="icm-field" role="group" aria-label="Persona">
         <span class="icm-field__label">Persona</span>
         <PersonPicker
           :picked="picked"
@@ -208,7 +208,7 @@ function close() {
         <span v-if="mode === 'renew'" class="icm-field__hint">
           El titular del contrato no se puede cambiar en una renovación.
         </span>
-      </label>
+      </div>
 
       <label class="icm-field">
         <span class="icm-field__label">Nombre comercial</span>

@@ -7,11 +7,12 @@ import VerifyEmailPrompt from '@/features/account/presentation/components/Verify
 import PersonalProfilePrompt from '@/features/account/presentation/components/PersonalProfilePrompt/PersonalProfilePrompt.vue'
 import NotificationSocketProvider from '@/features/notifications/presentation/components/NotificationSocketProvider/NotificationSocketProvider.vue'
 import { titanTvTheme } from '@/core/theme/titan-tv-theme'
+import { MESSAGE_CONTAINER_STYLE } from '@/core/ui/discrete-api'
 </script>
 
 <template>
   <NConfigProvider :theme-overrides="titanTvTheme" :locale="esAR" :date-locale="dateEsAR">
-    <NMessageProvider>
+    <NMessageProvider :container-style="MESSAGE_CONTAINER_STYLE">
       <NDialogProvider>
         <ErrorBoundary>
           <NotificationSocketProvider />

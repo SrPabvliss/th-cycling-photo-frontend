@@ -12,6 +12,7 @@ export function useDeletePhone() {
     mutationFn: async (phoneId: IUserPhone['id']) => {
       const response = await httpClient.delete<{ id: string }>(
         API_ROUTES.USER_PHONES.BY_ID(phoneId),
+        { silentSuccess: true },
       )
       return response.data
     },

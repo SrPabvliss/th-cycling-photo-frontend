@@ -42,7 +42,7 @@ async function confirm() {
     :show="show"
     preset="card"
     title="Cambiar el cupo de fotos"
-    style="width: 440px"
+    style="width: 440px; max-width: calc(100vw - 32px)"
     @update:show="(v: boolean) => emit('update:show', v)"
   >
     <div class="pqm-body">

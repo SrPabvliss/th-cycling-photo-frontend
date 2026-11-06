@@ -76,10 +76,14 @@ export function registerAuthInterceptor(axios: AxiosInstance): void {
       const authStore = useSessionStore()
       authStore.clearSession()
 
-      // Only redirect to login if current route requires auth
       const { default: router } = await import('@/app/router')
-      if (router.currentRoute.value.meta.public !== true) {
-        router.push('/login')
+      const current = router.currentRoute.value
+      const target =
+        current.matched.length > 0
+          ? current
+          : router.resolve(window.location.pathname + window.location.search)
+      if (target.meta.public !== true) {
+        router.push({ path: '/login', query: { redirect: target.fullPath } })
       }
 
       return Promise.reject(refreshError)

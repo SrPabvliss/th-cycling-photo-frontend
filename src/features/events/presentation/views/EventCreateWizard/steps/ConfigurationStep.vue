@@ -25,6 +25,7 @@ const {
   items,
   drafts,
   readyCount,
+  watermarkPreviewUrl,
   isComplete,
   totalCount,
   toggle,
@@ -67,8 +68,10 @@ defineExpose(configuration)
         <div>
           <h2>Configuración del evento</h2>
           <p>
-            Cinco datos que el comprador verá y usará para pagarte. Puedes reusar los de tu perfil o
-            poner otros solo para este evento.
+            Lo que el comprador verá y usará para pagarte: nombre público, WhatsApp y al menos un
+            método de cobro (Payphone o transferencia). La marca de agua es opcional; sin ella se
+            usa la de Titan TV. Puedes reusar los datos de tu perfil o poner otros solo para este
+            evento.
           </p>
         </div>
         <span class="ce-count" :class="{ ok: isComplete }" data-test="ready-count">
@@ -91,6 +94,7 @@ defineExpose(configuration)
           :state="item.state"
           :summary="item.summary"
           :open="item.isOpen"
+          :thumbnail-url="item.id === 'watermark' ? watermarkPreviewUrl : null"
           @toggle="toggle(item.id)"
         >
           <PublicNameBody

@@ -38,3 +38,18 @@ export function openWhatsApp(phone: string | null | undefined, message: string):
 export function openWhatsAppWithTemplate(template: string): void {
   window.open(`${WHATSAPP_BASE}?text=${encodeURIComponent(template)}`, '_blank')
 }
+
+export async function openWhatsAppWhenReady(
+  phone: string | null | undefined,
+  message: Promise<string>,
+): Promise<void> {
+  const tab = window.open('', '_blank')
+  try {
+    const url = buildWhatsAppUrl(phone ?? '', await message)
+    if (tab) tab.location.href = url
+    else window.open(url, '_blank')
+  } catch (error) {
+    tab?.close()
+    throw error
+  }
+}

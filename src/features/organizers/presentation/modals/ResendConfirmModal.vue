@@ -50,7 +50,7 @@ function submit() {
     @update:show="(v: boolean) => emit('update:show', v)"
     preset="card"
     title="Reenviar invitación"
-    style="width: 460px"
+    style="width: 460px; max-width: calc(100vw - 32px)"
   >
     <template #header-extra>{{ invitation.commercialName }} · {{ invitation.holderName }}</template>
 

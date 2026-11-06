@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { NAlert, NButton, NInput } from 'naive-ui'
 import { useIntervalFn } from '@vueuse/core'
 
@@ -16,6 +16,21 @@ const RESEND_COOLDOWN_SECONDS = 60
 const CONTACT_EMAIL = 'info@titantv.com.ec'
 
 const router = useRouter()
+const route = useRoute()
+
+const returnPath = computed<string | null>(() => {
+  const raw = route.query.redirect
+  const value = Array.isArray(raw) ? raw[0] : raw
+  return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//')
+    ? value
+    : null
+})
+const isReturningToContract = computed(() => returnPath.value?.startsWith('/contracts/') ?? false)
+
+function continueAfterVerification() {
+  if (returnPath.value) router.push(returnPath.value)
+  else goToProfile()
+}
 
 const {
   data: status,
@@ -342,15 +357,26 @@ function goToProfile() {
         <template v-else-if="screen === 'success'">
           <h1 class="verify-email-view__title">Listo, verificamos tu correo</h1>
           <p class="verify-email-view__hint">
-            Gracias por confirmarlo. Ya puedes volver a tu perfil.
+            {{
+              isReturningToContract
+                ? 'Gracias por confirmarlo. Ya puedes volver a tu contrato para aceptarlo.'
+                : 'Gracias por confirmarlo. Ya puedes volver a tu perfil.'
+            }}
           </p>
           <NButton
             type="primary"
             size="large"
             class="verify-email-view__action"
-            @click="goToProfile"
+            data-test="verify-continue"
+            @click="continueAfterVerification"
           >
-            Volver al perfil
+            {{
+              isReturningToContract
+                ? 'Volver al contrato'
+                : returnPath
+                  ? 'Continuar'
+                  : 'Volver al perfil'
+            }}
           </NButton>
         </template>
       </div>

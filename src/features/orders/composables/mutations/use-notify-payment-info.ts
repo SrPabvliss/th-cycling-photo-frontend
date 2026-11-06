@@ -12,6 +12,8 @@ export function useNotifyPaymentInfo() {
     mutationFn: async (orderId: string) => {
       const response = await httpClient.patch<IApiPaymentInfoNotified>(
         API_ROUTES.ORDERS.NOTIFY_PAYMENT_INFO(orderId),
+        undefined,
+        { silentSuccess: true },
       )
       return response.data
     },

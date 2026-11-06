@@ -10,18 +10,15 @@ import {
   SendOutline,
 } from '@vicons/ionicons5'
 
+import { usePermissions } from '@/core/auth/use-permissions'
 import type { IOrderDetail } from '../../../types/responses/order-detail.response'
-import {
-  isPlatformRole,
-  resolveOrderActions,
-  type OrderActionId,
-  type OrderOperatorRole,
-} from '../../../utils/order-actions'
+import { resolveOrderActions, type OrderActionId } from '../../../utils/order-actions'
 
 const props = defineProps<{
   order: IOrderDetail
-  role: OrderOperatorRole
 }>()
+
+const { has } = usePermissions()
 
 const emit = defineEmits<{
   action: [id: OrderActionId]
@@ -40,10 +37,7 @@ const ACTION_ICONS: Record<OrderActionId, Component> = {
 }
 
 const actions = computed(() =>
-  resolveOrderActions(
-    { status: props.order.status, deliveredAt: props.order.deliveredAt },
-    isPlatformRole(props.role),
-  ),
+  resolveOrderActions({ status: props.order.status, deliveredAt: props.order.deliveredAt }, has),
 )
 
 function handleActionClick(id: OrderActionId) {

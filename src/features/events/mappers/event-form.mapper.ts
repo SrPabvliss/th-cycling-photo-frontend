@@ -11,7 +11,7 @@ export function toEventFormData(event: IEventDetail): IEventFormData {
     endDate: event.endDate.getTime(),
     provinceId: event.provinceId,
     cantonId: event.cantonId,
-    eventTypeId: 1,
+    eventTypeId: event.eventTypeId,
   }
 }
 

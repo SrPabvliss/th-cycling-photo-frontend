@@ -24,6 +24,16 @@ const { data: event, isPending: isEventPending, isError: isEventError } = useEve
 
 const eventId = computed(() => event.value?.id ?? '')
 
+const blockedMessage = computed<string | null>(() => {
+  if (event.value?.isFrozen) {
+    return 'Este evento está congelado, así que no se le pueden subir fotos.'
+  }
+  if (event.value?.status === 'archived') {
+    return 'Este evento está archivado, así que no se le pueden subir fotos.'
+  }
+  return null
+})
+
 const quotaRemaining = computed(() => {
   const detail = event.value
   if (!detail || detail.photoQuota === null) return null
@@ -70,6 +80,16 @@ function handleGoToGallery() {
           title="Error al cargar evento"
           description="No se pudo obtener la información del evento."
         />
+      </div>
+
+      <div v-else-if="blockedMessage" class="error-container" data-test="upload-blocked">
+        <NResult status="warning" title="No se pueden subir fotos" :description="blockedMessage">
+          <template #footer>
+            <NButton type="primary" @click="router.push('/events/' + slug)">
+              Volver al evento
+            </NButton>
+          </template>
+        </NResult>
       </div>
 
       <template v-else-if="!isEventPending && event">

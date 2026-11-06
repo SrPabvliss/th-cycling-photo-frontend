@@ -8,6 +8,7 @@ import { STANDALONE_PATHS } from '@/core/views/standalone-routes'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import type { IApiCurrentUser } from '@/core/auth/current-user'
+import { holdsPermission } from '@/core/auth/permissions'
 
 let isHydrated = false
 
@@ -39,7 +40,10 @@ export function registerAuthGuard(router: Router): void {
 
     // Public routes — no auth required
     if (to.meta.public) {
-      if (authStore.isAuthenticated && (to.path === ROUTE_PATHS.LOGIN || to.path === ROUTE_PATHS.REGISTER)) {
+      if (
+        authStore.isAuthenticated &&
+        (to.path === ROUTE_PATHS.LOGIN || to.path === ROUTE_PATHS.REGISTER)
+      ) {
         return getHomePath(authStore.currentUser?.permissions ?? [])
       }
       return true
@@ -52,10 +56,11 @@ export function registerAuthGuard(router: Router): void {
 
     const required = to.meta.permissions as string[] | undefined
     if (required?.length) {
-      const held = authStore.currentUser?.permissions ?? []
-      if (!required.some((permission) => held.includes(permission))) {
-        return STANDALONE_PATHS.ACCESS_DENIED
-      }
+      const user = authStore.currentUser
+      const isAllowed = to.meta.eventScoped
+        ? required.some((permission) => holdsPermission(user, permission))
+        : required.some((permission) => user?.permissions.includes(permission))
+      if (!isAllowed) return STANDALONE_PATHS.ACCESS_DENIED
     }
 
     return true

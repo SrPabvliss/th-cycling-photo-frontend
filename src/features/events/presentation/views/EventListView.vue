@@ -50,7 +50,7 @@ const authStore = useSessionStore()
 const role = computed<EventRole>(() => {
   const user = authStore.currentUser
   if (user?.permissions.includes(PERMISSIONS.EVENT_READ_ALL)) return 'titan'
-  return user?.tenantId ? 'organizer' : 'operator'
+  return user?.tenantId && !user.isPlatform ? 'organizer' : 'operator'
 })
 
 const filterState = useEventFilters()
@@ -199,7 +199,12 @@ function handleCreate() {
 
         <template v-else-if="events.length === 0">
           <OperatorEmpty v-if="role === 'operator' && !hasActiveFilters" />
-          <FirstRun v-else-if="!hasActiveFilters" />
+          <FirstRun
+            v-else-if="!hasActiveFilters"
+            :is-organizer="isOrganizer"
+            :can-create="showCreateAffordance && hasCapacity"
+            @create="handleCreate"
+          />
           <NoResults v-else :query="filters.search" @clear="clearAll()" />
         </template>
 

@@ -313,11 +313,94 @@ describe('useConfigurationItems', () => {
 
   it('can be saved when an item is missing everywhere but the event still keeps a payout method', () => {
     const preset = ref(makePreset({ watermarkStorageKey: null }))
-    const current = ref(makeCurrent({ watermarkStorageKey: null }))
-    const { readyCount, canSave } = useConfigurationItems(preset, current)
+    const current = ref(
+      makeCurrent({ watermarkStorageKey: null, whatsappNumber: '+593 99 812 4477' }),
+    )
+    const { canSave } = useConfigurationItems(preset, current)
 
-    expect(readyCount.value).toBeLessThan(5)
     expect(canSave.value).toBe(true)
+  })
+
+  it("previews the event's own watermark while it is unchanged", () => {
+    const preset = ref(makePreset())
+    const current = ref(makeCurrent())
+    const { watermarkPreviewUrl } = useConfigurationItems(preset, current)
+
+    expect(watermarkPreviewUrl.value).toBe(
+      'https://cdn.titantv.com.ec/events/sierra-norte/marca.png',
+    )
+  })
+
+  it('previews the profile watermark when the wizard reuses it', () => {
+    const preset = ref(makePreset())
+    const { watermarkPreviewUrl } = useConfigurationItems(preset)
+
+    expect(watermarkPreviewUrl.value).toBe('https://cdn.example/marca-andes-2026.png')
+  })
+
+  it('still saves an older event that never had a WhatsApp number', () => {
+    const preset = ref(makePreset({ whatsappNumber: null }))
+    const current = ref(makeCurrent({ whatsappNumber: null }))
+    const { canSave } = useConfigurationItems(preset, current)
+
+    expect(canSave.value).toBe(true)
+  })
+
+  it('refuses to save when the stored WhatsApp number is cleared', () => {
+    const preset = ref(makePreset())
+    const current = ref(makeCurrent({ whatsappNumber: '+593 99 812 4477' }))
+    const { canSave, patchDraft } = useConfigurationItems(preset, current)
+
+    patchDraft('whatsapp', { value: '' })
+
+    expect(canSave.value).toBe(false)
+  })
+
+  it('lets the wizard continue with name, WhatsApp and only a bank transfer, without a watermark', () => {
+    const preset = ref(
+      makePreset({ watermarkStorageKey: null, availablePayoutMethods: [profileBankMethod] }),
+    )
+    const { isComplete, readyCount, totalCount, toSelection } = useConfigurationItems(preset)
+
+    expect(readyCount.value).toBe(totalCount)
+    expect(isComplete.value).toBe(true)
+    expect(toSelection()).toMatchObject({
+      watermarkStorageKey: null,
+      payoutMethods: [{ source: 'profile', id: profileBankMethod.id }],
+    })
+  })
+
+  it('lets the wizard continue with only a payphone', () => {
+    const preset = ref(makePreset({ availablePayoutMethods: [profilePayphoneMethod] }))
+    const { isComplete } = useConfigurationItems(preset)
+
+    expect(isComplete.value).toBe(true)
+  })
+
+  it('keeps the wizard closed without any payout method', () => {
+    const preset = ref(makePreset({ availablePayoutMethods: [] }))
+    const { isComplete, readyCount } = useConfigurationItems(preset)
+
+    expect(readyCount.value).toBe(2)
+    expect(isComplete.value).toBe(false)
+  })
+
+  it('keeps the wizard closed without a WhatsApp number', () => {
+    const preset = ref(makePreset({ whatsappNumber: null }))
+    const { isComplete } = useConfigurationItems(preset)
+
+    expect(isComplete.value).toBe(false)
+  })
+
+  it('keeps the wizard closed while a new payphone is typed but not verified', () => {
+    const preset = ref(makePreset({ availablePayoutMethods: [profileBankMethod] }))
+    const { isComplete, patchDraft } = useConfigurationItems(preset)
+
+    patchDraft('payphone', { phone: '+593987654321', verification: 'pending' })
+    expect(isComplete.value).toBe(false)
+
+    patchDraft('payphone', { verification: 'verified' })
+    expect(isComplete.value).toBe(true)
   })
 
   it('sends nothing when the screen is saved without any change', () => {

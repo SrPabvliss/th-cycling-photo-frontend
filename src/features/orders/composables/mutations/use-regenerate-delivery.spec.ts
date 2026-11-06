@@ -21,7 +21,9 @@ describe('useRegenerateDelivery', () => {
       useRegenerateDelivery() as unknown as { mutationFn: (id: string) => Promise<unknown> }
     ).mutationFn('order-1')
 
-    expect(httpClient.post).toHaveBeenCalledWith('/orders/order-1/regenerate-delivery')
+    expect(httpClient.post).toHaveBeenCalledWith('/orders/order-1/regenerate-delivery', undefined, {
+      silentSuccess: true,
+    })
     expect(httpClient.patch).not.toHaveBeenCalled()
   })
 })

@@ -34,7 +34,7 @@ const { copy, copied } = useClipboard({ source: () => props.url })
     @update:show="(v: boolean) => emit('update:show', v)"
     preset="card"
     :title="resend ? 'Enlace reenviado' : 'Contrato emitido'"
-    style="width: 520px"
+    style="width: 520px; max-width: calc(100vw - 32px)"
   >
     <template v-if="commercialName" #header-extra>
       {{ commercialName }}<template v-if="holderName"> · {{ holderName }}</template>

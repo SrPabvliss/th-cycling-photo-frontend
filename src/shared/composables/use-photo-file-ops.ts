@@ -13,17 +13,27 @@ export function usePhotoFileOps() {
 
   const uploadRetouched = useMutation({
     mutationFn: async ({ photoId, file }: { photoId: string; file: File }) => {
-      const presignedRes = await httpClient.post<{ url: string; key: string }>(
-        API_ROUTES.PHOTOS.RETOUCHED_PRESIGNED_URL(photoId),
-        { contentType: file.type, fileSize: file.size },
-      )
-      await fetch(presignedRes.data.url, {
+      const presignedRes = await httpClient.post<{
+        url: string | null
+        objectKey: string | null
+        isDuplicate?: boolean
+      }>(API_ROUTES.PHOTOS.RETOUCHED_PRESIGNED_URL(photoId), {
+        fileName: file.name,
+        contentType: file.type,
+      })
+      const { url, objectKey, isDuplicate } = presignedRes.data
+      if (isDuplicate || !url || !objectKey) return
+
+      const uploadResponse = await fetch(url, {
         method: 'PUT',
         body: file,
         headers: { 'Content-Type': file.type },
       })
+      if (!uploadResponse.ok) throw new Error('retouched upload failed')
+
       await httpClient.post(API_ROUTES.PHOTOS.RETOUCHED_CONFIRM(photoId), {
-        key: presignedRes.data.key,
+        objectKey,
+        fileSize: file.size,
       })
     },
     onSuccess: () => {

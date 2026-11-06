@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
 import { toCurrentUser } from '@/core/auth/current-user.mapper'
+import { useHatStore } from '@/core/auth/stores/hat.store'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import type { IApiCurrentUser } from '@/core/auth/current-user'
 import { CONTRACT_QUERY_KEYS } from '../../constants/query-keys'
@@ -24,6 +25,7 @@ export function useAcceptContract() {
           silent: true,
         })
         authStore.setSession(authStore.accessToken, toCurrentUser(meResponse.data))
+        useHatStore().setHat('operating')
       }
       queryClient.invalidateQueries({ queryKey: CONTRACT_QUERY_KEYS.byToken(token) })
     },

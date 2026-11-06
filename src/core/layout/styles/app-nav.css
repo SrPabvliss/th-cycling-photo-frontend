@@ -95,6 +95,10 @@
 }
 
 .app-nav-user-role {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 11px;
   color: #6b7280;
   line-height: 1.2;
@@ -268,4 +272,18 @@
   .app-nav-user-info {
     display: none;
   }
+}
+
+.app-nav-menu__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f1f3;
+}
+
+.app-nav-menu__user .app-nav-user-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }

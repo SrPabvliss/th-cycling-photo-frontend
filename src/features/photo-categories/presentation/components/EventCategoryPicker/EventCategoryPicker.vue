@@ -3,6 +3,8 @@ import { computed, ref } from 'vue'
 import { NButton, NIcon, NInput } from 'naive-ui'
 import { AddOutline } from '@vicons/ionicons5'
 
+import { PERMISSIONS } from '@/core/auth/permissions'
+import { usePermissions } from '@/core/auth/use-permissions'
 import { usePhotoCategoriesGlobalQuery } from '../../../composables/queries/use-photo-categories-global'
 
 const props = defineProps<{
@@ -16,6 +18,8 @@ const emit = defineEmits<{
 
 const { data: globalCategories } = usePhotoCategoriesGlobalQuery()
 const newCategoryName = ref('')
+const { has } = usePermissions()
+const canCreateCategory = computed(() => has(PERMISSIONS.PHOTO_CATEGORY_CREATE))
 
 const displayCategories = computed(() => globalCategories.value ?? [])
 
@@ -59,7 +63,7 @@ function handleCreateNew() {
       </button>
     </div>
 
-    <div class="category-picker__add">
+    <div v-if="canCreateCategory" class="category-picker__add">
       <NInput
         v-model:value="newCategoryName"
         size="small"
