@@ -2,7 +2,7 @@ import { h } from 'vue'
 import { NIcon, useDialog, useMessage } from 'naive-ui'
 import { GiftOutline } from '@vicons/ionicons5'
 
-import { openWhatsApp } from '@/shared/utils/whatsapp.utils'
+import { openWhatsApp, openWhatsAppWhenReady } from '@/shared/utils/whatsapp.utils'
 import { useConfirmPayment } from './mutations/use-confirm-payment'
 import { useMarkGift } from './mutations/use-mark-gift'
 import { useNotifyPaymentInfo } from './mutations/use-notify-payment-info'
@@ -152,11 +152,13 @@ export function useOrderActions() {
     })
   }
 
-  async function handleNotifyPaymentInfo(order: IOrderListItem) {
+  async function handleNotifyPaymentInfo(order: Pick<IOrderListItem, 'id' | 'snapWhatsapp'>) {
     try {
-      const result = await notifyPaymentInfo(order.id)
-      // Composed server-side so the buyer is told to transfer to the account frozen on this event.
-      openWhatsApp(order.snapWhatsapp, result.whatsappTemplate)
+      await openWhatsAppWhenReady(
+        order.snapWhatsapp,
+        notifyPaymentInfo(order.id).then((result) => result.whatsappTemplate),
+      )
+      message.success('Info de pago registrada')
     } catch {
       message.error('No se pudo registrar el envío. Intenta de nuevo.')
     }

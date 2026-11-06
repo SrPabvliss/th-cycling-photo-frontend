@@ -65,10 +65,29 @@ const emit = defineEmits<{
   sendDelivery: [order: IOrderListItem]
   sendPaymentInfo: [order: IOrderListItem]
   resendDelivery: [order: IOrderListItem]
-  regenerate: [id: string]
+  regenerate: [order: IOrderListItem]
 }>()
 
 const { has } = usePermissions()
+
+const canNotify = computed(() => has(PERMISSIONS.ORDER_NOTIFY_PAYMENT))
+const canConfirm = computed(() => has(PERMISSIONS.ORDER_CONFIRM_PAYMENT))
+const canRegenerate = computed(() => has(PERMISSIONS.ORDER_DELIVERY_REGENERATE))
+const isAwaitingPayment = computed(
+  () =>
+    props.order.status === ORDER_STATUS.PENDING ||
+    props.order.status === ORDER_STATUS.PAYMENT_INFO_SENT,
+)
+const isAwaitingDelivery = computed(
+  () =>
+    props.order.status === ORDER_STATUS.PAID ||
+    (props.order.status === ORDER_STATUS.GIFTED && !props.order.deliveredAt),
+)
+const isDelivered = computed(
+  () =>
+    props.order.status === ORDER_STATUS.DELIVERED ||
+    (props.order.status === ORDER_STATUS.GIFTED && props.order.deliveredAt !== null),
+)
 
 const isNew = computed(
   () => isRecent(props.order.createdAt) && props.order.status === ORDER_STATUS.PENDING,
@@ -212,16 +231,20 @@ const paymentMethodLabel = computed(() =>
 
     <!-- Actions -->
     <div class="oc__actions">
-      <template
-        v-if="
-          order.status === ORDER_STATUS.PENDING || order.status === ORDER_STATUS.PAYMENT_INFO_SENT
-        "
-      >
-        <button class="oc__btn oc__btn--wa" @click.stop="emit('sendPaymentInfo', order)">
+      <template v-if="isAwaitingPayment && (canNotify || canConfirm)">
+        <button
+          v-if="canNotify"
+          class="oc__btn oc__btn--wa"
+          @click.stop="emit('sendPaymentInfo', order)"
+        >
           <NIcon :component="LogoWhatsapp" :size="16" />
           {{ order.status === ORDER_STATUS.PAYMENT_INFO_SENT ? 'Reenviar info' : 'Info de pago' }}
         </button>
-        <button class="oc__btn oc__btn--confirm" @click.stop="emit('confirmPayment', order.id)">
+        <button
+          v-if="canConfirm"
+          class="oc__btn oc__btn--confirm"
+          @click.stop="emit('confirmPayment', order.id)"
+        >
           <NIcon :component="CheckmarkOutline" :size="16" />
           Confirmar pago
         </button>
@@ -237,10 +260,7 @@ const paymentMethodLabel = computed(() =>
       </template>
 
       <button
-        v-else-if="
-          order.status === ORDER_STATUS.PAID ||
-          (order.status === ORDER_STATUS.GIFTED && !order.deliveredAt)
-        "
+        v-else-if="isAwaitingDelivery && has(PERMISSIONS.ORDER_DELIVER)"
         class="oc__btn oc__btn--send"
         @click.stop="emit('sendDelivery', order)"
       >
@@ -249,10 +269,7 @@ const paymentMethodLabel = computed(() =>
       </button>
 
       <button
-        v-else-if="
-          (order.status === ORDER_STATUS.DELIVERED || order.status === ORDER_STATUS.GIFTED) &&
-          order.hasDeliveryLink
-        "
+        v-else-if="isDelivered && order.hasDeliveryLink && canRegenerate"
         class="oc__btn oc__btn--wa"
         @click.stop="emit('resendDelivery', order)"
       >
@@ -261,13 +278,9 @@ const paymentMethodLabel = computed(() =>
       </button>
 
       <button
-        v-else-if="
-          (order.status === ORDER_STATUS.DELIVERED ||
-            (order.status === ORDER_STATUS.GIFTED && order.deliveredAt)) &&
-          !order.hasDeliveryLink
-        "
+        v-else-if="isDelivered && !order.hasDeliveryLink && canRegenerate"
         class="oc__btn"
-        @click.stop="emit('regenerate', order.id)"
+        @click.stop="emit('regenerate', order)"
       >
         <NIcon :component="RefreshOutline" :size="16" />
         Regenerar enlace
@@ -275,7 +288,7 @@ const paymentMethodLabel = computed(() =>
 
       <button v-else class="oc__btn" @click.stop="emit('view', order.id)">
         <NIcon :component="EyeOutline" :size="16" />
-        Ver detalles
+        Ver detalle
       </button>
 
       <button class="oc__icon-btn" @click.stop="emit('view', order.id)">

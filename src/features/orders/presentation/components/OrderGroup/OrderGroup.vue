@@ -4,14 +4,12 @@ import { useMediaQuery } from '@vueuse/core'
 
 import type { IOrderListItem } from '../../../types/responses/order-list.response'
 import type { IOrderCustomerGroup } from '../../../types/order-customer-group.type'
-import type { OrderOperatorRole } from '../../../utils/order-actions'
 import OrderCustomerSeparator from '../OrderCustomerSeparator/OrderCustomerSeparator.vue'
 import OrderRow from '../OrderRow/OrderRow.vue'
 import OrderCard from '../OrderCard/OrderCard.vue'
 
 const props = defineProps<{
   group: IOrderCustomerGroup
-  role: OrderOperatorRole
 }>()
 
 const emit = defineEmits<{
@@ -20,6 +18,8 @@ const emit = defineEmits<{
   sendDelivery: [order: IOrderListItem]
   sendPaymentInfo: [order: IOrderListItem]
   resendDelivery: [order: IOrderListItem]
+  markGift: [id: string]
+  regenerate: [order: IOrderListItem]
 }>()
 
 const isMobile = useMediaQuery('(max-width: 767px)')
@@ -46,6 +46,14 @@ function forwardResendDelivery(order: IOrderListItem) {
 function forwardSendPaymentInfo(order: IOrderListItem) {
   emit('sendPaymentInfo', order)
 }
+
+function forwardMarkGift(id: string) {
+  emit('markGift', id)
+}
+
+function forwardRegenerate(order: IOrderListItem) {
+  emit('regenerate', order)
+}
 </script>
 
 <template>
@@ -61,7 +69,6 @@ function forwardSendPaymentInfo(order: IOrderListItem) {
         v-for="(order, index) in group.orders"
         :key="order.id"
         :order="order"
-        :role="role"
         :show-customer="isHeaderless"
         :customer-label="group.name"
         :customer-phone="group.phone"
@@ -80,14 +87,16 @@ function forwardSendPaymentInfo(order: IOrderListItem) {
         v-for="(order, index) in group.orders"
         :key="order.id"
         :order="order"
-        :role="role"
-        :position-in-group="index + 1"
-        :total-in-group="group.orders.length"
+        :group-position="index + 1"
+        :group-total="group.orders.length"
+        :is-latest-for-customer="index === 0"
         @view="forwardView"
         @confirm-payment="forwardConfirmPayment"
         @send-delivery="forwardSendDelivery"
         @resend-delivery="forwardResendDelivery"
         @send-payment-info="forwardSendPaymentInfo"
+        @mark-gift="forwardMarkGift"
+        @regenerate="forwardRegenerate"
       />
     </div>
   </div>

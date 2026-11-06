@@ -1,17 +1,12 @@
 import { computed, type Ref } from 'vue'
-import { useMessage } from 'naive-ui'
 
 import { openWhatsApp } from '@/shared/utils/whatsapp.utils'
 import { useOrderDetailQuery } from './queries/use-order-detail'
-import { useNotifyPaymentInfo } from './mutations/use-notify-payment-info'
 import { useOrderActions } from './use-order-actions'
 import type { OrderActionId } from '../utils/order-actions'
 
 export function useOrderDetailPanel(orderId: Ref<string>) {
-  const message = useMessage()
-
   const { data: order, isPending, isError, refetch } = useOrderDetailQuery(orderId)
-  const { mutateAsync: notifyPaymentInfo } = useNotifyPaymentInfo()
   const {
     handleConfirmPayment,
     handleMarkGift,
@@ -20,22 +15,16 @@ export function useOrderDetailPanel(orderId: Ref<string>) {
     handleSendDelivery,
     handleCancel,
     handleRegenerate,
+    handleNotifyPaymentInfo,
     isRegenerating,
   } = useOrderActions()
 
   const invoiceState = computed(() => order.value?.invoice?.state ?? null)
 
-  async function onSendPaymentInfo() {
+  function onSendPaymentInfo() {
     const o = order.value
     if (!o) return
-    try {
-      const result = await notifyPaymentInfo(o.id)
-      // The message is composed server-side: it carries the bank account frozen on this event, and
-      // the browser has no business deciding where a buyer transfers money to.
-      openWhatsApp(o.snapWhatsapp, result.whatsappTemplate)
-    } catch {
-      message.error('No se pudo registrar el envío. Intenta de nuevo.')
-    }
+    handleNotifyPaymentInfo(o)
   }
 
   function onSendDeliveryWhatsApp() {
