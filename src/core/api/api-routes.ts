@@ -263,6 +263,7 @@ export const API_ROUTES = {
     DASHBOARD_REVIEW_QUEUE: `${OPERATOR_BASE}/dashboard/review-queue`,
     RETOUCH_QUEUE: (eventId: string) => `${OPERATOR_BASE}/events/${eventId}/retouch-queue`,
     RETOUCH_ORDERS: `${OPERATOR_BASE}/retouch/orders`,
+    RETOUCH_EVENTS: `${OPERATOR_BASE}/retouch/events`,
     RETOUCH_ORDER_DETAIL: (orderId: string) => `${OPERATOR_BASE}/retouch/orders/${orderId}`,
   },
   PRICING: {

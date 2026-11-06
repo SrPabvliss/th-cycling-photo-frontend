@@ -5,8 +5,7 @@ import { NGrid, NGridItem, NSpin } from 'naive-ui'
 
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import { useOperatorRetouchOrdersListSource } from '../../composables/queue-sources/use-retouch-orders-list-source'
-import { useEventsListQuery } from '@/shared/composables/use-events-list'
-import type { IEventFilters } from '@/shared/types/event-filters.types'
+import { useOperatorRetouchEventsQuery } from '../../composables/queries/use-operator-retouch-events'
 import { RETOUCH_ROUTE_NAMES } from '../../constants/retouch-routes'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import RetouchOrderCard from '../components/RetouchOrderCard/RetouchOrderCard.vue'
@@ -25,19 +24,10 @@ const selectedEventSlug = ref<string | null>(null)
 
 const source = useOperatorRetouchOrdersListSource(scope, selectedEventSlug)
 
-const eventsFilter = ref<IEventFilters>({
-  search: null,
-  organizerId: null,
-  sort: 'name',
-  tab: 'active',
-})
-const eventsListQuery = useEventsListQuery(eventsFilter, 50)
+const { data: retouchEvents } = useOperatorRetouchEventsQuery()
 
 const eventOptions = computed(() =>
-  (eventsListQuery.data.value?.pages.flatMap((page) => page.items) ?? []).map((e) => ({
-    label: e.name,
-    value: e.slug,
-  })),
+  (retouchEvents.value ?? []).map((e) => ({ label: e.name, value: e.slug })),
 )
 
 const goWorkspace = (orderId?: string) =>
