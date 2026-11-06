@@ -12,6 +12,7 @@ export const PERMISSIONS = {
   PHOTO_RETOUCH_UPLOAD: 'photo.retouch.upload',
   PHOTO_CLASSIFICATION_RETRY: 'photo.classification.retry',
   PHOTO_CATEGORY_CREATE: 'photo_category.create',
+  PHOTO_CATEGORY_BASE_MANAGE: 'photo_category.base.manage',
   REVIEW_QUEUE_READ: 'dashboard.review_queue.read',
   ORDER_READ: 'order.read',
   ORDER_NOTIFY_PAYMENT: 'order.notify_payment',
