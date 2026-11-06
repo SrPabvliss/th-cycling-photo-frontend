@@ -286,5 +286,6 @@ export const API_ROUTES = {
     VERIFY_RECEIVER: '/tenants/me/payout-methods/verify-receiver',
     WATERMARK_PRESIGNED_URL: '/tenants/me/watermark/presigned-url',
     WATERMARK_CONFIRM: '/tenants/me/watermark/confirm',
+    CONTACT_REQUESTS: '/tenants/me/contact-requests',
   },
 } as const

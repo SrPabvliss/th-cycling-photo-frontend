@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, watchEffect } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { NButton, NIcon } from 'naive-ui'
-import { BanOutline, LogoWhatsapp, TimeOutline, WarningOutline } from '@vicons/ionicons5'
+import { BanOutline, MailOutline, TimeOutline, WarningOutline } from '@vicons/ionicons5'
 import { differenceInCalendarDays } from 'date-fns'
 
 import { formatDate, parseDateOnly } from '@/shared/utils/date.utils'
+import ContactTitanModal from '@/features/tenant-profile/presentation/modals/ContactTitanModal.vue'
 import { useEventCreationContext } from '../../../../composables/queries/use-event-creation-context'
 import { EVENT_ROUTE_NAMES } from '../../../../routes'
 import { formatNumber } from '@/shared/utils/format.utils'
@@ -17,6 +18,7 @@ const emit = defineEmits<{
 const router = useRouter()
 const { data } = useEventCreationContext()
 
+const isContactOpen = ref(false)
 const contract = computed(() => data.value?.contract ?? null)
 const hasSlot = computed(() => data.value?.hasSlot ?? false)
 
@@ -165,12 +167,16 @@ function goToEvents() {
         </div>
       </div>
       <div class="ce-acts">
-        <NButton type="primary" data-test="contact-titan">
-          <template #icon><NIcon :component="LogoWhatsapp" :size="15" /></template>
+        <NButton type="primary" data-test="contact-titan" @click="isContactOpen = true">
+          <template #icon><NIcon :component="MailOutline" :size="15" /></template>
           Escribir a Titan TV
         </NButton>
         <NButton data-test="back-to-events" @click="goToEvents">Volver a Eventos</NButton>
       </div>
+      <ContactTitanModal
+        v-model:show="isContactOpen"
+        :initial-reason="isExpired ? 'renewal' : 'more_quota'"
+      />
     </template>
   </div>
 </template>

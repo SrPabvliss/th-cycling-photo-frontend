@@ -22,6 +22,7 @@ import ConfirmationStep from './steps/ConfirmationStep.vue'
 import PasswordConfirmModal from '@/shared/components/PasswordConfirmModal/PasswordConfirmModal.vue'
 import CreatingModal from './modals/CreatingModal.vue'
 import NoSlotModal from './modals/NoSlotModal.vue'
+import ContactTitanModal from '@/features/tenant-profile/presentation/modals/ContactTitanModal.vue'
 import ExitWarningModal from './modals/ExitWarningModal.vue'
 
 const router = useRouter()
@@ -34,6 +35,13 @@ const { data: allCategories } = usePhotoCategoriesGlobalQuery()
 
 const configurationRef = ref<InstanceType<typeof ConfigurationStep> | null>(null)
 const detailsRef = ref<InstanceType<typeof DetailsStep> | null>(null)
+
+const isContactOpen = ref(false)
+
+function openContact() {
+  isNoSlotOpen.value = false
+  isContactOpen.value = true
+}
 
 const canContinueContract = ref(false)
 const canContinueConfiguration = ref(false)
@@ -357,7 +365,10 @@ function createAnother() {
       :show="isNoSlotOpen"
       @update:show="isNoSlotOpen = $event"
       @back-to-events="goToEvents"
+      @contact="openContact"
     />
+
+    <ContactTitanModal v-model:show="isContactOpen" initial-reason="more_quota" />
 
     <ExitWarningModal
       :show="isExitOpen"

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { NButton, NIcon, NModal } from 'naive-ui'
-import { BanOutline, LogoWhatsapp } from '@vicons/ionicons5'
+import { BanOutline, MailOutline } from '@vicons/ionicons5'
 
 defineProps<{
   show: boolean
@@ -41,7 +41,7 @@ const emit = defineEmits<{
       <div class="ce-noslot-foot">
         <NButton data-test="no-slot-back" @click="emit('back-to-events')">Volver a Eventos</NButton>
         <NButton type="primary" data-test="no-slot-contact" @click="emit('contact')">
-          <template #icon><NIcon :component="LogoWhatsapp" :size="15" /></template>
+          <template #icon><NIcon :component="MailOutline" :size="15" /></template>
           Escribir a Titan TV
         </NButton>
       </div>
