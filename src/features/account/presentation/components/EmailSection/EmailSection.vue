@@ -25,7 +25,7 @@ const form = useForm({
   defaultValues: EMAIL_FORM_DEFAULTS,
   onSubmit: ({ value }) => {
     changeEmail.mutate(
-      { newEmail: value.newEmail, currentPassword: value.currentPassword },
+      { newEmail: value.newEmail.trim(), currentPassword: value.currentPassword },
       {
         onSuccess: () => {
           form.reset()

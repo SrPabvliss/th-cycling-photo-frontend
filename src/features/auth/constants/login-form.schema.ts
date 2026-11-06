@@ -10,6 +10,7 @@ export const LOGIN_FORM_DEFAULTS: ILoginFormData = {
 export const loginFormSchema = z.object({
   email: z
     .string()
+    .trim()
     .min(1, 'El correo es requerido')
     .email('Ingresa un correo valido')
     .max(255, 'Maximo 255 caracteres'),

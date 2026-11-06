@@ -58,6 +58,17 @@ describe('EmailSection', () => {
     expect(push).toHaveBeenCalledWith({ name: 'account-verify-email' })
   })
 
+  it('sends the new email without the spaces typed around it', async () => {
+    mutate.mockClear()
+    const w = mountSection()
+    await fillAndSubmit(w, '  nueva@example.com ', 'CurrentPass1')
+
+    expect(mutate).toHaveBeenCalledWith(
+      { newEmail: 'nueva@example.com', currentPassword: 'CurrentPass1' },
+      expect.any(Object),
+    )
+  })
+
   it('keeps the password out of sight until the change is requested', () => {
     const w = mountSection()
 

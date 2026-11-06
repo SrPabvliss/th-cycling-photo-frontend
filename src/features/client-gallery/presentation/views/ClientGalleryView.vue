@@ -81,7 +81,7 @@ function goToContact() {
 async function handleModalLogin() {
   loginError.value = ''
   try {
-    await login({ email: loginEmail.value, password: loginPassword.value })
+    await login({ email: loginEmail.value.trim(), password: loginPassword.value })
     showLoginModal.value = false
     step.value = 'contact'
   } catch {

@@ -25,7 +25,7 @@ const form = useForm({
   defaultValues: LOGIN_FORM_DEFAULTS,
   onSubmit: async ({ value }) => {
     try {
-      const user = await login(value)
+      const user = await login({ ...value, email: value.email.trim() })
       router.push(redirectQuery.value ?? getHomePath(user.permissions))
     } catch {
       // Error toast is shown by error interceptor
