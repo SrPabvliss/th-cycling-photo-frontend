@@ -11,6 +11,7 @@ import {
   NIcon,
   NInput,
   NSelect,
+  useMessage,
 } from 'naive-ui'
 import { ArrowForward } from '@vicons/ionicons5'
 
@@ -24,6 +25,8 @@ import AssetUploadZone from '@/features/event-assets/presentation/components/Ass
 import type { IFocalPoint } from '@/features/event-assets/composables/use-local-asset-previews'
 import EventCategoryPicker from '@/features/photo-categories/presentation/components/EventCategoryPicker/EventCategoryPicker.vue'
 import { useCreatePhotoCategory } from '@/features/photo-categories/composables/mutations/use-create-photo-category'
+import type { ICreatePhotoCategoryRequest } from '@/features/photo-categories/types/requests/create-photo-category.request'
+import { photoCategoryErrorMessage } from '@/features/photo-categories/utils/photo-category-error'
 import { EVENT_FORM_DEFAULTS, eventFormSchema } from '../../../constants/event-form.schema'
 import type { IEventFormData, IEventFormExtra } from '../../../types/event-form.types'
 
@@ -35,6 +38,8 @@ const props = defineProps<{
   hideFooter?: boolean
   existingAssets?: IEventAsset[]
   initialCategoryIds?: number[]
+  /** Set when editing: the category catalog is the event organizer's. */
+  eventId?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -70,10 +75,15 @@ const assetPreviews = useLocalAssetPreviews(() => props.existingAssets)
 const selectedCategoryIds = ref<number[]>(props.initialCategoryIds ?? [])
 
 const { mutateAsync: createCategory } = useCreatePhotoCategory()
+const message = useMessage()
 
-async function handleCreateNewCategory(name: string) {
-  const { data } = await createCategory(name)
-  selectedCategoryIds.value = [...selectedCategoryIds.value, data.id]
+async function handleCreateNewCategory(request: ICreatePhotoCategoryRequest) {
+  try {
+    const { data } = await createCategory(request)
+    selectedCategoryIds.value = [...selectedCategoryIds.value, data.id]
+  } catch (caught) {
+    message.error(photoCategoryErrorMessage(caught))
+  }
 }
 
 const selectedProvinceId = ref<number | null>(props.initialData?.provinceId ?? null)
@@ -260,6 +270,7 @@ const eventTypeOptions = computed(
       <NFlex vertical :size="16">
         <EventCategoryPicker
           :selected-ids="selectedCategoryIds"
+          :event-id="eventId"
           @update:selected-ids="selectedCategoryIds = $event"
           @create-new="handleCreateNewCategory"
         />

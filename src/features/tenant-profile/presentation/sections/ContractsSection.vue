@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { NEmpty, NFlex, NSpin, NTag } from 'naive-ui'
 
-import { formatDate } from '@/shared/utils/date.utils'
+import { formatDate, isOnOrAfterToday } from '@/shared/utils/date.utils'
 import type {
   ContractStatus,
   IContractListItem,
@@ -35,9 +35,7 @@ function photosPerEventLabel(contract: IContractListItem): string {
 }
 
 function isCurrentlyValid(contract: IContractListItem): boolean {
-  const startOfToday = new Date()
-  startOfToday.setHours(0, 0, 0, 0)
-  return contract.validUntil >= startOfToday
+  return isOnOrAfterToday(contract.validUntil)
 }
 
 const totalEventsRemaining = computed(() =>

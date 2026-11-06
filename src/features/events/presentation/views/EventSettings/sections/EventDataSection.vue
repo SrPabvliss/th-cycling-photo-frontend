@@ -124,6 +124,7 @@ async function handleSubmit(formData: IEventFormData, extra: IEventFormExtra) {
       :initial-data="initialData"
       :existing-assets="assets"
       :initial-category-ids="initialCategoryIds"
+      :event-id="id"
       :is-submitting="isUpdating"
       submit-label="Guardar Cambios"
       @submit="handleSubmit"

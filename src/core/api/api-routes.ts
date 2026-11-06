@@ -157,12 +157,10 @@ export const API_ROUTES = {
     GET_ALL: PUBLIC_EVENTS_BASE,
     GET_BY_SLUG: (slug: string) => `${PUBLIC_EVENTS_BASE}/${slug}`,
     PHOTOS: (slug: string) => `${PUBLIC_EVENTS_BASE}/${slug}/photos`,
-    CREATE_ORDER: (slug: string) => `${PUBLIC_EVENTS_BASE}/${slug}/orders`,
   },
   PREVIEW_PUBLIC: {
     BASE: PREVIEW_PUBLIC_BASE,
     GET_BY_TOKEN: (token: string) => `${PREVIEW_PUBLIC_BASE}/${token}`,
-    CUSTOMER_LOOKUP: (token: string) => `${PREVIEW_PUBLIC_BASE}/${token}/customer`,
     CREATE_ORDER: (token: string) => `${PREVIEW_PUBLIC_BASE}/${token}/orders`,
   },
   ORDERS: {
@@ -263,6 +261,7 @@ export const API_ROUTES = {
     DASHBOARD_REVIEW_QUEUE: `${OPERATOR_BASE}/dashboard/review-queue`,
     RETOUCH_QUEUE: (eventId: string) => `${OPERATOR_BASE}/events/${eventId}/retouch-queue`,
     RETOUCH_ORDERS: `${OPERATOR_BASE}/retouch/orders`,
+    RETOUCH_EVENTS: `${OPERATOR_BASE}/retouch/events`,
     RETOUCH_ORDER_DETAIL: (orderId: string) => `${OPERATOR_BASE}/retouch/orders/${orderId}`,
   },
   PRICING: {

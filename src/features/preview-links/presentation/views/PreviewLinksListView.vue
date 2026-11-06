@@ -32,16 +32,24 @@ import type {
 const route = useRoute()
 const message = useMessage()
 
-const eventId = computed(() => route.params.eventId as string)
+const slug = computed(() => route.params.slug as string)
 const page = ref(1)
 
-const { data: event } = useEventDetailQuery(eventId)
-const {
-  data: previewLinksData,
-  isPending,
-  isError,
-  refetch,
-} = usePreviewLinksListQuery(eventId, page)
+// The route carries the slug; the preview-links API is keyed by the event UUID.
+const eventQuery = useEventDetailQuery(slug)
+const event = eventQuery.data
+const eventId = computed(() => event.value?.id ?? '')
+const linksQuery = usePreviewLinksListQuery(eventId, page)
+const previewLinksData = linksQuery.data
+
+const isLoading = computed(() => eventQuery.isPending.value || linksQuery.isPending.value)
+const isError = computed(() => eventQuery.isError.value || linksQuery.isError.value)
+const eventDetailPath = computed(() => `/events/${slug.value}`)
+
+function retry() {
+  if (eventQuery.isError.value) eventQuery.refetch()
+  else linksQuery.refetch()
+}
 
 const showWhatsAppModal = ref(false)
 const whatsAppPhone = ref('')
@@ -155,7 +163,7 @@ import { h } from 'vue'
 <template>
   <div class="page-view">
     <div class="page-view__content" style="padding: 24px 32px">
-      <PageHeader title="Preview Links" :back-to="'/events/' + eventId" />
+      <PageHeader title="Preview Links" :back-to="eventDetailPath" />
       <div v-if="isError" class="error-container">
         <NResult
           status="error"
@@ -163,7 +171,7 @@ import { h } from 'vue'
           description="No se pudieron obtener los preview links."
         >
           <template #footer>
-            <NButton @click="refetch()">Reintentar</NButton>
+            <NButton @click="retry">Reintentar</NButton>
           </template>
         </NResult>
       </div>
@@ -173,13 +181,13 @@ import { h } from 'vue'
           <NDataTable
             :columns="columns"
             :data="previewLinksData?.items ?? []"
-            :loading="isPending"
+            :loading="isLoading"
             :bordered="false"
-          />
-
-          <template v-if="previewLinksData && previewLinksData.items.length === 0 && !isPending">
-            <NEmpty description="No hay preview links para este evento" style="padding: 48px 0" />
-          </template>
+          >
+            <template #empty>
+              <NEmpty description="No hay preview links para este evento" style="padding: 48px 0" />
+            </template>
+          </NDataTable>
         </NCard>
 
         <NFlex

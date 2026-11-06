@@ -17,18 +17,16 @@ import { useEventPaymentOptionsQuery } from '@/shared/composables/use-event-paym
 import CheckoutSummary from '../components/CheckoutSummary/CheckoutSummary.vue'
 import { useCartPricing } from '../../composables/use-cart-pricing'
 import PricingTotalBlock from '@/features/pricing/presentation/components/PricingTotalBlock/PricingTotalBlock.vue'
-import { useMyBillingAccountsQuery } from '@/features/account/composables/queries/use-my-billing-accounts'
-import { useSetDefaultBillingAccount } from '@/features/account/composables/mutations/use-set-default-billing-account'
-import { useRecordInvoiceConsent } from '@/features/account/composables/mutations/use-record-invoice-consent'
+import { useBillingSelection } from '@/features/account/composables/use-billing-selection'
 import BillingAccountForm from '@/features/account/presentation/components/BillingAccountForm/BillingAccountForm.vue'
-import BillingCard from '../components/BillingCard/BillingCard.vue'
+import BillingCard from '@/features/account/presentation/components/BillingCard/BillingCard.vue'
 import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
-import BillingAccountPicker from '../components/BillingAccountPicker/BillingAccountPicker.vue'
+import BillingAccountPicker from '@/features/account/presentation/components/BillingAccountPicker/BillingAccountPicker.vue'
 
 const route = useRoute()
 const router = useRouter()
 const cartStore = useCartStore()
-const { isAuthenticated, currentUser } = useAuth()
+const { isAuthenticated } = useAuth()
 const { mutateAsync: mergeCart, isPending: isMerging } = useMergeCart()
 
 const eventId = computed(() => route.params.eventId as string)
@@ -56,55 +54,20 @@ const cartPricing = useCartPricing(checkoutCount)
 const orderResults = ref<ICheckoutOrderResult[] | null>(null)
 const showMethodModal = ref(false)
 
-const billingQuery = useMyBillingAccountsQuery({ enabled: () => isAuthenticated.value })
-const { mutateAsync: setDefaultBillingAccount, isPending: isSettingDefault } =
-  useSetDefaultBillingAccount()
-const { mutateAsync: recordInvoiceConsent, isPending: isRecordingConsent } =
-  useRecordInvoiceConsent()
-
-const billingAccounts = computed(() => billingQuery.data.value?.accounts ?? [])
-const needsInvoiceConsent = computed(
-  () => billingQuery.data.value !== undefined && !billingQuery.data.value.invoiceConsentGiven,
-)
-const selectedBillingAccountId = ref<string | null>(null)
-const invoiceConsentChecked = ref(false)
-const billingSheet = ref<'form' | 'picker' | null>(null)
-
-watch(
+const {
   billingAccounts,
-  (accounts) => {
-    if (accounts.some((account) => account.id === selectedBillingAccountId.value)) return
-    selectedBillingAccountId.value =
-      accounts.find((account) => account.isDefault)?.id ?? accounts[0]?.id ?? null
-  },
-  { immediate: true },
-)
-
-const billingPrefill = computed(() => ({
-  legalName: [currentUser.value?.firstName, currentUser.value?.lastName]
-    .filter(Boolean)
-    .join(' ')
-    .trim(),
-  email: currentUser.value?.email ?? '',
-}))
-
-const isBillingReady = computed(
-  () =>
-    selectedBillingAccountId.value !== null &&
-    (!needsInvoiceConsent.value || invoiceConsentChecked.value),
-)
-
-function handleBillingSaved(billingAccountId: string) {
-  selectedBillingAccountId.value = billingAccountId
-  invoiceConsentChecked.value = false
-  billingSheet.value = null
-}
-
-async function handleBillingChosen(choice: { id: string; makeDefault: boolean }) {
-  selectedBillingAccountId.value = choice.id
-  if (choice.makeDefault) await setDefaultBillingAccount(choice.id)
-  billingSheet.value = null
-}
+  needsInvoiceConsent,
+  selectedBillingAccountId,
+  invoiceConsentChecked,
+  billingSheet,
+  billingPrefill,
+  isBillingReady,
+  isSettingDefault,
+  isRecordingConsent,
+  handleBillingSaved,
+  handleBillingChosen,
+  ensureInvoiceConsent,
+} = useBillingSelection(() => isAuthenticated.value)
 
 async function handleConfirm() {
   if (!eventId.value) return
@@ -122,7 +85,7 @@ async function handleConfirm() {
     /* already merged */
   }
 
-  if (needsInvoiceConsent.value) await recordInvoiceConsent()
+  await ensureInvoiceConsent()
 
   if (!cardAvailable.value) {
     await placeTransferOrder()

@@ -24,7 +24,7 @@ const form = useForm({
   defaultValues: FORGOT_PASSWORD_FORM_DEFAULTS,
   onSubmit: async ({ value }) => {
     try {
-      await mutateAsync(value.email)
+      await mutateAsync(value.email.trim())
     } catch {
     } finally {
       isSubmitted.value = true

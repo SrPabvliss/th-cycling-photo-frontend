@@ -5,6 +5,7 @@ import {
   ArchiveOutline,
   CreateOutline,
   ImagesOutline,
+  LinkOutline,
   OptionsOutline,
   RefreshOutline,
   SettingsOutline,
@@ -13,7 +14,7 @@ import {
 
 import type { IEventDetail } from '../../../../types/responses/event-detail.response'
 
-type PickKey = 'edit' | 'configure' | 'gallery' | 'freeze' | 'quota' | 'archive'
+type PickKey = 'edit' | 'configure' | 'gallery' | 'previews' | 'freeze' | 'quota' | 'archive'
 
 const props = defineProps<{
   event: IEventDetail
@@ -21,6 +22,7 @@ const props = defineProps<{
   canFreeze: boolean
   canSetQuota: boolean
   canArchive: boolean
+  canOpenPreviews: boolean
   sheet: boolean
 }>()
 
@@ -102,6 +104,19 @@ function pick(key: PickKey) {
         <span class="action-menu__text">
           <b>Ver galería</b>
           <em v-if="galleryNote">{{ galleryNote }}</em>
+        </span>
+      </button>
+      <button
+        v-if="canOpenPreviews"
+        class="action-menu__item"
+        type="button"
+        data-test="action-previews"
+        @click="pick('previews')"
+      >
+        <NIcon :component="LinkOutline" :size="18" />
+        <span class="action-menu__text">
+          <b>Preview links</b>
+          <em>Enlaces privados para que un cliente vea y pida fotos</em>
         </span>
       </button>
     </div>

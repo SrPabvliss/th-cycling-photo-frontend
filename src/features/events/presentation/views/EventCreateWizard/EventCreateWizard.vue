@@ -6,7 +6,7 @@ import { NButton, NIcon, NResult, NSpin } from 'naive-ui'
 import { AlertCircleOutline, CloseOutline } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
-import { usePhotoCategoriesGlobalQuery } from '@/features/photo-categories/composables/queries/use-photo-categories-global'
+import { usePhotoCategoryCatalogQuery } from '@/features/photo-categories/composables/queries/use-photo-category-catalog'
 import { useEventCreationContext } from '../../../composables/queries/use-event-creation-context'
 import { useEventCreationSubmit } from '../../../composables/use-event-creation-submit'
 import { useEventWizard } from '../../../composables/use-event-wizard'
@@ -31,7 +31,7 @@ const { role, steps, currentIndex, goNext, goBack, contract, isLoading, isError,
   useEventWizard()
 
 const { data: creationContext } = useEventCreationContext()
-const { data: allCategories } = usePhotoCategoriesGlobalQuery()
+const { data: allCategories } = usePhotoCategoryCatalogQuery()
 
 const configurationRef = ref<InstanceType<typeof ConfigurationStep> | null>(null)
 const detailsRef = ref<InstanceType<typeof DetailsStep> | null>(null)

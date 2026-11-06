@@ -92,3 +92,18 @@
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+.gp-selbar .tt-btn-ghost:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .gp-selbar {
+    flex-wrap: wrap;
+  }
+
+  .gp-selbar-t {
+    flex-basis: 100%;
+  }
+}

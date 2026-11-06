@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NIcon, NModal, NSpin } from 'naive-ui'
+import { NButton, NIcon, NModal, NRadio, NRadioGroup, NSpin } from 'naive-ui'
 import {
   CloseCircleOutline,
   ImagesOutline,
@@ -13,11 +13,22 @@ import {
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import TitanLogo from '@/core/layout/public/TitanLogo.vue'
+import { ROUTE_NAMES } from '@/core/navigation/route-names'
 import { useAuth } from '@/features/auth/composables/use-auth'
+import { useBillingSelection } from '@/features/account/composables/use-billing-selection'
+import BillingAccountForm from '@/features/account/presentation/components/BillingAccountForm/BillingAccountForm.vue'
+import BillingAccountPicker from '@/features/account/presentation/components/BillingAccountPicker/BillingAccountPicker.vue'
+import BillingCard from '@/features/account/presentation/components/BillingCard/BillingCard.vue'
+import { usePricingPreviewQuery } from '@/features/pricing/composables/queries/use-pricing-preview'
+import PricingTotalBlock from '@/features/pricing/presentation/components/PricingTotalBlock/PricingTotalBlock.vue'
+import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
+import { useEventPaymentOptionsQuery } from '@/shared/composables/use-event-payment-options'
+import { PAYMENT_METHOD, type PaymentMethod } from '@/shared/types/payment-method.types'
 import { usePreviewGallery } from '../../composables/queries/use-preview-gallery'
 import { useCreateOrder } from '../../composables/mutations/use-create-order'
 import { usePhotoSelection } from '../../composables/use-photo-selection'
 import { toCreateOrderRequest } from '../../mappers/create-order.mapper'
+import { toPreviewOrderFailure, type PreviewOrderFix } from '../../utils/preview-order-error'
 import { formatDate } from '@/shared/utils/date.utils'
 import type { IContactFormData } from '../../constants/contact-form.schema'
 import GalleryCarousel from '../components/GalleryCarousel/GalleryCarousel.vue'
@@ -35,8 +46,35 @@ const router = useRouter()
 const token = computed(() => route.params.token as string)
 
 const { isAuthenticated, login, isLoggingIn } = useAuth()
-const { data: preview, isPending, isExpired, isNotFound, isConverted } = usePreviewGallery(token)
+const {
+  data: preview,
+  isPending,
+  isError,
+  isExpired,
+  isNotFound,
+  isConverted,
+  refetch,
+} = usePreviewGallery(token)
 const { mutateAsync: createOrder, isPending: isSubmitting } = useCreateOrder(token.value)
+
+/** Set when submitting the order reveals the preview is no longer usable. */
+const orderBlockedBy = ref<'already_ordered' | 'expired' | 'not_found' | null>(null)
+const orderErrorMessage = ref<string | null>(null)
+const orderErrorFix = ref<PreviewOrderFix | null>(null)
+
+const ERROR_ACTION_LABELS: Partial<Record<PreviewOrderFix, string>> = {
+  complete_profile: 'Completar mi perfil',
+  pick_billing: 'Elegir datos de facturación',
+}
+const orderErrorActionLabel = computed(() =>
+  orderErrorFix.value ? (ERROR_ACTION_LABELS[orderErrorFix.value] ?? null) : null,
+)
+
+const showExpired = computed(() => isExpired.value || orderBlockedBy.value === 'expired')
+const showNotFound = computed(() => isNotFound.value || orderBlockedBy.value === 'not_found')
+const showAlreadyOrdered = computed(
+  () => isConverted.value || orderBlockedBy.value === 'already_ordered',
+)
 
 const previewPhotos = computed(() => preview.value?.photos)
 const {
@@ -48,7 +86,8 @@ const {
   clearSelection,
   toggleSelect,
   removeFromSelection,
-} = usePhotoSelection(previewPhotos)
+  forgetSelection,
+} = usePhotoSelection(previewPhotos, token)
 
 function toggleSelectAll() {
   if (allSelected.value) {
@@ -57,6 +96,44 @@ function toggleSelectAll() {
     selectAll()
   }
 }
+
+// --- Billing, price and payment method (same rules as the cart checkout) ---
+const {
+  billingAccounts,
+  needsInvoiceConsent,
+  selectedBillingAccountId,
+  invoiceConsentChecked,
+  billingSheet,
+  billingPrefill,
+  isBillingReady,
+  isSettingDefault,
+  isRecordingConsent,
+  handleBillingSaved,
+  handleBillingChosen,
+  ensureInvoiceConsent,
+  refreshBilling,
+} = useBillingSelection(() => isAuthenticated.value)
+
+const { data: pricing, isLoading: isPricingLoading } = usePricingPreviewQuery(selectedCount)
+
+const previewEventId = computed(() => preview.value?.eventId ?? '')
+const { data: paymentOptions, isLoading: isLoadingPaymentOptions } = useEventPaymentOptionsQuery(
+  previewEventId,
+  isAuthenticated,
+)
+// The server can turn card down at submit time (payment.card_unavailable).
+const cardRejected = ref(false)
+const cardAvailable = computed(
+  () => !cardRejected.value && (paymentOptions.value?.cardAvailable ?? false),
+)
+const paymentMethod = ref<PaymentMethod>(PAYMENT_METHOD.TRANSFER)
+watch(cardAvailable, (available) => {
+  if (!available) paymentMethod.value = PAYMENT_METHOD.TRANSFER
+})
+
+const isCheckoutBlocked = computed(
+  () => !isBillingReady.value || isLoadingPaymentOptions.value || isPricingLoading.value,
+)
 
 const step = ref<ViewStep>('gallery')
 const submittedPhotoCount = ref(0)
@@ -81,7 +158,7 @@ function goToContact() {
 async function handleModalLogin() {
   loginError.value = ''
   try {
-    await login({ email: loginEmail.value, password: loginPassword.value })
+    await login({ email: loginEmail.value.trim(), password: loginPassword.value })
     showLoginModal.value = false
     step.value = 'contact'
   } catch {
@@ -94,13 +171,70 @@ function goToRegister() {
   router.push({ path: '/register', query: { redirect: route.fullPath } })
 }
 
+/** Applies right away what can be fixed without the buyer, the rest waits for a click. */
+function applyOrderFix(fix: PreviewOrderFix | null) {
+  if (fix === 'transfer_only') {
+    cardRejected.value = true
+    paymentMethod.value = PAYMENT_METHOD.TRANSFER
+  }
+  if (fix === 'accept_consent' || fix === 'pick_billing') refreshBilling()
+}
+
+function handleOrderErrorAction() {
+  if (orderErrorFix.value === 'complete_profile') {
+    // New tab: the selection lives in this page and would be lost on navigation.
+    const { href } = router.resolve({ name: ROUTE_NAMES.ACCOUNT_PROFILE })
+    window.open(href, '_blank', 'noopener')
+    return
+  }
+  if (orderErrorFix.value === 'pick_billing') {
+    billingSheet.value = billingAccounts.value.length > 0 ? 'picker' : 'form'
+  }
+}
+
 function goBackToGallery() {
+  orderErrorMessage.value = null
+  orderErrorFix.value = null
   step.value = 'gallery'
 }
 
 async function handleSubmit(formData: IContactFormData) {
+  orderErrorMessage.value = null
+  orderErrorFix.value = null
+  const billingAccountId = selectedBillingAccountId.value
+  if (!billingAccountId || isCheckoutBlocked.value) return
+
+  let orderId: string
+  try {
+    await ensureInvoiceConsent()
+    const order = await createOrder(
+      toCreateOrderRequest(formData, selectedIds.value, {
+        billingAccountId,
+        method: paymentMethod.value,
+      }),
+    )
+    orderId = order.id
+  } catch (caught) {
+    const failure = toPreviewOrderFailure(caught)
+    if (failure.kind === 'message') {
+      orderErrorMessage.value = failure.message
+      orderErrorFix.value = failure.fix
+      applyOrderFix(failure.fix)
+    } else {
+      orderBlockedBy.value = failure.kind
+    }
+    return
+  }
+
+  if (paymentMethod.value === PAYMENT_METHOD.CARD) {
+    // Same as the cart checkout: the payment box creates the intent for the draft order.
+    forgetSelection()
+    router.push({ name: ROUTE_NAMES.PAYMENT_BOX, query: { orders: orderId } })
+    return
+  }
+
   submittedPhotoCount.value = selectedCount.value
-  await createOrder(toCreateOrderRequest(formData, selectedIds.value))
+  forgetSelection()
   step.value = 'confirmation'
 }
 </script>
@@ -113,11 +247,20 @@ async function handleSubmit(formData: IContactFormData) {
       <p class="cg-muted">Cargando tus fotos...</p>
     </div>
 
-    <PreviewExpired v-else-if="isExpired" />
+    <PreviewExpired v-else-if="showExpired" />
 
-    <PreviewNotFound v-else-if="isNotFound" />
+    <PreviewNotFound v-else-if="showNotFound" />
 
-    <PreviewAlreadyOrdered v-else-if="isConverted" :event-name="preview?.eventName ?? ''" />
+    <PreviewAlreadyOrdered v-else-if="showAlreadyOrdered" :event-name="preview?.eventName ?? ''" />
+
+    <div v-else-if="isError && !preview" class="cg-center" data-test="preview-load-error">
+      <NIcon :component="CloseCircleOutline" :size="48" color="#d03050" />
+      <p class="cg-center__title">No pudimos cargar tus fotos</p>
+      <p class="cg-muted">
+        Puede ser tu conexión o un problema de nuestro lado. Inténtalo de nuevo.
+      </p>
+      <NButton type="primary" @click="refetch()">Reintentar</NButton>
+    </div>
 
     <!-- Active preview -->
     <template v-else-if="preview">
@@ -213,8 +356,8 @@ async function handleSubmit(formData: IContactFormData) {
                 <NIcon :component="ChatbubblesOutline" :size="16" />
               </span>
               <div>
-                <p class="cg-step__title">Te contactamos</p>
-                <p class="cg-step__desc">Vía WhatsApp para confirmar tu pedido</p>
+                <p class="cg-step__title">Confirmas tu pedido</p>
+                <p class="cg-step__desc">Con tus datos de facturación</p>
               </div>
             </div>
             <div class="cg-step">
@@ -222,8 +365,8 @@ async function handleSubmit(formData: IContactFormData) {
                 <NIcon :component="CardOutline" :size="16" />
               </span>
               <div>
-                <p class="cg-step__title">Coordinas el pago</p>
-                <p class="cg-step__desc">Transferencia o depósito bancario</p>
+                <p class="cg-step__title">Pagas</p>
+                <p class="cg-step__desc">Con tarjeta o por transferencia bancaria</p>
               </div>
             </div>
             <div class="cg-step">
@@ -252,15 +395,81 @@ async function handleSubmit(formData: IContactFormData) {
       <template v-if="step === 'contact'">
         <ContactForm
           :token="token"
+          :event-type-id="preview.eventTypeId"
           :event-name="preview.eventName"
+          :organizer-name="preview.organizerName"
           :start-date="preview.startDate"
           :end-date="preview.endDate"
           :selected-photos="selectedPhotos"
           :photo-count="selectedCount"
-          :is-submitting="isSubmitting"
+          :is-submitting="isSubmitting || isRecordingConsent"
+          :submit-blocked="isCheckoutBlocked"
+          :error-message="orderErrorMessage"
+          :error-action-label="orderErrorActionLabel"
           @submit="handleSubmit"
+          @error-action="handleOrderErrorAction"
           @back="goBackToGallery"
-        />
+        >
+          <template #checkout>
+            <div class="cg-checkout">
+              <PricingTotalBlock
+                v-if="pricing"
+                emphasis="soft"
+                :quantity="pricing.quantity"
+                :subtotal="pricing.subtotal"
+                :unit-price="pricing.unitPrice"
+                :currency="pricing.currency"
+                :tier="pricing.tier"
+                :next-tier="pricing.nextTier"
+                :photos-to-next-tier="pricing.photosToNextTier"
+                :is-loading="isPricingLoading"
+              />
+              <p v-else class="cg-muted">Calculando precio…</p>
+
+              <BillingCard
+                v-model:consented="invoiceConsentChecked"
+                :accounts="billingAccounts"
+                :selected-id="selectedBillingAccountId"
+                :needs-consent="needsInvoiceConsent && billingAccounts.length > 0"
+                @add="billingSheet = 'form'"
+                @change="billingSheet = 'picker'"
+              />
+
+              <div v-if="cardAvailable" class="cg-method" data-test="preview-payment-method">
+                <p class="cg-method__label">¿Cómo quieres pagar?</p>
+                <NRadioGroup v-model:value="paymentMethod" name="preview-payment-method">
+                  <NRadio :value="PAYMENT_METHOD.CARD" label="Tarjeta de crédito o débito" />
+                  <NRadio :value="PAYMENT_METHOD.TRANSFER" label="Transferencia bancaria" />
+                </NRadioGroup>
+              </div>
+              <p v-else-if="paymentOptions" class="cg-muted cg-method__hint">
+                Pagas por transferencia bancaria: al confirmar te enviamos los datos.
+              </p>
+            </div>
+          </template>
+        </ContactForm>
+
+        <BillingSheet
+          v-if="billingSheet"
+          :title="billingSheet === 'form' ? 'Datos de facturación' : '¿A nombre de quién?'"
+          @close="billingSheet = null"
+        >
+          <BillingAccountForm
+            v-if="billingSheet === 'form'"
+            :needs-consent="needsInvoiceConsent"
+            :prefill="billingPrefill"
+            @saved="handleBillingSaved"
+            @cancel="billingSheet = null"
+          />
+          <BillingAccountPicker
+            v-else
+            :accounts="billingAccounts"
+            :selected-id="selectedBillingAccountId"
+            :is-saving="isSettingDefault"
+            @choose="handleBillingChosen"
+            @add="billingSheet = 'form'"
+          />
+        </BillingSheet>
       </template>
 
       <!-- Step 3: Confirmation -->

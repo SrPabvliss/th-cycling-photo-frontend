@@ -11,7 +11,7 @@ import { EVENT_ROUTE_NAMES } from '../../../../routes'
 import type { IEventDetail } from '../../../../types/responses/event-detail.response'
 import EventActionMenu from './EventActionMenu.vue'
 
-type PickKey = 'edit' | 'configure' | 'gallery' | 'freeze' | 'quota' | 'archive'
+type PickKey = 'edit' | 'configure' | 'gallery' | 'previews' | 'freeze' | 'quota' | 'archive'
 
 const props = defineProps<{
   event: IEventDetail
@@ -19,6 +19,7 @@ const props = defineProps<{
   canFreeze: boolean
   canSetQuota: boolean
   canArchive: boolean
+  canOpenPreviews: boolean
   showOrganizer: boolean
   menuOpen: boolean
 }>()
@@ -143,6 +144,7 @@ function handlePick(key: PickKey) {
             :can-freeze="canFreeze"
             :can-set-quota="canSetQuota"
             :can-archive="canArchive"
+            :can-open-previews="canOpenPreviews"
             :sheet="isMobile"
             data-test="header-menu"
             @pick="handlePick"

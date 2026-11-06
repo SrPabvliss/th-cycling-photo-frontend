@@ -62,3 +62,11 @@
   display: flex;
   gap: 8px;
 }
+
+.category-item__scope {
+  flex-shrink: 0;
+}
+
+.category-add__base {
+  margin-bottom: 6px;
+}

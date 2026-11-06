@@ -35,6 +35,7 @@ import NoResults from '../components/EventEmptyStates/NoResults.vue'
 import OperatorEmpty from '../components/EventEmptyStates/OperatorEmpty.vue'
 import NoCoverNote from '../components/EventEmptyStates/NoCoverNote.vue'
 import NoQuotaNote from '../components/EventEmptyStates/NoQuotaNote.vue'
+import { isOnOrAfterToday } from '@/shared/utils/date.utils'
 import { formatNumber, pluralize } from '@/shared/utils/format.utils'
 
 const SUBTITLES: Record<EventRole, string> = {
@@ -99,7 +100,7 @@ const subtitle = computed(() => {
 
 const validContracts = computed(() =>
   (myContracts.value ?? []).filter(
-    (contract) => contract.status === 'accepted' && contract.validUntil.getTime() >= Date.now(),
+    (contract) => contract.status === 'accepted' && isOnOrAfterToday(contract.validUntil),
   ),
 )
 

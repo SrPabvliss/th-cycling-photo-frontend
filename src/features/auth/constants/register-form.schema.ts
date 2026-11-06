@@ -39,7 +39,7 @@ export const REGISTER_FORM_DEFAULTS: IRegisterFormData = {
 
 /** Field-level validators for individual form.Field bindings */
 export const registerFieldValidators = {
-  email: z.string().min(1, 'El correo es requerido').email('Correo inválido'),
+  email: z.string().trim().min(1, 'El correo es requerido').email('Correo inválido'),
   password: z.string().min(8, 'Mínimo 8 caracteres'),
   confirmPassword: z.string().min(1, 'Confirma tu contraseña'),
   firstName: z.string().min(1, 'El nombre es requerido').max(100),
