@@ -6,12 +6,18 @@
   border-bottom: 0;
 }
 
+/*
+ * Actions take their real width (two buttons, the longest primary label is
+ * «Reenviar info de pago»), and the timeline gets the room its four steps need
+ * (240px + 18px of left padding). Below 1400px the six columns no longer fit
+ * side by side, so the row stacks.
+ */
 .og__rows {
   display: grid;
-  grid-template-columns: 200px 204px 124px minmax(224px, 0.5fr) minmax(186px, 1fr) 226px;
+  grid-template-columns: 200px 204px 124px minmax(150px, 0.5fr) minmax(260px, 1fr) max-content;
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 1400px) {
   .og__rows {
     grid-template-columns: 1fr;
   }

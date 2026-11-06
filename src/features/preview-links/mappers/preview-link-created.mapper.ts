@@ -9,5 +9,6 @@ export function toPreviewLinkCreated(api: IApiPreviewLinkCreated): IPreviewLinkC
     token: api.token,
     previewUrl: api.previewUrl,
     shareTemplate: api.shareTemplate,
+    expiresAt: new Date(api.expiresAt),
   }
 }

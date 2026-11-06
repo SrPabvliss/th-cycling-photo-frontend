@@ -142,6 +142,17 @@ export function usePhotoGalleryView() {
   }
 
   const canReview = computed(() => has(PERMISSIONS.REVIEW_QUEUE_READ))
+  const canCreatePreview = computed(() => has(PERMISSIONS.PREVIEW_LINK_CREATE))
+
+  // The preview screen reads the photos from the selection store, so leaving
+  // the gallery towards it must not wipe the selection.
+  let keepSelectionOnLeave = false
+
+  function onCreatePreview() {
+    if (wholeSetSelected.value || selectionStore.selectedCount === 0) return
+    keepSelectionOnLeave = true
+    router.push({ name: ROUTE_NAMES.PREVIEW_LINKS_CREATE, params: { slug: slug.value } })
+  }
   const canRetryClassification = computed(
     () => has(PERMISSIONS.PHOTO_CLASSIFICATION_RETRY) && !event.value?.isFrozen,
   )
@@ -237,6 +248,7 @@ export function usePhotoGalleryView() {
   )
 
   onUnmounted(() => {
+    if (keepSelectionOnLeave) return
     selectionStore.exitSelectionMode()
   })
 
@@ -276,6 +288,8 @@ export function usePhotoGalleryView() {
     selectionCount,
     showSelectionBar,
     canReview,
+    canCreatePreview,
+    onCreatePreview,
     canRetryClassification,
     failedCount,
     isRetryingClassification,

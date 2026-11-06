@@ -21,6 +21,7 @@ export const PERMISSIONS = {
   ORDER_CANCEL: 'order.cancel',
   CART_CHECKOUT: 'cart.checkout',
   PREVIEW_LINK_READ: 'preview_link.read',
+  PREVIEW_LINK_CREATE: 'preview_link.create',
   BUYER_READ: 'buyer.read',
   EVENT_COLLABORATOR_READ: 'event.collaborator.read',
   TENANT_READ: 'tenant.read',

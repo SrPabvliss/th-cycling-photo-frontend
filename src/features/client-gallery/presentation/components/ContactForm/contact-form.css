@@ -169,3 +169,14 @@
     padding: 12px 1rem;
   }
 }
+
+.cf-error {
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.cf-error__action {
+  margin-left: 6px;
+  font-weight: 600;
+  text-decoration: underline;
+}

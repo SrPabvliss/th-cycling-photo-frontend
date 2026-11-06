@@ -13,7 +13,7 @@ export const CONTACT_FORM_DEFAULTS: IContactFormData = {
 }
 
 export const contactFormSchema = z.object({
-  notes: z.string().max(500, 'Máximo 500 caracteres').optional(),
-  bibNumber: z.string().max(20, 'Máximo 20 caracteres').optional(),
-  snapCategoryName: z.string().max(100, 'Máximo 100 caracteres').optional(),
+  notes: z.string().max(500, 'Máximo 500 caracteres'),
+  bibNumber: z.string().max(20, 'Máximo 20 caracteres'),
+  snapCategoryName: z.string().max(100, 'Máximo 100 caracteres'),
 })

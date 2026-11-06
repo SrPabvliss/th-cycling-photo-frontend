@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 import {
   NButton,
   NCard,
@@ -21,37 +21,49 @@ import {
 } from '@vicons/ionicons5'
 
 import { usePhotoSelectionStore } from '@/shared/stores/photo-selection.store'
+import { useEventDetailQuery } from '@/shared/composables/use-event-detail'
+import { ROUTE_NAMES } from '@/core/navigation/route-names'
 import { useCreatePreviewLink } from '../../composables/mutations/use-create-preview-link'
 import { openWhatsApp } from '@/shared/utils/whatsapp.utils'
 import PageHeader from '@/shared/components/PageHeader/PageHeader.vue'
 import type { IPreviewLinkCreated } from '../../types/responses/preview-link-created.response'
 import { pluralize } from '@/shared/utils/format.utils'
+import { formatDateTime } from '@/shared/utils/date.utils'
 
 const route = useRoute()
 const router = useRouter()
 const message = useMessage()
 const selectionStore = usePhotoSelectionStore()
 
-const eventId = computed(() => route.params.eventId as string)
+const slug = computed(() => route.params.slug as string)
+// The route carries the slug; the preview-links API is keyed by the event UUID.
+const { data: event } = useEventDetailQuery(slug)
+const eventId = computed(() => event.value?.id ?? '')
 
 const expiresInDays = ref(7)
 const createdLink = ref<IPreviewLinkCreated | null>(null)
 const showWhatsAppModal = ref(false)
 const whatsAppPhone = ref('')
 
-const { mutateAsync: createPreviewLink, isPending: isCreating } = useCreatePreviewLink(
-  eventId.value,
-)
+const { mutateAsync: createPreviewLink, isPending: isCreating } = useCreatePreviewLink(eventId)
 
 const selectedPhotos = computed(() => selectionStore.selectedArray)
 
 // Redirect to gallery if no photos selected (e.g., page reload)
 if (selectionStore.selectedCount === 0) {
   router.replace({
-    name: 'photos-gallery',
-    params: { eventId: eventId.value },
+    name: ROUTE_NAMES.PHOTOS_GALLERY,
+    params: { slug: slug.value },
   })
 }
+
+// The gallery hands the selection over to this screen. Keep it only when going
+// back to this event's gallery without having generated the link, so the
+// selection can be adjusted; anywhere else it would leak into other screens.
+onBeforeRouteLeave((to) => {
+  const backToSameGallery = to.name === ROUTE_NAMES.PHOTOS_GALLERY && to.params.slug === slug.value
+  if (createdLink.value || !backToSameGallery) selectionStore.exitSelectionMode()
+})
 
 const expirationOptions = [
   { label: '1 día', value: 1 },
@@ -60,13 +72,16 @@ const expirationOptions = [
 ]
 
 async function handleGenerate() {
-  if (selectedPhotos.value.length === 0) return
+  if (selectedPhotos.value.length === 0 || !eventId.value) return
 
-  const result = await createPreviewLink({
-    photoIds: selectedPhotos.value.map((p) => p.id),
-    expiresInDays: expiresInDays.value,
-  })
-  createdLink.value = result
+  try {
+    createdLink.value = await createPreviewLink({
+      photoIds: selectedPhotos.value.map((p) => p.id),
+      expiresInDays: expiresInDays.value,
+    })
+  } catch {
+    // Error toast is shown by the error interceptor
+  }
 }
 
 async function handleCopyLink() {
@@ -154,6 +169,7 @@ function handleWhatsAppSend() {
                 block
                 size="large"
                 :loading="isCreating"
+                :disabled="!eventId"
                 @click="handleGenerate"
               >
                 <template #icon><NIcon :component="LinkOutline" /></template>
@@ -165,6 +181,9 @@ function handleWhatsAppSend() {
                 <div class="link-display">
                   <code class="link-url">{{ createdLink.previewUrl }}</code>
                 </div>
+                <p class="status-text" data-test="preview-expires-at">
+                  Vence el {{ formatDateTime(createdLink.expiresAt) }}
+                </p>
                 <NFlex :size="8">
                   <NButton type="primary" block @click="handleCopyLink">
                     <template #icon><NIcon :component="CopyOutline" /></template>

@@ -54,6 +54,8 @@ const {
   selectionCount,
   showSelectionBar,
   canReview,
+  canCreatePreview,
+  onCreatePreview,
   canRetryClassification,
   failedCount,
   isRetryingClassification,
@@ -201,10 +203,12 @@ const {
               :phrase="phrase"
               :whole-set="wholeSetSelected"
               :can-assign="!event.isFrozen"
+              :can-create-preview="canCreatePreview"
               @select-all="onSelectAllMatching"
               @only-page="onOnlyPage"
               @clear="onClearSelection"
               @assign="openCategoryModal"
+              @create-preview="onCreatePreview"
             />
           </div>
         </template>

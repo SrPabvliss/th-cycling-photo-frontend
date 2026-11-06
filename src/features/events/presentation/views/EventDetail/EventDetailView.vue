@@ -27,7 +27,7 @@ import FreezeEventModal from './modals/FreezeEventModal.vue'
 import PhotoQuotaModal from './modals/PhotoQuotaModal.vue'
 import ArchiveEventModal from './modals/ArchiveEventModal.vue'
 
-type PickKey = 'edit' | 'configure' | 'gallery' | 'freeze' | 'quota' | 'archive'
+type PickKey = 'edit' | 'configure' | 'gallery' | 'previews' | 'freeze' | 'quota' | 'archive'
 type ModalKey = 'cover' | 'freeze' | 'quota' | 'archive' | null
 
 const route = useRoute()
@@ -53,6 +53,7 @@ const canArchive = computed(() =>
   isArchived.value ? has(PERMISSIONS.EVENT_RESTORE) : has(PERMISSIONS.EVENT_ARCHIVE),
 )
 const showOrganizer = computed(() => has(PERMISSIONS.EVENT_READ_ALL))
+const canOpenPreviews = computed(() => has(PERMISSIONS.PREVIEW_LINK_READ))
 
 const canEditCategories = computed(() => hasEventUpdate.value && !isClosedForWork.value)
 
@@ -114,7 +115,10 @@ function handleEdit() {
 const PICK_HANDLERS: Record<PickKey, () => void> = {
   edit: () => handleEdit(),
   configure: () => handleConfigure(),
-  gallery: () => window.open(`${env.VITE_APP_BASE_URL}/gallery/${slug.value}`, '_blank', 'noopener'),
+  gallery: () =>
+    window.open(`${env.VITE_APP_BASE_URL}/gallery/${slug.value}`, '_blank', 'noopener'),
+  previews: () =>
+    router.push({ name: ROUTE_NAMES.PREVIEW_LINKS_LIST, params: { slug: slug.value } }),
   freeze: () => (openModal.value = 'freeze'),
   quota: () => (openModal.value = 'quota'),
   archive: () => (openModal.value = 'archive'),
@@ -185,6 +189,7 @@ function handleUploadCover() {
           :can-freeze="canFreeze"
           :can-set-quota="canSetQuota"
           :can-archive="canArchive"
+          :can-open-previews="canOpenPreviews"
           :show-organizer="showOrganizer"
           v-model:menu-open="isHeaderMenuOpen"
           @upload="handleUpload"
@@ -220,6 +225,7 @@ function handleUploadCover() {
               :can-freeze="canFreeze"
               :can-set-quota="canSetQuota"
               :can-archive="canArchive"
+              :can-open-previews="canOpenPreviews"
               :sheet="true"
               data-test="mobile-action-menu"
               @pick="handlePick"

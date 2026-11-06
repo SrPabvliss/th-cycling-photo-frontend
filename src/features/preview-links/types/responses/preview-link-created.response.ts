@@ -4,12 +4,14 @@ export interface IApiPreviewLinkCreated {
   token: string
   previewUrl: string
   shareTemplate: string
+  expiresAt: string
 }
 
-/** Frontend domain type — no transformation needed, all fields are strings */
+/** Frontend domain type with the expiry parsed */
 export interface IPreviewLinkCreated {
   id: string
   token: string
   previewUrl: string
   shareTemplate: string
+  expiresAt: Date
 }

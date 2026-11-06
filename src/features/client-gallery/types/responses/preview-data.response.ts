@@ -8,6 +8,9 @@ export interface IApiPreviewPhoto {
 /** API projection from GET /preview/:token */
 export interface IApiPreviewData {
   token: string
+  eventId: string
+  eventTypeId: number
+  organizerName: string
   eventName: string
   startDate: string
   endDate: string
@@ -24,6 +27,9 @@ export interface IPreviewPhoto {
 /** Frontend domain type with parsed dates and typed status */
 export interface IPreviewData {
   token: string
+  eventId: string
+  eventTypeId: number
+  organizerName: string
   eventName: string
   startDate: Date
   endDate: Date

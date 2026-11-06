@@ -32,8 +32,8 @@ const router = useRouter()
       <p class="state-page__description">
         Tu selección de
         <strong>{{ photoCount }} {{ pluralize(photoCount, 'foto', 'fotos') }}</strong> del evento
-        <strong>{{ eventName }}</strong> fue registrada correctamente. Te contactaremos pronto por
-        WhatsApp.
+        <strong>{{ eventName }}</strong> fue registrada correctamente. Te enviaremos los datos para
+        la transferencia; apenas confirmemos el pago recibirás tus fotos.
       </p>
 
       <div class="state-page__actions">
