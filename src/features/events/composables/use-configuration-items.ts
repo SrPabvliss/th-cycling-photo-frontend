@@ -14,6 +14,7 @@ import {
   MISSING_SUMMARY,
   NEW_DATA_SUMMARY,
   NO_PAYOUT_METHOD_LEFT,
+  REQUIRED_CONFIGURATION_COUNT,
   UNVERIFIED_SUFFIX,
 } from '../constants/configuration-item.constants'
 import {
@@ -40,11 +41,7 @@ import type {
   IEventConfigurationPresetResponse,
   IEventConfigurationResponse,
 } from '../types/responses/event-configuration.response'
-import {
-  createDrafts,
-  invalidWhenFilled,
-  isPayoutItem,
-} from '../utils/configuration-draft.utils'
+import { createDrafts, invalidWhenFilled, isPayoutItem } from '../utils/configuration-draft.utils'
 import {
   resolveItemState,
   resolveItemSummary,
@@ -134,9 +131,7 @@ export function useConfigurationItems(
   const hasCurrentValues = computed(() =>
     buildHasCurrentValues(current?.value, currentValues.value),
   )
-  const currentPayoutIsFromProfile = computed(() =>
-    buildCurrentPayoutIsFromProfile(current?.value),
-  )
+  const currentPayoutIsFromProfile = computed(() => buildCurrentPayoutIsFromProfile(current?.value))
   const currentMatchesProfile = computed(() =>
     buildCurrentMatchesProfile(
       current?.value,
@@ -217,12 +212,7 @@ export function useConfigurationItems(
       const hasCurrent = hasCurrentValues.value
 
       if (currentValue) {
-        seedDraftsFromCurrent(
-          drafts,
-          currentValue,
-          seededEventPayoutDrafts,
-          seededNonPayoutDrafts,
-        )
+        seedDraftsFromCurrent(drafts, currentValue, seededEventPayoutDrafts, seededNonPayoutDrafts)
       }
 
       removedPayoutFlags.payphone = false
@@ -298,8 +288,13 @@ export function useConfigurationItems(
     }),
   )
 
-  const readyCount = computed(() => items.value.filter((item) => item.isReady).length)
-  const isComplete = computed(() => readyCount.value === CONFIGURATION_ITEMS.length)
+  const requirementsMet = computed(() => [
+    isReady('publicName'),
+    isReady('whatsapp'),
+    isReady('payphone') || isReady('bankTransfer'),
+  ])
+  const readyCount = computed(() => requirementsMet.value.filter(Boolean).length)
+  const totalCount = REQUIRED_CONFIGURATION_COUNT
 
   const itemsSavedToProfile = computed<ConfigurationItemId[]>(() =>
     items.value.filter((item) => !item.useProfile && item.saveToProfile).map((item) => item.id),
@@ -340,9 +335,7 @@ export function useConfigurationItems(
         const phone = drafts.payphone.phone
         if (phone.trim() === '') return false
         if (!isPhoneValid(phone)) return true
-        return (
-          drafts.payphone.verification === 'rejected' || drafts.payphone.verification === 'invalid'
-        )
+        return drafts.payphone.verification !== 'verified'
       }
       const bank = drafts.bankTransfer
       return (
@@ -362,7 +355,16 @@ export function useConfigurationItems(
     CONFIGURATION_ITEMS.some((definition) => isFieldInvalid(definition.id)),
   )
 
-  const canSave = computed(() => hasActivePayoutMethod.value && !hasInvalidField.value)
+  const canSave = computed(
+    () =>
+      isReady('publicName') &&
+      isReady('whatsapp') &&
+      hasActivePayoutMethod.value &&
+      !hasInvalidField.value,
+  )
+  const isComplete = computed(
+    () => readyCount.value === REQUIRED_CONFIGURATION_COUNT && !hasInvalidField.value,
+  )
 
   function toSelection(): IEventConfigurationSelectionRequest {
     const selectionContext = {
@@ -386,7 +388,7 @@ export function useConfigurationItems(
     isComplete,
     canSave,
     itemsSavedToProfile,
-    totalCount: CONFIGURATION_ITEMS.length,
+    totalCount,
     toggle,
     setUseProfile,
     setSaveToProfile,

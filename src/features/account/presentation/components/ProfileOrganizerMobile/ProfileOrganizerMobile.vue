@@ -36,7 +36,7 @@ const { data: contracts } = useMyContracts()
 const myProfileRef = computed(() => props.myProfile)
 const tenantProfileRef = computed(() => props.tenantProfile)
 
-const { pendingItems, accountPending, businessPending, hasVerifiedPayphone } =
+const { pendingItems, accountPending, businessPending, hasActivePayoutMethod } =
   useProfileCompleteness({
     currentUser,
     myProfile: myProfileRef,
@@ -256,10 +256,10 @@ const brandMetaLabel = computed(() =>
             <template #header-extra>
               <span
                 class="profile-organizer-mobile__meta"
-                :class="{ 'is-warn': !hasVerifiedPayphone }"
+                :class="{ 'is-warn': !hasActivePayoutMethod }"
               >
                 {{ configuredPayoutSlots }} de 2
-                <NIcon v-if="!hasVerifiedPayphone" :size="12" :component="WarningOutline" />
+                <NIcon v-if="!hasActivePayoutMethod" :size="12" :component="WarningOutline" />
               </span>
             </template>
             <PayoutSection :whatsapp-number="tenantProfile.whatsappNumber" />

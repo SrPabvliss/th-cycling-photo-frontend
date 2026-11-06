@@ -108,7 +108,7 @@ const slotsRemaining = computed(() =>
 )
 
 const readyCount = computed(() => configurationRef.value?.readyCount ?? 0)
-const totalCount = computed(() => configurationRef.value?.totalCount ?? 5)
+const totalCount = computed(() => configurationRef.value?.totalCount ?? 3)
 const isConfigurationComplete = computed(() => canContinueConfiguration.value)
 
 interface IFooterProps {
@@ -125,7 +125,9 @@ const footerProps = computed<IFooterProps>(() => {
       listos: readyCount.value,
       total: totalCount.value,
       dis: !isConfigurationComplete.value,
-      nota: isConfigurationComplete.value ? null : 'Completa los cinco datos para continuar',
+      nota: isConfigurationComplete.value
+        ? null
+        : 'Completa nombre, WhatsApp y un método de cobro para continuar',
       cta: 'Continuar',
     }
   }

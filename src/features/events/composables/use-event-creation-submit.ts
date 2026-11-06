@@ -14,10 +14,7 @@ import {
   WRONG_PASSWORD_MESSAGE,
 } from '../constants/event-creation.constants'
 import { toCreateEventRequest } from '../mappers/event-form.mapper'
-import type {
-  ConfigurationItemId,
-  IConfigurationItem,
-} from '../types/configuration-item.types'
+import type { ConfigurationItemId, IConfigurationItem } from '../types/configuration-item.types'
 import type { IEventCreationSubmitContext, ISavedPayoutMethod } from '../types/event-creation.types'
 import type { IEventFormData, IEventFormExtra } from '../types/event-form.types'
 import type { IConfirmationResourceState } from '../types/event-wizard.types'
@@ -72,6 +69,7 @@ export function useEventCreationSubmit(context: IEventCreationSubmitContext) {
       .filter(
         (item) =>
           PAYOUT_ITEM_IDS.includes(item.id) &&
+          item.isReady &&
           !item.useProfile &&
           item.saveToProfile &&
           savedPayoutIds.value[item.id]?.fingerprint !== payoutFingerprint(item),
@@ -82,7 +80,11 @@ export function useEventCreationSubmit(context: IEventCreationSubmitContext) {
     return context
       .items()
       .filter(
-        (item) => !PAYOUT_ITEM_IDS.includes(item.id) && !item.useProfile && item.saveToProfile,
+        (item) =>
+          !PAYOUT_ITEM_IDS.includes(item.id) &&
+          item.isReady &&
+          !item.useProfile &&
+          item.saveToProfile,
       )
       .map((item) => item.id)
   }

@@ -4,12 +4,7 @@ import type {
   PayoutMethodResponse,
 } from '@/features/tenant-profile/types/responses/payout-method.response'
 
-export type IEventConfigurationMissingRequirement =
-  | 'publicName'
-  | 'watermark'
-  | 'whatsapp'
-  | 'payphone'
-  | 'bankTransfer'
+export type IEventConfigurationMissingRequirement = 'publicName' | 'whatsapp' | 'payoutMethod'
 
 export interface IEventConfigurationPresetResponse {
   publicName: string | null

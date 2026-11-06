@@ -199,7 +199,12 @@ function handleCreate() {
 
         <template v-else-if="events.length === 0">
           <OperatorEmpty v-if="role === 'operator' && !hasActiveFilters" />
-          <FirstRun v-else-if="!hasActiveFilters" />
+          <FirstRun
+            v-else-if="!hasActiveFilters"
+            :is-organizer="isOrganizer"
+            :can-create="showCreateAffordance && hasCapacity"
+            @create="handleCreate"
+          />
           <NoResults v-else :query="filters.search" @clear="clearAll()" />
         </template>
 

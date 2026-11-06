@@ -313,11 +313,59 @@ describe('useConfigurationItems', () => {
 
   it('can be saved when an item is missing everywhere but the event still keeps a payout method', () => {
     const preset = ref(makePreset({ watermarkStorageKey: null }))
-    const current = ref(makeCurrent({ watermarkStorageKey: null }))
-    const { readyCount, canSave } = useConfigurationItems(preset, current)
+    const current = ref(
+      makeCurrent({ watermarkStorageKey: null, whatsappNumber: '+593 99 812 4477' }),
+    )
+    const { canSave } = useConfigurationItems(preset, current)
 
-    expect(readyCount.value).toBeLessThan(5)
     expect(canSave.value).toBe(true)
+  })
+
+  it('lets the wizard continue with name, WhatsApp and only a bank transfer, without a watermark', () => {
+    const preset = ref(
+      makePreset({ watermarkStorageKey: null, availablePayoutMethods: [profileBankMethod] }),
+    )
+    const { isComplete, readyCount, totalCount, toSelection } = useConfigurationItems(preset)
+
+    expect(readyCount.value).toBe(totalCount)
+    expect(isComplete.value).toBe(true)
+    expect(toSelection()).toMatchObject({
+      watermarkStorageKey: null,
+      payoutMethods: [{ source: 'profile', id: profileBankMethod.id }],
+    })
+  })
+
+  it('lets the wizard continue with only a payphone', () => {
+    const preset = ref(makePreset({ availablePayoutMethods: [profilePayphoneMethod] }))
+    const { isComplete } = useConfigurationItems(preset)
+
+    expect(isComplete.value).toBe(true)
+  })
+
+  it('keeps the wizard closed without any payout method', () => {
+    const preset = ref(makePreset({ availablePayoutMethods: [] }))
+    const { isComplete, readyCount } = useConfigurationItems(preset)
+
+    expect(readyCount.value).toBe(2)
+    expect(isComplete.value).toBe(false)
+  })
+
+  it('keeps the wizard closed without a WhatsApp number', () => {
+    const preset = ref(makePreset({ whatsappNumber: null }))
+    const { isComplete } = useConfigurationItems(preset)
+
+    expect(isComplete.value).toBe(false)
+  })
+
+  it('keeps the wizard closed while a new payphone is typed but not verified', () => {
+    const preset = ref(makePreset({ availablePayoutMethods: [profileBankMethod] }))
+    const { isComplete, patchDraft } = useConfigurationItems(preset)
+
+    patchDraft('payphone', { phone: '+593987654321', verification: 'pending' })
+    expect(isComplete.value).toBe(false)
+
+    patchDraft('payphone', { verification: 'verified' })
+    expect(isComplete.value).toBe(true)
   })
 
   it('sends nothing when the screen is saved without any change', () => {
