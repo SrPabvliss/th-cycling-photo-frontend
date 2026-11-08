@@ -6,7 +6,7 @@ import { httpClient } from '@/core/http/axios-client'
 import { toPickablePeople } from '../../mappers/pickable-person.mapper'
 import type { IApiPickablePerson } from '../../types/responses/pickable-person.response'
 
-const MIN_SEARCH_LENGTH = 2
+export const MIN_SEARCH_LENGTH = 2
 const RESULTS_LIMIT = 8
 
 export function useSearchUsersQuery(search: Ref<string>) {
