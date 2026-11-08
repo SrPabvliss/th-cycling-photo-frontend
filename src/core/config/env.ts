@@ -3,9 +3,10 @@ import { z } from 'zod'
 const envSchema = z.object({
   VITE_API_BASE_URL: z.string().min(1, 'VITE_API_BASE_URL is required'),
   VITE_CDN_BASE_URL: z.string().min(1, 'VITE_CDN_BASE_URL is required'),
-  // Public origin where operators paste delivery/preview links. We keep
-  // this independent from window.location.origin so that links sent from
-  // a localhost dev session still point to the real customer-facing host.
+  // Public origin (https://titantv.com.ec in production) for the absolute
+  // links staff copy or open: the public gallery and preview links. It stays
+  // independent from window.location.origin so that a link copied from a
+  // localhost session still points to the real customer-facing host.
   VITE_APP_BASE_URL: z.string().min(1, 'VITE_APP_BASE_URL is required'),
 })
 
