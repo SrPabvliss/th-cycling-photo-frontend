@@ -11,6 +11,7 @@ import {
 } from '@/shared/utils/payout.validation'
 import {
   CONFIGURATION_ITEMS,
+  LOCKED_MISSING_SUMMARY,
   MISSING_SUMMARY,
   NEW_DATA_SUMMARY,
   NO_PAYOUT_METHOD_LEFT,
@@ -36,7 +37,10 @@ import type {
   PayoutItemId,
   PayphoneVerificationState,
 } from '../types/configuration-item.types'
-import type { IEventConfigurationSelectionRequest } from '../types/requests/event-configuration.request'
+import type {
+  IEventConfigurationSelectionRequest,
+  IEventPayoutSelection,
+} from '../types/requests/event-configuration.request'
 import type {
   IEventConfigurationPresetResponse,
   IEventConfigurationResponse,
@@ -84,16 +88,28 @@ export type {
 
 export {
   CONFIGURATION_ITEMS,
+  LOCKED_MISSING_SUMMARY,
   MISSING_SUMMARY,
   NEW_DATA_SUMMARY,
   UNVERIFIED_SUFFIX,
   NO_PAYOUT_METHOD_LEFT,
 }
 
+export interface IConfigurationItemsOptions {
+  /**
+   * Whether the viewer may load a payout method that is not on the profile (`source: 'new'`).
+   * The backend asks `tenant.payout_method.manage` for it, so without it a payout item only offers
+   * the profile's method or keeping the one the event already has.
+   */
+  canEnterNewPayout?: Ref<boolean>
+}
+
 export function useConfigurationItems(
   preset: Ref<IEventConfigurationPresetResponse | undefined>,
   current?: Ref<IEventConfigurationResponse | undefined>,
+  options: IConfigurationItemsOptions = {},
 ) {
+  const canEnterNewPayout = computed(() => options.canEnterNewPayout?.value ?? true)
   const drafts = reactive<IDrafts>(createDrafts())
   const useProfileFlags = reactive<Record<ConfigurationItemId, boolean>>({
     publicName: false,
@@ -166,7 +182,14 @@ export function useConfigurationItems(
   function isReady(id: ConfigurationItemId): boolean {
     if (isPayoutItem(id) && removedPayoutFlags[id]) return false
     if (useProfileFlags[id]) return hasProfileValues.value[id]
+    if (isPayoutItem(id) && !canEnterNewPayout.value) return keepsCurrentPayout(id)
     return draftCompletion.value[id]
+  }
+
+  /** The event already has this payout method and its draft still holds it untouched. */
+  function keepsCurrentPayout(id: PayoutItemId): boolean {
+    const target = id === 'payphone' ? payphoneTarget() : bankTransferTarget()
+    return target?.source === 'event'
   }
 
   function payphoneTarget() {
@@ -190,12 +213,18 @@ export function useConfigurationItems(
     })
   }
 
+  /** Never sends a method the viewer is not allowed to load, whatever the drafts hold. */
+  function allowedSelection(target: IEventPayoutSelection | null): IEventPayoutSelection | null {
+    if (target?.source === 'new' && !canEnterNewPayout.value) return null
+    return target
+  }
+
   function payphoneSelection() {
-    return removedPayoutFlags.payphone ? null : payphoneTarget()
+    return removedPayoutFlags.payphone ? null : allowedSelection(payphoneTarget())
   }
 
   function bankTransferSelection() {
-    return removedPayoutFlags.bankTransfer ? null : bankTransferTarget()
+    return removedPayoutFlags.bankTransfer ? null : allowedSelection(bankTransferTarget())
   }
 
   function payoutTargetExists(id: PayoutItemId): boolean {
@@ -226,7 +255,8 @@ export function useConfigurationItems(
           saveToProfileFlags[definition.id] = false
         } else {
           useProfileFlags[definition.id] = hasProfile[definition.id]
-          saveToProfileFlags[definition.id] = !hasProfile[definition.id]
+          saveToProfileFlags[definition.id] =
+            !hasProfile[definition.id] && (canEnterNewPayout.value || !isPayoutItem(definition.id))
         }
         seededUseProfileFlags[definition.id] = useProfileFlags[definition.id]
       })
@@ -267,14 +297,17 @@ export function useConfigurationItems(
         hasProfileValue: hasProfileValues.value[definition.id],
         profileValue: profileValues.value[definition.id],
         profileLabel,
-        summary: resolveItemSummary(
-          definition.id,
-          state,
-          profileLabel,
-          currentValues.value,
-          Boolean(current?.value),
-          saveToProfileFlags[definition.id],
-        ),
+        summary:
+          state === 'missing' && isPayoutItem(definition.id) && !canEnterNewPayout.value
+            ? LOCKED_MISSING_SUMMARY
+            : resolveItemSummary(
+                definition.id,
+                state,
+                profileLabel,
+                currentValues.value,
+                Boolean(current?.value),
+                saveToProfileFlags[definition.id],
+              ),
         isReady: isReady(definition.id),
         isOpen: openIds.value.includes(definition.id),
         useProfile: useProfileFlags[definition.id],
@@ -283,6 +316,10 @@ export function useConfigurationItems(
         isRemoved: isPayoutItem(definition.id) ? removedPayoutFlags[definition.id] : false,
         removeDisabledReason: isPayoutItem(definition.id)
           ? resolveRemoveDisabledReason(definition.id, removedPayoutFlags, payoutTargetExists)
+          : null,
+        allowsNewData: !isPayoutItem(definition.id) || canEnterNewPayout.value,
+        currentLabel: hasCurrentValues.value[definition.id]
+          ? currentValues.value[definition.id]
           : null,
         draft: drafts[definition.id],
       }

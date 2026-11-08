@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { watch } from 'vue'
+import { computed, watch } from 'vue'
 import { NButton, NIcon, NResult, NSpin } from 'naive-ui'
 import { ShieldOutline } from '@vicons/ionicons5'
 
+import { PERMISSIONS } from '@/core/auth/permissions'
+import { usePermissions } from '@/core/auth/use-permissions'
 import { useEventConfigurationPreset } from '../../../../composables/queries/use-event-configuration-preset'
 import { useConfigurationItems } from '../../../../composables/use-configuration-items'
 import type { IEventConfigurationSelectionRequest } from '../../../../types/requests/event-configuration.request'
@@ -20,7 +22,10 @@ const emit = defineEmits<{
 
 const { data: preset, isPending, isError, refetch } = useEventConfigurationPreset()
 
-const configuration = useConfigurationItems(preset)
+const { has } = usePermissions()
+const canEnterNewPayout = computed(() => has(PERMISSIONS.TENANT_PAYOUT_METHOD_MANAGE))
+
+const configuration = useConfigurationItems(preset, undefined, { canEnterNewPayout })
 const {
   items,
   drafts,
@@ -136,6 +141,8 @@ defineExpose(configuration)
             :profile-label="item.profileLabel"
             :use-profile="item.useProfile"
             :save-to-profile="item.saveToProfile"
+            :allows-new-data="item.allowsNewData"
+            :current-label="item.currentLabel"
             :draft="drafts.payphone"
             @update:use-profile="setUseProfile('payphone', $event)"
             @update:save-to-profile="setSaveToProfile('payphone', $event)"
@@ -147,6 +154,8 @@ defineExpose(configuration)
             :profile-label="item.profileLabel"
             :use-profile="item.useProfile"
             :save-to-profile="item.saveToProfile"
+            :allows-new-data="item.allowsNewData"
+            :current-label="item.currentLabel"
             :draft="drafts.bankTransfer"
             @update:use-profile="setUseProfile('bankTransfer', $event)"
             @update:save-to-profile="setSaveToProfile('bankTransfer', $event)"

@@ -83,6 +83,8 @@ function baseItem(id: ConfigurationItemId, label: string): IConfigurationItem {
     isRemovable: false,
     isRemoved: false,
     removeDisabledReason: null,
+    allowsNewData: true,
+    currentLabel: null,
     draft: { value: 'algo' },
   }
 }

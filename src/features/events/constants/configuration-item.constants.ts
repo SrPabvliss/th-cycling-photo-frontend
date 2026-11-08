@@ -11,6 +11,8 @@ export const CONFIGURATION_ITEMS: IConfigurationItemDefinition[] = [
 export const REQUIRED_CONFIGURATION_COUNT = 3
 
 export const MISSING_SUMMARY = 'Tu perfil no tiene este dato · complétalo aquí'
+export const LOCKED_MISSING_SUMMARY =
+  'El perfil no tiene este método · lo configura un administrador'
 export const NEW_DATA_SUMMARY = 'Dato nuevo solo para este evento'
 export const NEW_DATA_SAVED_SUMMARY = 'Dato nuevo · se guardará también en tu perfil'
 export const UNVERIFIED_SUFFIX = ' · aún sin verificar'

@@ -16,7 +16,7 @@ import type {
 import ConfigField from './ConfigField.vue'
 import RemovePayoutCheck from './RemovePayoutCheck.vue'
 import SaveToProfileCheck from './SaveToProfileCheck.vue'
-import SourceChoice from './SourceChoice.vue'
+import PayoutSourceChoice from './PayoutSourceChoice.vue'
 
 const VERIFY_DEBOUNCE_MS = 400
 
@@ -35,9 +35,18 @@ const props = withDefaults(
     removable?: boolean
     isRemoved?: boolean
     removeDisabledReason?: string | null
+    allowsNewData?: boolean
+    currentLabel?: string | null
     draft: IPayphoneDraft
   }>(),
-  { showSaveToProfile: true, removable: false, isRemoved: false, removeDisabledReason: null },
+  {
+    showSaveToProfile: true,
+    removable: false,
+    isRemoved: false,
+    removeDisabledReason: null,
+    allowsNewData: true,
+    currentLabel: null,
+  },
 )
 
 const emit = defineEmits<{
@@ -112,10 +121,13 @@ onBeforeUnmount(clearTimer)
 </script>
 
 <template>
-  <SourceChoice
-    v-if="hasProfileValue"
+  <PayoutSourceChoice
+    item-id="payphone"
+    :has-profile-value="hasProfileValue"
     :profile-label="profileLabel"
     :use-profile="useProfile"
+    :allows-new-data="allowsNewData"
+    :current-label="currentLabel"
     @update:use-profile="emit('update:use-profile', $event)"
   />
 
@@ -126,7 +138,7 @@ onBeforeUnmount(clearTimer)
     @update:model-value="emit('update:removed', $event)"
   />
 
-  <template v-if="!useProfile && !isRemoved">
+  <template v-if="allowsNewData && !useProfile && !isRemoved">
     <ConfigField
       label="Número registrado en Payphone"
       hint="Verificamos con Payphone que el número esté registrado como receptor de pagos."

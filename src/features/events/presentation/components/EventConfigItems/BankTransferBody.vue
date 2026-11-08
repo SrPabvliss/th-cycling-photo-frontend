@@ -23,7 +23,7 @@ import ConfigInput from './ConfigInput.vue'
 import ConfigSelect from './ConfigSelect.vue'
 import RemovePayoutCheck from './RemovePayoutCheck.vue'
 import SaveToProfileCheck from './SaveToProfileCheck.vue'
-import SourceChoice from './SourceChoice.vue'
+import PayoutSourceChoice from './PayoutSourceChoice.vue'
 
 const BANK_NAME_ERROR = `Escribe al menos ${MIN_BANK_NAME_LENGTH} caracteres.`
 const ACCOUNT_NUMBER_ERROR = `Solo números, mínimo ${MIN_ACCOUNT_NUMBER_LENGTH} dígitos.`
@@ -40,9 +40,18 @@ const props = withDefaults(
     removable?: boolean
     isRemoved?: boolean
     removeDisabledReason?: string | null
+    allowsNewData?: boolean
+    currentLabel?: string | null
     draft: IBankTransferDraft
   }>(),
-  { showSaveToProfile: true, removable: false, isRemoved: false, removeDisabledReason: null },
+  {
+    showSaveToProfile: true,
+    removable: false,
+    isRemoved: false,
+    removeDisabledReason: null,
+    allowsNewData: true,
+    currentLabel: null,
+  },
 )
 
 const emit = defineEmits<{
@@ -75,10 +84,13 @@ const holderIdentificationError = computed(() =>
 </script>
 
 <template>
-  <SourceChoice
-    v-if="hasProfileValue"
+  <PayoutSourceChoice
+    item-id="bankTransfer"
+    :has-profile-value="hasProfileValue"
     :profile-label="profileLabel"
     :use-profile="useProfile"
+    :allows-new-data="allowsNewData"
+    :current-label="currentLabel"
     @update:use-profile="emit('update:use-profile', $event)"
   />
 
@@ -89,7 +101,7 @@ const holderIdentificationError = computed(() =>
     @update:model-value="emit('update:removed', $event)"
   />
 
-  <template v-if="!useProfile && !isRemoved">
+  <template v-if="allowsNewData && !useProfile && !isRemoved">
     <ConfigField label="Banco" :error="bankNameError">
       <ConfigComboSelect
         :model-value="draft.bankName"
