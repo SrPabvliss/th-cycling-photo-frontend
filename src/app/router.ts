@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import AppLayout from '@/core/layout/AppLayout.vue'
 import { registerAuthGuard } from '@/core/guards/auth.guard'
+import { registerStaleChunkReload } from '@/core/navigation/stale-chunk-reload'
 import { standaloneRoutes } from '@/core/views/standalone-routes'
 import { authRoutes } from '@/features/auth/routes'
 import { eventRoutes } from '@/features/events/routes'
@@ -67,5 +68,6 @@ const router = createRouter({
 })
 
 registerAuthGuard(router)
+registerStaleChunkReload(router)
 
 export default router
