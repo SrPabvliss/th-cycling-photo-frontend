@@ -63,6 +63,10 @@ export interface IConfigurationItem {
   isRemovable: boolean
   isRemoved: boolean
   removeDisabledReason: string | null
+  /** False for a payout item when the viewer may only pick the profile's method or keep the event's. */
+  allowsNewData: boolean
+  /** What the event stores today for this item, or null when it stores nothing (or is new). */
+  currentLabel: string | null
   draft: IConfigurationDraft
 }
 

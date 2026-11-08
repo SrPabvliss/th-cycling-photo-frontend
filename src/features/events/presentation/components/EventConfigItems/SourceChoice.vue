@@ -1,8 +1,18 @@
 <script setup lang="ts">
-defineProps<{
-  profileLabel: string
-  useProfile: boolean
-}>()
+withDefaults(
+  defineProps<{
+    profileLabel: string
+    useProfile: boolean
+    profileTitle?: string
+    otherTitle?: string
+    otherHint?: string
+  }>(),
+  {
+    profileTitle: 'Usar la de mi perfil',
+    otherTitle: 'Usar otra solo para este evento',
+    otherHint: 'Tu perfil no cambia',
+  },
+)
 
 const emit = defineEmits<{
   'update:use-profile': [boolean]
@@ -20,7 +30,7 @@ const emit = defineEmits<{
     >
       <span class="ce-radio" />
       <span class="ce-opt-t">
-        <b>Usar la de mi perfil</b>
+        <b>{{ profileTitle }}</b>
         <i>{{ profileLabel }}</i>
       </span>
     </button>
@@ -33,8 +43,8 @@ const emit = defineEmits<{
     >
       <span class="ce-radio" />
       <span class="ce-opt-t">
-        <b>Usar otra solo para este evento</b>
-        <i>Tu perfil no cambia</i>
+        <b>{{ otherTitle }}</b>
+        <i>{{ otherHint }}</i>
       </span>
     </button>
   </div>

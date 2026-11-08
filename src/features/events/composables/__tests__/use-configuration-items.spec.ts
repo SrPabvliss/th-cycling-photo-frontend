@@ -1,7 +1,11 @@
 import { ref } from 'vue'
 import { describe, expect, it } from 'vitest'
 
-import { NO_PAYOUT_METHOD_LEFT, useConfigurationItems } from '../use-configuration-items'
+import {
+  LOCKED_MISSING_SUMMARY,
+  NO_PAYOUT_METHOD_LEFT,
+  useConfigurationItems,
+} from '../use-configuration-items'
 import type {
   IEventConfigurationPresetResponse,
   IEventConfigurationResponse,
@@ -470,6 +474,75 @@ describe('useConfigurationItems', () => {
     expect(selection.payoutMethods).toContainEqual({
       source: 'event',
       id: '44444444-4444-4444-8444-444444444444',
+    })
+  })
+
+  describe('without tenant.payout_method.manage (TIT-95)', () => {
+    const locked = { canEnterNewPayout: ref(false) }
+
+    it('creates the event with the profile payout methods and never offers a new one', () => {
+      const preset = ref(makePreset())
+      const { items, toSelection, isComplete } = useConfigurationItems(preset, undefined, locked)
+
+      expect(items.value[PAYPHONE]!.allowsNewData).toBe(false)
+      expect(items.value[PAYPHONE]!.useProfile).toBe(true)
+      expect(items.value[PAYPHONE]!.saveToProfile).toBe(false)
+      expect(items.value[PUBLIC_NAME]!.allowsNewData).toBe(true)
+      expect(isComplete.value).toBe(true)
+      expect(toSelection().payoutMethods).toEqual([
+        { source: 'profile', id: profilePayphoneMethod.id },
+        { source: 'profile', id: profileBankMethod.id },
+      ])
+    })
+
+    it('tells that an admin sets up a payout method the profile lacks', () => {
+      const preset = ref(makePreset({ availablePayoutMethods: [profileBankMethod] }))
+      const { items } = useConfigurationItems(preset, undefined, locked)
+
+      expect(items.value[PAYPHONE]!.isReady).toBe(false)
+      expect(items.value[PAYPHONE]!.saveToProfile).toBe(false)
+      expect(items.value[PAYPHONE]!.summary).toBe(LOCKED_MISSING_SUMMARY)
+    })
+
+    it('never sends a typed number as a new payout method', () => {
+      const preset = ref(makePreset({ availablePayoutMethods: [profileBankMethod] }))
+      const { items, patchDraft, toSelection } = useConfigurationItems(preset, undefined, locked)
+
+      patchDraft('payphone', { phone: '+593 99 000 3333', verification: 'verified' })
+
+      expect(items.value[PAYPHONE]!.isReady).toBe(false)
+      expect(toSelection().payoutMethods).toEqual([{ source: 'profile', id: profileBankMethod.id }])
+    })
+
+    it("keeps the event's own method while the other one moves to the profile", () => {
+      const preset = ref(makePreset())
+      const current = ref(makeCurrent())
+      const { items, setUseProfile, toSelection } = useConfigurationItems(preset, current, locked)
+
+      expect(items.value[BANK_TRANSFER]!.isReady).toBe(true)
+      expect(items.value[BANK_TRANSFER]!.currentLabel).not.toBeNull()
+
+      setUseProfile('payphone', true)
+
+      expect(toSelection().payoutMethods).toEqual([
+        { source: 'profile', id: profilePayphoneMethod.id },
+        { source: 'event', id: '44444444-4444-4444-8444-444444444444' },
+      ])
+    })
+
+    it('still lets a holder of the permission type a new payout method', () => {
+      const preset = ref(makePreset({ availablePayoutMethods: [profileBankMethod] }))
+      const { patchDraft, toSelection } = useConfigurationItems(preset, undefined, {
+        canEnterNewPayout: ref(true),
+      })
+
+      patchDraft('payphone', { phone: '+593 99 000 3333', verification: 'verified' })
+
+      expect(toSelection().payoutMethods).toContainEqual({
+        source: 'new',
+        provider: 'payphone',
+        phone: '+593 99 000 3333',
+      })
     })
   })
 })

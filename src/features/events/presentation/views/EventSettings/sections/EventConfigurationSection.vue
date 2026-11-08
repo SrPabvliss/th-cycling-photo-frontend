@@ -26,6 +26,7 @@ const props = defineProps<{
 const router = useRouter()
 const { has } = usePermissions()
 const canUpdateEvent = computed(() => has(PERMISSIONS.EVENT_UPDATE))
+const canEnterNewPayout = computed(() => has(PERMISSIONS.TENANT_PAYOUT_METHOD_MANAGE))
 
 const slug = computed(() => props.slug)
 
@@ -50,7 +51,7 @@ const {
   patchDraft,
   toSelection,
   reseed,
-} = useConfigurationItems(preset, configuration)
+} = useConfigurationItems(preset, configuration, { canEnterNewPayout })
 
 const isLoading = computed(
   () => isLoadingEvent.value || isLoadingConfiguration.value || isLoadingPreset.value,
@@ -156,6 +157,8 @@ async function handleSave() {
             :removable="item.isRemovable"
             :is-removed="item.isRemoved"
             :remove-disabled-reason="item.removeDisabledReason"
+            :allows-new-data="item.allowsNewData"
+            :current-label="item.currentLabel"
             :draft="drafts.payphone"
             @update:use-profile="setUseProfile('payphone', $event)"
             @update:save-to-profile="setSaveToProfile('payphone', $event)"
@@ -172,6 +175,8 @@ async function handleSave() {
             :removable="item.isRemovable"
             :is-removed="item.isRemoved"
             :remove-disabled-reason="item.removeDisabledReason"
+            :allows-new-data="item.allowsNewData"
+            :current-label="item.currentLabel"
             :draft="drafts.bankTransfer"
             @update:use-profile="setUseProfile('bankTransfer', $event)"
             @update:save-to-profile="setSaveToProfile('bankTransfer', $event)"
