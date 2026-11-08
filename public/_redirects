@@ -1,1 +1,8 @@
+# Old links that still circulate. Cloudflare Pages applies the first rule that
+# matches, so every redirect must stay above the SPA fallback at the bottom.
+/privacidad /privacy 301
+/terminos /terms 301
+/orders/:id /orders?order=:id 301
+/checkout /gallery 302
+
 /* /index.html 200
