@@ -84,7 +84,7 @@ function confirm() {
       <div class="gp-delrow">
         <img :src="photo.thumbnailUrl" :alt="photo.filename" />
         <div>
-          <GalleryBibChips :bibs="photo.bibs" />
+          <GalleryBibChips :bibs="photo.bibs" :status="photo.status" />
           <span v-if="metaLine" data-test="delete-meta-line">{{ metaLine }}</span>
         </div>
       </div>

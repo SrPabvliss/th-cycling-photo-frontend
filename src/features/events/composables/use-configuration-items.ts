@@ -273,6 +273,7 @@ export function useConfigurationItems(
           profileLabel,
           currentValues.value,
           Boolean(current?.value),
+          saveToProfileFlags[definition.id],
         ),
         isReady: isReady(definition.id),
         isOpen: openIds.value.includes(definition.id),

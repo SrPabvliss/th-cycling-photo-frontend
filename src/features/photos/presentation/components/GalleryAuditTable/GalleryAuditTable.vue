@@ -124,7 +124,7 @@ function isSelected(id: string): boolean {
             <img :src="photo.thumbnailUrl" :alt="photo.filename" loading="lazy" decoding="async" />
           </td>
           <td class="c-bib">
-            <GalleryBibChips :bibs="photo.bibs" />
+            <GalleryBibChips :bibs="photo.bibs" :status="photo.status" />
           </td>
           <td class="c-src">
             <span
