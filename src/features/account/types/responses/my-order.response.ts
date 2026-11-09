@@ -100,14 +100,7 @@ export interface IApiMyOrdersSummary {
   spent: IApiMyOrdersSummarySpent[]
 }
 
-export interface IMyOrdersSummarySpent {
-  currency: string
-  amount: string
-}
-
 export interface IMyOrdersSummary {
   orderCount: number
   photoCount: number
-  eventCount: number
-  spent: IMyOrdersSummarySpent[]
 }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { NButton, NIcon } from 'naive-ui'
+import { useClipboard } from '@vueuse/core'
 import {
   CameraOutline,
   CheckmarkCircleOutline,
@@ -56,9 +57,7 @@ const statusDescription = computed(() => {
     : 'Aparece en la galería pública y sus fotos se pueden comprar.'
 })
 
-async function copyPublicUrl() {
-  await navigator.clipboard.writeText(publicUrl.value)
-}
+const { copy: copyPublicUrl, copied } = useClipboard({ source: publicUrl })
 </script>
 
 <template>
@@ -139,10 +138,12 @@ async function copyPublicUrl() {
         type="primary"
         size="small"
         data-test="cover-copy"
-        @click="copyPublicUrl"
+        @click="copyPublicUrl()"
       >
-        <template #icon><NIcon :component="CopyOutline" /></template>
-        Copiar
+        <template #icon>
+          <NIcon :component="copied ? CheckmarkCircleOutline : CopyOutline" />
+        </template>
+        {{ copied ? 'Copiado' : 'Copiar' }}
       </NButton>
       <span v-else class="cover__link-warning" data-test="cover-link-warning">
         {{ linkWarning }}
