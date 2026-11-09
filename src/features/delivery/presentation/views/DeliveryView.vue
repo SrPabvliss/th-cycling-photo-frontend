@@ -16,16 +16,25 @@ import PreviewNotFound from '@/shared/components/PreviewNotFound/PreviewNotFound
 const route = useRoute()
 const token = computed(() => route.params.token as string)
 
-const { data: delivery, isPending, isExpired, isNotFound } = useDeliveryQuery(token)
+const {
+  data: delivery,
+  isPending,
+  isExpired,
+  isNotFound,
+  ensureFreshUrls,
+} = useDeliveryQuery(token)
 const { downloadSingle, downloadAll, isDownloadingAll, downloadProgress, downloadTotal } =
   usePhotoDownload()
 
-function handleDownload(photo: IDeliveryPhoto) {
-  downloadSingle(photo)
+async function handleDownload(photo: IDeliveryPhoto) {
+  const fresh = await ensureFreshUrls()
+  const freshPhoto = fresh?.photos.find((candidate) => candidate.id === photo.id)
+  if (freshPhoto) downloadSingle(freshPhoto)
 }
 
-function handleDownloadAll() {
-  if (delivery.value) downloadAll(delivery.value.photos)
+async function handleDownloadAll() {
+  const fresh = await ensureFreshUrls()
+  if (fresh) downloadAll(fresh.photos)
 }
 </script>
 
