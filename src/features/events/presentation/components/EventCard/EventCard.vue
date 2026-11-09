@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { NIcon } from 'naive-ui'
+import { useClipboard } from '@vueuse/core'
 import {
   CalendarOutline,
   CameraOutline,
+  CheckmarkCircleOutline,
   ChevronForward,
   CloudUploadOutline,
+  CopyOutline,
   ImageOutline,
   LocationOutline,
 } from '@vicons/ionicons5'
+
+import { env } from '@/core/config/env'
 
 import { formatDate } from '@/shared/utils/date.utils'
 import { formatLocation } from '@/shared/utils/location.utils'
@@ -98,6 +103,14 @@ const organizerInitials = computed(() =>
     .join('')
     .toUpperCase(),
 )
+
+const isPublic = computed(
+  () => props.event.status === 'active' && props.event.coverImageSlug !== null,
+)
+
+const publicUrl = computed(() => `${env.VITE_APP_BASE_URL}/gallery/${props.event.slug}`)
+
+const { copy: copyPublicUrl, copied } = useClipboard({ source: publicUrl })
 
 function handleView() {
   emit('view', props.event.slug)
@@ -244,6 +257,17 @@ function handleUpload() {
       </div>
 
       <div class="ev-foot">
+        <button
+          v-if="isPublic"
+          type="button"
+          class="ev-btn ev-btn--ghost ev-btn--copy"
+          :class="{ 'ev-btn--copied': copied }"
+          data-test="event-card-copy"
+          @click.stop="copyPublicUrl()"
+        >
+          <NIcon :component="copied ? CheckmarkCircleOutline : CopyOutline" :size="14" />
+          {{ copied ? 'Copiado' : 'Copiar enlace' }}
+        </button>
         <button
           v-if="canUpload"
           type="button"
