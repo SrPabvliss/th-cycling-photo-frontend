@@ -5,7 +5,7 @@ import { API_ROUTES } from '@/core/api/api-routes'
 import { INTERNAL_IMAGE_QUERY_DEFAULTS } from '@/core/api/internal-image-query'
 import { httpClient } from '@/core/http/axios-client'
 import { PHOTO_QUERY_KEYS } from '../../constants/query-keys'
-import { toPhotoDetail } from '../../mappers/photo-detail.mapper'
+import { toPhotoDetail } from '@/shared/mappers/photo-detail.mapper'
 import type { IApiPhotoDetail } from '../../types/responses/photo-detail.response'
 
 export function usePhotoDetailQuery(id: Ref<string>) {

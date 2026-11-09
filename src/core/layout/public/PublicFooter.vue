@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import TitanLogo from './TitanLogo.vue'
-import { LEGAL_PATHS } from '@/features/legal/routes'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 </script>
 
 <template>
@@ -16,8 +16,8 @@ import { LEGAL_PATHS } from '@/features/legal/routes'
       </p>
       <div class="public-footer-meta">
         <nav class="public-footer-links">
-          <RouterLink :to="LEGAL_PATHS.PRIVACY">Privacidad</RouterLink>
-          <RouterLink :to="LEGAL_PATHS.TERMS">Términos</RouterLink>
+          <RouterLink :to="ROUTE_PATHS.PRIVACY">Privacidad</RouterLink>
+          <RouterLink :to="ROUTE_PATHS.TERMS">Términos</RouterLink>
           <a href="mailto:info@titantv.com.ec">Contacto</a>
         </nav>
         <p class="public-footer-copy">&copy; 2026 Titan TV. Todos los derechos reservados.</p>

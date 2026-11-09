@@ -21,6 +21,7 @@ export interface IApiSuccessResponse<T> {
 export interface IApiError {
   code: string
   message: string
+  messageKey?: string
   shouldThrow: boolean
   fields?: Record<string, string[]>
   details?: unknown

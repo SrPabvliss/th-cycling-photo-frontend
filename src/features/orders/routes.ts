@@ -1,12 +1,13 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-import { USER_ROLES } from '@/core/auth/user-roles'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 
-export const ORDERS_PATH = '/orders'
+import { PERMISSIONS } from '@/core/auth/permissions'
+
+export const ORDERS_PATH = ROUTE_PATHS.ORDERS
 
 export const ORDER_ROUTE_NAMES = {
   LIST: 'orders-list',
-  DETAIL: 'orders-detail',
 } as const
 
 export const orderRoutes: RouteRecordRaw[] = [
@@ -14,12 +15,6 @@ export const orderRoutes: RouteRecordRaw[] = [
     path: 'orders',
     name: ORDER_ROUTE_NAMES.LIST,
     component: () => import('./presentation/views/OrdersListView.vue'),
-    meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN] },
-  },
-  {
-    path: 'orders/:id',
-    name: ORDER_ROUTE_NAMES.DETAIL,
-    component: () => import('./presentation/views/OrderDetailView.vue'),
-    meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN] },
+    meta: { requiresAuth: true, permissions: [PERMISSIONS.ORDER_READ] },
   },
 ]

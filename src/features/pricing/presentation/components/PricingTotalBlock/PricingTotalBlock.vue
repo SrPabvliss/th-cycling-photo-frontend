@@ -6,7 +6,7 @@ import PricingTierProgress from '../PricingTierProgress/PricingTierProgress.vue'
 import PricingTiersTable from '../PricingTiersTable/PricingTiersTable.vue'
 import { usePricingTiersQuery } from '../../../composables/queries/use-pricing-tiers'
 import { getBasePricePerPhoto } from '../../../utils/get-base-price-per-photo'
-import { formatCurrency } from '../../../utils/format-currency'
+import { formatCurrency } from '@/shared/utils/currency.utils'
 import type { IPricingTier } from '../../../types/responses/pricing-preview.response'
 
 const props = withDefaults(

@@ -1,0 +1,13 @@
+.payphone-box {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.payphone-box__container {
+  min-height: 120px;
+}
+
+.payphone-box__loading {
+  align-self: center;
+}

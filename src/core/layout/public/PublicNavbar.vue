@@ -4,24 +4,30 @@ import { useRouter } from 'vue-router'
 import { NDrawer, NDrawerContent, NIcon } from 'naive-ui'
 import { MenuOutline, CloseOutline } from '@vicons/ionicons5'
 
-import { useAuth } from '@/features/auth/composables/use-auth'
+import { useSession } from '@/core/auth/use-session'
 import { getHomePath } from '@/core/auth/role-config'
-import { USER_ROLES } from '@/core/auth/user-roles'
-import { useCartQuery } from '@/features/cart/composables/queries/use-cart'
-import CartIcon from '@/features/cart/presentation/components/CartIcon/CartIcon.vue'
-import CartDrawer from '@/features/cart/presentation/components/CartDrawer/CartDrawer.vue'
+import { canOperate, canShop } from '@/core/auth/capabilities'
+import { useHatStore } from '@/core/auth/stores/hat.store'
+import { LAYOUT_SLOTS, useLayoutSlot } from '@/core/layout/slot-registry'
+import { ROUTE_NAMES } from '@/core/navigation/route-names'
 import TitanLogo from './TitanLogo.vue'
 
 const router = useRouter()
-const { isAuthenticated, currentUser, logout } = useAuth()
+const { isAuthenticated, currentUser, logout } = useSession()
+const hatStore = useHatStore()
 
-const isCustomer = computed(() => currentUser.value?.role === USER_ROLES.CUSTOMER)
-const showPanelLink = computed(() => isAuthenticated.value && !isCustomer.value)
-const panelPath = computed(() => getHomePath(currentUser.value?.role ?? USER_ROLES.CUSTOMER))
+const permissions = computed(() => currentUser.value?.permissions ?? [])
+const showShopLinks = computed(() => isAuthenticated.value && canShop(permissions.value))
+const showPanelLink = computed(() => isAuthenticated.value && canOperate(permissions.value))
 
-useCartQuery()
+function goPanel() {
+  showMenu.value = false
+  hatStore.setHat('operating')
+  router.push(getHomePath(permissions.value))
+}
 
-const showCart = ref(false)
+const navActions = useLayoutSlot(LAYOUT_SLOTS.PUBLIC_NAV_ACTION)
+const navOverlays = useLayoutSlot(LAYOUT_SLOTS.PUBLIC_NAV_OVERLAY)
 const showMenu = ref(false)
 
 const navLinks = [
@@ -57,12 +63,26 @@ function go(href: string) {
         <a v-for="link in navLinks" :key="link.label" :href="link.href" class="public-navbar-link">
           {{ link.label }}
         </a>
-        <RouterLink
+        <button
           v-if="showPanelLink"
-          :to="panelPath"
           class="public-navbar-link public-navbar-link--accent"
+          @click="goPanel"
         >
           Ir al panel
+        </button>
+        <RouterLink
+          v-if="showShopLinks"
+          :to="{ name: ROUTE_NAMES.ACCOUNT_ORDERS }"
+          class="public-navbar-link"
+        >
+          Mis compras
+        </RouterLink>
+        <RouterLink
+          v-if="showShopLinks"
+          :to="{ name: ROUTE_NAMES.ACCOUNT_PROFILE }"
+          class="public-navbar-link"
+        >
+          Mi perfil
         </RouterLink>
         <a v-if="isAuthenticated" class="public-navbar-link" href="#" @click.prevent="handleLogout">
           Cerrar sesión
@@ -70,12 +90,12 @@ function go(href: string) {
         <RouterLink v-else to="/login" class="public-navbar-link public-navbar-link--accent">
           Inicio de sesión
         </RouterLink>
-        <CartIcon @click="showCart = true" />
+        <component :is="action" v-for="(action, index) in navActions" :key="index" />
       </nav>
 
       <!-- Mobile: cart button -->
       <div class="public-navbar-mobile-cart">
-        <CartIcon @click="showCart = true" />
+        <component :is="action" v-for="(action, index) in navActions" :key="index" />
       </div>
     </div>
   </header>
@@ -108,13 +128,28 @@ function go(href: string) {
           >
             {{ link.label }}
           </a>
-          <RouterLink
+          <button
             v-if="showPanelLink"
-            :to="panelPath"
             class="public-navbar-menu__link public-navbar-menu__link--accent"
-            @click="showMenu = false"
+            @click="goPanel"
           >
             Ir al panel
+          </button>
+          <RouterLink
+            v-if="showShopLinks"
+            :to="{ name: ROUTE_NAMES.ACCOUNT_ORDERS }"
+            class="public-navbar-menu__link"
+            @click="showMenu = false"
+          >
+            Mis compras
+          </RouterLink>
+          <RouterLink
+            v-if="showShopLinks"
+            :to="{ name: ROUTE_NAMES.ACCOUNT_PROFILE }"
+            class="public-navbar-menu__link"
+            @click="showMenu = false"
+          >
+            Mi perfil
           </RouterLink>
           <a
             v-if="isAuthenticated"
@@ -137,7 +172,7 @@ function go(href: string) {
     </NDrawerContent>
   </NDrawer>
 
-  <CartDrawer :show="showCart" @update:show="showCart = $event" />
+  <component :is="overlay" v-for="(overlay, index) in navOverlays" :key="index" />
 </template>
 
 <style scoped src="./styles/public-navbar.css" />

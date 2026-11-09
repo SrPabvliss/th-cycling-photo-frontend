@@ -1,33 +1,83 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { NAlert, NButton, NDivider, NIcon } from 'naive-ui'
-import { ArrowBack, CheckmarkCircle, ChevronBack, LogoWhatsapp } from '@vicons/ionicons5'
+import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { NButton, NDivider, NIcon } from 'naive-ui'
+import { ArrowBack, CheckmarkCircle, ChevronBack } from '@vicons/ionicons5'
 
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
+import { checkoutPath } from '@/core/navigation/route-paths'
 import { useAuth } from '@/features/auth/composables/use-auth'
-import { useCartStore } from '../../stores/cart.store'
+import PaymentMethodModal from '@/shared/components/PaymentMethodModal/PaymentMethodModal.vue'
+import { useCheckout } from '@/shared/composables/use-checkout'
+import { PAYMENT_METHOD } from '@/shared/types/payment-method.types'
+import { useCartStore } from '@/shared/stores/cart.store'
+import type { ICheckoutOrderResult } from '@/shared/types/cart.types'
 import { useMergeCart } from '../../composables/mutations/use-merge-cart'
-import { useCheckout } from '../../composables/mutations/use-checkout'
-import type { ICheckoutOrderResult } from '../../types/requests/cart.request'
+import { useEventPaymentOptionsQuery } from '@/shared/composables/use-event-payment-options'
 import CheckoutSummary from '../components/CheckoutSummary/CheckoutSummary.vue'
 import { useCartPricing } from '../../composables/use-cart-pricing'
 import PricingTotalBlock from '@/features/pricing/presentation/components/PricingTotalBlock/PricingTotalBlock.vue'
+import { useBillingSelection } from '@/features/account/composables/use-billing-selection'
+import BillingAccountForm from '@/features/account/presentation/components/BillingAccountForm/BillingAccountForm.vue'
+import BillingCard from '@/features/account/presentation/components/BillingCard/BillingCard.vue'
+import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
+import BillingAccountPicker from '@/features/account/presentation/components/BillingAccountPicker/BillingAccountPicker.vue'
 
+const route = useRoute()
 const router = useRouter()
 const cartStore = useCartStore()
 const { isAuthenticated } = useAuth()
-const { mutateAsync: mergeCart } = useMergeCart()
-const { mutateAsync: checkout, isPending: isCheckingOut } = useCheckout()
-const cartPricing = useCartPricing()
+const { mutateAsync: mergeCart, isPending: isMerging } = useMergeCart()
+
+const eventId = computed(() => route.params.eventId as string)
+const { data: paymentOptions, isLoading: isLoadingPaymentOptions } = useEventPaymentOptionsQuery(
+  eventId,
+  isAuthenticated,
+)
+const cardAvailable = computed(() => paymentOptions.value?.cardAvailable ?? false)
+const { mutateAsync: checkout, isPending: isPlacingOrder } = useCheckout()
+
+watch(
+  eventId,
+  (id) => {
+    if (id) cartStore.setActiveEvent(id)
+  },
+  { immediate: true },
+)
+
+const checkoutGroup = computed(
+  () => cartStore.groups.find((group) => group.eventId === eventId.value) ?? null,
+)
+const checkoutCount = computed(() => checkoutGroup.value?.photos.length ?? 0)
+const cartPricing = useCartPricing(checkoutCount)
 
 const orderResults = ref<ICheckoutOrderResult[] | null>(null)
+const showMethodModal = ref(false)
+
+const {
+  billingAccounts,
+  needsInvoiceConsent,
+  selectedBillingAccountId,
+  invoiceConsentChecked,
+  billingSheet,
+  billingPrefill,
+  isBillingReady,
+  isSettingDefault,
+  isRecordingConsent,
+  handleBillingSaved,
+  handleBillingChosen,
+  ensureInvoiceConsent,
+} = useBillingSelection(() => isAuthenticated.value)
 
 async function handleConfirm() {
+  if (!eventId.value) return
+
   if (!isAuthenticated.value) {
-    router.push({ path: '/login', query: { redirect: '/checkout' } })
+    router.push({ path: '/login', query: { redirect: checkoutPath(eventId.value) } })
     return
   }
+
+  if (!isBillingReady.value) return
 
   try {
     await mergeCart()
@@ -35,8 +85,30 @@ async function handleConfirm() {
     /* already merged */
   }
 
-  const items = cartStore.groups.map((g) => ({ eventId: g.eventId }))
-  orderResults.value = await checkout({ items })
+  await ensureInvoiceConsent()
+
+  if (!cardAvailable.value) {
+    await placeTransferOrder()
+    return
+  }
+
+  showMethodModal.value = true
+}
+
+async function placeTransferOrder() {
+  if (!selectedBillingAccountId.value) return
+
+  const orders = await checkout({
+    eventId: eventId.value,
+    method: PAYMENT_METHOD.TRANSFER,
+    billingAccountId: selectedBillingAccountId.value,
+  }).catch(() => null)
+
+  if (orders) orderResults.value = orders
+}
+
+function handlePaidOrders(orders: ICheckoutOrderResult[]) {
+  orderResults.value = orders
 }
 </script>
 
@@ -58,7 +130,7 @@ async function handleConfirm() {
           <strong
             >{{ orderResults.length }} pedido{{ orderResults.length !== 1 ? 's' : '' }}</strong
           >
-          correctamente. Te contactaremos pronto por WhatsApp.
+          correctamente. Completa el pago para recibir tus fotos.
         </p>
 
         <div class="checkout-order-list">
@@ -66,6 +138,13 @@ async function handleConfirm() {
             <span class="checkout-order-item__name">{{ order.eventName }}</span>
             <span class="checkout-order-item__count">{{ order.photoCount }} fotos</span>
           </div>
+        </div>
+
+        <div class="checkout-payment-actions">
+          <p class="checkout-transfer-notice">
+            Te enviaremos los datos para la transferencia. Apenas confirmemos el pago recibirás tus
+            fotos.
+          </p>
         </div>
 
         <div class="state-page__actions">
@@ -89,7 +168,7 @@ async function handleConfirm() {
         <span class="cf-breadcrumb-cur">Confirmar pedido</span>
       </div>
 
-      <div v-if="cartStore.totalCount === 0" class="checkout-empty">
+      <div v-if="!checkoutGroup" class="checkout-empty">
         <h2 class="checkout-empty__title">Tu carrito está vacío</h2>
         <NButton type="primary" @click="router.push('/gallery')">Explorar eventos</NButton>
       </div>
@@ -105,9 +184,7 @@ async function handleConfirm() {
         <div class="checkout-summary__layout">
           <div class="checkout-summary__main">
             <CheckoutSummary
-              v-for="group in cartStore.groups"
-              :key="group.eventId"
-              :group="group"
+              :group="checkoutGroup"
               :unit-price="cartPricing.preview.value?.unitPrice ?? 0"
               :base-price="cartPricing.basePrice.value"
               :currency="cartPricing.currency.value"
@@ -117,14 +194,6 @@ async function handleConfirm() {
 
           <aside class="checkout-summary__aside">
             <div class="checkout-summary__panel">
-              <NAlert type="info" :show-icon="true" class="checkout-summary__notice">
-                <template #icon>
-                  <NIcon :component="LogoWhatsapp" />
-                </template>
-                <strong>Nos contactaremos por WhatsApp</strong>
-                para coordinar el pago y la entrega de tus fotos.
-              </NAlert>
-
               <NDivider class="checkout-summary__divider" />
 
               <div class="checkout-summary__totals">
@@ -143,16 +212,39 @@ async function handleConfirm() {
                 <div v-else class="checkout-summary__totals-loading">Calculando precio…</div>
               </div>
 
+              <BillingCard
+                v-if="isAuthenticated"
+                v-model:consented="invoiceConsentChecked"
+                :accounts="billingAccounts"
+                :selected-id="selectedBillingAccountId"
+                :needs-consent="needsInvoiceConsent && billingAccounts.length > 0"
+                @add="billingSheet = 'form'"
+                @change="billingSheet = 'picker'"
+              />
+
               <NButton
                 type="primary"
                 size="large"
                 block
-                :loading="isCheckingOut"
-                :disabled="isCheckingOut || cartPricing.isLoading.value"
+                data-test="checkout-confirm"
+                :loading="isMerging || isRecordingConsent || isPlacingOrder"
+                :disabled="
+                  isMerging ||
+                  isPlacingOrder ||
+                  cartPricing.isLoading.value ||
+                  (isAuthenticated && (!isBillingReady || isLoadingPaymentOptions))
+                "
                 @click="handleConfirm"
               >
                 Confirmar pedido
               </NButton>
+
+              <p
+                v-if="isAuthenticated && paymentOptions && !cardAvailable"
+                class="checkout-summary__method-hint"
+              >
+                Pagas por transferencia bancaria: al confirmar te enviamos los datos.
+              </p>
 
               <NButton quaternary size="medium" block @click="router.push('/gallery')">
                 Seguir explorando
@@ -161,11 +253,40 @@ async function handleConfirm() {
           </aside>
         </div>
       </section>
+
+      <PaymentMethodModal
+        v-model:show="showMethodModal"
+        :event-id="eventId"
+        :total="cartPricing.subtotal.value"
+        :currency="cartPricing.currency.value"
+        :billing-account-id="selectedBillingAccountId ?? undefined"
+        @paid-orders="handlePaidOrders"
+      />
+
+      <BillingSheet
+        v-if="billingSheet"
+        :title="billingSheet === 'form' ? 'Datos de facturación' : '¿A nombre de quién?'"
+        @close="billingSheet = null"
+      >
+        <BillingAccountForm
+          v-if="billingSheet === 'form'"
+          :needs-consent="needsInvoiceConsent"
+          :prefill="billingPrefill"
+          @saved="handleBillingSaved"
+          @cancel="billingSheet = null"
+        />
+        <BillingAccountPicker
+          v-else
+          :accounts="billingAccounts"
+          :selected-id="selectedBillingAccountId"
+          :is-saving="isSettingDefault"
+          @choose="handleBillingChosen"
+          @add="billingSheet = 'form'"
+        />
+      </BillingSheet>
     </template>
   </PublicLayout>
 </template>
 
-<style
-  src="@/features/client-gallery/presentation/components/OrderConfirmation/order-confirmation.css"
-></style>
+<style src="./checkout-success.css"></style>
 <style scoped src="./checkout-view.css" />

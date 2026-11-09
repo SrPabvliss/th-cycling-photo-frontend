@@ -1,7 +1,11 @@
 .register-form {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 16px;
+}
+
+.register-form :deep(.n-form-item-feedback-wrapper) {
+  min-height: 0;
 }
 
 .register-form__row {
@@ -14,26 +18,6 @@
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 12px;
-}
-
-.register-form__phone :deep(.iti) {
-  width: 100%;
-}
-
-.register-form__phone :deep(.iti input) {
-  width: 100%;
-  height: 34px;
-  padding: 0 12px;
-  border: 1px solid #e0e0e6;
-  border-radius: 3px;
-  font-size: 14px;
-  font-family: inherit;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.register-form__phone :deep(.iti input:focus) {
-  border-color: var(--tt-primary, #18a058);
 }
 
 .register-form__phone-error {

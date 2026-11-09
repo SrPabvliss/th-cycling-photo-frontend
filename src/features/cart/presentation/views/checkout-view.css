@@ -84,6 +84,23 @@
   color: #18a058;
 }
 
+.checkout-payment-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 16px;
+}
+
+.checkout-transfer-notice {
+  margin: 0;
+  max-width: 42ch;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  opacity: 0.85;
+}
+
 .checkout-summary {
   max-width: 1100px;
   width: 100%;
@@ -191,6 +208,13 @@
 .checkout-summary__totals-meta {
   font-size: 13px;
   color: #6b7280;
+}
+
+.checkout-summary__method-hint {
+  margin: -4px 0 0;
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
 }
 
 .checkout-summary__totals-loading {

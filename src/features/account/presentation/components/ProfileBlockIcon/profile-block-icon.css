@@ -1,0 +1,10 @@
+.profile-block-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--tt-background);
+  color: var(--tt-neutral-dark);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}

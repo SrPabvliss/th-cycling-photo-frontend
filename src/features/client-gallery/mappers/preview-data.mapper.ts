@@ -17,6 +17,9 @@ function toPreviewPhoto(api: IApiPreviewPhoto): IPreviewPhoto {
 export function toPreviewData(api: IApiPreviewData): IPreviewData {
   return {
     token: api.token,
+    eventId: api.eventId,
+    eventTypeId: api.eventTypeId,
+    organizerName: api.organizerName,
     eventName: api.eventName,
     startDate: parseDateOnly(api.startDate),
     endDate: parseDateOnly(api.endDate),

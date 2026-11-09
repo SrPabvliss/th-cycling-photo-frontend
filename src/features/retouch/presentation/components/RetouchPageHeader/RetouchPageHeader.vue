@@ -2,7 +2,8 @@
 import { computed } from 'vue'
 import { NButton } from 'naive-ui'
 
-import PageHeader from '@/shared/components/PageHeader.vue'
+import PageHeader from '@/shared/components/PageHeader/PageHeader.vue'
+import { pluralize } from '@/shared/utils/format.utils'
 
 interface IRetouchPageHeaderProps {
   title: string
@@ -18,18 +19,16 @@ interface IRetouchPageHeaderProps {
 const props = defineProps<IRetouchPageHeaderProps>()
 defineEmits<{ start: [] }>()
 
-function pluralize(count: number, singular: string, plural: string) {
-  return count === 1 ? `1 ${singular}` : `${count} ${plural}`
-}
-
 const fullSubtitle = computed(() => {
   const parts: string[] = []
   if (props.subtitle) parts.push(props.subtitle)
   if (props.totalOrders !== undefined) {
-    parts.push(pluralize(props.totalOrders, 'orden', 'órdenes'))
+    parts.push(`${props.totalOrders} ${pluralize(props.totalOrders, 'orden', 'órdenes')}`)
   }
   if (props.totalPendingPhotos !== undefined) {
-    parts.push(pluralize(props.totalPendingPhotos, 'foto pendiente', 'fotos pendientes'))
+    parts.push(
+      `${props.totalPendingPhotos} ${pluralize(props.totalPendingPhotos, 'foto pendiente', 'fotos pendientes')}`,
+    )
   }
   return parts.join(' · ')
 })

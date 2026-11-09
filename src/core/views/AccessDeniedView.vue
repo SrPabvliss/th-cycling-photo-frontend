@@ -4,17 +4,17 @@ import { NButton, NIcon } from 'naive-ui'
 import { ArrowBack, IdCardOutline, InformationCircleOutline } from '@vicons/ionicons5'
 
 import { getHomePath } from '@/core/auth/role-config'
-import { useAuthStore } from '@/features/auth/stores/auth.store'
+import { useSessionStore } from '@/core/auth/stores/session.store'
 import ErrorPageLayout from './components/ErrorPageLayout.vue'
 
 const router = useRouter()
-const authStore = useAuthStore()
+const authStore = useSessionStore()
 
 const accessId = `ACC-${Math.random().toString(36).substring(2, 10).toUpperCase()}`
 
 function goBack() {
   if (authStore.isAuthenticated) {
-    router.push(getHomePath(authStore.currentUser!.role))
+    router.push(getHomePath(authStore.currentUser?.permissions ?? []))
   } else if (window.history.length > 1) {
     router.back()
   } else {

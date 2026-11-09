@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NEmpty, NIcon, NSpin } from 'naive-ui'
 import { ArrowBack } from '@vicons/ionicons5'
@@ -7,9 +7,9 @@ import { ArrowBack } from '@vicons/ionicons5'
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { formatDate } from '@/shared/utils/date.utils'
 import { getAssetPresetUrl } from '@/shared/utils/cdn.utils'
-import { useCartStore } from '@/features/cart/stores/cart.store'
-import { useAddToCart } from '@/features/cart/composables/mutations/use-add-to-cart'
-import { useRemoveFromCart } from '@/features/cart/composables/mutations/use-remove-from-cart'
+import { useCartStore } from '@/shared/stores/cart.store'
+import { useAddToCart } from '@/shared/composables/use-add-to-cart'
+import { useRemoveFromCart } from '@/shared/composables/use-remove-from-cart'
 import { usePublicEventDetailQuery } from '../../composables/queries/use-public-event-detail'
 import {
   usePublicEventNoBibPhotosInfinite,
@@ -26,6 +26,16 @@ const router = useRouter()
 const slug = computed(() => route.params.slug as string)
 
 const { data: event, isPending: isEventPending } = usePublicEventDetailQuery(slug)
+
+const cartStore = useCartStore()
+
+watch(
+  () => event.value?.id ?? null,
+  (eventId) => cartStore.setActiveEvent(eventId),
+  { immediate: true },
+)
+
+onUnmounted(() => cartStore.setActiveEvent(null))
 
 const activeCategoryId = ref<number | null>(null)
 const bibNumber = ref('')
@@ -68,7 +78,6 @@ const showNoBibSection = computed(
 )
 
 // --- Cart-based selection ---
-const cartStore = useCartStore()
 const { mutate: addToCart } = useAddToCart()
 const { mutate: removeFromCart } = useRemoveFromCart()
 
@@ -138,6 +147,7 @@ const heroUrl = computed(() => {
               <NIcon :component="ArrowBack" :size="18" />
             </button>
             <h1 class="gallery-hero__title">{{ event.name }}</h1>
+            <p class="gallery-hero__owner">Fotos de {{ event.ownerName }}</p>
             <p class="gallery-hero__meta">
               <template v-if="event.startDate.getTime() === event.endDate.getTime()">
                 {{ formatDate(event.startDate) }}

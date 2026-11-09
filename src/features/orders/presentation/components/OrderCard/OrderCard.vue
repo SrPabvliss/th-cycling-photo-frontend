@@ -15,10 +15,12 @@ import {
   TimeOutline,
 } from '@vicons/ionicons5'
 
+import { PERMISSIONS } from '@/core/auth/permissions'
+import { usePermissions } from '@/core/auth/use-permissions'
 import { formatRelativeTime, isRecent } from '@/shared/utils/date.utils'
-import { formatCurrency } from '@/features/pricing/utils/format-currency'
+import { formatCurrency } from '@/shared/utils/currency.utils'
 import { ORDER_STATUS, type IOrderListItem } from '../../../types/responses/order-list.response'
-import { ORDER_STATUS_CONFIG } from '../../../constants/status-config'
+import { ORDER_STATUS_CONFIG, PAYMENT_METHOD_LABELS } from '../../../constants/status-config'
 
 const MAX_THUMBS = 3
 
@@ -59,11 +61,33 @@ const emit = defineEmits<{
   view: [id: string]
   confirmPayment: [id: string]
   markGift: [id: string]
-  sendDelivery: [id: string]
+  // The whole order, not its id: the message goes to the buyer's phone, which lives on it.
+  sendDelivery: [order: IOrderListItem]
   sendPaymentInfo: [order: IOrderListItem]
   resendDelivery: [order: IOrderListItem]
-  regenerate: [id: string]
+  regenerate: [order: IOrderListItem]
 }>()
+
+const { has } = usePermissions()
+
+const canNotify = computed(() => has(PERMISSIONS.ORDER_NOTIFY_PAYMENT))
+const canConfirm = computed(() => has(PERMISSIONS.ORDER_CONFIRM_PAYMENT))
+const canRegenerate = computed(() => has(PERMISSIONS.ORDER_DELIVERY_REGENERATE))
+const isAwaitingPayment = computed(
+  () =>
+    props.order.status === ORDER_STATUS.PENDING ||
+    props.order.status === ORDER_STATUS.PAYMENT_INFO_SENT,
+)
+const isAwaitingDelivery = computed(
+  () =>
+    props.order.status === ORDER_STATUS.PAID ||
+    (props.order.status === ORDER_STATUS.GIFTED && !props.order.deliveredAt),
+)
+const isDelivered = computed(
+  () =>
+    props.order.status === ORDER_STATUS.DELIVERED ||
+    (props.order.status === ORDER_STATUS.GIFTED && props.order.deliveredAt !== null),
+)
 
 const isNew = computed(
   () => isRecent(props.order.createdAt) && props.order.status === ORDER_STATUS.PENDING,
@@ -128,6 +152,10 @@ const currentStepIndex = computed(() => {
 })
 
 const showTimeline = computed(() => props.order.status !== ORDER_STATUS.CANCELLED)
+
+const paymentMethodLabel = computed(() =>
+  props.order.paymentMethod ? (PAYMENT_METHOD_LABELS[props.order.paymentMethod] ?? '—') : '—',
+)
 </script>
 
 <template>
@@ -196,24 +224,32 @@ const showTimeline = computed(() => props.order.status !== ORDER_STATUS.CANCELLE
       <span class="oc__chip oc__chip--photos">
         {{ order.photoCount }} {{ order.photoCount === 1 ? 'foto' : 'fotos' }}
       </span>
+      <span v-if="order.paymentMethod" class="oc__chip oc__chip--payment">{{
+        paymentMethodLabel
+      }}</span>
     </div>
 
     <!-- Actions -->
     <div class="oc__actions">
-      <template
-        v-if="
-          order.status === ORDER_STATUS.PENDING || order.status === ORDER_STATUS.PAYMENT_INFO_SENT
-        "
-      >
-        <button class="oc__btn oc__btn--wa" @click.stop="emit('sendPaymentInfo', order)">
+      <template v-if="isAwaitingPayment && (canNotify || canConfirm)">
+        <button
+          v-if="canNotify"
+          class="oc__btn oc__btn--wa"
+          @click.stop="emit('sendPaymentInfo', order)"
+        >
           <NIcon :component="LogoWhatsapp" :size="16" />
           {{ order.status === ORDER_STATUS.PAYMENT_INFO_SENT ? 'Reenviar info' : 'Info de pago' }}
         </button>
-        <button class="oc__btn oc__btn--confirm" @click.stop="emit('confirmPayment', order.id)">
+        <button
+          v-if="canConfirm"
+          class="oc__btn oc__btn--confirm"
+          @click.stop="emit('confirmPayment', order.id)"
+        >
           <NIcon :component="CheckmarkOutline" :size="16" />
           Confirmar pago
         </button>
         <button
+          v-if="has(PERMISSIONS.ORDER_GIFT)"
           class="oc__icon-btn oc__icon-btn--gift"
           title="Enviar como regalo"
           aria-label="Enviar como regalo"
@@ -224,22 +260,16 @@ const showTimeline = computed(() => props.order.status !== ORDER_STATUS.CANCELLE
       </template>
 
       <button
-        v-else-if="
-          order.status === ORDER_STATUS.PAID ||
-          (order.status === ORDER_STATUS.GIFTED && !order.deliveredAt)
-        "
+        v-else-if="isAwaitingDelivery && has(PERMISSIONS.ORDER_DELIVER)"
         class="oc__btn oc__btn--send"
-        @click.stop="emit('sendDelivery', order.id)"
+        @click.stop="emit('sendDelivery', order)"
       >
         <NIcon :component="SendOutline" :size="16" />
         Enviar fotos
       </button>
 
       <button
-        v-else-if="
-          (order.status === ORDER_STATUS.DELIVERED || order.status === ORDER_STATUS.GIFTED) &&
-          order.hasDeliveryLink
-        "
+        v-else-if="isDelivered && order.hasDeliveryLink && canRegenerate"
         class="oc__btn oc__btn--wa"
         @click.stop="emit('resendDelivery', order)"
       >
@@ -248,13 +278,9 @@ const showTimeline = computed(() => props.order.status !== ORDER_STATUS.CANCELLE
       </button>
 
       <button
-        v-else-if="
-          (order.status === ORDER_STATUS.DELIVERED ||
-            (order.status === ORDER_STATUS.GIFTED && order.deliveredAt)) &&
-          !order.hasDeliveryLink
-        "
+        v-else-if="isDelivered && !order.hasDeliveryLink && canRegenerate"
         class="oc__btn"
-        @click.stop="emit('regenerate', order.id)"
+        @click.stop="emit('regenerate', order)"
       >
         <NIcon :component="RefreshOutline" :size="16" />
         Regenerar enlace
@@ -262,7 +288,7 @@ const showTimeline = computed(() => props.order.status !== ORDER_STATUS.CANCELLE
 
       <button v-else class="oc__btn" @click.stop="emit('view', order.id)">
         <NIcon :component="EyeOutline" :size="16" />
-        Ver detalles
+        Ver detalle
       </button>
 
       <button class="oc__icon-btn" @click.stop="emit('view', order.id)">

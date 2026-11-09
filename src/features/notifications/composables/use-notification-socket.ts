@@ -2,11 +2,10 @@ import { watch, onUnmounted } from 'vue'
 import { useQueryClient } from '@tanstack/vue-query'
 import { useMessage } from 'naive-ui'
 
-import { USER_ROLES } from '@/core/auth/user-roles'
+import { PERMISSIONS } from '@/core/auth/permissions'
 import { connectSocket, disconnectSocket, getSocket } from '@/core/socket/socket-client'
-import { useAuthStore } from '@/features/auth/stores/auth.store'
+import { useSessionStore } from '@/core/auth/stores/session.store'
 import { API_ROUTES } from '@/core/api/api-routes'
-import { ORDER_QUERY_KEYS } from '@/features/orders/constants/query-keys'
 import { NOTIFICATION_QUERY_KEYS } from '../constants/query-keys'
 import { useNotificationStore } from '../stores/notification.store'
 import type { INotificationSocketPayload } from '../types/notification.types'
@@ -19,7 +18,7 @@ const processedIds = new Set<string>()
  * Call this once in AppLayout or App.vue.
  */
 export function useNotificationSocket() {
-  const authStore = useAuthStore()
+  const authStore = useSessionStore()
   const notificationStore = useNotificationStore()
   const queryClient = useQueryClient()
   const message = useMessage()
@@ -43,13 +42,15 @@ export function useNotificationSocket() {
 
     // Invalidate orders cache for order-related events
     if (payload.type.startsWith('order.')) {
-      queryClient.invalidateQueries({ queryKey: ORDER_QUERY_KEYS.all() })
+      queryClient.invalidateQueries({ queryKey: [API_ROUTES.ORDERS.BASE] })
     }
 
     // Invalidate operator queries when relevant events arrive
-    const role = authStore.currentUser?.role
+    const hasDashboardRead = authStore.currentUser?.permissions?.includes(
+      PERMISSIONS.DASHBOARD_OPERATOR_READ,
+    )
     if (
-      role === USER_ROLES.OPERATOR &&
+      hasDashboardRead &&
       (payload.type === 'order.paid' || payload.type === 'order.retouch_completed')
     ) {
       queryClient.invalidateQueries({ queryKey: [API_ROUTES.OPERATOR.BASE] })

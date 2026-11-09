@@ -1,0 +1,102 @@
+import type { LocationQuery, LocationQueryRaw } from 'vue-router'
+import {
+  BUYER_GENDERS,
+  BUYER_PURCHASE_FILTERS,
+  BUYER_SORTS,
+  type BuyerGender,
+  type BuyerPurchaseFilter,
+  type BuyerSort,
+  type IBuyerFilters,
+} from '../types/requests/buyer-filters.request'
+import {
+  DEFAULT_BUYER_PURCHASE,
+  DEFAULT_BUYER_SORT,
+} from '../constants/buyer-filters.constants'
+
+function queryString(value: LocationQuery[string] | undefined): string | null {
+  const raw = Array.isArray(value) ? value[0] : value
+  return typeof raw === 'string' && raw ? raw : null
+}
+
+function queryNumber(value: LocationQuery[string] | undefined): number | null {
+  const raw = queryString(value)
+  if (raw === null) return null
+  const parsed = Number(raw)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function queryBoolean(value: LocationQuery[string] | undefined): boolean | null {
+  const raw = queryString(value)
+  if (raw === 'true') return true
+  if (raw === 'false') return false
+  return null
+}
+
+export function parseBuyerFiltersFromQuery(query: LocationQuery): Partial<IBuyerFilters> {
+  const updates: Partial<IBuyerFilters> = {}
+
+  const search = queryString(query.search)
+  if (search !== null) updates.search = search
+
+  const purchase = queryString(query.purchase)
+  if (purchase !== null && BUYER_PURCHASE_FILTERS.includes(purchase as BuyerPurchaseFilter)) {
+    updates.purchase = purchase as BuyerPurchaseFilter
+  }
+
+  const countryId = queryNumber(query.countryId)
+  if (countryId !== null) updates.countryId = countryId
+
+  const provinceId = queryNumber(query.provinceId)
+  if (provinceId !== null) updates.provinceId = provinceId
+
+  const registeredFrom = queryString(query.registeredFrom)
+  if (registeredFrom !== null) updates.registeredFrom = registeredFrom
+
+  const registeredTo = queryString(query.registeredTo)
+  if (registeredTo !== null) updates.registeredTo = registeredTo
+
+  const gender = queryString(query.gender)
+  if (gender !== null && BUYER_GENDERS.includes(gender as BuyerGender)) {
+    updates.gender = gender as BuyerGender
+  }
+
+  const ageFrom = queryNumber(query.ageFrom)
+  if (ageFrom !== null) updates.ageFrom = ageFrom
+
+  const ageTo = queryNumber(query.ageTo)
+  if (ageTo !== null) updates.ageTo = ageTo
+
+  const emailVerified = queryBoolean(query.emailVerified)
+  if (emailVerified !== null) updates.emailVerified = emailVerified
+
+  const hasWhatsapp = queryBoolean(query.hasWhatsapp)
+  if (hasWhatsapp !== null) updates.hasWhatsapp = hasWhatsapp
+
+  const sort = queryString(query.sort)
+  if (sort !== null && BUYER_SORTS.includes(sort as BuyerSort)) {
+    updates.sort = sort as BuyerSort
+  }
+
+  return updates
+}
+
+export function buyerFiltersToQuery(filters: IBuyerFilters): LocationQueryRaw {
+  const entries: Array<[string, string | null]> = [
+    ['search', filters.search],
+    ['purchase', filters.purchase !== DEFAULT_BUYER_PURCHASE ? filters.purchase : null],
+    ['countryId', filters.countryId != null ? String(filters.countryId) : null],
+    ['provinceId', filters.provinceId != null ? String(filters.provinceId) : null],
+    ['registeredFrom', filters.registeredFrom],
+    ['registeredTo', filters.registeredTo],
+    ['gender', filters.gender],
+    ['ageFrom', filters.ageFrom != null ? String(filters.ageFrom) : null],
+    ['ageTo', filters.ageTo != null ? String(filters.ageTo) : null],
+    ['emailVerified', filters.emailVerified != null ? String(filters.emailVerified) : null],
+    ['hasWhatsapp', filters.hasWhatsapp != null ? String(filters.hasWhatsapp) : null],
+    ['sort', filters.sort !== DEFAULT_BUYER_SORT ? filters.sort : null],
+  ]
+
+  return Object.fromEntries(
+    entries.filter((entry): entry is [string, string] => entry[1] !== null),
+  )
+}

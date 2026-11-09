@@ -1,0 +1,15 @@
+.profile-view {
+  padding: 24px 32px 64px;
+}
+
+@media (max-width: 767px) {
+  .profile-view {
+    padding: 16px 16px 96px;
+  }
+}
+
+@media (max-width: 479px) {
+  .profile-view {
+    padding: 12px 12px 96px;
+  }
+}

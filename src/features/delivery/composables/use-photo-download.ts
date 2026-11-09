@@ -1,20 +1,7 @@
 import { ref } from 'vue'
 
+import { triggerDownload } from '@/shared/utils/download.utils'
 import type { IDeliveryPhoto } from '../types/responses/delivery-data.response'
-
-/**
- * Triggers a browser download by navigating to the presigned URL.
- * The backend sets Content-Disposition: attachment, so the browser downloads instead of displaying.
- * Uses an iframe to avoid navigating away from the page.
- */
-function triggerDownload(url: string): void {
-  const iframe = document.createElement('iframe')
-  iframe.style.display = 'none'
-  iframe.src = url
-  document.body.appendChild(iframe)
-  // Clean up after download starts
-  setTimeout(() => document.body.removeChild(iframe), 10_000)
-}
 
 export function usePhotoDownload() {
   const isDownloadingAll = ref(false)

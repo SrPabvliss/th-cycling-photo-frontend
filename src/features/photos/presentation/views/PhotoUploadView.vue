@@ -3,12 +3,12 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton, NCard, NFlex, NFormItem, NResult, NSelect } from 'naive-ui'
 
-import { useEventDetailQuery } from '@/features/events/composables/queries/use-event-detail'
+import { useEventDetailQuery } from '@/shared/composables/use-event-detail'
 import { usePhotoCategoriesQuery } from '@/features/photo-categories/composables/queries/use-photo-categories'
 import { useUploadOrchestration } from '../../composables/use-upload-orchestration'
 import { MAX_FILES } from '../../constants/upload.constants'
 import { PHOTO_ROUTE_NAMES } from '../../routes'
-import PageHeader from '@/shared/components/PageHeader.vue'
+import PageHeader from '@/shared/components/PageHeader/PageHeader.vue'
 import UploadDropzone from '../components/UploadDropzone/UploadDropzone.vue'
 import UploadEventCard from '../components/UploadEventCard/UploadEventCard.vue'
 import UploadControls from '../components/UploadControls/UploadControls.vue'
@@ -23,6 +23,22 @@ const slug = computed(() => route.params.slug as string)
 const { data: event, isPending: isEventPending, isError: isEventError } = useEventDetailQuery(slug)
 
 const eventId = computed(() => event.value?.id ?? '')
+
+const blockedMessage = computed<string | null>(() => {
+  if (event.value?.isFrozen) {
+    return 'Este evento está congelado, así que no se le pueden subir fotos.'
+  }
+  if (event.value?.status === 'archived') {
+    return 'Este evento está archivado, así que no se le pueden subir fotos.'
+  }
+  return null
+})
+
+const quotaRemaining = computed(() => {
+  const detail = event.value
+  if (!detail || detail.photoQuota === null) return null
+  return Math.max(0, detail.photoQuota - detail.photosUploaded)
+})
 const { data: categories } = usePhotoCategoriesQuery(eventId)
 
 const categoryOptions = computed(
@@ -47,7 +63,7 @@ const {
   handleCancel,
   handleRemoveItem,
   handleNewUpload,
-} = useUploadOrchestration(eventId)
+} = useUploadOrchestration(eventId, quotaRemaining)
 
 function handleGoToGallery() {
   router.push({ name: PHOTO_ROUTE_NAMES.GALLERY, params: { slug: slug.value } })
@@ -64,6 +80,16 @@ function handleGoToGallery() {
           title="Error al cargar evento"
           description="No se pudo obtener la información del evento."
         />
+      </div>
+
+      <div v-else-if="blockedMessage" class="error-container" data-test="upload-blocked">
+        <NResult status="warning" title="No se pueden subir fotos" :description="blockedMessage">
+          <template #footer>
+            <NButton type="primary" @click="router.push('/events/' + slug)">
+              Volver al evento
+            </NButton>
+          </template>
+        </NResult>
       </div>
 
       <template v-else-if="!isEventPending && event">
@@ -114,7 +140,12 @@ function handleGoToGallery() {
             <div>
               <div class="upload-header__title">Seleccionar fotos</div>
               <p class="upload-header__subtitle">
-                Máximo {{ MAX_FILES }} archivos por carga. JPEG, PNG o WebP.
+                <template v-if="quotaRemaining !== null">
+                  Quedan {{ quotaRemaining }} foto{{ quotaRemaining !== 1 ? 's' : '' }} de cupo en
+                  este evento.
+                </template>
+                <template v-else>Máximo {{ MAX_FILES }} archivos por carga.</template>
+                JPEG, PNG o WebP.
               </p>
             </div>
           </template>

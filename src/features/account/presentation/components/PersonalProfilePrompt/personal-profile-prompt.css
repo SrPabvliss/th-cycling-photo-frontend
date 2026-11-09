@@ -1,0 +1,47 @@
+.personal-profile-prompt :deep(.n-card-header__main) {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.personal-profile-prompt__illustration {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 16px;
+}
+
+.personal-profile-prompt__illustration svg {
+  width: 64px;
+  height: 64px;
+}
+
+.personal-profile-prompt__text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--tt-neutral-dark);
+  text-align: center;
+}
+
+.personal-profile-prompt__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 520px) {
+  .personal-profile-prompt :deep(.n-card__content),
+  .personal-profile-prompt :deep(.n-card__footer),
+  .personal-profile-prompt :deep(.n-card-header) {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .personal-profile-prompt__actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .personal-profile-prompt__actions .n-button {
+    width: 100%;
+  }
+}

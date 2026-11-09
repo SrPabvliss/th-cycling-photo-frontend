@@ -9,9 +9,9 @@ import TitanLogo from '@/core/layout/public/TitanLogo.vue'
 import heroImage from '@/assets/brand/hero-downhill.webp'
 import aboutImage from '@/assets/brand/about-experience.webp'
 import ctaImage from '@/assets/brand/cta-explore.webp'
-import { usePublicEventsQuery } from '@/features/public-gallery/composables/queries/use-public-events'
-import { PUBLIC_GALLERY_ROUTE_NAMES } from '@/features/public-gallery/routes'
-import PublicEventCard from '@/features/public-gallery/presentation/components/PublicEventCard/PublicEventCard.vue'
+import { ROUTE_NAMES } from '@/core/navigation/route-names'
+import { usePublicEventsQuery } from '@/shared/composables/use-public-events'
+import PublicEventCard from '@/shared/components/PublicEventCard/PublicEventCard.vue'
 
 const router = useRouter()
 const { data: events } = usePublicEventsQuery()
@@ -23,7 +23,7 @@ const recentEvents = computed(() =>
 )
 
 function handleEventClick(slug: string) {
-  router.push({ name: PUBLIC_GALLERY_ROUTE_NAMES.EVENT_GALLERY, params: { slug } })
+  router.push({ name: ROUTE_NAMES.PUBLIC_GALLERY_EVENT_GALLERY, params: { slug } })
 }
 </script>
 

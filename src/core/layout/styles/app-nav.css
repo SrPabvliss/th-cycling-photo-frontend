@@ -37,6 +37,10 @@
   text-decoration: none;
   padding: 6px 12px;
   border-radius: 6px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
   transition:
     color 0.15s,
     background 0.15s;
@@ -91,6 +95,10 @@
 }
 
 .app-nav-user-role {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 11px;
   color: #6b7280;
   line-height: 1.2;
@@ -219,12 +227,15 @@
   border: none;
   border-left: 3px solid transparent;
   font-family: inherit;
-  color: #ef4444;
 }
 
 .app-nav-menu__link--button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.app-nav-menu__link--destructive {
+  color: #ef4444;
 }
 
 @media (max-width: 767px) {
@@ -261,4 +272,18 @@
   .app-nav-user-info {
     display: none;
   }
+}
+
+.app-nav-menu__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f1f3;
+}
+
+.app-nav-menu__user .app-nav-user-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }

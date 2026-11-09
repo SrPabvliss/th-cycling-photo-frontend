@@ -19,14 +19,14 @@ const route = useRoute()
 const { login, isLoggingIn } = useAuth()
 
 const redirectQuery = computed(() => (route.query.redirect as string | undefined) ?? null)
-const showCheckoutNotice = computed(() => redirectQuery.value === '/checkout')
+const showCheckoutNotice = computed(() => redirectQuery.value?.startsWith('/checkout') ?? false)
 
 const form = useForm({
   defaultValues: LOGIN_FORM_DEFAULTS,
   onSubmit: async ({ value }) => {
     try {
-      const user = await login(value)
-      router.push(redirectQuery.value ?? getHomePath(user.role))
+      const user = await login({ ...value, email: value.email.trim() })
+      router.push(redirectQuery.value ?? getHomePath(user.permissions))
     } catch {
       // Error toast is shown by error interceptor
     }

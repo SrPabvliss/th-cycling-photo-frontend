@@ -1,9 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { NIcon, NPopover } from 'naive-ui'
-import { InformationCircleOutline } from '@vicons/ionicons5'
+import {
+  CashOutline,
+  CubeOutline,
+  GiftOutline,
+  HourglassOutline,
+  InformationCircleOutline,
+  ReceiptOutline,
+} from '@vicons/ionicons5'
 import type { IOrderStats } from '../../../types/responses/order-stats.response'
-import { formatCurrency } from '@/features/pricing/utils/format-currency'
+import { formatCurrency } from '@/shared/utils/currency.utils'
+import StatTile from '@/shared/components/StatTile/StatTile.vue'
 
 const props = defineProps<{
   stats: IOrderStats | undefined
@@ -16,8 +24,26 @@ interface IStatCard {
   variant: 'error' | 'warning' | 'info' | 'success' | 'gift'
 }
 
+function formatCount(value: number | undefined): string {
+  return value != null ? value.toLocaleString('de-DE') : '—'
+}
+
 const totalOrders = computed(() => props.stats?.totalOrders ?? 0)
 const totalRevenue = computed(() => formatCurrency(props.stats?.totalRevenue ?? 0, 'USD'))
+
+const ordersNote = computed(() =>
+  props.stats
+    ? `${formatCount(props.stats.activeOrders)} activos · ${formatCount(props.stats.cancelledCount)} cancelados`
+    : undefined,
+)
+const openAmount = computed(() =>
+  props.stats ? formatCurrency(Number(props.stats.openAmount), 'USD') : undefined,
+)
+const openNote = computed(() =>
+  props.stats
+    ? `${formatCount(props.stats.pendingCount)} pendientes · ${formatCount(props.stats.paymentInfoSentCount)} con info enviada`
+    : undefined,
+)
 
 const breakdown = computed<IStatCard[]>(() => [
   {
@@ -65,12 +91,15 @@ const segments = computed(() =>
 </script>
 
 <template>
-  <!-- Desktop / tablet: cards individuales -->
-  <div class="stats-row stats-row--cards">
-    <div class="stat-card stat-card--revenue">
-      <span class="stat-card__num">{{ totalRevenue }}</span>
-      <span class="stat-card__label">
-        Ingresos
+  <div class="order-stat-tiles">
+    <StatTile
+      label="Ingresos"
+      :value="totalRevenue"
+      :icon="CashOutline"
+      tone="green"
+      note="Pedidos pagados y entregados"
+    >
+      <template #label-extra>
         <NPopover trigger="click" placement="top" :show-arrow="true">
           <template #trigger>
             <button
@@ -92,21 +121,37 @@ const segments = computed(() =>
             </p>
           </div>
         </NPopover>
-      </span>
-    </div>
-    <div class="stat-card stat-card--total">
-      <span class="stat-card__num">{{ totalOrders }}</span>
-      <span class="stat-card__label">Total pedidos</span>
-    </div>
-    <div
-      v-for="item in breakdown"
-      :key="item.key"
-      class="stat-card"
-      :class="`stat-card--${item.variant}`"
-    >
-      <span class="stat-card__num">{{ item.value }}</span>
-      <span class="stat-card__label">{{ item.label }}</span>
-    </div>
+      </template>
+    </StatTile>
+    <StatTile
+      label="Pedidos"
+      :value="formatCount(stats?.totalOrders)"
+      :icon="ReceiptOutline"
+      tone="navy"
+      :note="ordersNote"
+    />
+    <StatTile
+      label="Por cobrar"
+      :value="formatCount(stats?.openCount)"
+      :detail="openAmount"
+      :icon="HourglassOutline"
+      tone="amber"
+      :note="openNote"
+    />
+    <StatTile
+      label="Por entregar"
+      :value="formatCount(stats?.awaitingDeliveryCount)"
+      :icon="CubeOutline"
+      tone="blue"
+      note="Pagados o regalados sin entregar"
+    />
+    <StatTile
+      label="Regaladas"
+      :value="formatCount(stats?.giftedCount)"
+      :icon="GiftOutline"
+      tone="violet"
+      note="Sin cobro"
+    />
   </div>
 
   <!-- Mobile: barra de distribución -->

@@ -1,7 +1,7 @@
 import { computed, ref, type Ref } from 'vue'
 
-import type { IReviewQueueSource } from '@/features/workspace/types/workspace-queue-source.types'
-import type { IWorkspaceQueueItem } from '@/features/workspace/types/workspace-queue-item.types'
+import type { IReviewQueueSource } from '@/shared/workspace/types/workspace-queue-source.types'
+import type { IWorkspaceQueueItem } from '@/shared/workspace/types/workspace-queue-item.types'
 import {
   useOperatorRetouchOrderDetailQuery,
   type TRetouchDetailScope,

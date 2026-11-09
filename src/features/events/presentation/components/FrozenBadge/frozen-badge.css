@@ -1,0 +1,21 @@
+.frozen-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.frozen-badge--inline {
+  background: rgba(56, 132, 255, 0.12);
+  color: #1f66c9;
+}
+
+.frozen-badge--overlay {
+  background: #1f66c9;
+  color: #fff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}

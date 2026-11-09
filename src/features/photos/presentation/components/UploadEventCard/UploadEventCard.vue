@@ -3,8 +3,8 @@ import { NCard, NFlex, NIcon, NTag } from 'naive-ui'
 import { CalendarOutline, CameraOutline } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
-import { EVENT_STATUS_CONFIG } from '@/features/events/constants/status-config'
-import type { IEventDetail } from '@/features/events/types/responses/event-detail.response'
+import { EVENT_STATUS_CONFIG } from '@/shared/constants/event-status.constants'
+import type { IEventDetail } from '@/shared/types/event.types'
 
 defineProps<{
   event: IEventDetail

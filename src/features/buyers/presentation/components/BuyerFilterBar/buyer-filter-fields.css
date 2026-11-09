@@ -1,0 +1,39 @@
+.bff {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.bff-field {
+  min-width: 150px;
+}
+
+.bff-field--age {
+  min-width: 190px;
+}
+
+.bff-age-range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bff--stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.bff--stacked .bff-field {
+  min-width: 0;
+  width: 100%;
+}
+
+.bff-field__label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tt-neutral-mid);
+  margin-bottom: 6px;
+}

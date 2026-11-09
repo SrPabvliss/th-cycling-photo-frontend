@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import AppLayout from '@/core/layout/AppLayout.vue'
 import { registerAuthGuard } from '@/core/guards/auth.guard'
+import { registerStaleChunkReload } from '@/core/navigation/stale-chunk-reload'
 import { standaloneRoutes } from '@/core/views/standalone-routes'
 import { authRoutes } from '@/features/auth/routes'
 import { eventRoutes } from '@/features/events/routes'
@@ -15,17 +16,30 @@ import { previewLinkRoutes } from '@/features/preview-links/routes'
 import { publicGalleryRoutes } from '@/features/public-gallery/routes'
 import { retouchRoutes, retouchWorkspaceRoutes } from '@/features/retouch/routes'
 import { reviewRoutes } from '@/features/review/routes'
+import { accountRoutes } from '@/features/account/routes'
 import { buyerRoutes } from '@/features/buyers/routes'
 import { cartRoutes } from '@/features/cart/routes'
+import { contractRoutes } from '@/features/contracts/routes'
+import { organizerRoutes } from '@/features/organizers/routes'
+import { paymentRoutes } from '@/features/payments/routes'
+import { tenantProfileRoutes } from '@/features/tenant-profile/routes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) return savedPosition
+    if (to.hash) return { el: to.hash }
+    if (to.path === from.path) return false
+    return { top: 0 }
+  },
   routes: [
     ...landingRoutes,
     ...legalRoutes,
     ...authRoutes,
     ...publicGalleryRoutes,
+    ...accountRoutes,
     ...cartRoutes,
+    ...paymentRoutes,
     ...clientGalleryRoutes,
     ...deliveryRoutes,
     ...standaloneRoutes,
@@ -41,6 +55,9 @@ const router = createRouter({
         ...orderRoutes,
         ...retouchRoutes,
         ...buyerRoutes,
+        ...organizerRoutes,
+        ...contractRoutes,
+        ...tenantProfileRoutes,
       ],
     },
     {
@@ -51,5 +68,6 @@ const router = createRouter({
 })
 
 registerAuthGuard(router)
+registerStaleChunkReload(router)
 
 export default router

@@ -1,0 +1,51 @@
+.odp__ident {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 11px 13px;
+  border: 1px solid #f5e2c8;
+  border-radius: 10px;
+  background: #fffbf4;
+}
+
+.odp__ident > b {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: #8a5200;
+}
+
+.odp__ident > p {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #96754a;
+}
+
+.odp__ident-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  color: #4b5563;
+}
+
+.odp__ident-row span {
+  min-width: 74px;
+  color: #6b7280;
+}
+
+.odp__ident-row i {
+  font-style: normal;
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+
+.odp__ident-row em {
+  font-style: normal;
+  font-weight: 600;
+  color: #1a1f2c;
+}

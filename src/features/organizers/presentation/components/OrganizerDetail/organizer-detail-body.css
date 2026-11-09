@@ -1,0 +1,6 @@
+.od {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  container-type: inline-size;
+}

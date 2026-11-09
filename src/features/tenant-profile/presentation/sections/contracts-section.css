@@ -1,0 +1,26 @@
+.contracts-section__summary {
+  margin: 0 0 16px;
+  color: var(--n-text-color-2, #333639);
+}
+
+.contract-row {
+  padding: 12px;
+  border: 1px solid var(--n-border-color, #efeff5);
+  border-radius: 6px;
+}
+
+.contract-row__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.contract-row__details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--n-text-color-3, #7a7a7a);
+  font-size: 13px;
+}

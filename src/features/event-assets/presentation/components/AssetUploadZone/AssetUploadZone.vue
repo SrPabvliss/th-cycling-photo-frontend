@@ -3,6 +3,7 @@ import { NButton, NFlex, NIcon, NSpin } from 'naive-ui'
 import { CameraOutline, CloseCircleOutline, ImageOutline } from '@vicons/ionicons5'
 
 import { ASSET_TYPE_CONFIG } from '../../../constants/asset-config'
+import FocalPointPicker from '../FocalPointPicker/FocalPointPicker.vue'
 import type { EventAssetType } from '../../../types/asset-type'
 import { useFileDropZone } from '../../../composables/use-file-drop-zone'
 
@@ -11,11 +12,15 @@ const props = defineProps<{
   currentUrl?: string | null
   isUploading?: boolean
   isRemoving?: boolean
+  focalX?: number
+  focalY?: number
 }>()
 
 const emit = defineEmits<{
   upload: [file: File]
   remove: []
+  'update:focalX': [value: number]
+  'update:focalY': [value: number]
 }>()
 
 const config = ASSET_TYPE_CONFIG[props.assetType]
@@ -67,6 +72,17 @@ const {
         </div>
       </div>
     </NSpin>
+
+    <FocalPointPicker
+      v-if="currentUrl && focalX !== undefined && focalY !== undefined"
+      class="asset-zone__focal"
+      :src="currentUrl"
+      :aspect-ratio="config.aspectRatio"
+      :focal-x="focalX"
+      :focal-y="focalY"
+      @update:focal-x="emit('update:focalX', $event)"
+      @update:focal-y="emit('update:focalY', $event)"
+    />
 
     <NFlex v-if="currentUrl" :size="4" class="asset-zone__actions">
       <NButton

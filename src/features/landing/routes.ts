@@ -1,6 +1,8 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-export const LANDING_PATH = '/'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+
+export const LANDING_PATH = ROUTE_PATHS.LANDING
 
 export const LANDING_ROUTE_NAMES = {
   HOME: 'landing',

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { IPricingTier } from '../../../types/responses/pricing-preview.response'
-import { formatCurrency } from '../../../utils/format-currency'
+import { formatCurrency } from '@/shared/utils/currency.utils'
 
 defineProps<{ tiers: IPricingTier[]; currency: string }>()
 

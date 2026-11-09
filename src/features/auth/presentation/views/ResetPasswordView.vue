@@ -9,7 +9,7 @@ import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
 import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import TitanLogo from '@/core/layout/public/TitanLogo.vue'
 import { AUTH_ROUTE_NAMES, FORGOT_PASSWORD_PATH } from '../../routes'
-import { useAuthStore } from '../../stores/auth.store'
+import { useSessionStore } from '@/core/auth/stores/session.store'
 import {
   useResetPasswordMutation,
   useValidateResetTokenMutation,
@@ -21,7 +21,7 @@ import {
 } from '../../constants/reset-password-form.schema'
 
 const router = useRouter()
-const authStore = useAuthStore()
+const authStore = useSessionStore()
 
 const token = ref('')
 const isTokenChecked = ref(false)

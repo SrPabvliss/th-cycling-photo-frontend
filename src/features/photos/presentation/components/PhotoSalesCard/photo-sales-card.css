@@ -1,0 +1,95 @@
+.pd-card {
+  background: var(--tt-surface);
+  border: 1px solid var(--tt-neutral-light);
+  border-radius: 12px;
+  padding: 13px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  box-shadow: 0 1px 2px rgba(16, 35, 58, 0.04);
+}
+
+.pd-card-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pd-card-h h4 {
+  margin: 0;
+  font: 700 10px/1 'Plus Jakarta Sans';
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: #8b98ab;
+}
+
+.pd-mini {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  padding: 4px 7px;
+}
+
+.pd-mini.green {
+  background: #e9f8ee;
+  color: #1a7a4a;
+}
+
+.pd-empty {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--tt-neutral-mid);
+}
+
+.pd-ords {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.pd-ord {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--tt-neutral-light);
+  border-radius: 10px;
+  padding: 9px 10px;
+  cursor: pointer;
+  text-decoration: none !important;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+}
+
+.pd-ord:hover {
+  border-color: #bcd4fb;
+  background: #eaf1fe;
+}
+
+.pd-ord :deep(svg) {
+  color: #8b98ab;
+}
+
+.pd-ord-t {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pd-ord-t b {
+  font: 700 13px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #16294d;
+}
+
+.pd-ord-t i {
+  font-style: normal;
+  font-size: 11px;
+  color: #8b98ab;
+}

@@ -11,7 +11,7 @@ import type { IDeliveryPhoto } from '../../types/responses/delivery-data.respons
 import DeliveryHeader from '../components/DeliveryHeader/DeliveryHeader.vue'
 import DeliveryPhotoGrid from '../components/DeliveryPhotoGrid/DeliveryPhotoGrid.vue'
 import DeliveryExpired from '../components/DeliveryExpired/DeliveryExpired.vue'
-import PreviewNotFound from '@/features/client-gallery/presentation/components/PreviewNotFound/PreviewNotFound.vue'
+import PreviewNotFound from '@/shared/components/PreviewNotFound/PreviewNotFound.vue'
 
 const route = useRoute()
 const token = computed(() => route.params.token as string)

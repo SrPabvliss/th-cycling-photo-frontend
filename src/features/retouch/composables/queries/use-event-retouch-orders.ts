@@ -1,3 +1,4 @@
+import { isAxiosError } from 'axios'
 import { computed, ref, type Ref } from 'vue'
 import { useInfiniteQuery } from '@tanstack/vue-query'
 
@@ -24,9 +25,14 @@ export interface IEventRetouchOrdersPage {
   pagination: ReturnType<typeof toPagination>
 }
 
+export function isForbidden(error: unknown): boolean {
+  return isAxiosError(error) && error.response?.status === 403
+}
+
 export function useEventRetouchOrdersInfiniteQuery(
   eventSlug: Ref<string>,
   scope: Ref<TRetouchOrderScope> = ref('pending'),
+  enabled: Ref<boolean> = ref(true),
 ) {
   return useInfiniteQuery({
     queryKey: computed(() => RETOUCH_QUERY_KEYS.eventOrders(eventSlug.value, scope.value)),
@@ -38,7 +44,7 @@ export function useEventRetouchOrdersInfiniteQuery(
     }): Promise<IEventRetouchOrdersPage> => {
       const response = await httpClient.get<IApiRetouchQueueOrder[]>(
         API_ROUTES.OPERATOR.RETOUCH_QUEUE(eventSlug.value),
-        { params: { scope: scope.value, page: pageParam.page, limit: PAGE_LIMIT } },
+        { params: { scope: scope.value, page: pageParam.page, limit: PAGE_LIMIT }, silent: true },
       )
       const items = response.data.map(toRetouchQueueOrder)
       return {
@@ -54,7 +60,8 @@ export function useEventRetouchOrdersInfiniteQuery(
       last.pagination.page < last.pagination.totalPages
         ? ({ page: last.pagination.page + 1 } satisfies IPageParams)
         : undefined,
-    enabled: computed(() => !!eventSlug.value),
+    enabled: computed(() => !!eventSlug.value && enabled.value),
     ...INTERNAL_IMAGE_QUERY_DEFAULTS,
+    retry: (failureCount, error) => !isForbidden(error) && failureCount < 1,
   })
 }

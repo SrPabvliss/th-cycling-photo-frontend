@@ -2,7 +2,7 @@
 import { NButton, NFlex, NIcon } from 'naive-ui'
 import { CheckmarkDoneOutline, EyeOutline, FolderOutline } from '@vicons/ionicons5'
 
-import { usePhotoSelectionStore } from '@/features/preview-links/stores/photo-selection.store'
+import { usePhotoSelectionStore } from '@/shared/stores/photo-selection.store'
 
 const selectionStore = usePhotoSelectionStore()
 

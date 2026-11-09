@@ -2,8 +2,7 @@
 import { useRouter } from 'vue-router'
 import { NButton, NSpin } from 'naive-ui'
 
-import type { UserRole } from '@/core/auth/user-roles'
-import { useAuthStore } from '@/features/auth/stores/auth.store'
+import { useSessionStore } from '@/core/auth/stores/session.store'
 import { useNotificationsListQuery } from '../../../composables/queries/use-notifications-list'
 import { useMarkAsRead } from '../../../composables/mutations/use-mark-as-read'
 import { useMarkAllRead } from '../../../composables/mutations/use-mark-all-read'
@@ -14,7 +13,7 @@ import NotificationItem from '../NotificationItem/NotificationItem.vue'
 
 const router = useRouter()
 const store = useNotificationStore()
-const authStore = useAuthStore()
+const authStore = useSessionStore()
 const { data: notifications, isPending } = useNotificationsListQuery()
 const { mutate: markAsRead } = useMarkAsRead()
 const { mutate: markAllRead } = useMarkAllRead()
@@ -25,8 +24,8 @@ function handleClick(notification: INotification) {
   }
 
   const config = NOTIFICATION_CONFIG[notification.type as NotificationType]
-  const role = authStore.currentUser?.role as UserRole | undefined
-  const route = config?.getRoute(notification.data, role)
+  const permissions = authStore.currentUser?.permissions ?? []
+  const route = config?.getRoute(notification.data, permissions)
   if (route) {
     router.push(route)
   }

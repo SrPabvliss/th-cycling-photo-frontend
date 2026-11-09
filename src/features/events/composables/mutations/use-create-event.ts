@@ -10,7 +10,10 @@ export function useCreateEvent() {
 
   return useMutation({
     mutationFn: async (data: ICreateEventRequest) => {
-      const response = await httpClient.post<{ id: string }>(API_ROUTES.EVENTS.CREATE, data)
+      const response = await httpClient.post<{ id: string; slug: string }>(
+        API_ROUTES.EVENTS.CREATE,
+        data,
+      )
       return response.data
     },
     onSuccess: () => {

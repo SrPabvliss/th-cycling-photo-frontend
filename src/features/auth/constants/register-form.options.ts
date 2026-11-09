@@ -3,10 +3,6 @@ import type { Gender } from '../types/requests/register.request'
 export const MIN_AGE_YEARS = 4
 export const MAX_AGE_YEARS = 100
 
-export const DEFAULT_COUNTRY_ISO = 'EC'
-
-export const PHONE_PRIORITY_ISOS = ['ec', 'co', 'pe', 'cl', 'ar', 'mx']
-
 export const MONTH_OPTIONS: { label: string; value: number }[] = [
   { label: 'Enero', value: 1 },
   { label: 'Febrero', value: 2 },

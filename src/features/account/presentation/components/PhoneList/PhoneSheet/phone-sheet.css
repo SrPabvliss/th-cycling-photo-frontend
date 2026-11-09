@@ -1,0 +1,39 @@
+.phone-sheet__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.phone-sheet__phone-input,
+.phone-sheet__fields :deep(.n-input) {
+  width: 100%;
+}
+
+.phone-sheet__whatsapp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px;
+}
+
+.phone-sheet__whatsapp-label {
+  font-size: 14px;
+  color: var(--tt-neutral-mid, #6b7280);
+}
+
+.phone-sheet__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.phone-sheet__delete-btn {
+  margin-right: auto;
+}
+
+.phone-sheet__save-btn {
+  margin-left: auto;
+  min-height: 40px;
+  padding-inline: 24px;
+}

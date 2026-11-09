@@ -11,6 +11,7 @@ import {
   NIcon,
   NInput,
   NSelect,
+  useMessage,
 } from 'naive-ui'
 import { ArrowForward } from '@vicons/ionicons5'
 
@@ -21,24 +22,24 @@ import { useEventTypesQuery } from '@/features/event-types/composables/queries/u
 import { useLocalAssetPreviews } from '@/features/event-assets/composables/use-local-asset-previews'
 import type { IEventAsset } from '@/features/event-assets/types/responses/event-asset.response'
 import AssetUploadZone from '@/features/event-assets/presentation/components/AssetUploadZone/AssetUploadZone.vue'
+import type { IFocalPoint } from '@/features/event-assets/composables/use-local-asset-previews'
 import EventCategoryPicker from '@/features/photo-categories/presentation/components/EventCategoryPicker/EventCategoryPicker.vue'
 import { useCreatePhotoCategory } from '@/features/photo-categories/composables/mutations/use-create-photo-category'
+import type { ICreatePhotoCategoryRequest } from '@/features/photo-categories/types/requests/create-photo-category.request'
+import { photoCategoryErrorMessage } from '@/features/photo-categories/utils/photo-category-error'
 import { EVENT_FORM_DEFAULTS, eventFormSchema } from '../../../constants/event-form.schema'
-import type { IEventFormData } from '../../../types/event-form.types'
-
-export interface IEventFormExtra {
-  assetFiles?: Map<'cover_image', File>
-  assetRemovals?: 'cover_image'[]
-  categoryIds?: number[]
-}
+import type { IEventFormData, IEventFormExtra } from '../../../types/event-form.types'
 
 const props = defineProps<{
   isSubmitting: boolean
   initialData?: IEventFormData
   submitLabel?: string
   hideAssetUpload?: boolean
+  hideFooter?: boolean
   existingAssets?: IEventAsset[]
   initialCategoryIds?: number[]
+  /** Set when editing: the category catalog is the event organizer's. */
+  eventId?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -53,20 +54,36 @@ const form = useForm({
     const files = assetPreviews.getPendingFiles() as Map<'cover_image', File> | undefined
     emit('submit', value, {
       assetFiles: files,
+      assetFocalPoints: assetPreviews.getPendingFocalPoints() as
+        | Map<'cover_image', IFocalPoint>
+        | undefined,
       assetRemovals: removals.length > 0 ? removals : undefined,
-      categoryIds: selectedCategoryIds.value.length > 0 ? selectedCategoryIds.value : undefined,
+      categoryIds: [...selectedCategoryIds.value],
     })
   },
+})
+
+const formCanSubmit = form.useStore((s) => s.canSubmit)
+const hasDates = form.useStore((s) => s.values.startDate !== null && s.values.endDate !== null)
+
+defineExpose({
+  submit: () => form.handleSubmit(),
+  canSubmit: computed(() => formCanSubmit.value && hasDates.value),
 })
 
 const assetPreviews = useLocalAssetPreviews(() => props.existingAssets)
 const selectedCategoryIds = ref<number[]>(props.initialCategoryIds ?? [])
 
 const { mutateAsync: createCategory } = useCreatePhotoCategory()
+const message = useMessage()
 
-async function handleCreateNewCategory(name: string) {
-  const { data } = await createCategory(name)
-  selectedCategoryIds.value = [...selectedCategoryIds.value, data.id]
+async function handleCreateNewCategory(request: ICreatePhotoCategoryRequest) {
+  try {
+    const { data } = await createCategory(request)
+    selectedCategoryIds.value = [...selectedCategoryIds.value, data.id]
+  } catch (caught) {
+    message.error(photoCategoryErrorMessage(caught))
+  }
 }
 
 const selectedProvinceId = ref<number | null>(props.initialData?.provinceId ?? null)
@@ -141,9 +158,21 @@ const eventTypeOptions = computed(
           </template>
         </form.Field>
 
-        <form.Field name="startDate">
+        <form.Field
+          name="startDate"
+          :validators="{
+            onChange: eventFormSchema.shape.startDate,
+            onSubmit: eventFormSchema.shape.startDate,
+          }"
+        >
           <template v-slot="{ field: startField }">
-            <form.Field name="endDate">
+            <form.Field
+              name="endDate"
+              :validators="{
+                onChange: eventFormSchema.shape.endDate,
+                onSubmit: eventFormSchema.shape.endDate,
+              }"
+            >
               <template v-slot="{ field: endField }">
                 <NFormItem
                   label="Fechas del evento"
@@ -152,6 +181,12 @@ const eventTypeOptions = computed(
                     (startField.state.meta.isTouched && !startField.state.meta.isValid) ||
                     (endField.state.meta.isTouched && !endField.state.meta.isValid)
                       ? 'error'
+                      : undefined
+                  "
+                  :feedback="
+                    (startField.state.meta.isTouched && !startField.state.meta.isValid) ||
+                    (endField.state.meta.isTouched && !endField.state.meta.isValid)
+                      ? 'Elige la fecha de inicio y la de fin'
                       : undefined
                   "
                 >
@@ -235,6 +270,7 @@ const eventTypeOptions = computed(
       <NFlex vertical :size="16">
         <EventCategoryPicker
           :selected-ids="selectedCategoryIds"
+          :event-id="eventId"
           @update:selected-ids="selectedCategoryIds = $event"
           @create-new="handleCreateNewCategory"
         />
@@ -247,14 +283,30 @@ const eventTypeOptions = computed(
         <AssetUploadZone
           asset-type="cover_image"
           :current-url="assetPreviews.getAssetUrl('cover_image')"
+          :focal-x="assetPreviews.getFocalPoint('cover_image').focalX"
+          :focal-y="assetPreviews.getFocalPoint('cover_image').focalY"
           @upload="(file) => assetPreviews.addFile('cover_image', file)"
           @remove="assetPreviews.removeFile('cover_image')"
+          @update:focal-x="
+            (value) =>
+              assetPreviews.setFocalPoint('cover_image', {
+                ...assetPreviews.getFocalPoint('cover_image'),
+                focalX: value,
+              })
+          "
+          @update:focal-y="
+            (value) =>
+              assetPreviews.setFocalPoint('cover_image', {
+                ...assetPreviews.getFocalPoint('cover_image'),
+                focalY: value,
+              })
+          "
         />
       </div>
     </div>
 
     <!-- Footer -->
-    <div class="event-form__footer">
+    <div v-if="!props.hideFooter" class="event-form__footer">
       <NButton @click="emit('cancel')">Cancelar</NButton>
       <form.Subscribe>
         <template v-slot="{ canSubmit }">

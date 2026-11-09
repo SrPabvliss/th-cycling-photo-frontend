@@ -1,3 +1,12 @@
+import type {
+  PayoutMethodAccountType,
+  PayoutMethodProvider,
+} from '@/features/tenant-profile/types/responses/payout-method.response'
+import type {
+  IApiOrderInvoice,
+  IOrderInvoice,
+} from '@/features/account/types/responses/order-invoice.response'
+import type { ICreateBillingAccountRequest } from '@/features/account/types/requests/billing-account.request'
 import type { OrderStatus } from './order-list.response'
 
 export const DELIVERY_LINK_STATUS = {
@@ -21,6 +30,20 @@ export interface IApiOrderDetailDeliveryLink {
   status: string
   expiresAt: string
   downloadCount: number
+  whatsappTemplate: string
+}
+
+/** Shared shape: no dates or decimals, so it serves both the API and domain types */
+export interface IOrderPayoutMethod {
+  provider: PayoutMethodProvider
+  isActive: boolean
+  sortOrder: number
+  receiverIdentifier: string | null
+  bankName: string | null
+  accountNumber: string | null
+  accountType: PayoutMethodAccountType | null
+  accountHolder: string | null
+  holderIdentification: string | null
 }
 
 /** API projection from GET /orders/:id */
@@ -37,14 +60,20 @@ export interface IApiOrderDetail {
   snapFirstName: string | null
   snapLastName: string | null
   snapWhatsapp: string | null
+  customerPrimaryPhone: string | null
   snapEmail: string | null
   previewLinkToken: string | null
   eventName: string
+  organizerName: string
   subtotal: string | null
   snapCurrency: string | null
+  paymentMethod: string | null
   photos: IApiOrderDetailPhoto[]
   deliveryLink: IApiOrderDetailDeliveryLink | null
   retouchProgress?: { total: number; retouched: number }
+  payoutMethods?: IOrderPayoutMethod[]
+  invoice: IApiOrderInvoice | null
+  billing: ICreateBillingAccountRequest | null
 }
 
 export interface IOrderDetailPhoto {
@@ -59,6 +88,7 @@ export interface IOrderDetailDeliveryLink {
   status: DeliveryLinkStatus
   expiresAt: Date
   downloadCount: number
+  whatsappTemplate: string
 }
 
 /** Frontend domain type */
@@ -78,9 +108,16 @@ export interface IOrderDetail {
   snapEmail: string | null
   previewLinkToken: string | null
   eventName: string
+  organizerName: string
   subtotal: number | null
+  subtotalDecimal: string | null
+  customerPrimaryPhone: string | null
   snapCurrency: string | null
+  paymentMethod: string | null
   photos: IOrderDetailPhoto[]
   deliveryLink: IOrderDetailDeliveryLink | null
   retouchProgress?: { total: number; retouched: number }
+  payoutMethods?: IOrderPayoutMethod[]
+  invoice: IOrderInvoice | null
+  billing: ICreateBillingAccountRequest | null
 }

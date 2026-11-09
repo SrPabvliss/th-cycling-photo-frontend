@@ -1,5 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router'
-import { USER_ROLES } from '@/core/auth/user-roles'
+import { PERMISSIONS } from '@/core/auth/permissions'
 
 export const REVIEW_ROUTE_NAMES = {
   WORKSPACE: 'review-workspace',
@@ -11,12 +11,12 @@ export const reviewRoutes: RouteRecordRaw[] = [
     path: '/events/:eventSlug/review',
     name: REVIEW_ROUTE_NAMES.WORKSPACE,
     component: () => import('./presentation/views/ReviewWorkspaceView.vue'),
-    meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN, USER_ROLES.OPERATOR] },
+    meta: { requiresAuth: true, permissions: [PERMISSIONS.REVIEW_QUEUE_READ] },
   },
   {
     path: '/photos/:photoSlug/review',
     name: REVIEW_ROUTE_NAMES.SINGLE_PHOTO,
     component: () => import('./presentation/views/SinglePhotoReviewWorkspaceView.vue'),
-    meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN, USER_ROLES.OPERATOR] },
+    meta: { requiresAuth: true, permissions: [PERMISSIONS.REVIEW_QUEUE_READ] },
   },
 ]

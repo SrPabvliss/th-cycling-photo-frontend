@@ -1,8 +1,10 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-import { USER_ROLES } from '@/core/auth/user-roles'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 
-export const PREVIEW_LINKS_PATH = '/preview-links'
+import { PERMISSIONS } from '@/core/auth/permissions'
+
+export const PREVIEW_LINKS_PATH = ROUTE_PATHS.PREVIEW_LINKS
 
 export const PREVIEW_LINK_ROUTE_NAMES = {
   LIST: 'preview-links-list',
@@ -11,15 +13,15 @@ export const PREVIEW_LINK_ROUTE_NAMES = {
 
 export const previewLinkRoutes: RouteRecordRaw[] = [
   {
-    path: 'events/:eventId/preview-links',
+    path: 'events/:slug/preview-links',
     name: PREVIEW_LINK_ROUTE_NAMES.LIST,
     component: () => import('./presentation/views/PreviewLinksListView.vue'),
-    meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN] },
+    meta: { requiresAuth: true, permissions: [PERMISSIONS.PREVIEW_LINK_READ] },
   },
   {
-    path: 'events/:eventId/preview-links/create',
+    path: 'events/:slug/preview-links/create',
     name: PREVIEW_LINK_ROUTE_NAMES.CREATE,
     component: () => import('./presentation/views/PreviewGenerationView.vue'),
-    meta: { requiresAuth: true, roles: [USER_ROLES.ADMIN] },
+    meta: { requiresAuth: true, permissions: [PERMISSIONS.PREVIEW_LINK_CREATE] },
   },
 ]

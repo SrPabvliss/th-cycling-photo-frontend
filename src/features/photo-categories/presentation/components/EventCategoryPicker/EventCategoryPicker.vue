@@ -1,23 +1,33 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { NButton, NIcon, NInput } from 'naive-ui'
+import { NButton, NCheckbox, NIcon, NInput } from 'naive-ui'
 import { AddOutline } from '@vicons/ionicons5'
 
-import { usePhotoCategoriesGlobalQuery } from '../../../composables/queries/use-photo-categories-global'
+import { PERMISSIONS } from '@/core/auth/permissions'
+import { usePermissions } from '@/core/auth/use-permissions'
+import { usePhotoCategoryCatalogQuery } from '../../../composables/queries/use-photo-category-catalog'
+import type { ICreatePhotoCategoryRequest } from '../../../types/requests/create-photo-category.request'
+import { groupPhotoCategories } from '../../../utils/group-photo-categories'
 
 const props = defineProps<{
   selectedIds: number[]
+  /** Existing event: lists its organizer's categories. Omit while creating one. */
+  eventId?: string | null
 }>()
 
 const emit = defineEmits<{
   'update:selectedIds': [ids: number[]]
-  'create-new': [name: string]
+  'create-new': [request: ICreatePhotoCategoryRequest]
 }>()
 
-const { data: globalCategories } = usePhotoCategoriesGlobalQuery()
+const { data: catalog } = usePhotoCategoryCatalogQuery(() => props.eventId)
 const newCategoryName = ref('')
+const createAsBase = ref(false)
+const { has } = usePermissions()
+const canCreateCategory = computed(() => has(PERMISSIONS.PHOTO_CATEGORY_CREATE))
+const canManageBase = computed(() => has(PERMISSIONS.PHOTO_CATEGORY_BASE_MANAGE))
 
-const displayCategories = computed(() => globalCategories.value ?? [])
+const groups = computed(() => groupPhotoCategories(catalog.value ?? []))
 
 function toggleCategory(id: number) {
   if (props.selectedIds.includes(id)) {
@@ -33,8 +43,9 @@ function toggleCategory(id: number) {
 function handleCreateNew() {
   const name = newCategoryName.value.trim()
   if (!name) return
-  emit('create-new', name)
+  emit('create-new', canManageBase.value && createAsBase.value ? { name, base: true } : { name })
   newCategoryName.value = ''
+  createAsBase.value = false
 }
 </script>
 
@@ -47,28 +58,41 @@ function handleCreateNew() {
       </p>
     </div>
 
-    <div v-if="displayCategories.length > 0" class="category-picker__chips">
-      <button
-        v-for="cat in displayCategories"
-        :key="cat.id"
-        type="button"
-        :class="['category-chip', { 'category-chip--selected': selectedIds.includes(cat.id) }]"
-        @click="toggleCategory(cat.id)"
-      >
-        {{ cat.name }}
-      </button>
+    <div
+      v-for="group in groups"
+      :key="group.key"
+      class="category-picker__group"
+      :data-test="`category-group-${group.key}`"
+    >
+      <p class="category-picker__group-label">{{ group.label }}</p>
+      <div class="category-picker__chips">
+        <button
+          v-for="cat in group.items"
+          :key="cat.id"
+          type="button"
+          :class="['category-chip', { 'category-chip--selected': selectedIds.includes(cat.id) }]"
+          @click="toggleCategory(cat.id)"
+        >
+          {{ cat.name }}
+        </button>
+      </div>
     </div>
 
-    <div class="category-picker__add">
-      <NInput
-        v-model:value="newCategoryName"
-        size="small"
-        placeholder="Crear nueva categoría..."
-        @keyup.enter="handleCreateNew"
-      />
-      <NButton size="small" :disabled="!newCategoryName.trim()" @click="handleCreateNew">
-        <template #icon><NIcon :component="AddOutline" /></template>
-      </NButton>
+    <div v-if="canCreateCategory" class="category-picker__create">
+      <div class="category-picker__add">
+        <NInput
+          v-model:value="newCategoryName"
+          size="small"
+          placeholder="Crear nueva categoría..."
+          @keydown.enter.prevent="handleCreateNew"
+        />
+        <NButton size="small" :disabled="!newCategoryName.trim()" @click="handleCreateNew">
+          <template #icon><NIcon :component="AddOutline" /></template>
+        </NButton>
+      </div>
+      <NCheckbox v-if="canManageBase" v-model:checked="createAsBase" size="small">
+        Crear como base (disponible para todos los organizadores)
+      </NCheckbox>
     </div>
   </div>
 </template>

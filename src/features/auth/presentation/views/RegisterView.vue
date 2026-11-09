@@ -17,12 +17,12 @@ const route = useRoute()
 const { register, isRegistering } = useAuth()
 
 const redirectQuery = computed(() => (route.query.redirect as string | undefined) ?? null)
-const showCheckoutNotice = computed(() => redirectQuery.value === '/checkout')
+const showCheckoutNotice = computed(() => redirectQuery.value?.startsWith('/checkout') ?? false)
 
 async function handleSubmit(formData: IRegisterFormData) {
   try {
     const user = await register(toRegisterRequest(formData))
-    router.push(redirectQuery.value ?? getHomePath(user.role))
+    router.push(redirectQuery.value ?? getHomePath(user.permissions))
   } catch {
     // Error toast shown by interceptor
   }

@@ -1,0 +1,151 @@
+.od-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.od-id {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+.od-ava {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--tt-neutral-dark);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 19px;
+  flex: none;
+}
+.od-id__txt {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.od-id__name {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.od-id__holder {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  color: #5b6a80;
+  min-width: 0;
+}
+.od-id__holder i {
+  font-style: normal;
+  opacity: 0.6;
+}
+.od-mailbit {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.od-mailbit .n-icon {
+  color: var(--tt-success);
+  flex: none;
+}
+.od-mailbit--warn .n-icon {
+  color: var(--tt-warning);
+}
+.od-ellip {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.od-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 7px;
+  white-space: nowrap;
+  flex: none;
+}
+.od-tag--act {
+  background: #e9f8ee;
+  color: var(--tt-success);
+}
+.od-tag--venc {
+  background: #fef3e2;
+  color: var(--tt-warning);
+}
+.od-tag--sin {
+  background: #fdecec;
+  color: var(--tt-error);
+}
+
+.od-sec h4 {
+  margin: 0 0 9px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tt-neutral-mid);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.od-dl {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+.od-dl > div {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f4f7;
+  font-size: 13px;
+}
+.od-dl > div:last-child {
+  border-bottom: 0;
+}
+.od-dl dt {
+  width: 130px;
+  flex: none;
+  color: var(--tt-neutral-mid);
+  font-weight: 600;
+  font-size: 12px;
+}
+.od-dl dd {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.od-sub {
+  color: var(--tt-neutral-mid);
+}
+.od-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--tt-success);
+  font-weight: 700;
+  font-size: 11px;
+}
+.od-warn {
+  color: var(--tt-warning);
+  font-weight: 700;
+  font-size: 11px;
+}

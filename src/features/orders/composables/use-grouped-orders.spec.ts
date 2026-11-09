@@ -16,6 +16,8 @@ function makeOrder(overrides: Partial<IOrderListItem> & { id: string }): IOrderL
     notifiedAt: null,
     paidAt: null,
     deliveredAt: null,
+    cancelledAt: null,
+    eventId: 'event-1',
     userName: 'user',
     userId: 'user-1',
     customerFirstName: 'Pablo',
@@ -27,7 +29,9 @@ function makeOrder(overrides: Partial<IOrderListItem> & { id: string }): IOrderL
     photoCount: 1,
     hasDeliveryLink: false,
     subtotal: null,
+    subtotalDecimal: null,
     snapCurrency: null,
+    paymentMethod: null,
     previewPhotos: [],
     ...overrides,
   }

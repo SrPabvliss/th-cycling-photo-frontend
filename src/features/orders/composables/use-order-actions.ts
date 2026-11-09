@@ -2,7 +2,7 @@ import { h } from 'vue'
 import { NIcon, useDialog, useMessage } from 'naive-ui'
 import { GiftOutline } from '@vicons/ionicons5'
 
-import { buildPaymentInfoTemplate, openWhatsApp } from '@/shared/utils/whatsapp.utils'
+import { openWhatsApp, openWhatsAppWhenReady } from '@/shared/utils/whatsapp.utils'
 import { useConfirmPayment } from './mutations/use-confirm-payment'
 import { useMarkGift } from './mutations/use-mark-gift'
 import { useNotifyPaymentInfo } from './mutations/use-notify-payment-info'
@@ -10,6 +10,7 @@ import { useSendDelivery } from './mutations/use-send-delivery'
 import { useCancelOrder } from './mutations/use-cancel-order'
 import { useRegenerateDelivery } from './mutations/use-regenerate-delivery'
 import { buildConversionMessage } from '../utils/conversion-message'
+import { withCreditNoteWarning } from '../utils/credit-note-warning'
 import { useConvertToGift } from './mutations/use-convert-to-gift'
 import { useConvertToSale } from './mutations/use-convert-to-sale'
 import type { IOrderListItem } from '../types/responses/order-list.response'
@@ -18,6 +19,7 @@ interface IConvertibleOrder {
   id: string
   subtotal: number | null
   snapCurrency: string | null
+  invoiceState: string | null
 }
 
 export function useOrderActions() {
@@ -78,7 +80,10 @@ export function useOrderActions() {
   function handleConvertToGift(order: IConvertibleOrder) {
     dialog.create({
       title: 'Cambiar a regalo',
-      content: buildConversionMessage('gift', order.subtotal, order.snapCurrency),
+      content: withCreditNoteWarning(
+        buildConversionMessage('gift', order.subtotal, order.snapCurrency),
+        order.invoiceState,
+      ),
       icon: () => h(NIcon, { color: '#7c3aed' }, { default: () => h(GiftOutline) }),
       positiveText: 'Cambiar a regalo',
       negativeText: 'Cancelar',
@@ -90,14 +95,14 @@ export function useOrderActions() {
     })
   }
 
-  function handleSendDelivery(orderId: string, snapWhatsapp?: string) {
+  function handleSendDelivery(order: Pick<IOrderListItem, 'id' | 'snapWhatsapp'>) {
     dialog.success({
       title: 'Enviar fotos',
       content: '¿Generar el enlace de descarga y marcar como entregado?',
       positiveText: 'Enviar fotos',
       negativeText: 'Cancelar',
       onPositiveClick: async () => {
-        const result = await sendDelivery(orderId)
+        const result = await sendDelivery(order.id)
         message.success('Fotos enviadas')
         dialog.success({
           title: 'Enlace de descarga generado',
@@ -105,19 +110,25 @@ export function useOrderActions() {
           positiveText: 'Enviar por WhatsApp',
           negativeText: 'Cerrar',
           onPositiveClick: () => {
-            openWhatsApp(snapWhatsapp, result.whatsappTemplate)
+            openWhatsApp(order.snapWhatsapp ?? undefined, result.whatsappTemplate)
           },
         })
       },
     })
   }
 
-  function handleCancel(orderId: string, userName?: string) {
+  function handleCancel(
+    orderId: string,
+    userName: string | undefined,
+    invoiceState: string | null,
+  ) {
+    const content = userName
+      ? `¿Estás seguro de cancelar el pedido de ${userName}? Esta acción no se puede deshacer.`
+      : '¿Estás seguro de cancelar este pedido? Esta acción no se puede deshacer.'
+
     dialog.error({
       title: 'Cancelar pedido',
-      content: userName
-        ? `¿Estás seguro de cancelar el pedido de ${userName}? Esta acción no se puede deshacer.`
-        : '¿Estás seguro de cancelar este pedido? Esta acción no se puede deshacer.',
+      content: withCreditNoteWarning(content, invoiceState),
       positiveText: 'Cancelar pedido',
       negativeText: 'Volver',
       onPositiveClick: async () => {
@@ -127,8 +138,8 @@ export function useOrderActions() {
     })
   }
 
-  async function handleRegenerate(orderId: string, snapWhatsapp?: string) {
-    const result = await regenerateDelivery(orderId)
+  async function handleRegenerate(order: Pick<IOrderListItem, 'id' | 'snapWhatsapp'>) {
+    const result = await regenerateDelivery(order.id)
     message.success('Enlace regenerado')
     dialog.success({
       title: 'Nuevo enlace de descarga',
@@ -136,27 +147,21 @@ export function useOrderActions() {
       positiveText: 'Enviar por WhatsApp',
       negativeText: 'Cerrar',
       onPositiveClick: () => {
-        openWhatsApp(snapWhatsapp, result.whatsappTemplate)
+        openWhatsApp(order.snapWhatsapp ?? undefined, result.whatsappTemplate)
       },
     })
   }
 
-  async function handleNotifyPaymentInfo(order: IOrderListItem) {
+  async function handleNotifyPaymentInfo(order: Pick<IOrderListItem, 'id' | 'snapWhatsapp'>) {
     try {
-      await notifyPaymentInfo(order.id)
+      await openWhatsAppWhenReady(
+        order.snapWhatsapp,
+        notifyPaymentInfo(order.id).then((result) => result.whatsappTemplate),
+      )
+      message.success('Info de pago registrada')
     } catch {
       message.error('No se pudo registrar el envío. Intenta de nuevo.')
-      return
     }
-    const firstName = order.userName.split(' ')[0] ?? order.userName
-    const template = buildPaymentInfoTemplate({
-      customerFirstName: firstName,
-      photoCount: order.photoCount,
-      eventName: order.eventName,
-      totalPrice: order.subtotal,
-      currency: order.snapCurrency,
-    })
-    openWhatsApp(order.snapWhatsapp, template)
   }
 
   return {

@@ -1,3 +1,1 @@
-export const CART_QUERY_KEYS = {
-  cart: () => ['cart'] as const,
-} as const
+export { CART_QUERY_KEYS } from '@/shared/constants/cart-query-keys'

@@ -3,21 +3,22 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
 import { b2UploadClient } from '@/core/http/b2-upload-client'
-import { EVENT_QUERY_KEYS } from '@/features/events/constants/query-keys'
 import { EVENT_ASSET_QUERY_KEYS } from '../../constants/query-keys'
 import type { EventAssetType } from '../../types/asset-type'
 import type { IApiAssetPresignedUrl } from '../../types/responses/asset-presigned-url.response'
+import type { IFocalPoint } from '../use-local-asset-previews'
 
 interface UploadAssetsBatchParams {
   eventId: string
   assetFiles: Map<EventAssetType, File>
+  focalPoints?: Map<EventAssetType, IFocalPoint>
 }
 
 export function useUploadAssetsBatch() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ eventId, assetFiles }: UploadAssetsBatchParams) => {
+    mutationFn: async ({ eventId, assetFiles, focalPoints }: UploadAssetsBatchParams) => {
       await Promise.all(
         Array.from(assetFiles.entries()).map(async ([assetType, file]) => {
           const { data: presigned } = await httpClient.post<IApiAssetPresignedUrl>(
@@ -33,6 +34,8 @@ export function useUploadAssetsBatch() {
             storageKey: presigned.objectKey,
             fileSize: file.size,
             mimeType: file.type,
+            focalX: focalPoints?.get(assetType)?.focalX,
+            focalY: focalPoints?.get(assetType)?.focalY,
           })
         }),
       )
@@ -40,7 +43,7 @@ export function useUploadAssetsBatch() {
     },
     onSuccess: (eventId) => {
       queryClient.invalidateQueries({ queryKey: EVENT_ASSET_QUERY_KEYS.byEvent(eventId) })
-      queryClient.invalidateQueries({ queryKey: EVENT_QUERY_KEYS.all() })
+      queryClient.invalidateQueries({ queryKey: [API_ROUTES.EVENTS.BASE] })
     },
   })
 }

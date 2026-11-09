@@ -41,6 +41,7 @@ const isSingleDay = computed(
     </div>
     <div class="pub-event-card__body">
       <h3 class="pub-event-card__title">{{ event.name }}</h3>
+      <p class="pub-event-card__owner">Fotos de {{ event.ownerName }}</p>
       <div class="pub-event-card__meta">
         <span v-if="location">
           <NIcon :component="LocationOutline" :size="13" />

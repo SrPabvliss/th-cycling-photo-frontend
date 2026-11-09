@@ -1,0 +1,11 @@
+.frozen-panel {
+  margin-top: 24px;
+}
+
+.frozen-panel__text {
+  font-size: 14px;
+  color: var(--tt-neutral-mid);
+  margin: 0;
+  text-align: center;
+  max-width: 420px;
+}

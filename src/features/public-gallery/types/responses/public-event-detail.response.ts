@@ -2,6 +2,7 @@ import type { IApiPublicEventAsset, IPublicEventAsset } from './public-event-lis
 
 /** API projection from GET /public/events/:slug */
 export interface IApiPublicEventDetail {
+  id: string
   slug: string
   name: string
   startDate: string
@@ -9,6 +10,7 @@ export interface IApiPublicEventDetail {
   provinceName: string | null
   cantonName: string | null
   photoCount: number
+  ownerName: string
   assets: IApiPublicEventAsset[]
   photoCategories: IApiPublicPhotoCategory[]
 }
@@ -20,6 +22,7 @@ export interface IApiPublicPhotoCategory {
 
 /** Frontend domain type */
 export interface IPublicEventDetail {
+  id: string
   slug: string
   name: string
   startDate: Date
@@ -27,6 +30,7 @@ export interface IPublicEventDetail {
   provinceName: string | null
   cantonName: string | null
   photoCount: number
+  ownerName: string
   assets: IPublicEventAsset[]
   photoCategories: IPublicPhotoCategory[]
 }

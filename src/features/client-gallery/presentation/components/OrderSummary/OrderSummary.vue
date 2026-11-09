@@ -12,6 +12,7 @@ import type { IPreviewPhoto } from '../../../types/responses/preview-data.respon
 
 defineProps<{
   eventName: string
+  organizerName: string
   startDate: Date
   endDate: Date
   selectedPhotos: IPreviewPhoto[]
@@ -50,7 +51,7 @@ defineProps<{
       </div>
       <div class="cf-event-row cf-event-row--last">
         <span class="cf-event-row__label">Fotógrafo</span>
-        <span class="cf-event-row__value">Titan TV</span>
+        <span class="cf-event-row__value">{{ organizerName }}</span>
       </div>
     </div>
 
@@ -61,11 +62,11 @@ defineProps<{
       </div>
       <div class="cf-promise">
         <NIcon :component="ChatbubblesOutline" :size="14" color="#18a058" />
-        <span>Contacto vía WhatsApp en menos de 24h</span>
+        <span>Factura electrónica a tu nombre</span>
       </div>
       <div class="cf-promise">
         <NIcon :component="CardOutline" :size="14" color="#18a058" />
-        <span>Pago por transferencia o depósito</span>
+        <span>Pago con tarjeta o por transferencia</span>
       </div>
       <div class="cf-promise">
         <NIcon :component="CloudDownloadOutline" :size="14" color="#18a058" />

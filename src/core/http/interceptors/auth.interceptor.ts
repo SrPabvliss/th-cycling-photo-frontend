@@ -1,7 +1,7 @@
 import type { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios'
 
 import { API_ROUTES } from '@/core/api/api-routes'
-import { useAuthStore } from '@/features/auth/stores/auth.store'
+import { useSessionStore } from '@/core/auth/stores/session.store'
 
 let _isRefreshing = false
 let _failedQueue: Array<{
@@ -23,7 +23,7 @@ function processQueue(error: unknown, token: string | null) {
 export function registerAuthInterceptor(axios: AxiosInstance): void {
   // --- Request interceptor: attach Bearer token ---
   axios.interceptors.request.use((config) => {
-    const authStore = useAuthStore()
+    const authStore = useSessionStore()
 
     if (authStore.accessToken) {
       config.headers.Authorization = `Bearer ${authStore.accessToken}`
@@ -63,7 +63,7 @@ export function registerAuthInterceptor(axios: AxiosInstance): void {
 
       const newToken: string = response.data.data.accessToken
 
-      const authStore = useAuthStore()
+      const authStore = useSessionStore()
       authStore.setAccessToken(newToken)
 
       processQueue(null, newToken)
@@ -73,13 +73,17 @@ export function registerAuthInterceptor(axios: AxiosInstance): void {
     } catch (refreshError) {
       processQueue(refreshError, null)
 
-      const authStore = useAuthStore()
+      const authStore = useSessionStore()
       authStore.clearSession()
 
-      // Only redirect to login if current route requires auth
       const { default: router } = await import('@/app/router')
-      if (router.currentRoute.value.meta.public !== true) {
-        router.push('/login')
+      const current = router.currentRoute.value
+      const target =
+        current.matched.length > 0
+          ? current
+          : router.resolve(window.location.pathname + window.location.search)
+      if (target.meta.public !== true) {
+        router.push({ path: '/login', query: { redirect: target.fullPath } })
       }
 
       return Promise.reject(refreshError)

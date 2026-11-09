@@ -1,25 +1,3 @@
-/* Variant color tokens (compartidos cards + bar) */
-.stat-card--error .stat-card__num,
-.stats-bar__chip--error,
-.stats-bar__count.stats-bar__count--error {
-  color: #d03050;
-}
-.stat-card--warning .stat-card__num {
-  color: #f0a020;
-}
-.stat-card--info .stat-card__num {
-  color: #2080f0;
-}
-.stat-card--success .stat-card__num {
-  color: #18a058;
-}
-.stat-card--gift .stat-card__num {
-  color: #7c3aed;
-}
-.stat-card--revenue .stat-card__num {
-  color: #0d9488;
-}
-
 /* Info affordance (mirrors pricing total block popover) */
 .stat-card__info {
   display: inline-flex;
@@ -29,7 +7,7 @@
   height: 18px;
   border: none;
   background: transparent;
-  color: #0d9488;
+  color: var(--tt-neutral-mid);
   cursor: pointer;
   border-radius: 50%;
   padding: 0;
@@ -39,7 +17,7 @@
 
 .stat-card__info:hover,
 .stat-card__info:focus-visible {
-  background: rgba(13, 148, 136, 0.12);
+  background: #eef2f7;
   outline: none;
 }
 
@@ -70,52 +48,27 @@
 }
 
 /* =====================================================================
- * Default (>=480px): cards individuales. Bar oculta.
+ * Default (>=480px): tiles. Bar oculta.
  * ===================================================================== */
 .stats-bar {
   display: none;
 }
 
-.stats-row {
+.order-stat-tiles {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
 }
 
-.stat-card {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 16px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.stat-card__num {
-  font-size: 28px;
-  font-weight: 800;
-  color: #1a1f2c;
-  line-height: 1;
-}
-
-.stat-card__label {
-  font-size: 12px;
-  color: #6b7280;
-  font-weight: 400;
-}
-
-/* 768-1023px: 4 cols */
-@media (max-width: 1023px) {
-  .stats-row {
-    grid-template-columns: repeat(4, 1fr);
+@media (max-width: 1200px) {
+  .order-stat-tiles {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
-/* 480-767px: 2 cols */
 @media (max-width: 767px) {
-  .stats-row {
+  .order-stat-tiles {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -124,7 +77,7 @@
  * <480px: barra de distribución apilada, cards ocultas
  * ===================================================================== */
 @media (max-width: 479px) {
-  .stats-row {
+  .order-stat-tiles {
     display: none;
   }
 
@@ -235,4 +188,13 @@
   .stats-bar__label {
     color: #6b7280;
   }
+}
+
+.stats-bar__header--revenue {
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.stats-bar__header--revenue .stats-bar__total {
+  color: #0d9488;
 }

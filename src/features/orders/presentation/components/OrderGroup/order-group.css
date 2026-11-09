@@ -1,0 +1,38 @@
+.og {
+  border-bottom: 1px solid var(--tt-neutral-light, #d8e0e9);
+}
+
+.og:not(:has(~ .og)) {
+  border-bottom: 0;
+}
+
+/*
+ * Actions take their real width (two buttons, the longest primary label is
+ * «Reenviar info de pago»), and the timeline gets the room its four steps need
+ * (240px + 18px of left padding). Below 1400px the six columns no longer fit
+ * side by side, so the row stacks.
+ */
+.og__rows {
+  display: grid;
+  grid-template-columns: 200px 204px 124px minmax(150px, 0.5fr) minmax(260px, 1fr) max-content;
+}
+
+@media (max-width: 1400px) {
+  .og__rows {
+    grid-template-columns: 1fr;
+  }
+}
+
+.og__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 14px;
+  padding: 12px 16px 16px;
+}
+
+/* Con más de cuatro por fila la tarjeta se estrecha y las acciones saltan de línea. */
+@media (min-width: 1380px) {
+  .og__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

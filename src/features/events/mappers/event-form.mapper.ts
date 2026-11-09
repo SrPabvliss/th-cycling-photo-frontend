@@ -2,6 +2,7 @@ import type { IEventDetail } from '../types/responses/event-detail.response'
 import type { IEventFormData } from '../types/event-form.types'
 import type { ICreateEventRequest } from '../types/requests/create-event.request'
 import type { IUpdateEventRequest } from '../types/requests/update-event.request'
+import type { IEventConfigurationSelectionRequest } from '../types/requests/event-configuration.request'
 
 export function toEventFormData(event: IEventDetail): IEventFormData {
   return {
@@ -10,11 +11,14 @@ export function toEventFormData(event: IEventDetail): IEventFormData {
     endDate: event.endDate.getTime(),
     provinceId: event.provinceId,
     cantonId: event.cantonId,
-    eventTypeId: 1,
+    eventTypeId: event.eventTypeId,
   }
 }
 
-export function toCreateEventRequest(form: IEventFormData): ICreateEventRequest {
+export function toCreateEventRequest(
+  form: IEventFormData,
+  configuration?: IEventConfigurationSelectionRequest,
+): ICreateEventRequest {
   return {
     name: form.name.trim(),
     startDate: new Date(form.startDate!).toISOString(),
@@ -22,6 +26,7 @@ export function toCreateEventRequest(form: IEventFormData): ICreateEventRequest 
     provinceId: form.provinceId,
     cantonId: form.cantonId,
     eventTypeId: form.eventTypeId,
+    configuration,
   }
 }
 

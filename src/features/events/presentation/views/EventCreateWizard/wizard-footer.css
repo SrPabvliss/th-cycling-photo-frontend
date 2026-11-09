@@ -1,0 +1,51 @@
+.ce-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid var(--tt-neutral-light, #e6ebf1);
+  background: #fbfcfe;
+  padding: 13px 16px 13px 20px;
+}
+
+.ce-foot-spacer {
+  flex: 1;
+}
+
+.ce-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--tt-warning, #e08700);
+}
+
+.ce-progress.ok {
+  color: var(--tt-success, #16a34a);
+}
+
+.ce-footnote {
+  font-size: 11.5px;
+  color: #8b98ab;
+}
+
+@media (max-width: 767px) {
+  .ce-foot {
+    padding: 11px 14px 14px;
+    box-shadow: 0 -8px 20px rgba(16, 35, 58, 0.07);
+    background: #fff;
+    flex-wrap: wrap;
+  }
+
+  .ce-foot .ce-progress,
+  .ce-foot .ce-footnote {
+    flex: 1 0 100%;
+    order: -1;
+  }
+
+  .ce-foot .ce-foot__back,
+  .ce-foot .ce-foot__cta {
+    flex: 1;
+  }
+}

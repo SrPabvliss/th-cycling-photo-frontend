@@ -14,6 +14,11 @@ const COUNTRIES_BASE = '/countries'
 const PHOTO_CATEGORIES_BASE = '/photo-categories'
 const OPERATOR_BASE = '/operator'
 const PRICING_BASE = '/pricing'
+const PAYMENTS_BASE = '/payments'
+const BUYERS_BASE = '/buyers'
+const ORGANIZERS_BASE = '/organizers'
+const CONTRACTS_BASE = '/contracts'
+const TENANTS_BASE = '/tenants'
 
 export const API_ROUTES = {
   AUTH: {
@@ -27,11 +32,30 @@ export const API_ROUTES = {
     RESET_PASSWORD: `${AUTH_BASE}/reset-password`,
     VALIDATE_RESET_TOKEN: `${AUTH_BASE}/reset-password/validate`,
     CONSENTS: `${AUTH_BASE}/consents`,
+    CHANGE_PASSWORD: `${AUTH_BASE}/change-password`,
+    EMAIL_CHANGE: `${AUTH_BASE}/email-change`,
+    EMAIL_VERIFICATION: {
+      BASE: `${AUTH_BASE}/email-verification`,
+      RESEND: `${AUTH_BASE}/email-verification/resend`,
+      CONFIRM: `${AUTH_BASE}/email-verification/confirm`,
+    },
+    PROMPTS: {
+      SNOOZE: (key: string) => `${AUTH_BASE}/prompts/${key}/snooze`,
+    },
   },
   USER_PHONES: {
     BASE: '/users/me/phones',
     BY_ID: (phoneId: string) => `/users/me/phones/${phoneId}`,
     SET_PRIMARY: (phoneId: string) => `/users/me/phones/${phoneId}/primary`,
+  },
+  BILLING_ACCOUNTS: {
+    BASE: '/users/me/billing-accounts',
+    DEFAULT: (billingAccountId: string) => `/users/me/billing-accounts/${billingAccountId}/default`,
+  },
+  MY_PROFILE: {
+    BASE: '/users/me',
+    AVATAR_PRESIGNED_URL: '/users/me/avatar/presigned-url',
+    AVATAR_CONFIRM: '/users/me/avatar/confirm',
   },
   EVENTS: {
     BASE: EVENTS_BASE,
@@ -41,10 +65,15 @@ export const API_ROUTES = {
     UPDATE: (id: string) => `${EVENTS_BASE}/${id}`,
     DELETE: (id: string) => `${EVENTS_BASE}/${id}`,
     STATS: `${EVENTS_BASE}/stats`,
+    CREATION_CONTEXT: `${EVENTS_BASE}/creation-context`,
     FEATURED: (id: string) => `${EVENTS_BASE}/${id}/featured`,
-    OPERATORS: (id: string) => `${EVENTS_BASE}/${id}/operators`,
-    OPERATOR: (eventId: string, userId: string) => `${EVENTS_BASE}/${eventId}/operators/${userId}`,
+    FREEZE: (id: string) => `${EVENTS_BASE}/${id}/freeze`,
+    ARCHIVE: (id: string) => `${EVENTS_BASE}/${id}/archive`,
+    RESTORE: (id: string) => `${EVENTS_BASE}/${id}/restore`,
+    PHOTO_QUOTA: (id: string) => `${EVENTS_BASE}/${id}/photo-quota`,
     REVIEW_QUEUE: (eventId: string) => `${EVENTS_BASE}/${eventId}/review-queue`,
+    CONFIGURATION_PRESET: `${EVENTS_BASE}/configuration/preset`,
+    CONFIGURATION: (id: string) => `${EVENTS_BASE}/${id}/configuration`,
     ASSETS: {
       GET_ALL: (id: string) => `${EVENTS_BASE}/${id}/assets`,
       PRESIGNED_URL: (id: string, assetType: string) =>
@@ -52,6 +81,8 @@ export const API_ROUTES = {
       CONFIRM: (id: string, assetType: string) =>
         `${EVENTS_BASE}/${id}/assets/${assetType}/confirm`,
       DELETE: (id: string, assetType: string) => `${EVENTS_BASE}/${id}/assets/${assetType}`,
+      FOCAL_POINT: (id: string, assetType: string) =>
+        `${EVENTS_BASE}/${id}/assets/${assetType}/focal-point`,
     },
   },
   PHOTOS: {
@@ -64,6 +95,9 @@ export const API_ROUTES = {
     UPLOAD: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos`,
     PRESIGNED_URL: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/presigned-url`,
     CONFIRM_BATCH: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/confirm-batch`,
+    RECLASSIFY: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/reclassify`,
+    CLASSIFICATION_FAILURES: (eventId: string) =>
+      `${EVENTS_BASE}/${eventId}/photos/classification-failures`,
     RETOUCHED_PRESIGNED_URL: (id: string) => `${PHOTOS_BASE}/${id}/retouched/presigned-url`,
     RETOUCHED_CONFIRM: (id: string) => `${PHOTOS_BASE}/${id}/retouched/confirm`,
     DOWNLOAD: (id: string) => `${PHOTOS_BASE}/${id}/download`,
@@ -74,6 +108,7 @@ export const API_ROUTES = {
     PENDING_RETOUCH: `${PHOTOS_BASE}/pending-retouch`,
     PARTICIPANTS_BY_PHOTO: (photoId: string) => `${PHOTOS_BASE}/${photoId}/participants`,
     RESUME_POINT: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/resume-point`,
+    GALLERY_FACETS: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/facets`,
     DOWNLOAD_MANIFEST: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/download-manifest`,
     BIB_CORRECTIONS: (photoId: string, bibId: string) =>
       `${PHOTOS_BASE}/${photoId}/bibs/${bibId}/corrections`,
@@ -122,12 +157,10 @@ export const API_ROUTES = {
     GET_ALL: PUBLIC_EVENTS_BASE,
     GET_BY_SLUG: (slug: string) => `${PUBLIC_EVENTS_BASE}/${slug}`,
     PHOTOS: (slug: string) => `${PUBLIC_EVENTS_BASE}/${slug}/photos`,
-    CREATE_ORDER: (slug: string) => `${PUBLIC_EVENTS_BASE}/${slug}/orders`,
   },
   PREVIEW_PUBLIC: {
     BASE: PREVIEW_PUBLIC_BASE,
     GET_BY_TOKEN: (token: string) => `${PREVIEW_PUBLIC_BASE}/${token}`,
-    CUSTOMER_LOOKUP: (token: string) => `${PREVIEW_PUBLIC_BASE}/${token}/customer`,
     CREATE_ORDER: (token: string) => `${PREVIEW_PUBLIC_BASE}/${token}/orders`,
   },
   ORDERS: {
@@ -143,9 +176,49 @@ export const API_ROUTES = {
     CANCEL: (id: string) => `${ORDERS_BASE}/${id}/cancel`,
     SEND_DELIVERY: (id: string) => `${ORDERS_BASE}/${id}/send-delivery`,
     REGENERATE_DELIVERY: (id: string) => `${ORDERS_BASE}/${id}/regenerate-delivery`,
+    PAYMENT_METHOD: `${ORDERS_BASE}/payment-method`,
+    TAX_DOCUMENT_FILES: (id: string, taxDocumentId: string) =>
+      `${ORDERS_BASE}/${id}/tax-documents/${taxDocumentId}/files`,
+    TAX_DOCUMENT_RESENDS: (id: string, taxDocumentId: string) =>
+      `${ORDERS_BASE}/${id}/tax-documents/${taxDocumentId}/resends`,
+    ANNULMENT_RETRIES: (id: string) => `${ORDERS_BASE}/${id}/invoice/annulment-retries`,
+    BILLING: (id: string) => `${ORDERS_BASE}/${id}/billing`,
+  },
+  MY_ORDERS: {
+    BASE: `${ORDERS_BASE}/me`,
+    GET_BY_ID: (id: string) => `${ORDERS_BASE}/me/${id}`,
+    DOWNLOADS: (id: string) => `${ORDERS_BASE}/me/${id}/downloads`,
+    CANCEL: (id: string) => `${ORDERS_BASE}/me/${id}/cancel`,
+    SUMMARY: `${ORDERS_BASE}/me/summary`,
+    TAX_DOCUMENT_FILES: (id: string, taxDocumentId: string) =>
+      `${ORDERS_BASE}/me/${id}/tax-documents/${taxDocumentId}/files`,
+    BILLING: (id: string) => `${ORDERS_BASE}/me/${id}/billing`,
   },
   BUYERS: {
-    GET_ALL: '/buyers',
+    BASE: BUYERS_BASE,
+    GET_ALL: BUYERS_BASE,
+    STATS: `${BUYERS_BASE}/stats`,
+    GET_BY_ID: (id: string) => `${BUYERS_BASE}/${id}`,
+  },
+  ORGANIZERS: {
+    BASE: ORGANIZERS_BASE,
+    GET_ALL: ORGANIZERS_BASE,
+    STATS: `${ORGANIZERS_BASE}/stats`,
+    GET_BY_ID: (id: string) => `${ORGANIZERS_BASE}/${id}`,
+    EVENTS: (id: string) => `${ORGANIZERS_BASE}/${id}/events`,
+  },
+  CONTRACTS: {
+    BASE: CONTRACTS_BASE,
+    ISSUE: CONTRACTS_BASE,
+    BY_TOKEN: (token: string) => `${CONTRACTS_BASE}/token/${token}`,
+    ACCEPT: (token: string) => `${CONTRACTS_BASE}/token/${token}/accept`,
+    RESEND: (id: string) => `${CONTRACTS_BASE}/${id}/resend`,
+    REVOKE: (id: string) => `${CONTRACTS_BASE}/${id}/revoke`,
+    MINE: `${CONTRACTS_BASE}/mine`,
+  },
+  TENANTS: {
+    BASE: TENANTS_BASE,
+    PHOTO_QUOTA_DEFAULT: (id: string) => `${TENANTS_BASE}/${id}/photo-quota-default`,
   },
   CART: {
     GET: '/cart',
@@ -188,11 +261,30 @@ export const API_ROUTES = {
     DASHBOARD_REVIEW_QUEUE: `${OPERATOR_BASE}/dashboard/review-queue`,
     RETOUCH_QUEUE: (eventId: string) => `${OPERATOR_BASE}/events/${eventId}/retouch-queue`,
     RETOUCH_ORDERS: `${OPERATOR_BASE}/retouch/orders`,
+    RETOUCH_EVENTS: `${OPERATOR_BASE}/retouch/events`,
     RETOUCH_ORDER_DETAIL: (orderId: string) => `${OPERATOR_BASE}/retouch/orders/${orderId}`,
   },
   PRICING: {
     BASE: PRICING_BASE,
     PREVIEW: `${PRICING_BASE}/preview`,
     TIERS: `${PRICING_BASE}/tiers`,
+  },
+  PAYMENTS: {
+    BASE: PAYMENTS_BASE,
+    CREATE_INTENT: `${PAYMENTS_BASE}/intent`,
+    CONFIRM: `${PAYMENTS_BASE}/confirm`,
+    TRANSACTION: (clientTransactionId: string) =>
+      `${PAYMENTS_BASE}/transactions/${clientTransactionId}`,
+    EVENT_OPTIONS: (eventId: string) => `${PAYMENTS_BASE}/events/${eventId}/options`,
+  },
+  TENANT_PROFILE: {
+    BASE: '/tenants/me/profile',
+    PAYOUT_METHODS: '/tenants/me/payout-methods',
+    PAYOUT_METHOD: (id: string) => `/tenants/me/payout-methods/${id}`,
+    PAYOUT_METHOD_SORT_ORDER: (id: string) => `/tenants/me/payout-methods/${id}/sort-order`,
+    VERIFY_RECEIVER: '/tenants/me/payout-methods/verify-receiver',
+    WATERMARK_PRESIGNED_URL: '/tenants/me/watermark/presigned-url',
+    WATERMARK_CONFIRM: '/tenants/me/watermark/confirm',
+    CONTACT_REQUESTS: '/tenants/me/contact-requests',
   },
 } as const

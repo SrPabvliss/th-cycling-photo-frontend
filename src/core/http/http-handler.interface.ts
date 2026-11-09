@@ -7,6 +7,10 @@ export interface IHttpRequestConfig {
   onUploadProgress?: (event: { loaded: number; total?: number }) => void
   /** Suppress automatic success/error toasts for this request */
   silent?: boolean
+  /** Suppress only the automatic success toast; errors still surface */
+  silentSuccess?: boolean
+  /** Request body for methods that otherwise take no data argument, e.g. DELETE */
+  data?: unknown
 }
 
 export interface IHttpHandler {

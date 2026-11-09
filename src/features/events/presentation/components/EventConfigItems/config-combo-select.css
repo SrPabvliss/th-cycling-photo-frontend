@@ -1,0 +1,15 @@
+.ce-combo {
+  width: 100%;
+}
+
+.ce-combo :deep(.n-base-selection) {
+  --n-height: 38px;
+  --n-border-radius: 9px;
+  --n-font-size: 13px;
+}
+
+.ce-combo :deep(.n-base-selection-label__render-label),
+.ce-combo :deep(.n-base-selection-input) {
+  font-weight: 600;
+  color: var(--tt-neutral-dark, #16233a);
+}

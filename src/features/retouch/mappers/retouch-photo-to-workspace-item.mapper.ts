@@ -1,5 +1,5 @@
 import type { IOperatorRetouchOrderDetailPhoto } from '../types/responses/operator-retouch-order-detail.response'
-import type { IWorkspaceQueueItem } from '@/features/workspace/types/workspace-queue-item.types'
+import type { IWorkspaceQueueItem } from '@/shared/workspace/types/workspace-queue-item.types'
 
 export function toWorkspaceQueueItemFromRetouchPhoto(
   photo: IOperatorRetouchOrderDetailPhoto,

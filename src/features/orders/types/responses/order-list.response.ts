@@ -1,13 +1,5 @@
-export const ORDER_STATUS = {
-  PENDING: 'pending',
-  PAYMENT_INFO_SENT: 'payment_info_sent',
-  PAID: 'paid',
-  DELIVERED: 'delivered',
-  GIFTED: 'gifted',
-  CANCELLED: 'cancelled',
-} as const
-
-export type OrderStatus = (typeof ORDER_STATUS)[keyof typeof ORDER_STATUS]
+import type { OrderStatus } from '@/shared/types/order-status.types'
+export { ORDER_STATUS, type OrderStatus } from '@/shared/types/order-status.types'
 
 export interface IApiOrderPreviewPhoto {
   photoId: string
@@ -31,6 +23,8 @@ export interface IApiOrderListItem {
   notifiedAt: string | null
   paidAt: string | null
   deliveredAt: string | null
+  cancelledAt: string | null
+  eventId: string
   userName: string
   userId: string
   customerFirstName: string | null
@@ -43,6 +37,7 @@ export interface IApiOrderListItem {
   hasDeliveryLink: boolean
   subtotal: string | null
   snapCurrency: string | null
+  paymentMethod: string | null
   previewPhotos: IApiOrderPreviewPhoto[]
 }
 
@@ -54,6 +49,8 @@ export interface IOrderListItem {
   notifiedAt: Date | null
   paidAt: Date | null
   deliveredAt: Date | null
+  cancelledAt: Date | null
+  eventId: string
   userName: string
   userId: string
   customerFirstName: string | null
@@ -65,6 +62,8 @@ export interface IOrderListItem {
   photoCount: number
   hasDeliveryLink: boolean
   subtotal: number | null
+  subtotalDecimal: string | null
   snapCurrency: string | null
+  paymentMethod: string | null
   previewPhotos: IOrderPreviewPhoto[]
 }

@@ -1,14 +1,18 @@
 import { computed, ref, type Ref } from 'vue'
 
-import { useEventRetouchOrdersInfiniteQuery } from '../queries/use-event-retouch-orders'
+import {
+  useEventRetouchOrdersInfiniteQuery,
+  isForbidden,
+} from '../queries/use-event-retouch-orders'
 import type { IRetouchQueueOrder } from '../../types/responses/operator-retouch-queue.response'
 import type { TRetouchOrderScope } from '../../types/responses/operator-retouch-orders.response'
 
 export function useEventRetouchOrdersListSource(
   eventSlug: Ref<string>,
   scope: Ref<TRetouchOrderScope> = ref('pending'),
+  enabled: Ref<boolean> = ref(true),
 ) {
-  const query = useEventRetouchOrdersInfiniteQuery(eventSlug, scope)
+  const query = useEventRetouchOrdersInfiniteQuery(eventSlug, scope, enabled)
 
   const orders = computed<IRetouchQueueOrder[]>(
     () => query.data.value?.pages.flatMap((p) => p.items) ?? [],
@@ -23,6 +27,8 @@ export function useEventRetouchOrdersListSource(
     total,
     scope,
     isPending: computed(() => query.isPending.value),
+    isForbidden: computed(() => isForbidden(query.error.value)),
+    isError: computed(() => query.isError.value),
     hasNextPage: computed(() => query.hasNextPage.value ?? false),
     isFetchingNextPage: computed(() => query.isFetchingNextPage.value),
     fetchNextPage: () => {

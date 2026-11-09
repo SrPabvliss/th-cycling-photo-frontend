@@ -7,8 +7,6 @@ import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
 import { b2UploadClient } from '@/core/http/b2-upload-client'
 import { useConnectivityMonitor } from '@/shared/composables/use-connectivity-monitor'
-import { EVENT_QUERY_KEYS } from '@/features/events/constants/query-keys'
-import { PHOTO_CATEGORY_QUERY_KEYS } from '@/features/photo-categories/constants/query-keys'
 import { PHOTO_QUERY_KEYS } from '../constants/query-keys'
 import { useUploadStore } from '../stores/upload.store'
 import type { IConfirmPhotoBatchRequest } from '../types/requests/confirm-photo-batch.request'
@@ -59,7 +57,10 @@ export function useUploadQueue(eventId: Ref<string>) {
   async function uploadSingleFile(item: IUploadItem): Promise<void> {
     store.transitionStatus(item.id, 'uploading')
 
-    const result = await presignedUrlCache.fetch(item.fileName, item._file.type)
+    // The backend weighs the whole batch against the remaining quota before signing anything, so a
+    // batch that cannot fit is refused up front instead of landing in storage and being rejected
+    // afterwards.
+    const result = await presignedUrlCache.fetch(item.fileName, item._file.type, store.counts.total)
 
     // Duplicate: auto-confirm without uploading to B2
     if (result.isDuplicate) {
@@ -192,10 +193,10 @@ export function useUploadQueue(eventId: Ref<string>) {
         await flushConfirmBatch()
       } finally {
         queryClient.invalidateQueries({ queryKey: PHOTO_QUERY_KEYS.all() })
-        queryClient.invalidateQueries({ queryKey: EVENT_QUERY_KEYS.all() })
+        queryClient.invalidateQueries({ queryKey: [API_ROUTES.EVENTS.BASE] })
         if (photoCategoryId.value) {
           queryClient.invalidateQueries({
-            queryKey: PHOTO_CATEGORY_QUERY_KEYS.byEvent(eventId.value),
+            queryKey: [API_ROUTES.PHOTO_CATEGORIES.GET_ALL],
           })
         }
       }

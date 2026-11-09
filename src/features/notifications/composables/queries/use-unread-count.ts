@@ -1,3 +1,4 @@
+import { computed, type MaybeRefOrGetter, toValue } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
@@ -5,7 +6,7 @@ import { httpClient } from '@/core/http/axios-client'
 import { NOTIFICATION_QUERY_KEYS } from '../../constants/query-keys'
 import { useNotificationStore } from '../../stores/notification.store'
 
-export function useUnreadCountQuery() {
+export function useUnreadCountQuery(enabled: MaybeRefOrGetter<boolean> = true) {
   const store = useNotificationStore()
 
   return useQuery({
@@ -19,5 +20,6 @@ export function useUnreadCountQuery() {
       return response.data.count
     },
     staleTime: 30_000, // Fallback poll every 30s
+    enabled: computed(() => toValue(enabled)),
   })
 }

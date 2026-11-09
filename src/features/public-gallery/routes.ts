@@ -1,6 +1,8 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-export const PUBLIC_GALLERY_PATH = '/gallery'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+
+export const PUBLIC_GALLERY_PATH = ROUTE_PATHS.PUBLIC_GALLERY
 
 export const PUBLIC_GALLERY_ROUTE_NAMES = {
   EVENT_LIST: 'public-event-list',

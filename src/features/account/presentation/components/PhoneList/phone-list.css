@@ -1,0 +1,10 @@
+.phone-list__rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.phone-list__add-trigger {
+  align-self: flex-start;
+  margin-top: 8px;
+  min-height: 44px;
+}

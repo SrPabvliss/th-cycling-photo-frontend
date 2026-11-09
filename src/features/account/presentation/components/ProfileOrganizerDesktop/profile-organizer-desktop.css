@@ -1,0 +1,44 @@
+.profile-organizer-desktop {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-organizer-desktop__panes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.profile-organizer-desktop__pane {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  background: var(--tt-surface);
+  border: 1px solid var(--tt-neutral-light);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.profile-organizer-desktop__pane--biz {
+  background: #eef3f6;
+  border-color: #dbe5eb;
+}
+
+@media (max-width: 1279px) {
+  .profile-organizer-desktop__panes {
+    grid-template-columns: 1fr;
+  }
+}
+
+.profile-organizer-desktop__count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tt-neutral-mid);
+  background: var(--tt-background);
+  border-radius: 999px;
+  padding: 3px 9px;
+  min-width: 24px;
+  text-align: center;
+}

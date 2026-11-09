@@ -11,11 +11,14 @@ export function useConfirmPayment() {
     mutationFn: async (orderId: string) => {
       const response = await httpClient.patch<{ id: string }>(
         API_ROUTES.ORDERS.CONFIRM_PAYMENT(orderId),
+        undefined,
+        { silentSuccess: true },
       )
       return response.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ORDER_QUERY_KEYS.all() })
+      queryClient.invalidateQueries({ queryKey: [API_ROUTES.EVENTS.BASE] })
     },
   })
 }

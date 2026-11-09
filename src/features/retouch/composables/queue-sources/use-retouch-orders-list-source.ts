@@ -9,8 +9,9 @@ import { useOperatorRetouchOrdersInfiniteQuery } from '../queries/use-operator-r
 export function useOperatorRetouchOrdersListSource(
   scope: Ref<TRetouchOrderScope> = ref('pending'),
   eventSlug: Ref<string | null> = ref(null),
+  enabled: Ref<boolean> = ref(true),
 ) {
-  const query = useOperatorRetouchOrdersInfiniteQuery(scope, eventSlug)
+  const query = useOperatorRetouchOrdersInfiniteQuery(scope, eventSlug, enabled)
 
   const orders = computed<IOperatorRetouchOrder[]>(
     () => query.data.value?.pages.flatMap((p) => p.items) ?? [],
