@@ -291,6 +291,8 @@
 /* --- Footer --- */
 .ev-foot {
   margin-top: auto;
+  display: flex;
+  gap: 8px;
 }
 
 .ev-btn {
@@ -316,4 +318,13 @@
   border: 1px solid var(--tt-neutral-light);
   background: #fff;
   color: var(--tt-neutral-dark);
+}
+
+.ev-btn--copy {
+  white-space: nowrap;
+}
+
+.ev-btn--copied {
+  border-color: var(--tt-primary);
+  color: var(--tt-primary);
 }
