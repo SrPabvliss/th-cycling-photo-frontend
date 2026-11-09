@@ -47,7 +47,5 @@ export function toMyOrdersSummary(api: IApiMyOrdersSummary): IMyOrdersSummary {
   return {
     orderCount: api.orderCount,
     photoCount: api.photoCount,
-    eventCount: api.eventCount,
-    spent: api.spent.map((entry) => ({ currency: entry.currency, amount: entry.amount })),
   }
 }
