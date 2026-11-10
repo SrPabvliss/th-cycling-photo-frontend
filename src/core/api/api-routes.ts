@@ -9,7 +9,6 @@ const ORDERS_BASE = '/orders'
 const DELIVERY_PUBLIC_BASE = '/delivery'
 const NOTIFICATIONS_BASE = '/notifications'
 const LOCATIONS_BASE = '/locations'
-const PARTICIPANTS_BASE = '/participants'
 const COUNTRIES_BASE = '/countries'
 const PHOTO_CATEGORIES_BASE = '/photo-categories'
 const OPERATOR_BASE = '/operator'
@@ -101,13 +100,9 @@ export const API_ROUTES = {
     RETOUCHED_PRESIGNED_URL: (id: string) => `${PHOTOS_BASE}/${id}/retouched/presigned-url`,
     RETOUCHED_CONFIRM: (id: string) => `${PHOTOS_BASE}/${id}/retouched/confirm`,
     DOWNLOAD: (id: string) => `${PHOTOS_BASE}/${id}/download`,
-    CLASSIFY: (photoId: string) => `${PHOTOS_BASE}/${photoId}/classify`,
-    SIMILAR: (photoId: string) => `${PHOTOS_BASE}/${photoId}/similar`,
-    BULK_CLASSIFY: `${PHOTOS_BASE}/bulk-classify`,
     BULK_CATEGORY: `${PHOTOS_BASE}/bulk-category`,
     PENDING_RETOUCH: `${PHOTOS_BASE}/pending-retouch`,
     PARTICIPANTS_BY_PHOTO: (photoId: string) => `${PHOTOS_BASE}/${photoId}/participants`,
-    RESUME_POINT: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/resume-point`,
     GALLERY_FACETS: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/facets`,
     DOWNLOAD_MANIFEST: (eventId: string) => `${EVENTS_BASE}/${eventId}/photos/download-manifest`,
     BIB_CORRECTIONS: (photoId: string, bibId: string) =>
@@ -131,21 +126,11 @@ export const API_ROUTES = {
     UNASSIGN: (eventId: string, categoryId: string) =>
       `${EVENTS_BASE}/${eventId}/photo-categories/${categoryId}`,
   },
-  GEAR_TYPES: {
-    GET_ALL: '/gear-types',
-  },
   PARTICIPANT_CATEGORIES: {
     GET_ALL: '/participant-categories',
   },
   EVENT_TYPES: {
     GET_ALL: '/event-types',
-  },
-  CLASSIFICATIONS: {
-    BASE: PARTICIPANTS_BASE,
-    PARTICIPANTS_BY_PHOTO: (photoId: string) => `${PHOTOS_BASE}/${photoId}/participants`,
-    PARTICIPANT_DETAIL: (id: string) => `${PARTICIPANTS_BASE}/${id}`,
-    UPDATE_PARTICIPANT: (id: string) => `${PARTICIPANTS_BASE}/${id}`,
-    DELETE_PARTICIPANT: (id: string) => `${PARTICIPANTS_BASE}/${id}`,
   },
   PREVIEW_LINKS: {
     BASE: PREVIEW_LINKS_BASE,
