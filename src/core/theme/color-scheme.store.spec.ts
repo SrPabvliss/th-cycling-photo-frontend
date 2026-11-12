@@ -85,6 +85,44 @@ describe('useColorSchemeStore', () => {
     expect(localStorage.getItem(COLOR_SCHEME_STORAGE_KEY)).toBe('dark')
   })
 
+  it('follows the choice made in another tab', () => {
+    const store = useColorSchemeStore()
+
+    window.dispatchEvent(
+      new StorageEvent('storage', { key: COLOR_SCHEME_STORAGE_KEY, newValue: 'dark' }),
+    )
+
+    expect(store.preference).toBe('dark')
+    expect(store.scheme).toBe('dark')
+    expect(document.documentElement.dataset.ttScheme).toBe('dark')
+  })
+
+  it('goes back to the default when another tab clears the choice or saves nonsense', () => {
+    localStorage.setItem(COLOR_SCHEME_STORAGE_KEY, 'dark')
+    const store = useColorSchemeStore()
+
+    window.dispatchEvent(
+      new StorageEvent('storage', { key: COLOR_SCHEME_STORAGE_KEY, newValue: null }),
+    )
+    expect(store.preference).toBe('light')
+
+    store.setPreference('dark')
+    window.dispatchEvent(
+      new StorageEvent('storage', { key: COLOR_SCHEME_STORAGE_KEY, newValue: 'banana' }),
+    )
+    expect(store.preference).toBe('light')
+  })
+
+  it('ignores what other tabs save under other keys', () => {
+    const store = useColorSchemeStore()
+
+    window.dispatchEvent(
+      new StorageEvent('storage', { key: 'titan_cart_session_id', newValue: 'dark' }),
+    )
+
+    expect(store.preference).toBe('light')
+  })
+
   it('toggles back from dark to light', () => {
     localStorage.setItem(COLOR_SCHEME_STORAGE_KEY, 'dark')
     const store = useColorSchemeStore()

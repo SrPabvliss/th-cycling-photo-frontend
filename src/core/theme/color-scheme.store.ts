@@ -43,6 +43,16 @@ function savePreference(preference: SchemePreference): void {
   }
 }
 
+/** Another tab or document of the app changed the choice: this one follows without saving again. */
+function onSavedElsewhere(apply: (preference: SchemePreference) => void): void {
+  if (typeof window === 'undefined') return
+
+  window.addEventListener('storage', (event) => {
+    if (event.key !== COLOR_SCHEME_STORAGE_KEY) return
+    apply(isPreference(event.newValue) ? event.newValue : DEFAULT_PREFERENCE)
+  })
+}
+
 function watchSystemDark(): Ref<boolean> {
   const isDark = ref(false)
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return isDark
@@ -72,6 +82,10 @@ export const useColorSchemeStore = defineStore('color-scheme', () => {
     },
     { immediate: true, flush: 'sync' },
   )
+
+  onSavedElsewhere((saved) => {
+    preference.value = saved
+  })
 
   function setPreference(next: SchemePreference): void {
     preference.value = next
