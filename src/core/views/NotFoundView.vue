@@ -1,38 +1,23 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
-import { NButton, NIcon } from 'naive-ui'
-import { ArrowBack, CameraOutline } from '@vicons/ionicons5'
+import { NButton } from 'naive-ui'
 
-import TitanLogo from '@/core/layout/public/TitanLogo.vue'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import ErrorPageLayout from './components/ErrorPageLayout.vue'
-
-const router = useRouter()
-const route = useRoute()
 </script>
 
 <template>
   <ErrorPageLayout
-    code="404"
-    title="Fuera del camino."
-    description="Hasta los dioses mas poderosos a veces pierden el camino en la montaña. La pagina que buscas no existe o fue movida."
-    :error-info="`Codigo de error: 404_NOT_FOUND | Ruta: ${route.fullPath}`"
+    illustration="fueraDelCamino"
+    title="Te saliste del camino"
+    description="Esta página no existe o cambió de lugar."
   >
-    <template #icon>
-      <TitanLogo :size="100" variant="emblem" />
-    </template>
     <template #actions>
-      <NButton type="primary" size="large" @click="router.push('/')">
-        <template #icon>
-          <NIcon :component="ArrowBack" />
-        </template>
-        Volver al inicio
-      </NButton>
-      <NButton size="large" @click="router.push('/')">
-        <template #icon>
-          <NIcon :component="CameraOutline" />
-        </template>
-        Buscar tus fotos
-      </NButton>
+      <RouterLink v-slot="{ navigate }" :to="ROUTE_PATHS.LANDING" custom>
+        <NButton type="primary" size="large" block @click="navigate">Ir al inicio</NButton>
+      </RouterLink>
+      <RouterLink v-slot="{ navigate }" :to="ROUTE_PATHS.PUBLIC_GALLERY" custom>
+        <NButton text type="primary" size="large" @click="navigate">Ver eventos</NButton>
+      </RouterLink>
     </template>
   </ErrorPageLayout>
 </template>

@@ -16,7 +16,8 @@
     "lint:eslint": "eslint . --fix --cache",
     "format": "prettier --write --experimental-cli src/",
     "prepare": "husky",
-    "tokens:sync": "node scripts/sync-awana-tokens.mjs"
+    "tokens:sync": "node scripts/sync-awana-tokens.mjs",
+    "illustrations:sync": "node scripts/sync-illustrations.mjs"
   },
   "dependencies": {
     "@tanstack/vue-form": "^1.28.3",

@@ -173,6 +173,6 @@ import { NAlert } from 'naive-ui'
 
 <style scoped>
 .legal-draft-notice {
-  margin-bottom: 24px;
+  margin-block-end: var(--tt-space-5);
 }
 </style>
