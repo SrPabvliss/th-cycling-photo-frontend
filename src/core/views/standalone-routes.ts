@@ -12,6 +12,18 @@ export const STANDALONE_ROUTE_NAMES = {
   ACCESS_DENIED: 'access-denied',
 } as const
 
+// Sample of the client base (theme, loading pieces). Never part of a production build.
+const devRoutes: RouteRecordRaw[] = import.meta.env.DEV
+  ? [
+      {
+        path: '/dev/ui',
+        name: 'dev-ui-sample',
+        component: () => import('./UiSampleView.vue'),
+        meta: { public: true },
+      },
+    ]
+  : []
+
 export const standaloneRoutes: RouteRecordRaw[] = [
   {
     path: STANDALONE_PATHS.NOT_FOUND,
@@ -31,4 +43,5 @@ export const standaloneRoutes: RouteRecordRaw[] = [
     component: () => import('./AccessDeniedView.vue'),
     meta: { public: true },
   },
+  ...devRoutes,
 ]
