@@ -3,6 +3,8 @@ import '@/assets/styles/breakpoints.css'
 import '@/assets/styles/phone-input.css'
 import '@/assets/styles/modal-form.css'
 import '@/core/theme/theme-vars.css'
+import '@/core/theme/client/awana-tokens.css'
+import '@/core/theme/client/legacy-bridge.css'
 import '@/assets/styles/payphone-box.css'
 import '@/core/config/env'
 
