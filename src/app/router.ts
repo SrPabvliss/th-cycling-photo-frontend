@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from '@/core/layout/AppLayout.vue'
 import { registerAuthGuard } from '@/core/guards/auth.guard'
 import { registerStaleChunkReload } from '@/core/navigation/stale-chunk-reload'
+import { inPanelArea, registerUiArea } from '@/core/theme/area'
 import { standaloneRoutes } from '@/core/views/standalone-routes'
 import { authRoutes } from '@/features/auth/routes'
 import { eventRoutes } from '@/features/events/routes'
@@ -43,11 +44,12 @@ const router = createRouter({
     ...clientGalleryRoutes,
     ...deliveryRoutes,
     ...standaloneRoutes,
-    ...reviewRoutes,
-    ...retouchWorkspaceRoutes,
+    ...inPanelArea(reviewRoutes),
+    ...inPanelArea(retouchWorkspaceRoutes),
     {
       path: '/',
       component: AppLayout,
+      meta: { area: 'panel' },
       children: [
         ...eventRoutes,
         ...photoRoutes,
@@ -67,6 +69,8 @@ const router = createRouter({
   ],
 })
 
+// Before the auth guard: it sets the area of the first page while the guard waits for the session.
+registerUiArea(router)
 registerAuthGuard(router)
 registerStaleChunkReload(router)
 
