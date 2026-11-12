@@ -96,7 +96,7 @@ watch(
       :description="
         deliveries.length > 0
           ? 'Tus fotos están listas para descargar.'
-          : 'Tu compra quedó registrada. Encuentras tus fotos en Mis compras.'
+          : 'Tu compra quedó registrada. Encuentras tus fotos en Mis fotos.'
       "
     >
       <template #footer>
@@ -116,7 +116,7 @@ watch(
           </NButton>
         </div>
         <NButton v-else type="primary" @click="router.push({ name: ROUTE_NAMES.ACCOUNT_ORDERS })">
-          Ver mis compras
+          Ver mis fotos
         </NButton>
       </template>
     </NResult>
@@ -136,7 +136,7 @@ watch(
           Guarda esta referencia: con ella podemos encontrar tu cobro si necesitas escribirnos.
         </p>
         <NButton type="primary" @click="router.push({ name: ROUTE_NAMES.ACCOUNT_ORDERS })">
-          Ver mis compras
+          Ver mis fotos
         </NButton>
       </template>
     </NResult>

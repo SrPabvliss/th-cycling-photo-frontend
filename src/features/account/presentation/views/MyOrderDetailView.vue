@@ -76,7 +76,7 @@ const isNotFound = computed(() => isAxiosError(error.value) && error.value.respo
     <NResult v-else-if="isNotFound" status="404" title="No encontramos esa orden">
       <template #footer>
         <RouterLink :to="{ name: ACCOUNT_ROUTE_NAMES.ORDERS }">
-          <NButton>Volver a mis compras</NButton>
+          <NButton>Volver a mis fotos</NButton>
         </RouterLink>
       </template>
     </NResult>

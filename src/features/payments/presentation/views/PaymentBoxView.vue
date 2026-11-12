@@ -120,7 +120,7 @@ watch(
 
       <template v-if="failureKind === 'not-payable'">
         <NButton type="primary" size="large" block data-test="go-to-orders" @click="goToOrders">
-          Mis compras
+          Mis fotos
         </NButton>
 
         <NButton size="large" block data-test="go-to-cart" @click="goToCart">

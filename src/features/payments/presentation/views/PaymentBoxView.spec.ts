@@ -102,7 +102,7 @@ describe('PaymentBoxView', () => {
     expect(replace).not.toHaveBeenCalled()
   })
 
-  it('shows the path to Mis compras on a 422 and hides the retry button', async () => {
+  it('shows the path to Mis fotos on a 422 and hides the retry button', async () => {
     routeQuery.value = { orders: 'order-1' }
     mutate.mockImplementation(() => {
       intentError.value = {

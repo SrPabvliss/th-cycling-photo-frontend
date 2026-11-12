@@ -17,7 +17,7 @@ const hasOrders = computed(() => orders.value.length > 0)
 
 <template>
   <div class="my-orders-view">
-    <h1 class="my-orders-view__title">Mis compras</h1>
+    <h1 class="my-orders-view__title">Mis fotos</h1>
 
     <OrdersSummary v-if="isPending || hasOrders" class="my-orders-view__summary" />
 
@@ -26,7 +26,7 @@ const hasOrders = computed(() => orders.value.length > 0)
     <NResult
       v-else-if="isError"
       status="error"
-      title="No pudimos cargar tus compras"
+      title="No pudimos cargar tus fotos"
       description="Intenta de nuevo en unos segundos."
     >
       <template #footer>
