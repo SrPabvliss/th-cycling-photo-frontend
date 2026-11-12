@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { NAlert, NButton, NInput } from 'naive-ui'
 import { useIntervalFn } from '@vueuse/core'
 
-import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { ACCOUNT_ROUTE_NAMES } from '../../routes'
 import { useConfirmEmailVerification } from '../../composables/mutations/use-confirm-email-verification'
 import { useResendEmailVerification } from '../../composables/mutations/use-resend-email-verification'
@@ -157,231 +156,219 @@ function goToProfile() {
 </script>
 
 <template>
-  <PublicLayout>
-    <div class="verify-email-view">
-      <div class="verify-email-view__card">
-        <div
-          class="verify-email-view__illustration"
-          :class="{ 'is-success': screen === 'success' }"
-        >
-          <svg
-            viewBox="0 0 96 96"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-          >
-            <circle cx="48" cy="48" r="48" fill="var(--tt-primary-light)" fill-opacity="0.16" />
-            <rect
-              x="18"
-              y="30"
-              width="60"
-              height="42"
-              rx="8"
-              fill="var(--tt-surface)"
-              stroke="var(--tt-primary)"
-              stroke-width="2.5"
-            />
+  <div class="verify-email-view">
+    <div class="verify-email-view__card">
+      <div class="verify-email-view__illustration" :class="{ 'is-success': screen === 'success' }">
+        <svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="48" cy="48" r="48" fill="var(--tt-primary-light)" fill-opacity="0.16" />
+          <rect
+            x="18"
+            y="30"
+            width="60"
+            height="42"
+            rx="8"
+            fill="var(--tt-surface)"
+            stroke="var(--tt-primary)"
+            stroke-width="2.5"
+          />
+          <path
+            d="M20 34L48 55L76 34"
+            stroke="var(--tt-primary)"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <template v-if="screen === 'success'">
+            <circle cx="74" cy="26" r="16" fill="var(--tt-success)" />
             <path
-              d="M20 34L48 55L76 34"
-              stroke="var(--tt-primary)"
-              stroke-width="2.5"
+              d="M67 26L72 31L81 21"
+              stroke="white"
+              stroke-width="3"
               stroke-linecap="round"
               stroke-linejoin="round"
+              fill="none"
             />
-            <template v-if="screen === 'success'">
-              <circle cx="74" cy="26" r="16" fill="var(--tt-success)" />
-              <path
-                d="M67 26L72 31L81 21"
-                stroke="white"
-                stroke-width="3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                fill="none"
-              />
-            </template>
-          </svg>
-        </div>
-
-        <template v-if="screen === 'loading'">
-          <p class="verify-email-view__hint">Cargando el estado de tu verificación…</p>
-        </template>
-
-        <template v-else-if="screen === 'error'">
-          <h1 class="verify-email-view__title">No pudimos cargar esto</h1>
-          <p class="verify-email-view__hint">Intenta de nuevo en unos segundos.</p>
-          <NButton
-            type="primary"
-            size="large"
-            class="verify-email-view__action"
-            @click="refetchStatus()"
-          >
-            Reintentar
-          </NButton>
-        </template>
-
-        <template v-else-if="screen === 'offer'">
-          <h1 class="verify-email-view__title">Verifiquemos tu correo</h1>
-          <p class="verify-email-view__hint">
-            Ayúdanos a darte un mejor servicio: confirma tu dirección y te avisamos de tus compras
-            sin sorpresas. Te enviamos un código a tu correo registrado.
-          </p>
-          <NButton
-            type="primary"
-            size="large"
-            class="verify-email-view__action"
-            :loading="sendVerification.isPending.value"
-            @click="handleSend"
-          >
-            Enviar código
-          </NButton>
-        </template>
-
-        <template v-else-if="screen === 'form' || screen === 'expired'">
-          <h1 class="verify-email-view__title">Revisa tu correo</h1>
-          <p class="verify-email-view__target">
-            Te enviamos un código a
-            <strong>{{ status?.maskedTargetEmail }}</strong>
-          </p>
-          <NAlert
-            v-if="isChangeEmail"
-            type="warning"
-            :show-icon="true"
-            class="verify-email-view__warning"
-          >
-            Al confirmar este código, esa dirección pasa a ser con la que inicias sesión y la
-            anterior deja de servir. Hasta entonces sigues entrando con la de siempre.
-          </NAlert>
-
-          <template v-if="screen === 'expired'">
-            <p class="verify-email-view__hint is-warning">El código venció.</p>
-            <NButton
-              type="primary"
-              size="large"
-              class="verify-email-view__action"
-              :loading="resendVerification.isPending.value"
-              @click="handleResend"
-            >
-              Reenviar código
-            </NButton>
           </template>
-
-          <template v-else>
-            <NInput
-              class="verify-email-view__code-input"
-              :value="code"
-              maxlength="6"
-              placeholder="000000"
-              :input-props="{
-                inputmode: 'numeric',
-                autocomplete: 'one-time-code',
-                pattern: '[0-9]*',
-              }"
-              @update:value="onCodeInput"
-            />
-            <p class="verify-email-view__hint">Vence en {{ expiryLabel }}</p>
-            <p v-if="justResent" class="verify-email-view__notice">
-              Te enviamos un código nuevo: el anterior ya no sirve, usa el del correo más reciente.
-            </p>
-
-            <NButton
-              type="primary"
-              size="large"
-              class="verify-email-view__action"
-              :disabled="!canConfirm"
-              :loading="confirmVerification.isPending.value"
-              @click="handleConfirm"
-            >
-              Confirmar código
-            </NButton>
-
-            <p
-              v-if="isChangeEmail && confirmVerification.isError.value"
-              class="verify-email-view__escape"
-            >
-              <a href="#" @click.prevent="goToProfile">Volver al perfil</a> para intentar con otra
-              dirección.
-            </p>
-
-            <NButton
-              size="large"
-              class="verify-email-view__action"
-              :disabled="!canResend"
-              :loading="resendVerification.isPending.value"
-              @click="handleResend"
-            >
-              {{ canResend ? 'Reenviar código' : `Reenviar en ${cooldownSeconds}s` }}
-            </NButton>
-          </template>
-
-          <p class="verify-email-view__support">
-            ¿No te llega?
-            <a :href="`mailto:${CONTACT_EMAIL}`">Escríbenos</a>
-          </p>
-        </template>
-
-        <template v-else-if="screen === 'exhausted'">
-          <h1 class="verify-email-view__title">Se agotaron los intentos</h1>
-          <p v-if="exhaustedForChangeEmail" class="verify-email-view__hint">
-            Vuelve al perfil para pedir de nuevo el cambio de correo.
-          </p>
-          <p v-else class="verify-email-view__hint">
-            Pide un código nuevo para volver a intentarlo.
-          </p>
-
-          <NButton
-            v-if="exhaustedForChangeEmail"
-            type="primary"
-            size="large"
-            class="verify-email-view__action"
-            @click="goToProfile"
-          >
-            Volver al perfil
-          </NButton>
-          <NButton
-            v-else
-            type="primary"
-            size="large"
-            class="verify-email-view__action"
-            :loading="sendVerification.isPending.value"
-            @click="handleSend"
-          >
-            Pedir código nuevo
-          </NButton>
-
-          <p class="verify-email-view__support">
-            ¿No te llega?
-            <a :href="`mailto:${CONTACT_EMAIL}`">Escríbenos</a>
-          </p>
-        </template>
-
-        <template v-else-if="screen === 'success'">
-          <h1 class="verify-email-view__title">Listo, verificamos tu correo</h1>
-          <p class="verify-email-view__hint">
-            {{
-              isReturningToContract
-                ? 'Gracias por confirmarlo. Ya puedes volver a tu contrato para aceptarlo.'
-                : 'Gracias por confirmarlo. Ya puedes volver a tu perfil.'
-            }}
-          </p>
-          <NButton
-            type="primary"
-            size="large"
-            class="verify-email-view__action"
-            data-test="verify-continue"
-            @click="continueAfterVerification"
-          >
-            {{
-              isReturningToContract
-                ? 'Volver al contrato'
-                : returnPath
-                  ? 'Continuar'
-                  : 'Volver al perfil'
-            }}
-          </NButton>
-        </template>
+        </svg>
       </div>
+
+      <template v-if="screen === 'loading'">
+        <p class="verify-email-view__hint">Cargando el estado de tu verificación…</p>
+      </template>
+
+      <template v-else-if="screen === 'error'">
+        <h1 class="verify-email-view__title">No pudimos cargar esto</h1>
+        <p class="verify-email-view__hint">Intenta de nuevo en unos segundos.</p>
+        <NButton
+          type="primary"
+          size="large"
+          class="verify-email-view__action"
+          @click="refetchStatus()"
+        >
+          Reintentar
+        </NButton>
+      </template>
+
+      <template v-else-if="screen === 'offer'">
+        <h1 class="verify-email-view__title">Verifiquemos tu correo</h1>
+        <p class="verify-email-view__hint">
+          Ayúdanos a darte un mejor servicio: confirma tu dirección y te avisamos de tus compras sin
+          sorpresas. Te enviamos un código a tu correo registrado.
+        </p>
+        <NButton
+          type="primary"
+          size="large"
+          class="verify-email-view__action"
+          :loading="sendVerification.isPending.value"
+          @click="handleSend"
+        >
+          Enviar código
+        </NButton>
+      </template>
+
+      <template v-else-if="screen === 'form' || screen === 'expired'">
+        <h1 class="verify-email-view__title">Revisa tu correo</h1>
+        <p class="verify-email-view__target">
+          Te enviamos un código a
+          <strong>{{ status?.maskedTargetEmail }}</strong>
+        </p>
+        <NAlert
+          v-if="isChangeEmail"
+          type="warning"
+          :show-icon="true"
+          class="verify-email-view__warning"
+        >
+          Al confirmar este código, esa dirección pasa a ser con la que inicias sesión y la anterior
+          deja de servir. Hasta entonces sigues entrando con la de siempre.
+        </NAlert>
+
+        <template v-if="screen === 'expired'">
+          <p class="verify-email-view__hint is-warning">El código venció.</p>
+          <NButton
+            type="primary"
+            size="large"
+            class="verify-email-view__action"
+            :loading="resendVerification.isPending.value"
+            @click="handleResend"
+          >
+            Reenviar código
+          </NButton>
+        </template>
+
+        <template v-else>
+          <NInput
+            class="verify-email-view__code-input"
+            :value="code"
+            maxlength="6"
+            placeholder="000000"
+            :input-props="{
+              inputmode: 'numeric',
+              autocomplete: 'one-time-code',
+              pattern: '[0-9]*',
+            }"
+            @update:value="onCodeInput"
+          />
+          <p class="verify-email-view__hint">Vence en {{ expiryLabel }}</p>
+          <p v-if="justResent" class="verify-email-view__notice">
+            Te enviamos un código nuevo: el anterior ya no sirve, usa el del correo más reciente.
+          </p>
+
+          <NButton
+            type="primary"
+            size="large"
+            class="verify-email-view__action"
+            :disabled="!canConfirm"
+            :loading="confirmVerification.isPending.value"
+            @click="handleConfirm"
+          >
+            Confirmar código
+          </NButton>
+
+          <p
+            v-if="isChangeEmail && confirmVerification.isError.value"
+            class="verify-email-view__escape"
+          >
+            <a href="#" @click.prevent="goToProfile">Volver al perfil</a> para intentar con otra
+            dirección.
+          </p>
+
+          <NButton
+            size="large"
+            class="verify-email-view__action"
+            :disabled="!canResend"
+            :loading="resendVerification.isPending.value"
+            @click="handleResend"
+          >
+            {{ canResend ? 'Reenviar código' : `Reenviar en ${cooldownSeconds}s` }}
+          </NButton>
+        </template>
+
+        <p class="verify-email-view__support">
+          ¿No te llega?
+          <a :href="`mailto:${CONTACT_EMAIL}`">Escríbenos</a>
+        </p>
+      </template>
+
+      <template v-else-if="screen === 'exhausted'">
+        <h1 class="verify-email-view__title">Se agotaron los intentos</h1>
+        <p v-if="exhaustedForChangeEmail" class="verify-email-view__hint">
+          Vuelve al perfil para pedir de nuevo el cambio de correo.
+        </p>
+        <p v-else class="verify-email-view__hint">Pide un código nuevo para volver a intentarlo.</p>
+
+        <NButton
+          v-if="exhaustedForChangeEmail"
+          type="primary"
+          size="large"
+          class="verify-email-view__action"
+          @click="goToProfile"
+        >
+          Volver al perfil
+        </NButton>
+        <NButton
+          v-else
+          type="primary"
+          size="large"
+          class="verify-email-view__action"
+          :loading="sendVerification.isPending.value"
+          @click="handleSend"
+        >
+          Pedir código nuevo
+        </NButton>
+
+        <p class="verify-email-view__support">
+          ¿No te llega?
+          <a :href="`mailto:${CONTACT_EMAIL}`">Escríbenos</a>
+        </p>
+      </template>
+
+      <template v-else-if="screen === 'success'">
+        <h1 class="verify-email-view__title">Listo, verificamos tu correo</h1>
+        <p class="verify-email-view__hint">
+          {{
+            isReturningToContract
+              ? 'Gracias por confirmarlo. Ya puedes volver a tu contrato para aceptarlo.'
+              : 'Gracias por confirmarlo. Ya puedes volver a tu perfil.'
+          }}
+        </p>
+        <NButton
+          type="primary"
+          size="large"
+          class="verify-email-view__action"
+          data-test="verify-continue"
+          @click="continueAfterVerification"
+        >
+          {{
+            isReturningToContract
+              ? 'Volver al contrato'
+              : returnPath
+                ? 'Continuar'
+                : 'Volver al perfil'
+          }}
+        </NButton>
+      </template>
     </div>
-  </PublicLayout>
+  </div>
 </template>
 
 <style scoped src="./styles/verify-email-view.css"></style>

@@ -5,7 +5,6 @@ import { NButton, NIcon, NPopconfirm, NResult, NSkeleton } from 'naive-ui'
 import { CloudDownloadOutline } from '@vicons/ionicons5'
 import { isAxiosError } from 'axios'
 
-import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
 import { ACCOUNT_ROUTE_NAMES } from '../../routes'
 import { useMyOrderDetailQuery } from '../../composables/queries/use-my-order-detail'
@@ -71,93 +70,91 @@ const isNotFound = computed(() => isAxiosError(error.value) && error.value.respo
 </script>
 
 <template>
-  <PublicLayout>
-    <div class="my-order-detail-view">
-      <NSkeleton v-if="isPending" text :repeat="4" />
+  <div class="my-order-detail-view">
+    <NSkeleton v-if="isPending" text :repeat="4" />
 
-      <NResult v-else-if="isNotFound" status="404" title="No encontramos esa orden">
-        <template #footer>
-          <RouterLink :to="{ name: ACCOUNT_ROUTE_NAMES.ORDERS }">
-            <NButton>Volver a mis compras</NButton>
-          </RouterLink>
-        </template>
-      </NResult>
-
-      <NResult
-        v-else-if="isError"
-        status="error"
-        title="No pudimos cargar tu compra"
-        description="Intenta de nuevo en unos segundos."
-      >
-        <template #footer>
-          <NButton @click="refetch()">Reintentar</NButton>
-        </template>
-      </NResult>
-
-      <template v-else-if="order">
-        <OrderDetailHeader :order="order" />
-
-        <div v-if="order.canDownload || order.canCancel" class="my-order-detail-view__actions">
-          <NButton
-            v-if="order.canDownload"
-            type="primary"
-            size="large"
-            :loading="isDownloadingAll"
-            :disabled="isDownloadingAll"
-            @click="downloadAll()"
-          >
-            <template #icon><NIcon :component="CloudDownloadOutline" /></template>
-            Descargar todas
-          </NButton>
-
-          <NPopconfirm v-if="order.canCancel" @positive-click="cancelOrder.mutate(orderId)">
-            <template #trigger>
-              <NButton type="error" secondary size="large" :loading="cancelOrder.isPending.value">
-                Cancelar orden
-              </NButton>
-            </template>
-            ¿Seguro que quieres cancelar esta orden?
-          </NPopconfirm>
-        </div>
-
-        <InvoiceCard
-          v-if="order.invoice"
-          class="my-order-detail-view__invoice"
-          :invoice="order.invoice"
-          audience="buyer"
-          :busy-key="invoiceBusyKey"
-          @download="(docId, file) => downloadTaxDocument.mutate({ docId, file })"
-          @correct="openCorrection"
-        />
-
-        <BillingSheet
-          v-if="isCorrecting && billingInitial"
-          title="Corregir datos de facturación"
-          @close="isCorrecting = false"
-        >
-          <BillingAccountForm
-            mode="correct"
-            :needs-consent="false"
-            :prefill="{ legalName: billingInitial.legalName, email: billingInitial.email }"
-            :initial="billingInitial"
-            submit-label="Enviar corrección"
-            :submitting="correctBilling.isPending.value"
-            :server-error="correctionError"
-            @submit="submitCorrection"
-            @cancel="isCorrecting = false"
-          />
-        </BillingSheet>
-
-        <OrderPhotoGrid
-          class="my-order-detail-view__photos"
-          :photos="order.photos"
-          :can-download="order.canDownload"
-          :downloading-photo-id="downloadingPhotoId"
-          @download="downloadOne"
-        />
+    <NResult v-else-if="isNotFound" status="404" title="No encontramos esa orden">
+      <template #footer>
+        <RouterLink :to="{ name: ACCOUNT_ROUTE_NAMES.ORDERS }">
+          <NButton>Volver a mis compras</NButton>
+        </RouterLink>
       </template>
-    </div>
-  </PublicLayout>
+    </NResult>
+
+    <NResult
+      v-else-if="isError"
+      status="error"
+      title="No pudimos cargar tu compra"
+      description="Intenta de nuevo en unos segundos."
+    >
+      <template #footer>
+        <NButton @click="refetch()">Reintentar</NButton>
+      </template>
+    </NResult>
+
+    <template v-else-if="order">
+      <OrderDetailHeader :order="order" />
+
+      <div v-if="order.canDownload || order.canCancel" class="my-order-detail-view__actions">
+        <NButton
+          v-if="order.canDownload"
+          type="primary"
+          size="large"
+          :loading="isDownloadingAll"
+          :disabled="isDownloadingAll"
+          @click="downloadAll()"
+        >
+          <template #icon><NIcon :component="CloudDownloadOutline" /></template>
+          Descargar todas
+        </NButton>
+
+        <NPopconfirm v-if="order.canCancel" @positive-click="cancelOrder.mutate(orderId)">
+          <template #trigger>
+            <NButton type="error" secondary size="large" :loading="cancelOrder.isPending.value">
+              Cancelar orden
+            </NButton>
+          </template>
+          ¿Seguro que quieres cancelar esta orden?
+        </NPopconfirm>
+      </div>
+
+      <InvoiceCard
+        v-if="order.invoice"
+        class="my-order-detail-view__invoice"
+        :invoice="order.invoice"
+        audience="buyer"
+        :busy-key="invoiceBusyKey"
+        @download="(docId, file) => downloadTaxDocument.mutate({ docId, file })"
+        @correct="openCorrection"
+      />
+
+      <BillingSheet
+        v-if="isCorrecting && billingInitial"
+        title="Corregir datos de facturación"
+        @close="isCorrecting = false"
+      >
+        <BillingAccountForm
+          mode="correct"
+          :needs-consent="false"
+          :prefill="{ legalName: billingInitial.legalName, email: billingInitial.email }"
+          :initial="billingInitial"
+          submit-label="Enviar corrección"
+          :submitting="correctBilling.isPending.value"
+          :server-error="correctionError"
+          @submit="submitCorrection"
+          @cancel="isCorrecting = false"
+        />
+      </BillingSheet>
+
+      <OrderPhotoGrid
+        class="my-order-detail-view__photos"
+        :photos="order.photos"
+        :can-download="order.canDownload"
+        :downloading-photo-id="downloadingPhotoId"
+        @download="downloadOne"
+      />
+    </template>
+  </div>
 </template>
 
 <style scoped src="./styles/my-order-detail-view.css"></style>

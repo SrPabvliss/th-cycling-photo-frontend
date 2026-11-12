@@ -9,10 +9,6 @@ vi.mock('vue-router', () => ({
   useRoute: () => ({ query: routeQuery }),
 }))
 
-vi.mock('@/core/layout/public/PublicLayout.vue', () => ({
-  default: { name: 'PublicLayout', template: '<div><slot /></div>' },
-}))
-
 vi.mock('@vueuse/core', () => ({
   useIntervalFn: () => ({ pause: vi.fn(), resume: vi.fn() }),
 }))

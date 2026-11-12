@@ -203,14 +203,6 @@ function advance() {
 </template>
 
 <style>
-/* The app locks the document scroll for the panel; this page is a plain scrolling document. */
-html:has(.ui-sample),
-html:has(.ui-sample) body,
-html:has(.ui-sample) #app {
-  overflow: visible;
-  height: auto;
-}
-
 .ui-sample__modal {
   max-inline-size: var(--tt-drawer-width);
 }

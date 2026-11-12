@@ -5,7 +5,6 @@ import { NAlert, NButton, NIcon, NSpin } from 'naive-ui'
 import { ChevronBackOutline } from '@vicons/ionicons5'
 import { isAxiosError } from 'axios'
 
-import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { ROUTE_NAMES } from '@/core/navigation/route-names'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { useCreatePaymentIntent } from '@/features/payments/composables/mutations/use-create-payment-intent'
@@ -98,73 +97,71 @@ watch(
 </script>
 
 <template>
-  <PublicLayout>
-    <section v-if="orderIds.length > 0" class="payment-box-view">
-      <header class="payment-box-view__header">
-        <NButton quaternary size="small" data-test="back-to-cart" @click="goToCart">
-          <template #icon><NIcon :component="ChevronBackOutline" /></template>
-          Volver al carrito
+  <section v-if="orderIds.length > 0" class="payment-box-view">
+    <header class="payment-box-view__header">
+      <NButton quaternary size="small" data-test="back-to-cart" @click="goToCart">
+        <template #icon><NIcon :component="ChevronBackOutline" /></template>
+        Volver al carrito
+      </NButton>
+
+      <div class="payment-box-view__heading">
+        <h1 class="payment-box-view__title">Pagar con tarjeta</h1>
+
+        <p v-if="amount" class="payment-box-view__amount">
+          {{ formatCurrency(amount.amountCents / 100, amount.currency) }}
+        </p>
+      </div>
+    </header>
+
+    <template v-if="failureKind">
+      <NAlert type="error" :show-icon="true" class="payment-box-view__error">
+        {{ failureMessage }}
+      </NAlert>
+
+      <template v-if="failureKind === 'not-payable'">
+        <NButton type="primary" size="large" block data-test="go-to-orders" @click="goToOrders">
+          Mis compras
         </NButton>
 
-        <div class="payment-box-view__heading">
-          <h1 class="payment-box-view__title">Pagar con tarjeta</h1>
-
-          <p v-if="amount" class="payment-box-view__amount">
-            {{ formatCurrency(amount.amountCents / 100, amount.currency) }}
-          </p>
-        </div>
-      </header>
-
-      <template v-if="failureKind">
-        <NAlert type="error" :show-icon="true" class="payment-box-view__error">
-          {{ failureMessage }}
-        </NAlert>
-
-        <template v-if="failureKind === 'not-payable'">
-          <NButton type="primary" size="large" block data-test="go-to-orders" @click="goToOrders">
-            Mis compras
-          </NButton>
-
-          <NButton size="large" block data-test="go-to-cart" @click="goToCart">
-            Volver al carrito
-          </NButton>
-        </template>
-
-        <NButton
-          v-else-if="failureKind === 'forbidden'"
-          type="primary"
-          size="large"
-          block
-          data-test="go-to-cart"
-          @click="goToCart"
-        >
+        <NButton size="large" block data-test="go-to-cart" @click="goToCart">
           Volver al carrito
-        </NButton>
-
-        <NButton
-          v-else
-          type="primary"
-          size="large"
-          block
-          data-test="retry"
-          :loading="isCreatingIntent"
-          :disabled="isCreatingIntent"
-          @click="retry"
-        >
-          Reintentar
         </NButton>
       </template>
 
-      <component
-        :is="gateway.checkoutComponent"
-        v-else-if="gateway && intent"
-        :intent="intent"
-        @setup-failed="handleSetupFailed"
-      />
+      <NButton
+        v-else-if="failureKind === 'forbidden'"
+        type="primary"
+        size="large"
+        block
+        data-test="go-to-cart"
+        @click="goToCart"
+      >
+        Volver al carrito
+      </NButton>
 
-      <NSpin v-else size="small" class="payment-box-view__loading" />
-    </section>
-  </PublicLayout>
+      <NButton
+        v-else
+        type="primary"
+        size="large"
+        block
+        data-test="retry"
+        :loading="isCreatingIntent"
+        :disabled="isCreatingIntent"
+        @click="retry"
+      >
+        Reintentar
+      </NButton>
+    </template>
+
+    <component
+      :is="gateway.checkoutComponent"
+      v-else-if="gateway && intent"
+      :intent="intent"
+      @setup-failed="handleSetupFailed"
+    />
+
+    <NSpin v-else size="small" class="payment-box-view__loading" />
+  </section>
 </template>
 
 <style scoped src="./payment-box-view.css" />

@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { NEmpty, NIcon, NSpin } from 'naive-ui'
 import { ArrowBack } from '@vicons/ionicons5'
 
-import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { formatDate } from '@/shared/utils/date.utils'
 import { getAssetPresetUrl } from '@/shared/utils/cdn.utils'
 import { useCartStore } from '@/shared/stores/cart.store'
@@ -130,135 +129,133 @@ const heroUrl = computed(() => {
 </script>
 
 <template>
-  <PublicLayout :hide-footer="true">
-    <div v-if="isEventPending" class="gallery-loading">
-      <NSpin size="large" />
-    </div>
+  <div v-if="isEventPending" class="gallery-loading">
+    <NSpin size="large" />
+  </div>
 
-    <template v-else-if="event">
-      <!-- Hero -->
-      <div class="gallery-hero" :style="heroUrl ? { backgroundImage: `url(${heroUrl})` } : {}">
-        <div class="gallery-hero__overlay">
-          <div class="gallery-hero__content">
-            <button
-              class="gallery-hero__back"
-              @click="router.push({ name: PUBLIC_GALLERY_ROUTE_NAMES.EVENT_LIST })"
-            >
-              <NIcon :component="ArrowBack" :size="18" />
-            </button>
-            <h1 class="gallery-hero__title">{{ event.name }}</h1>
-            <p class="gallery-hero__owner">Fotos de {{ event.ownerName }}</p>
-            <p class="gallery-hero__meta">
-              <template v-if="event.startDate.getTime() === event.endDate.getTime()">
-                {{ formatDate(event.startDate) }}
-              </template>
-              <template v-else>
-                {{ formatDate(event.startDate) }} – {{ formatDate(event.endDate) }}
-              </template>
-              <span v-if="event.cantonName || event.provinceName">
-                · {{ [event.cantonName, event.provinceName].filter(Boolean).join(', ') }}
-              </span>
-              · {{ event.photoCount }} fotos
-            </p>
-          </div>
+  <template v-else-if="event">
+    <!-- Hero -->
+    <div class="gallery-hero" :style="heroUrl ? { backgroundImage: `url(${heroUrl})` } : {}">
+      <div class="gallery-hero__overlay">
+        <div class="gallery-hero__content">
+          <button
+            class="gallery-hero__back"
+            @click="router.push({ name: PUBLIC_GALLERY_ROUTE_NAMES.EVENT_LIST })"
+          >
+            <NIcon :component="ArrowBack" :size="18" />
+          </button>
+          <h1 class="gallery-hero__title">{{ event.name }}</h1>
+          <p class="gallery-hero__owner">Fotos de {{ event.ownerName }}</p>
+          <p class="gallery-hero__meta">
+            <template v-if="event.startDate.getTime() === event.endDate.getTime()">
+              {{ formatDate(event.startDate) }}
+            </template>
+            <template v-else>
+              {{ formatDate(event.startDate) }} – {{ formatDate(event.endDate) }}
+            </template>
+            <span v-if="event.cantonName || event.provinceName">
+              · {{ [event.cantonName, event.provinceName].filter(Boolean).join(', ') }}
+            </span>
+            · {{ event.photoCount }} fotos
+          </p>
         </div>
       </div>
+    </div>
 
-      <div class="gallery-body">
-        <PublicGalleryFilterBar
-          class="gallery-filter-bar"
-          :categories="event.photoCategories"
-          :selected-category-id="activeCategoryId"
-          :bib-number="bibNumber"
-          :bib-match="bibMatch"
-          @update:selected-category-id="activeCategoryId = $event"
-          @update:bib-number="bibNumber = $event"
-          @update:bib-match="bibMatch = $event"
-        />
+    <div class="gallery-body">
+      <PublicGalleryFilterBar
+        class="gallery-filter-bar"
+        :categories="event.photoCategories"
+        :selected-category-id="activeCategoryId"
+        :bib-number="bibNumber"
+        :bib-match="bibMatch"
+        @update:selected-category-id="activeCategoryId = $event"
+        @update:bib-number="bibNumber = $event"
+        @update:bib-match="bibMatch = $event"
+      />
 
-        <div v-if="isPhotosPending && allPhotos.length === 0" class="gallery-loading--tight">
-          <NSpin />
-        </div>
+      <div v-if="isPhotosPending && allPhotos.length === 0" class="gallery-loading--tight">
+        <NSpin />
+      </div>
 
-        <!-- Bib search mode: two physically separate sections so the rider
+      <!-- Bib search mode: two physically separate sections so the rider
              can scan their matched photos first, then optionally browse
              the photos where no bib was detected. -->
-        <template v-else-if="bibSearchActive">
-          <section class="gallery-section">
-            <p v-if="matchedPhotos.length === 0" class="gallery-section__empty">
-              No encontramos fotos donde se vea esa placa.
-            </p>
-            <PhotoGridSection
-              v-else
-              :photos="matchedPhotos"
-              :selected-ids="selectedIds"
-              :base-index="0"
-              :has-more="hasNextPage"
-              :is-loading-more="isFetchingNextPage"
-              @toggle="toggleSelect"
-              @preview="openPreview"
-              @load-more="handleLoadMore"
-            />
-          </section>
-
-          <div v-if="showNoBibSection" class="gallery-divider">
-            <div class="gallery-divider__line" />
-            <div class="gallery-divider__msg">
-              <strong>También puedes buscarte aquí.</strong>
-              <span>Mostramos fotos donde no detectamos placa.</span>
-            </div>
-            <div class="gallery-divider__line" />
-          </div>
-
-          <section v-if="showNoBibSection" class="gallery-section">
-            <PhotoGridSection
-              :photos="noBibPhotos"
-              :selected-ids="selectedIds"
-              :base-index="matchedPhotos.length"
-              :has-more="hasNextNoBibPage"
-              :is-loading-more="isFetchingNextNoBibPage"
-              @toggle="toggleSelect"
-              @preview="openPreview"
-              @load-more="handleLoadMoreNoBib"
-            />
-          </section>
-
-          <NEmpty
-            v-if="matchedPhotos.length === 0 && !showNoBibSection"
-            description="No encontramos resultados"
-            style="padding: 40px 0"
-          />
-        </template>
-
-        <!-- Default mode (no bib search): keep the existing virtualized
-             grid for performance on full-event browsing. -->
-        <template v-else-if="allPhotos.length > 0">
-          <PublicPhotoGrid
-            :photos="allPhotos"
+      <template v-else-if="bibSearchActive">
+        <section class="gallery-section">
+          <p v-if="matchedPhotos.length === 0" class="gallery-section__empty">
+            No encontramos fotos donde se vea esa placa.
+          </p>
+          <PhotoGridSection
+            v-else
+            :photos="matchedPhotos"
             :selected-ids="selectedIds"
+            :base-index="0"
+            :has-more="hasNextPage"
+            :is-loading-more="isFetchingNextPage"
             @toggle="toggleSelect"
             @preview="openPreview"
             @load-more="handleLoadMore"
           />
-        </template>
+        </section>
 
-        <NEmpty v-else description="No hay fotos disponibles" style="padding: 40px 0" />
-      </div>
-    </template>
+        <div v-if="showNoBibSection" class="gallery-divider">
+          <div class="gallery-divider__line" />
+          <div class="gallery-divider__msg">
+            <strong>También puedes buscarte aquí.</strong>
+            <span>Mostramos fotos donde no detectamos placa.</span>
+          </div>
+          <div class="gallery-divider__line" />
+        </div>
 
-    <!-- Lightbox -->
-    <PhotoLightbox
-      :photos="allPhotos"
-      :initial-index="lightboxIndex"
-      :show="showLightbox"
-      :selected-ids="selectedIds"
-      actions="select"
-      :paginated="true"
-      @update:show="showLightbox = $event"
-      @toggle="toggleSelect"
-      @load-more="handleLoadMore"
-    />
-  </PublicLayout>
+        <section v-if="showNoBibSection" class="gallery-section">
+          <PhotoGridSection
+            :photos="noBibPhotos"
+            :selected-ids="selectedIds"
+            :base-index="matchedPhotos.length"
+            :has-more="hasNextNoBibPage"
+            :is-loading-more="isFetchingNextNoBibPage"
+            @toggle="toggleSelect"
+            @preview="openPreview"
+            @load-more="handleLoadMoreNoBib"
+          />
+        </section>
+
+        <NEmpty
+          v-if="matchedPhotos.length === 0 && !showNoBibSection"
+          description="No encontramos resultados"
+          style="padding: 40px 0"
+        />
+      </template>
+
+      <!-- Default mode (no bib search): keep the existing virtualized
+             grid for performance on full-event browsing. -->
+      <template v-else-if="allPhotos.length > 0">
+        <PublicPhotoGrid
+          :photos="allPhotos"
+          :selected-ids="selectedIds"
+          @toggle="toggleSelect"
+          @preview="openPreview"
+          @load-more="handleLoadMore"
+        />
+      </template>
+
+      <NEmpty v-else description="No hay fotos disponibles" style="padding: 40px 0" />
+    </div>
+  </template>
+
+  <!-- Lightbox -->
+  <PhotoLightbox
+    :photos="allPhotos"
+    :initial-index="lightboxIndex"
+    :show="showLightbox"
+    :selected-ids="selectedIds"
+    actions="select"
+    :paginated="true"
+    @update:show="showLightbox = $event"
+    @toggle="toggleSelect"
+    @load-more="handleLoadMore"
+  />
 </template>
 
 <style scoped src="./styles/public-event-gallery-view.css" />

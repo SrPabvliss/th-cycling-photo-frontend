@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 import AppLayout from '@/core/layout/AppLayout.vue'
+import ClientLayout from '@/core/layout/client/ClientLayout.vue'
 import { registerAuthGuard } from '@/core/guards/auth.guard'
 import { registerRouteProgress } from '@/core/navigation/route-progress'
 import { registerStaleChunkReload } from '@/core/navigation/stale-chunk-reload'
@@ -35,16 +36,22 @@ const router = createRouter({
     return { top: 0 }
   },
   routes: [
-    ...landingRoutes,
-    ...legalRoutes,
-    ...authRoutes,
-    ...publicGalleryRoutes,
-    ...accountRoutes,
-    ...cartRoutes,
-    ...paymentRoutes,
-    ...clientGalleryRoutes,
-    ...deliveryRoutes,
-    ...standaloneRoutes,
+    {
+      path: '/',
+      component: ClientLayout,
+      children: [
+        ...landingRoutes,
+        ...legalRoutes,
+        ...authRoutes,
+        ...publicGalleryRoutes,
+        ...accountRoutes,
+        ...cartRoutes,
+        ...paymentRoutes,
+        ...clientGalleryRoutes,
+        ...deliveryRoutes,
+        ...standaloneRoutes,
+      ],
+    },
     ...inPanelArea(reviewRoutes),
     ...inPanelArea(retouchWorkspaceRoutes),
     {

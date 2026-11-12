@@ -4,7 +4,6 @@ import { useRoute } from 'vue-router'
 import { NButton, NIcon, NSpin } from 'naive-ui'
 import { DownloadOutline } from '@vicons/ionicons5'
 
-import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { useDeliveryQuery } from '../../composables/queries/use-delivery'
 import { usePhotoDownload } from '../../composables/use-photo-download'
 import type { IDeliveryPhoto } from '../../types/responses/delivery-data.response'
@@ -39,34 +38,32 @@ async function handleDownloadAll() {
 </script>
 
 <template>
-  <PublicLayout>
-    <div v-if="isPending" class="dv-loading">
-      <NSpin size="large" />
-      <p class="dv-loading__text">Cargando tus fotos...</p>
+  <div v-if="isPending" class="dv-loading">
+    <NSpin size="large" />
+    <p class="dv-loading__text">Cargando tus fotos...</p>
+  </div>
+
+  <DeliveryExpired v-else-if="isExpired" />
+
+  <PreviewNotFound v-else-if="isNotFound" />
+
+  <template v-else-if="delivery">
+    <DeliveryHeader :delivery="delivery" />
+
+    <!-- Download all bar -->
+    <div class="dv-actions">
+      <NButton type="primary" size="large" :loading="isDownloadingAll" @click="handleDownloadAll">
+        <template #icon><NIcon :component="DownloadOutline" /></template>
+        {{
+          isDownloadingAll
+            ? `Descargando ${downloadProgress} de ${downloadTotal}...`
+            : 'Descargar todas'
+        }}
+      </NButton>
     </div>
 
-    <DeliveryExpired v-else-if="isExpired" />
-
-    <PreviewNotFound v-else-if="isNotFound" />
-
-    <template v-else-if="delivery">
-      <DeliveryHeader :delivery="delivery" />
-
-      <!-- Download all bar -->
-      <div class="dv-actions">
-        <NButton type="primary" size="large" :loading="isDownloadingAll" @click="handleDownloadAll">
-          <template #icon><NIcon :component="DownloadOutline" /></template>
-          {{
-            isDownloadingAll
-              ? `Descargando ${downloadProgress} de ${downloadTotal}...`
-              : 'Descargar todas'
-          }}
-        </NButton>
-      </div>
-
-      <DeliveryPhotoGrid :photos="delivery.photos" @download="handleDownload" />
-    </template>
-  </PublicLayout>
+    <DeliveryPhotoGrid :photos="delivery.photos" @download="handleDownload" />
+  </template>
 </template>
 
 <style scoped src="./delivery-view.css" />

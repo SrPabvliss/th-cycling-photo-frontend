@@ -13,10 +13,6 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({ push, replace }),
 }))
 
-vi.mock('@/core/layout/public/PublicLayout.vue', () => ({
-  default: { name: 'PublicLayout', template: '<div><slot /></div>' },
-}))
-
 const mutate = vi.fn()
 const intentData = ref<{ provider: string; payload: Record<string, unknown> } | undefined>(
   undefined,

@@ -4,7 +4,6 @@ import { useRouter, useRoute } from 'vue-router'
 import { NAlert, NCard } from 'naive-ui'
 
 import { getHomePath } from '@/core/auth/role-config'
-import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import TitanLogo from '@/core/layout/public/TitanLogo.vue'
 import AuthModeTabs from '../components/AuthModeTabs/AuthModeTabs.vue'
 import { useAuth } from '../../composables/use-auth'
@@ -30,25 +29,23 @@ async function handleSubmit(formData: IRegisterFormData) {
 </script>
 
 <template>
-  <PublicLayout>
-    <div class="register-page">
-      <NCard class="register-card">
-        <div class="register-header">
-          <TitanLogo :size="56" />
-          <h1 class="register-title">Crear cuenta</h1>
-          <p class="register-subtitle">Regístrate para solicitar tus fotos de competencia.</p>
-        </div>
+  <div class="register-page">
+    <NCard class="register-card">
+      <div class="register-header">
+        <TitanLogo :size="56" />
+        <h1 class="register-title">Crear cuenta</h1>
+        <p class="register-subtitle">Regístrate para solicitar tus fotos de competencia.</p>
+      </div>
 
-        <AuthModeTabs mode="register" :redirect="redirectQuery" />
+      <AuthModeTabs mode="register" :redirect="redirectQuery" />
 
-        <NAlert v-if="showCheckoutNotice" type="info" :show-icon="true" style="margin-bottom: 16px">
-          Crea tu cuenta para completar tu pedido.
-        </NAlert>
+      <NAlert v-if="showCheckoutNotice" type="info" :show-icon="true" style="margin-bottom: 16px">
+        Crea tu cuenta para completar tu pedido.
+      </NAlert>
 
-        <RegisterForm :is-submitting="isRegistering" @submit="handleSubmit" />
-      </NCard>
-    </div>
-  </PublicLayout>
+      <RegisterForm :is-submitting="isRegistering" @submit="handleSubmit" />
+    </NCard>
+  </div>
 </template>
 
 <style scoped>

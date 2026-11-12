@@ -3,7 +3,6 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton, NResult, NSpin } from 'naive-ui'
 
-import PublicLayout from '@/core/layout/public/PublicLayout.vue'
 import { ROUTE_NAMES } from '@/core/navigation/route-names'
 import { useConfirmPayment } from '../../composables/mutations/use-confirm-payment'
 import { usePaymentTransactionQuery } from '../../composables/queries/use-payment-transaction'
@@ -87,104 +86,100 @@ watch(
 </script>
 
 <template>
-  <PublicLayout>
-    <div class="payment-return">
-      <NSpin v-if="state === 'confirming' || isLeavingForDelivery" size="large" />
+  <div class="payment-return">
+    <NSpin v-if="state === 'confirming' || isLeavingForDelivery" size="large" />
 
-      <NResult
-        v-else-if="state === 'approved'"
-        status="success"
-        title="¡Pago confirmado!"
-        :description="
-          deliveries.length > 0
-            ? 'Tus fotos están listas para descargar.'
-            : 'Tu compra quedó registrada. Encuentras tus fotos en Mis compras.'
-        "
-      >
-        <template #footer>
-          <div v-if="deliveries.length > 0" class="payment-return__deliveries">
-            <NButton
-              v-for="delivery in deliveries"
-              :key="delivery.orderId"
-              type="primary"
-              @click="
-                router.push({
-                  name: ROUTE_NAMES.DELIVERY,
-                  params: { token: delivery.token },
-                })
-              "
-            >
-              Descargar fotos de {{ delivery.eventName }}
-            </NButton>
-          </div>
-          <NButton v-else type="primary" @click="router.push({ name: ROUTE_NAMES.ACCOUNT_ORDERS })">
-            Ver mis compras
-          </NButton>
-        </template>
-      </NResult>
-
-      <NResult
-        v-else-if="state === 'unsettled'"
-        status="warning"
-        title="Cobramos tu pago, pero falta entregarte las fotos"
-        description="El cobro salió bien y quedó registrado. Algo falló de nuestro lado al preparar la entrega, así que lo estamos resolviendo y te avisamos apenas esté listo."
-      >
-        <template #footer>
-          <div class="payment-return__reference" data-test="payment-reference">
-            <span>Referencia de tu pago</span>
-            <code>{{ clientTransactionId }}</code>
-          </div>
-          <p class="payment-return__notice">
-            Guarda esta referencia: con ella podemos encontrar tu cobro si necesitas escribirnos.
-          </p>
-          <NButton type="primary" @click="router.push({ name: ROUTE_NAMES.ACCOUNT_ORDERS })">
-            Ver mis compras
-          </NButton>
-        </template>
-      </NResult>
-
-      <NResult
-        v-else-if="state === 'declined'"
-        status="warning"
-        title="El pago fue rechazado"
-        :description="message ?? 'Intenta nuevamente con otra tarjeta.'"
-      >
-        <template v-if="transactionError" #footer>
-          <p class="payment-return__notice">No pudimos cargar tu pago.</p>
-          <NButton type="primary" @click="router.push('/gallery')">Volver a la galería</NButton>
-        </template>
-        <template v-else #footer>
+    <NResult
+      v-else-if="state === 'approved'"
+      status="success"
+      title="¡Pago confirmado!"
+      :description="
+        deliveries.length > 0
+          ? 'Tus fotos están listas para descargar.'
+          : 'Tu compra quedó registrada. Encuentras tus fotos en Mis compras.'
+      "
+    >
+      <template #footer>
+        <div v-if="deliveries.length > 0" class="payment-return__deliveries">
           <NButton
-            v-if="!transferChosen"
+            v-for="delivery in deliveries"
+            :key="delivery.orderId"
             type="primary"
-            :loading="isTransactionPending"
-            :disabled="isTransactionPending || !transaction"
-            @click="showMethodModal = true"
+            @click="
+              router.push({
+                name: ROUTE_NAMES.DELIVERY,
+                params: { token: delivery.token },
+              })
+            "
           >
-            Elegir otro método
+            Descargar fotos de {{ delivery.eventName }}
           </NButton>
-          <p v-else class="payment-return__notice">
-            Te enviaremos los datos para la transferencia.
-          </p>
-        </template>
-      </NResult>
+        </div>
+        <NButton v-else type="primary" @click="router.push({ name: ROUTE_NAMES.ACCOUNT_ORDERS })">
+          Ver mis compras
+        </NButton>
+      </template>
+    </NResult>
 
-      <NResult v-else status="info" title="Estamos procesando tu pago" :description="message ?? ''">
-        <template #footer>
-          <NButton @click="router.push('/gallery')">Volver a la galería</NButton>
-        </template>
-      </NResult>
-    </div>
+    <NResult
+      v-else-if="state === 'unsettled'"
+      status="warning"
+      title="Cobramos tu pago, pero falta entregarte las fotos"
+      description="El cobro salió bien y quedó registrado. Algo falló de nuestro lado al preparar la entrega, así que lo estamos resolviendo y te avisamos apenas esté listo."
+    >
+      <template #footer>
+        <div class="payment-return__reference" data-test="payment-reference">
+          <span>Referencia de tu pago</span>
+          <code>{{ clientTransactionId }}</code>
+        </div>
+        <p class="payment-return__notice">
+          Guarda esta referencia: con ella podemos encontrar tu cobro si necesitas escribirnos.
+        </p>
+        <NButton type="primary" @click="router.push({ name: ROUTE_NAMES.ACCOUNT_ORDERS })">
+          Ver mis compras
+        </NButton>
+      </template>
+    </NResult>
 
-    <PaymentMethodModal
-      v-if="transaction"
-      v-model:show="showMethodModal"
-      :order-ids="transaction.orderIds"
-      :total="transaction.amountCents / 100"
-      currency="USD"
-      @method-chosen="handleMethodChosen"
-    />
-  </PublicLayout>
+    <NResult
+      v-else-if="state === 'declined'"
+      status="warning"
+      title="El pago fue rechazado"
+      :description="message ?? 'Intenta nuevamente con otra tarjeta.'"
+    >
+      <template v-if="transactionError" #footer>
+        <p class="payment-return__notice">No pudimos cargar tu pago.</p>
+        <NButton type="primary" @click="router.push('/gallery')">Volver a la galería</NButton>
+      </template>
+      <template v-else #footer>
+        <NButton
+          v-if="!transferChosen"
+          type="primary"
+          :loading="isTransactionPending"
+          :disabled="isTransactionPending || !transaction"
+          @click="showMethodModal = true"
+        >
+          Elegir otro método
+        </NButton>
+        <p v-else class="payment-return__notice">Te enviaremos los datos para la transferencia.</p>
+      </template>
+    </NResult>
+
+    <NResult v-else status="info" title="Estamos procesando tu pago" :description="message ?? ''">
+      <template #footer>
+        <NButton @click="router.push('/gallery')">Volver a la galería</NButton>
+      </template>
+    </NResult>
+  </div>
+
+  <PaymentMethodModal
+    v-if="transaction"
+    v-model:show="showMethodModal"
+    :order-ids="transaction.orderIds"
+    :total="transaction.amountCents / 100"
+    currency="USD"
+    @method-chosen="handleMethodChosen"
+  />
 </template>
 
 <style scoped src="./payment-return-view.css" />
