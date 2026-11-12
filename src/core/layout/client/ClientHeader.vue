@@ -3,12 +3,12 @@ import { computed, ref } from 'vue'
 
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import { LAYOUT_SLOTS, useLayoutSlot } from '@/core/layout/slot-registry'
-import { ROUTE_NAMES } from '@/core/navigation/route-names'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import AccountMenu from './AccountMenu.vue'
 import ClientLogo from './ClientLogo.vue'
 import UserAvatar from './UserAvatar.vue'
-import { useClientShell, type ClientTab } from './client-shell'
+import { CLIENT_DESTINATIONS } from './client-destinations'
+import { useClientShell } from './client-shell'
 
 const ACCOUNT_MENU_ID = 'client-account-menu'
 
@@ -19,12 +19,6 @@ const shell = useClientShell()
 // button and its drawer.
 const actions = useLayoutSlot(LAYOUT_SLOTS.PUBLIC_NAV_ACTION)
 const overlays = useLayoutSlot(LAYOUT_SLOTS.PUBLIC_NAV_OVERLAY)
-
-const destinations: { tab: ClientTab; label: string; to: string | { name: string } }[] = [
-  { tab: 'home', label: 'Inicio', to: ROUTE_PATHS.LANDING },
-  { tab: 'events', label: 'Eventos', to: ROUTE_PATHS.PUBLIC_GALLERY },
-  { tab: 'photos', label: 'Mis fotos', to: { name: ROUTE_NAMES.ACCOUNT_ORDERS } },
-]
 
 const fullName = computed(() =>
   [session.currentUser?.firstName, session.currentUser?.lastName].filter(Boolean).join(' '),
@@ -41,7 +35,7 @@ const accountButton = ref<HTMLButtonElement | null>(null)
 
     <nav class="client-header__nav" aria-label="Navegación principal">
       <RouterLink
-        v-for="destination in destinations"
+        v-for="destination in CLIENT_DESTINATIONS"
         :key="destination.tab"
         class="client-header__link"
         :to="destination.to"
