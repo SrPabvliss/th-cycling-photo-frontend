@@ -12,6 +12,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 
+import { useColorSchemeStore } from '@/core/theme/color-scheme.store'
 import { registerCartLayoutSlots } from '@/features/cart/layout-slots'
 import { registerCartPostLoginMerge } from '@/features/cart/post-login'
 import { registerNotificationLayoutSlots } from '@/features/notifications/layout-slots'
@@ -22,7 +23,11 @@ import router from './router'
 const app = createApp(App)
 const queryClient = new QueryClient(queryClientConfig)
 
-app.use(createPinia())
+const pinia = createPinia()
+
+app.use(pinia)
+// Reads the saved color scheme and keeps it on the root element from the first paint.
+useColorSchemeStore(pinia)
 app.use(router)
 app.use(VueQueryPlugin, { queryClient })
 
