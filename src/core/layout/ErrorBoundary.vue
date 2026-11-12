@@ -1,10 +1,16 @@
 <script setup lang="ts">
-import { ref, onErrorCaptured } from 'vue'
+import { ref, onErrorCaptured, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { isAxiosError } from 'axios'
 
 import ServerErrorView from '@/core/views/ServerErrorView.vue'
 
+const route = useRoute()
 const capturedError = ref<Error | null>(null)
+
+function recover() {
+  capturedError.value = null
+}
 
 onErrorCaptured((error: Error) => {
   // Axios errors are already handled by the error interceptor (toast shown).
@@ -14,9 +20,13 @@ onErrorCaptured((error: Error) => {
   capturedError.value = error
   return false
 })
+
+// Leaving the screen that failed is a way out: the next one gets its chance to render.
+watch(() => route.fullPath, recover)
 </script>
 
 <template>
-  <ServerErrorView v-if="capturedError" :error="capturedError" />
+  <!-- Clearing the error mounts the content from scratch, which is what retrying means here. -->
+  <ServerErrorView v-if="capturedError" :error="capturedError" recoverable @retry="recover" />
   <slot v-else />
 </template>

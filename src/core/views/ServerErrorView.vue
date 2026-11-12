@@ -9,14 +9,21 @@ import ErrorPageLayout from './components/ErrorPageLayout.vue'
 
 const props = defineProps<{
   error?: Error | unknown
+  /** Shown by the error boundary, which can mount the failed content again without a reload. */
+  recoverable?: boolean
+}>()
+
+const emit = defineEmits<{
+  retry: []
 }>()
 
 const router = useRouter()
 
 const incidentId = `ERR-${Math.random().toString(36).substring(2, 10).toUpperCase()}`
 
+// The stack is for whoever is developing; a visitor gets the incident id.
 const errorDetail = computed(() => {
-  if (!props.error) return null
+  if (!import.meta.env.DEV || !props.error) return null
   if (props.error instanceof Error) {
     return `${props.error.name}: ${props.error.message}\n\n${props.error.stack ?? ''}`
   }
@@ -24,7 +31,14 @@ const errorDetail = computed(() => {
 })
 
 function retry() {
-  window.location.reload()
+  if (props.recoverable) emit('retry')
+  else window.location.reload()
+}
+
+function goHome() {
+  // Already on the home page there is no navigation to clear the error: retrying does.
+  if (props.recoverable) emit('retry')
+  router.push('/')
 }
 
 async function copyError() {
@@ -41,9 +55,9 @@ async function copyError() {
 <template>
   <ErrorPageLayout
     code="500"
-    title="Falla mecánica en la montaña."
-    description="Nuestros servidores tuvieron una caida inesperada. No te preocupes, esto es culpa nuestra, no tuya. Nuestros mecanicos ya estan solucionando el problema."
-    :error-info="`Codigo de error: 500_INTERNAL_SERVER_ERROR | ID de incidente: ${incidentId}`"
+    title="Tuvimos una falla mecánica"
+    description="Algo se rompió de nuestro lado, no del tuyo. Puedes reintentar o volver al inicio."
+    :error-info="`Código de error: 500_INTERNAL_SERVER_ERROR | ID de incidente: ${incidentId}`"
   >
     <template #icon>
       <svg
@@ -65,17 +79,17 @@ async function copyError() {
       </svg>
     </template>
     <template #actions>
-      <NButton type="primary" size="large" @click="router.push('/')">
+      <NButton type="primary" size="large" @click="retry">
+        <template #icon>
+          <NIcon :component="RefreshOutline" />
+        </template>
+        Reintentar
+      </NButton>
+      <NButton size="large" @click="goHome">
         <template #icon>
           <NIcon :component="ArrowBack" />
         </template>
         Volver al inicio
-      </NButton>
-      <NButton size="large" @click="retry">
-        <template #icon>
-          <NIcon :component="RefreshOutline" />
-        </template>
-        Reintentar conexion
       </NButton>
     </template>
     <template v-if="errorDetail" #extra>
