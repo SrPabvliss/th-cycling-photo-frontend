@@ -17,6 +17,6 @@ export const cartRoutes: RouteRecordRaw[] = [
     path: `${CHECKOUT_PATH}/:eventId`,
     name: CART_ROUTE_NAMES.CHECKOUT,
     component: () => import('./presentation/views/CheckoutView.vue'),
-    meta: { public: true },
+    meta: { public: true, shell: { footer: false } },
   },
 ]

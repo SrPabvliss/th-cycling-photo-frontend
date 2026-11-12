@@ -18,27 +18,27 @@ export const accountRoutes: RouteRecordRaw[] = [
     name: ACCOUNT_ROUTE_NAMES.PROFILE,
     component: () => import('./presentation/views/ProfileView.vue'),
     // Self-scoped profile: authenticated only, like the backend's @Authenticated().
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, shell: { tab: 'home', footer: false } },
   },
   {
     path: `${ACCOUNT_PATH}/verify-email`,
     name: ACCOUNT_ROUTE_NAMES.VERIFY_EMAIL,
     component: () => import('./presentation/views/VerifyEmailView.vue'),
     // Self-scoped verification: authenticated only, like the backend's @Authenticated().
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, shell: { footer: false } },
   },
   {
     path: `${ACCOUNT_PATH}/orders`,
     name: ACCOUNT_ROUTE_NAMES.ORDERS,
     component: () => import('./presentation/views/MyOrdersView.vue'),
     // Self-scoped orders: authenticated only, like the backend's @Authenticated().
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, shell: { tab: 'photos', tabBar: true } },
   },
   {
     path: `${ACCOUNT_PATH}/orders/:id`,
     name: ACCOUNT_ROUTE_NAMES.ORDER_DETAIL,
     component: () => import('./presentation/views/MyOrderDetailView.vue'),
     // Self-scoped orders: authenticated only, like the backend's @Authenticated().
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, shell: { tab: 'photos', footer: false } },
   },
 ]

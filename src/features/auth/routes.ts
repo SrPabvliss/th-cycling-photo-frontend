@@ -19,24 +19,24 @@ export const authRoutes: RouteRecordRaw[] = [
     path: AUTH_PATH,
     name: AUTH_ROUTE_NAMES.LOGIN,
     component: () => import('./presentation/views/LoginView.vue'),
-    meta: { public: true },
+    meta: { public: true, shell: { footer: false } },
   },
   {
     path: REGISTER_PATH,
     name: AUTH_ROUTE_NAMES.REGISTER,
     component: () => import('./presentation/views/RegisterView.vue'),
-    meta: { public: true },
+    meta: { public: true, shell: { footer: false } },
   },
   {
     path: FORGOT_PASSWORD_PATH,
     name: AUTH_ROUTE_NAMES.FORGOT_PASSWORD,
     component: () => import('./presentation/views/ForgotPasswordView.vue'),
-    meta: { public: true },
+    meta: { public: true, shell: { footer: false } },
   },
   {
     path: RESET_PASSWORD_PATH,
     name: AUTH_ROUTE_NAMES.RESET_PASSWORD,
     component: () => import('./presentation/views/ResetPasswordView.vue'),
-    meta: { public: true },
+    meta: { public: true, shell: { footer: false } },
   },
 ]
