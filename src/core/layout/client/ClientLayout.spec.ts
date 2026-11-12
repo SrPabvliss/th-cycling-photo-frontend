@@ -49,7 +49,7 @@ async function mountAt(path: string) {
         ClientHeader: stub('ClientHeader'),
         ClientFooter: stub('ClientFooter'),
         ClientTabBar: stub('ClientTabBar'),
-        TitanLogo: stub('TitanLogo'),
+        ClientLogo: stub('ClientLogo'),
       },
     },
   })
@@ -95,7 +95,9 @@ describe('ClientLayout', () => {
     const { wrapper } = await mountAt('/private')
 
     expect(has(wrapper, 'ClientHeader')).toBe(false)
-    expect(wrapper.get('.client-layout__brand').find('[data-test="TitanLogo"]').exists()).toBe(true)
+    expect(wrapper.get('.client-layout__brand').find('[data-test="ClientLogo"]').exists()).toBe(
+      true,
+    )
   })
 
   it('applies the shell of the next route without mounting the layout again', async () => {

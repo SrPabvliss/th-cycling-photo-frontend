@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import ErrorBoundary from '@/core/layout/ErrorBoundary.vue'
-import TitanLogo from '@/core/layout/public/TitanLogo.vue'
 import ClientFooter from './ClientFooter.vue'
 import ClientHeader from './ClientHeader.vue'
+import ClientLogo from './ClientLogo.vue'
 import ClientTabBar from './ClientTabBar.vue'
 import { useClientShell } from './client-shell'
 
@@ -15,7 +15,7 @@ const shell = useClientShell()
   <div class="client-layout" :data-tab-bar="shell.tabBar ? 'true' : undefined">
     <ClientHeader v-if="shell.header" />
     <div v-else class="client-layout__brand">
-      <TitanLogo />
+      <ClientLogo />
     </div>
 
     <main class="client-layout__main">
