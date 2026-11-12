@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import AppLayout from '@/core/layout/AppLayout.vue'
 import { registerAuthGuard } from '@/core/guards/auth.guard'
+import { registerRouteProgress } from '@/core/navigation/route-progress'
 import { registerStaleChunkReload } from '@/core/navigation/stale-chunk-reload'
 import { inPanelArea, registerUiArea } from '@/core/theme/area'
 import { standaloneRoutes } from '@/core/views/standalone-routes'
@@ -71,6 +72,8 @@ const router = createRouter({
 
 // Before the auth guard: it sets the area of the first page while the guard waits for the session.
 registerUiArea(router)
+// Also before it, so the bar answers the tap at once.
+registerRouteProgress(router)
 registerAuthGuard(router)
 registerStaleChunkReload(router)
 
