@@ -35,11 +35,11 @@ import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 
 /* The scheme lives on the root element (color-scheme.store.ts): one helmet per scheme. */
 .client-logo__mark--dark,
-:global([data-tt-scheme='dark']) .client-logo__mark--light {
+html[data-tt-scheme='dark'] .client-logo__mark--light {
   display: none;
 }
 
-:global([data-tt-scheme='dark']) .client-logo__mark--dark {
+html[data-tt-scheme='dark'] .client-logo__mark--dark {
   display: block;
 }
 

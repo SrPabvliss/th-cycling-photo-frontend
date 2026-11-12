@@ -51,8 +51,9 @@ const shell = useClientShell()
   z-index: 40;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  box-sizing: content-box;
-  block-size: var(--tt-tabbar-height);
+  /* Border included: the layout reserves exactly this height under the page. */
+  box-sizing: border-box;
+  block-size: calc(var(--tt-tabbar-height) + env(safe-area-inset-bottom));
   padding-inline: var(--tt-space-2);
   padding-block-end: env(safe-area-inset-bottom);
   border-block-start: thin solid var(--tt-line);
