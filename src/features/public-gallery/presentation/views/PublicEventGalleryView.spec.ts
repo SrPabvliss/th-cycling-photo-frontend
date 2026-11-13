@@ -129,7 +129,7 @@ async function mountAt(path = '/gallery/mama-rumi') {
   const wrapper = mount(PublicEventGalleryView, {
     global: {
       plugins: [router],
-      stubs: { PhotoLightbox: true, PhotoViewer: true, PublicPhotoGrid: PlainGridStub },
+      stubs: { PhotoViewer: true, PublicPhotoGrid: PlainGridStub },
     },
   })
   await flushPromises()
@@ -239,6 +239,102 @@ describe('PublicEventGalleryView', () => {
       expect(buttonNamed(wrapper, 'Ver otros eventos')?.attributes('href')).toBe('/gallery')
       expect(wrapper.find('.gallery-cart-bar').exists()).toBe(false)
       expect(wrapper.find('form').exists()).toBe(false)
+    })
+  })
+
+  describe('the viewer', () => {
+    const viewer = (wrapper: Wrapper) => wrapper.findComponent({ name: 'PhotoViewer' })
+
+    it('is closed until a photo is opened', async () => {
+      const { wrapper } = await mountAt()
+
+      expect(viewer(wrapper).exists()).toBe(false)
+    })
+
+    it('opens the photo that was tapped, as a step back can undo', async () => {
+      const { wrapper, router } = await mountAt()
+      const push = vi.spyOn(router, 'push')
+
+      await tiles(wrapper)[2]!.get('.photo-tile__open').trigger('click')
+      await flushPromises()
+
+      expect(router.currentRoute.value.query).toEqual({ foto: 'c' })
+      expect(push).toHaveBeenCalledTimes(1)
+      expect(viewer(wrapper).props('photoId')).toBe('c')
+      expect(
+        viewer(wrapper)
+          .props('photos')
+          .map((each: IPhoto) => each.id),
+      ).toEqual(['a', 'b', 'c'])
+      expect(viewer(wrapper).props('plate')).toBeNull()
+      expect(viewer(wrapper).props('event')).toMatchObject({ id: 'e1', slug: 'mama-rumi' })
+    })
+
+    it('moves between photos without piling up history', async () => {
+      const { wrapper, router } = await mountAt('/gallery/mama-rumi?foto=a')
+      const replace = vi.spyOn(router, 'replace')
+      const push = vi.spyOn(router, 'push')
+
+      viewer(wrapper).vm.$emit('update:photoId', 'b')
+      await flushPromises()
+
+      expect(router.currentRoute.value.query).toEqual({ foto: 'b' })
+      expect(replace).toHaveBeenCalledTimes(1)
+      expect(push).not.toHaveBeenCalled()
+    })
+
+    it('closes by stepping back when it was opened from the grid', async () => {
+      const { wrapper, router } = await mountAt()
+      await tiles(wrapper)[0]!.get('.photo-tile__open').trigger('click')
+      await flushPromises()
+      const back = vi.spyOn(router, 'back')
+
+      viewer(wrapper).vm.$emit('close')
+      await flushPromises()
+
+      expect(back).toHaveBeenCalledTimes(1)
+    })
+
+    it('closes by cleaning the url when the page was opened straight on a photo', async () => {
+      const { wrapper, router } = await mountAt('/gallery/mama-rumi?placa=127&foto=a')
+
+      viewer(wrapper).vm.$emit('close')
+      await flushPromises()
+
+      expect(router.currentRoute.value.query).toEqual({ placa: '127' })
+      expect(viewer(wrapper).exists()).toBe(false)
+    })
+
+    it('carries the plate, and only the results, when opened from a plate search', async () => {
+      Object.assign(matched, { photos: [photo('a'), photo('b')], total: 2 })
+      noBib.photos = [photo('n1')]
+      const { wrapper } = await mountAt('/gallery/mama-rumi?placa=127&foto=b')
+
+      expect(viewer(wrapper).props('plate')).toBe('127')
+      expect(
+        viewer(wrapper)
+          .props('photos')
+          .map((each: IPhoto) => each.id),
+      ).toEqual(['a', 'b'])
+    })
+
+    it('moves among the photos with no plate, unlabelled, when opened from that section', async () => {
+      Object.assign(matched, { photos: [photo('a')], total: 1 })
+      noBib.photos = [photo('n1'), photo('n2')]
+      const { wrapper } = await mountAt('/gallery/mama-rumi?placa=127&foto=n2')
+
+      expect(viewer(wrapper).props('plate')).toBeNull()
+      expect(
+        viewer(wrapper)
+          .props('photos')
+          .map((each: IPhoto) => each.id),
+      ).toEqual(['n1', 'n2'])
+    })
+
+    it('stays closed for a photo the url names but the gallery does not have', async () => {
+      const { wrapper } = await mountAt('/gallery/mama-rumi?foto=zzz')
+
+      expect(viewer(wrapper).exists()).toBe(false)
     })
   })
 

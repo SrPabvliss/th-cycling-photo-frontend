@@ -99,6 +99,17 @@ describe('useDialogFocus', () => {
     expect(document.documentElement.style.overflow).toBe('')
   })
 
+  it('gives the focus back when it is removed while open', async () => {
+    const { wrapper, trigger } = mountWithTrigger()
+    await wrapper.setProps({ open: true })
+    await nextTick()
+    expect(document.activeElement).not.toBe(trigger)
+
+    wrapper.unmount()
+
+    expect(document.activeElement).toBe(trigger)
+  })
+
   it('lets the page go when it is removed while open', async () => {
     const { wrapper } = mountWithTrigger(true)
     await nextTick()

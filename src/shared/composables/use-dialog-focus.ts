@@ -61,6 +61,9 @@ export function useDialogFocus(
     isActive = false
     document.documentElement.style.overflow = previousOverflow
     document.removeEventListener('keydown', onKeydown)
+    // Back to what opened it, if it is still on the page.
+    if (opener?.isConnected) opener.focus()
+    opener = null
   }
 
   watch(
@@ -73,10 +76,7 @@ export function useDialogFocus(
         return
       }
 
-      const wasActive = isActive
       release()
-      if (wasActive && opener?.isConnected) opener.focus()
-      opener = null
     },
     { immediate: true },
   )

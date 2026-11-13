@@ -9,21 +9,21 @@ import NotFoundView from '@/core/views/NotFoundView.vue'
 import { useCartActions, useCartState } from '@/shared/cart'
 import { EmptyState } from '@/shared/components/empty-state'
 import { ErrorState, LoadBoundary, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
-import PhotoLightbox from '@/shared/components/PhotoLightbox/PhotoLightbox.vue'
 import { eventDateLabel } from '@/shared/public-events'
 import { useCartStore } from '@/shared/stores/cart.store'
 import { useGalleryPlate } from '../../composables/use-gallery-plate'
+import { useGalleryViewer } from '../../composables/use-gallery-viewer'
 import { usePublicEventDetailQuery } from '../../composables/queries/use-public-event-detail'
 import {
   usePublicEventNoBibPhotosInfinite,
   usePublicEventPhotosInfinite,
 } from '../../composables/queries/use-public-event-photos'
-import type { IPublicPhoto } from '../../types/responses/public-photo.response'
 import { toCalendarDate } from '../../utils/calendar-date'
 import GalleryBanner from '../components/GalleryBanner/GalleryBanner.vue'
 import GalleryCartBar from '../components/GalleryCartBar/GalleryCartBar.vue'
 import PhotoGridSection from '../components/PhotoGridSection/PhotoGridSection.vue'
 import PhotoGridSkeleton from '../components/PhotoGridSkeleton/PhotoGridSkeleton.vue'
+import PhotoViewer from '../components/PhotoViewer/PhotoViewer.vue'
 import PublicGalleryFilterBar from '../components/PublicGalleryFilterBar/PublicGalleryFilterBar.vue'
 import PublicPhotoGrid from '../components/PublicPhotoGrid/PublicPhotoGrid.vue'
 
@@ -140,32 +140,50 @@ const busyIds = computed(
 
 function toggle(photoId: string) {
   const photo = everyPhoto.value.find((each) => each.id === photoId)
-  if (!photo || !event.value) return
+  if (!photo || !cartEvent.value) return
 
-  cartActions.toggle({
-    id: photo.id,
-    publicSlug: photo.publicSlug,
-    event: {
-      id: event.value.id,
-      name: event.value.name,
-      slug: event.value.slug,
-      startDate: event.value.startDate,
-      endDate: event.value.endDate,
-    },
-  })
+  cartActions.toggle({ id: photo.id, publicSlug: photo.publicSlug, event: cartEvent.value })
 }
 
-// --- Photo viewer (the shared lightbox, until the client viewer replaces it) ---
-const showLightbox = ref(false)
-const lightboxIndex = ref(0)
+// --- Photo viewer ---
+const viewer = useGalleryViewer()
 
-function openPhoto(photoId: string) {
-  lightboxIndex.value = Math.max(
-    0,
-    everyPhoto.value.findIndex((photo: IPublicPhoto) => photo.id === photoId),
-  )
-  showLightbox.value = true
-}
+// The viewer moves through the list the photo was opened from: the main one (with its plate, in
+// a search) or the photos with no plate detected.
+const viewed = computed(() => {
+  const id = viewer.photoId.value
+  if (!id || !event.value) return null
+
+  if (photos.value.some((photo) => photo.id === id)) {
+    return {
+      photos: photos.value,
+      plate: shownPlate.value,
+      hasNextPage: hasNextPage.value,
+      fetchNextPage: () => fetchNextPage(),
+    }
+  }
+  if (noPlatePhotos.value.some((photo) => photo.id === id)) {
+    return {
+      photos: noPlatePhotos.value,
+      plate: null,
+      hasNextPage: hasMoreNoPlate.value,
+      fetchNextPage: () => fetchMoreNoPlate(),
+    }
+  }
+  return null
+})
+
+const cartEvent = computed(() =>
+  event.value
+    ? {
+        id: event.value.id,
+        name: event.value.name,
+        slug: event.value.slug,
+        startDate: event.value.startDate,
+        endDate: event.value.endDate,
+      }
+    : null,
+)
 </script>
 
 <template>
@@ -291,7 +309,7 @@ function openPhoto(photoId: string) {
                 :plate="shownPlate"
                 :has-more="hasNextPage"
                 :is-loading-more="isFetchingNextPage"
-                @open="openPhoto"
+                @open="viewer.open"
                 @toggle="toggle"
                 @load-more="loadMore"
               />
@@ -304,7 +322,7 @@ function openPhoto(photoId: string) {
                 :busy-ids="busyIds"
                 :has-more="hasNextPage"
                 :is-loading-more="isFetchingNextPage"
-                @open="openPhoto"
+                @open="viewer.open"
                 @toggle="toggle"
                 @load-more="loadMore"
               />
@@ -321,7 +339,7 @@ function openPhoto(photoId: string) {
                 :busy-ids="busyIds"
                 :has-more="hasMoreNoPlate"
                 :is-loading-more="isFetchingMoreNoPlate"
-                @open="openPhoto"
+                @open="viewer.open"
                 @toggle="toggle"
                 @load-more="loadMoreNoPlate"
               />
@@ -333,16 +351,16 @@ function openPhoto(photoId: string) {
       </template>
     </template>
 
-    <PhotoLightbox
-      :photos="everyPhoto"
-      :initial-index="lightboxIndex"
-      :show="showLightbox"
-      :selected-ids="selectedIds"
-      actions="select"
-      :paginated="true"
-      @update:show="showLightbox = $event"
-      @toggle="toggle"
-      @load-more="loadMore"
+    <PhotoViewer
+      v-if="viewed && cartEvent && viewer.photoId.value"
+      :photos="viewed.photos"
+      :photo-id="viewer.photoId.value"
+      :event="cartEvent"
+      :plate="viewed.plate"
+      :has-next-page="viewed.hasNextPage"
+      :fetch-next-page="viewed.fetchNextPage"
+      @update:photo-id="viewer.show"
+      @close="viewer.close"
     />
   </div>
 </template>
