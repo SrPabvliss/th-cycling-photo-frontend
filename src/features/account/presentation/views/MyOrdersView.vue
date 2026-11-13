@@ -1,68 +1,96 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { NButton, NIcon, NResult, NSkeleton } from 'naive-ui'
-import { ImagesOutline } from '@vicons/ionicons5'
+import { NButton } from 'naive-ui'
 
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+import { EmptyState } from '@/shared/components/empty-state'
+import { LoadBoundary } from '@/shared/components/loading'
+import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
+import { useVisiblePolling } from '@/shared/composables/use-visible-polling'
 import { useMyOrdersQuery } from '../../composables/queries/use-my-orders'
-import OrderCard from '../components/OrderCard/OrderCard.vue'
-import OrdersSummary from '../components/OrdersSummary/OrdersSummary.vue'
+import OrderRow from '../components/OrderRow/OrderRow.vue'
+import OrderRowSkeleton from '../components/OrderRowSkeleton/OrderRowSkeleton.vue'
 
-const { data, isPending, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
-  useMyOrdersQuery()
+const SKELETON_ROWS = 4
+const NEXT_PAGE_SKELETONS = 2
+/** Below this many orders the end of the list needs no words. */
+const SAY_THE_END_FROM = 7
+/** While a payment is being confirmed, the list is read again this often. */
+const CONFIRMING_POLL_MS = 15_000
+
+const {
+  status,
+  data,
+  isFetching,
+  isFetchingNextPage,
+  isFetchNextPageError,
+  hasNextPage,
+  refetch,
+  fetchNextPage,
+} = useMyOrdersQuery()
 
 const orders = computed(() => data.value?.pages.flatMap((page) => page.items) ?? [])
 
-const hasOrders = computed(() => orders.value.length > 0)
+const canLoadMore = computed(() => hasNextPage.value && !isFetchNextPageError.value)
+const sentinel = useInfiniteScrollTrigger(() => fetchNextPage(), {
+  isBusy: isFetching,
+  canLoadMore,
+})
+const isAtTheEnd = computed(() => !hasNextPage.value && orders.value.length >= SAY_THE_END_FROM)
+
+const anyConfirming = computed(() => orders.value.some((order) => order.state === 'confirming'))
+useVisiblePolling(anyConfirming, CONFIRMING_POLL_MS, () => refetch())
 </script>
 
 <template>
-  <div class="my-orders-view">
-    <h1 class="my-orders-view__title">Mis fotos</h1>
+  <div class="my-orders">
+    <h1 class="my-orders__title">Mis fotos</h1>
 
-    <OrdersSummary v-if="isPending || hasOrders" class="my-orders-view__summary" />
-
-    <NSkeleton v-if="isPending" text :repeat="4" />
-
-    <NResult
-      v-else-if="isError"
-      status="error"
-      title="No pudimos cargar tus fotos"
-      description="Intenta de nuevo en unos segundos."
+    <LoadBoundary
+      :status="status"
+      :empty="orders.length === 0"
+      :refreshing="status === 'error' && isFetching"
+      error-title="No pudimos cargar tus fotos"
+      error-text="Puede ser tu conexión."
+      @retry="refetch()"
     >
-      <template #footer>
-        <NButton @click="refetch()">Reintentar</NButton>
+      <template #skeleton>
+        <div class="my-orders__list" aria-label="Cargando tus compras">
+          <OrderRowSkeleton v-for="row in SKELETON_ROWS" :key="row" />
+        </div>
       </template>
-    </NResult>
 
-    <template v-else-if="orders.length > 0">
-      <div class="my-orders-view__grid">
-        <OrderCard v-for="order in orders" :key="order.id" :order="order" />
+      <template #empty>
+        <EmptyState
+          illustration="sinCompras"
+          title="Todavía no tienes fotos"
+          text="Cuando compres fotos de una carrera, aparecen aquí para descargarlas cuando quieras."
+        >
+          <template #actions>
+            <RouterLink v-slot="{ href, navigate }" :to="ROUTE_PATHS.PUBLIC_GALLERY" custom>
+              <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
+                Buscar mis fotos
+              </NButton>
+            </RouterLink>
+          </template>
+        </EmptyState>
+      </template>
+
+      <div class="my-orders__list">
+        <OrderRow v-for="order in orders" :key="order.id" :order="order" />
+        <template v-if="isFetchingNextPage">
+          <OrderRowSkeleton v-for="row in NEXT_PAGE_SKELETONS" :key="`next-${row}`" />
+        </template>
       </div>
 
-      <NButton
-        v-if="hasNextPage"
-        class="my-orders-view__load-more"
-        :loading="isFetchingNextPage"
-        :disabled="isFetchingNextPage"
-        @click="fetchNextPage()"
-      >
-        Cargar más
-      </NButton>
-    </template>
+      <div v-if="canLoadMore" ref="sentinel" class="my-orders__sentinel" aria-hidden="true" />
 
-    <div v-else class="my-orders-view__empty">
-      <div class="my-orders-view__empty-icon">
-        <NIcon :component="ImagesOutline" :size="36" />
+      <div v-if="hasNextPage && isFetchNextPageError" class="my-orders__more">
+        <NButton size="large" @click="fetchNextPage()">Cargar más</NButton>
       </div>
-      <h2 class="my-orders-view__empty-title">Aquí aparecerán tus órdenes</h2>
-      <p class="my-orders-view__empty-text">
-        Todavía no has comprado fotos. En cuanto compres, tus órdenes van a aparecer en esta
-        pantalla.
-      </p>
-      <RouterLink to="/gallery">
-        <NButton type="primary" size="large">Ir a la galería</NButton>
-      </RouterLink>
-    </div>
+
+      <p v-if="isAtTheEnd" class="my-orders__end">Esas son todas tus compras.</p>
+    </LoadBoundary>
   </div>
 </template>
 

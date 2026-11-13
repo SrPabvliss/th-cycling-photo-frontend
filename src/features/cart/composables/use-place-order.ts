@@ -90,7 +90,6 @@ export function usePlaceOrder(): IPlaceOrder {
       if (input.method === 'transfer') {
         void queryClient.invalidateQueries({ queryKey: CART_QUERY_KEYS.cart() })
         void queryClient.invalidateQueries({ queryKey: ACCOUNT_QUERY_KEYS.orders() })
-        void queryClient.invalidateQueries({ queryKey: ACCOUNT_QUERY_KEYS.ordersSummary() })
       }
       return response.data.orders
     } catch (error) {

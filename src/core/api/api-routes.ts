@@ -176,7 +176,6 @@ export const API_ROUTES = {
     GET_BY_ID: (id: string) => `${ORDERS_BASE}/me/${id}`,
     DOWNLOADS: (id: string) => `${ORDERS_BASE}/me/${id}/downloads`,
     CANCEL: (id: string) => `${ORDERS_BASE}/me/${id}/cancel`,
-    SUMMARY: `${ORDERS_BASE}/me/summary`,
     TAX_DOCUMENT_FILES: (id: string, taxDocumentId: string) =>
       `${ORDERS_BASE}/me/${id}/tax-documents/${taxDocumentId}/files`,
     BILLING: (id: string) => `${ORDERS_BASE}/me/${id}/billing`,

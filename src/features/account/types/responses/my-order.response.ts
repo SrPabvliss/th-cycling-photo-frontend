@@ -92,20 +92,3 @@ export interface IMyOrderDownloads {
   orderId: string
   photos: IApiMyOrderDownloadPhoto[]
 }
-
-export interface IApiMyOrdersSummarySpent {
-  currency: string
-  amount: string
-}
-
-export interface IApiMyOrdersSummary {
-  orderCount: number
-  photoCount: number
-  eventCount: number
-  spent: IApiMyOrdersSummarySpent[]
-}
-
-export interface IMyOrdersSummary {
-  orderCount: number
-  photoCount: number
-}

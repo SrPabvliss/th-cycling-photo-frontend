@@ -16,9 +16,9 @@ const total = computed(() => props.download.total.value)
 
 const notice = computed(() => {
   if (state.value === 'done' && total.value > 0) {
-    return total.value === 1
-      ? 'Listo: se descargó tu foto.'
-      : `Listo: se descargaron tus ${total.value} fotos.`
+    // The page cannot see the files land: it says what it did, and where to look.
+    const sent = total.value === 1 ? 'enviamos tu foto' : `enviamos tus ${total.value} fotos`
+    return `Listo: ${sent} a descargas. Revisa la carpeta de descargas de tu navegador.`
   }
   if (state.value === 'stopped')
     return `Descarga detenida en la foto ${done.value} de ${total.value}.`

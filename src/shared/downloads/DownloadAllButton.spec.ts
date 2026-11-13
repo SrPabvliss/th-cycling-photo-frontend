@@ -39,11 +39,13 @@ describe('DownloadAllButton', () => {
     expect(value.stop).toHaveBeenCalled()
   })
 
-  it('says it is done, in singular for one photo', () => {
+  it('says the photos went to downloads, in singular for one photo', () => {
     expect(mountButton(download('done', 3, 3)).text()).toContain(
-      'Listo: se descargaron tus 3 fotos.',
+      'Listo: enviamos tus 3 fotos a descargas. Revisa la carpeta de descargas de tu navegador.',
     )
-    expect(mountButton(download('done', 1, 1)).text()).toContain('Listo: se descargó tu foto.')
+    expect(mountButton(download('done', 1, 1)).text()).toContain(
+      'Listo: enviamos tu foto a descargas. Revisa la carpeta de descargas de tu navegador.',
+    )
   })
 
   it('says where it stopped', () => {

@@ -42,7 +42,6 @@ export function useDeclinedActions(orderIds: Readonly<Ref<string[]>>): IDeclined
       )
       void queryClient.invalidateQueries({ queryKey: CART_QUERY_KEYS.cart() })
       void queryClient.invalidateQueries({ queryKey: ACCOUNT_QUERY_KEYS.orders() })
-      void queryClient.invalidateQueries({ queryKey: ACCOUNT_QUERY_KEYS.ordersSummary() })
       await router.replace(`${ROUTE_PATHS.CHECKOUT}/received/${ids[0]}`)
     } catch (error) {
       const failed = checkoutProblem(error)

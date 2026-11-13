@@ -2,11 +2,9 @@ import type {
   IApiMyOrderDetail,
   IApiMyOrderDownloads,
   IApiMyOrderListItem,
-  IApiMyOrdersSummary,
   IMyOrderDetail,
   IMyOrderDownloads,
   IMyOrderListItem,
-  IMyOrdersSummary,
 } from '../types/responses/my-order.response'
 import { toMyOrderInvoice } from './order-invoice.mapper'
 
@@ -42,11 +40,4 @@ export function toMyOrderDetail(api: IApiMyOrderDetail): IMyOrderDetail {
 
 export function toMyOrderDownloads(api: IApiMyOrderDownloads): IMyOrderDownloads {
   return { orderId: api.orderId, photos: api.photos }
-}
-
-export function toMyOrdersSummary(api: IApiMyOrdersSummary): IMyOrdersSummary {
-  return {
-    orderCount: api.orderCount,
-    photoCount: api.photoCount,
-  }
 }
