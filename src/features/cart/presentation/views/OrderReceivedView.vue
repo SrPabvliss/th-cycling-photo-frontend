@@ -12,9 +12,7 @@ import { EmptyState } from '@/shared/components/empty-state'
 import { ErrorState, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
 import { formatMoney } from '@/shared/pricing/tier-cards'
 import { maskPhone } from '@/shared/utils/mask-phone'
-
-// The order code a person can read out: the first block of its id.
-const ORDER_CODE_LENGTH = 8
+import { orderCode } from '@/features/account/utils/order-code'
 
 const STEPS = [
   { title: 'Te escribimos por WhatsApp', text: 'Con el total y los datos de la cuenta.' },
@@ -44,7 +42,7 @@ const isMissing = computed(
   () => isAxiosError(error.value) && [403, 404].includes(error.value.response?.status ?? 0),
 )
 
-const code = computed(() => order.value?.id.slice(0, ORDER_CODE_LENGTH).toUpperCase() ?? '')
+const code = computed(() => (order.value ? orderCode(order.value.id) : ''))
 const count = computed(() => order.value?.photos.length ?? 0)
 const amount = computed(() =>
   order.value?.subtotal != null && order.value.currency
