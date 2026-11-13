@@ -6,6 +6,7 @@ import { ArrowBack } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
 import { getAssetPresetUrl } from '@/shared/utils/cdn.utils'
+import { PLATE_QUERY, plateFromQuery } from '@/shared/utils/plate.utils'
 import { useCartStore } from '@/shared/stores/cart.store'
 import { useAddToCart } from '@/shared/composables/use-add-to-cart'
 import { useRemoveFromCart } from '@/shared/composables/use-remove-from-cart'
@@ -37,7 +38,8 @@ watch(
 onUnmounted(() => cartStore.setActiveEvent(null))
 
 const activeCategoryId = ref<number | null>(null)
-const bibNumber = ref('')
+// The home finder arrives with the plate in the url: the gallery opens already searching it.
+const bibNumber = ref(plateFromQuery(route.query[PLATE_QUERY]))
 const bibMatch = ref<'exact' | 'starts' | 'contains'>('exact')
 
 const bibSearchActive = computed(() => !!bibNumber.value.trim())
