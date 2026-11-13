@@ -3,7 +3,9 @@ import { isAxiosError } from 'axios'
 import { h, reactive } from 'vue'
 
 import { API_ROUTES } from '@/core/api/api-routes'
+import { useSessionStore } from '@/core/auth/stores/session.store'
 import { httpClient } from '@/core/http/axios-client'
+import { isSessionExpired, SessionExpiredError } from '@/core/http/session-expired'
 import { message } from '@/core/ui/discrete-api'
 import { CART_QUERY_KEYS } from '@/shared/constants/cart-query-keys'
 import { quotePhotos } from '@/shared/pricing/quote'
@@ -39,6 +41,8 @@ interface ICartEngine {
   lastChangeOf: Map<string, number>
   busy: Map<string, number>
   changes: number
+  /** The expired session was already reported: the changes behind it fail without a word. */
+  expiryReported: boolean
 }
 
 const engines = new WeakMap<QueryClient, ICartEngine>()
@@ -51,14 +55,20 @@ function engineOf(queryClient: QueryClient): ICartEngine {
       lastChangeOf: new Map(),
       busy: reactive(new Map<string, number>()),
       changes: 0,
+      expiryReported: false,
     }
     engines.set(queryClient, engine)
   }
   return engine
 }
 
-/** How a change ended: on the server, undone on screen, or failed with a later tap in charge. */
-type ChangeOutcome = 'done' | 'undone' | 'superseded'
+/**
+ * How a change ended: on the server, undone on screen, failed with a later tap in charge, or cut
+ * short because the session expired (the cart on screen is no longer the one it changed).
+ */
+type ChangeOutcome = 'done' | 'undone' | 'superseded' | 'expired'
+
+const SESSION_EXPIRED = 'Tu sesión venció. Inicia sesión de nuevo para seguir con tu carrito.'
 
 // The server answers this when there is no cart to take the photo from: it is not in the cart,
 // which is what the person asked for.
@@ -80,6 +90,7 @@ function isAlreadyOut(error: unknown): boolean {
 export function useCartActions(): ICartActions {
   const queryClient = useQueryClient()
   const cartStore = useCartStore()
+  const session = useSessionStore()
   const engine = engineOf(queryClient)
   const cartKey = CART_QUERY_KEYS.cart()
 
@@ -104,12 +115,21 @@ export function useCartActions(): ICartActions {
     const change = ++engine.changes
     engine.lastChangeOf.set(photoId, change)
     engine.busy.set(photoId, (engine.busy.get(photoId) ?? 0) + 1)
+    if (session.isAuthenticated) engine.expiryReported = false
+
+    // A change asked inside a session is not sent once that session expired: it would land on the
+    // anonymous cart instead.
+    const signedIn = session.isAuthenticated
+    const send = () =>
+      signedIn && session.expired ? Promise.reject(new SessionExpiredError()) : request()
 
     return engine.queue
-      .run(request)
+      .run(send)
       .then(
         (): ChangeOutcome => 'done',
         (error: unknown): ChangeOutcome => {
+          // Neither done nor refused: the session ended, and with it the cart that was on screen.
+          if (isSessionExpired(error)) return 'expired'
           if (isAlreadyOut(error)) return 'done'
           // A later tap on the same photo already decided where it ends: leave it there, and say
           // nothing, since what the person sees is what they asked for last.
@@ -125,6 +145,13 @@ export function useCartActions(): ICartActions {
 
         if (engine.queue.isIdle()) void queryClient.invalidateQueries({ queryKey: cartKey })
       })
+  }
+
+  /** Says once that the session expired, for all the changes it cut short. */
+  function reportExpiry() {
+    if (engine.expiryReported) return
+    engine.expiryReported = true
+    message.warning(SESSION_EXPIRED)
   }
 
   function add(photo: ICartPhotoInput) {
@@ -143,6 +170,7 @@ export function useCartActions(): ICartActions {
       () => writeCart((groups) => withoutPhoto(groups, photo.id)),
     ).then((outcome) => {
       if (outcome === 'superseded') return
+      if (outcome === 'expired') return reportExpiry()
       if (outcome === 'undone') {
         return void message.error('No pudimos agregar la foto. Intenta de nuevo.')
       }
@@ -195,6 +223,7 @@ export function useCartActions(): ICartActions {
       () => writeCart((groups) => withPhotoBack(groups, removal)),
     ).then((outcome) => {
       if (outcome === 'superseded') return
+      if (outcome === 'expired') return reportExpiry()
       if (outcome === 'undone') {
         return void message.error('No pudimos quitar la foto. Intenta de nuevo.')
       }

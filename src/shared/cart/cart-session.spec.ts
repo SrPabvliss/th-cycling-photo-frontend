@@ -20,7 +20,7 @@ import { useCartState } from './use-cart-state'
 // the cart and the token refresh work together, which a mocked client would hide.
 
 const { message } = vi.hoisted(() => ({
-  message: { success: vi.fn(), info: vi.fn(), error: vi.fn() },
+  message: { success: vi.fn(), info: vi.fn(), error: vi.fn(), warning: vi.fn() },
 }))
 vi.mock('@/core/ui/discrete-api', () => ({ message }))
 // The interceptor sends to the login page from private screens; the cart is used on public ones.
@@ -210,17 +210,22 @@ describe('the cart when the session has expired', () => {
       expect(message.error).not.toHaveBeenCalled()
     })
 
-    it('undoes the add, and says so, when the refresh fails', async () => {
+    it('does not count the add, and says the session expired, when the refresh fails', async () => {
       const { state, actions } = await readyWithCart(false)
 
       actions().toggle(photo('p1'))
       await vi.waitFor(() =>
-        expect(message.error).toHaveBeenCalledWith('No pudimos agregar la foto. Intenta de nuevo.'),
+        expect(message.warning).toHaveBeenCalledWith(
+          'Tu sesión venció. Inicia sesión de nuevo para seguir con tu carrito.',
+        ),
       )
       await flushPromises()
 
+      expect(message.error).not.toHaveBeenCalled()
+      expect(message.success).not.toHaveBeenCalled()
       expect(state().isInCart('p1')).toBe(false)
       expect(useSessionStore().isAuthenticated).toBe(false)
+      expect(useSessionStore().expired).toBe(true)
     })
 
     it('does not let the retry jump ahead of the changes queued behind it', async () => {

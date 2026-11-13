@@ -165,6 +165,20 @@ describe('CartDrawer', () => {
     expect(wrapper.find('.cart-drawer__skeleton').exists()).toBe(true)
   })
 
+  it('says the session expired, not that the cart is empty, and leads back here after signing in', async () => {
+    useSessionStore().expireSession()
+    const { wrapper } = await open()
+
+    expect(wrapper.text()).toContain('Tu sesión venció')
+    expect(wrapper.text()).not.toContain('Tu carrito está vacío')
+    const signIn = wrapper.findAll('a').find((link) => link.text() === 'Iniciar sesión')!
+    expect(signIn.attributes('href')).toBe('/login?redirect=/')
+
+    await signIn.trigger('click')
+    await flushPromises()
+    expect(useCartStore().isDrawerOpen).toBe(false)
+  })
+
   it('says the cart is empty and sends to the events', async () => {
     const { wrapper, router } = await open()
 

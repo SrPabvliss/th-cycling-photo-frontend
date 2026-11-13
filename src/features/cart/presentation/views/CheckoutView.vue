@@ -15,6 +15,7 @@ import { useCartState } from '@/shared/cart'
 import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
 import { EmptyState } from '@/shared/components/empty-state'
 import { LoadBoundary, TtSkeleton } from '@/shared/components/loading'
+import SessionExpiredNotice from '@/shared/components/SessionExpiredNotice/SessionExpiredNotice.vue'
 import { useEventPaymentOptionsQuery } from '@/shared/composables/use-event-payment-options'
 import { quotePhotos } from '@/shared/pricing/quote'
 import { formatMoney } from '@/shared/pricing/tier-cards'
@@ -136,7 +137,14 @@ async function confirm() {
       <h1 class="checkout__title">Confirmar pedido</h1>
     </div>
 
+    <!-- The session expired with the order on screen: say so, it is not an order without photos. -->
+    <SessionExpiredNotice
+      v-if="session.expired"
+      text="Inicia sesión de nuevo para seguir con tu pedido. Tus fotos siguen guardadas."
+    />
+
     <LoadBoundary
+      v-else
       :status="cart.status.value"
       :empty="!group"
       :refreshing="cart.status.value === 'error' && cart.isFetching.value"

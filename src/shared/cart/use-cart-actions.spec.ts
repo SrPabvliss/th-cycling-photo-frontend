@@ -5,6 +5,8 @@ import { AxiosError, type AxiosResponse } from 'axios'
 import { createPinia, setActivePinia } from 'pinia'
 import { defineComponent, h, isVNode, type VNode } from 'vue'
 
+import { useSessionStore } from '@/core/auth/stores/session.store'
+import { SessionExpiredError } from '@/core/http/session-expired'
 import { PRICING_TIERS_QUERY_KEY } from '@/shared/pricing/use-pricing-tiers'
 import { useCartStore } from '@/shared/stores/cart.store'
 import { useCartActions, type ICartPhotoInput } from './use-cart-actions'
@@ -13,7 +15,7 @@ import { useCartState } from './use-cart-state'
 // Hoisted with the mocks below, which the module under test imports as it loads.
 const { http, message } = vi.hoisted(() => ({
   http: { get: vi.fn(), post: vi.fn(), delete: vi.fn() },
-  message: { success: vi.fn(), info: vi.fn(), error: vi.fn() },
+  message: { success: vi.fn(), info: vi.fn(), error: vi.fn(), warning: vi.fn() },
 }))
 
 vi.mock('@/core/http/axios-client', () => ({
@@ -422,6 +424,59 @@ describe('useCartActions', () => {
 
       expect(state.isInCart('p1')).toBe(false)
       expect(toasts('error')).toEqual(['No pudimos agregar la foto. Intenta de nuevo.'])
+    })
+  })
+
+  describe('when the session expires on the way', () => {
+    // What the auth interceptor does when a 401 cannot be renewed.
+    function expireOn(mock: typeof http.post) {
+      mock.mockImplementation(async () => {
+        useSessionStore().expireSession()
+        throw new SessionExpiredError()
+      })
+    }
+
+    it('does not claim a removal the server never made, and says the session expired', async () => {
+      useSessionStore().setAccessToken('token')
+      const { actions } = await setup({ inCart: ['p1', 'p2'] })
+      expireOn(http.delete)
+
+      actions.remove('p1')
+      await flushPromises()
+
+      expect(toasts('info')).toEqual([])
+      expect(toasts('error')).toEqual([])
+      expect(toasts('warning')).toEqual([
+        'Tu sesión venció. Inicia sesión de nuevo para seguir con tu carrito.',
+      ])
+    })
+
+    it('does not claim an add the server never made', async () => {
+      useSessionStore().setAccessToken('token')
+      const { actions } = await setup()
+      expireOn(http.post)
+
+      actions.toggle(photo('p1'))
+      await flushPromises()
+
+      expect(toasts('success')).toEqual([])
+      expect(toasts('error')).toEqual([])
+      expect(toasts('warning')).toHaveLength(1)
+    })
+
+    it('stops the changes still waiting in line, and says it once', async () => {
+      useSessionStore().setAccessToken('token')
+      const { actions } = await setup({ inCart: ['p1', 'p2', 'p3'] })
+      expireOn(http.delete)
+
+      actions.remove('p1')
+      actions.remove('p2')
+      actions.toggle(photo('p9'))
+      await flushPromises()
+
+      expect(http.delete).toHaveBeenCalledTimes(1)
+      expect(http.post).not.toHaveBeenCalled()
+      expect(toasts('warning')).toHaveLength(1)
     })
   })
 

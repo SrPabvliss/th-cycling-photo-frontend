@@ -2,6 +2,7 @@ import type { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axio
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { useSessionStore } from '@/core/auth/stores/session.store'
+import { SessionExpiredError } from '../session-expired'
 
 let _isRefreshing = false
 let _failedQueue: Array<{
@@ -60,26 +61,26 @@ export function registerAuthInterceptor(axios: AxiosInstance): void {
 
     _isRefreshing = true
 
+    let newToken: string
     try {
       const response = await axios.post(API_ROUTES.AUTH.REFRESH, undefined, {
         _skipAuthRetry: true,
         silent: true,
       } as InternalAxiosRequestConfig & { _skipAuthRetry?: boolean; silent?: boolean })
 
-      const newToken: string = response.data.data.accessToken
+      newToken = response.data.data.accessToken
 
       const authStore = useSessionStore()
       authStore.setAccessToken(newToken)
 
       processQueue(null, newToken)
-
-      originalRequest.headers.Authorization = `Bearer ${newToken}`
-      return axios(originalRequest)
     } catch (refreshError) {
-      processQueue(refreshError, null)
+      // Every request waiting on this refresh failed for the same reason: the session expired.
+      const expired = new SessionExpiredError(refreshError)
+      processQueue(expired, null)
 
       const authStore = useSessionStore()
-      authStore.clearSession()
+      authStore.expireSession()
 
       const { default: router } = await import('@/app/router')
       const current = router.currentRoute.value
@@ -91,9 +92,14 @@ export function registerAuthInterceptor(axios: AxiosInstance): void {
         router.push({ path: '/login', query: { redirect: target.fullPath } })
       }
 
-      return Promise.reject(refreshError)
+      return Promise.reject(expired)
     } finally {
       _isRefreshing = false
     }
+
+    // Outside the refresh: a failure of the retried request is its own answer, not an expired
+    // session.
+    originalRequest.headers.Authorization = `Bearer ${newToken}`
+    return axios(originalRequest)
   })
 }

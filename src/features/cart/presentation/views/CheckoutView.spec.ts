@@ -183,6 +183,18 @@ describe('CheckoutView', () => {
     while (mounted.length) mounted.pop()!.unmount()
   })
 
+  it('says the session expired, not that the order has no photos, and comes back here after signing in', async () => {
+    state.groups = []
+    useSessionStore().expireSession()
+    const { wrapper } = await mountView()
+
+    expect(wrapper.text()).toContain('Tu sesión venció')
+    expect(wrapper.text()).not.toContain('No hay fotos en este pedido')
+    expect(buttonNamed(wrapper, 'Iniciar sesión')?.attributes('href')).toBe(
+      '/login?redirect=/checkout/e1',
+    )
+  })
+
   it('says there are no photos for this event, and sends back to the gallery', async () => {
     state.groups = []
     const { wrapper } = await mountView()

@@ -9,6 +9,7 @@ import { usePriceSheet } from '@/features/pricing/composables/use-price-sheet'
 import { useCartActions, useCartState } from '@/shared/cart'
 import { EmptyState } from '@/shared/components/empty-state'
 import { LoadBoundary, TtSkeleton } from '@/shared/components/loading'
+import SessionExpiredNotice from '@/shared/components/SessionExpiredNotice/SessionExpiredNotice.vue'
 import { useDialogFocus } from '@/shared/composables/use-dialog-focus'
 import { quotePhotos } from '@/shared/pricing/quote'
 import { formatMoney } from '@/shared/pricing/tier-cards'
@@ -84,7 +85,15 @@ function explainPrices() {
           </button>
         </div>
 
+        <!-- The session expired with the cart on screen: say so, it is not an empty cart. -->
+        <SessionExpiredNotice
+          v-if="session.expired"
+          text="Inicia sesión de nuevo para seguir con tu carrito. Tus fotos siguen guardadas."
+          @leave="close"
+        />
+
         <LoadBoundary
+          v-else
           :status="cart.status.value"
           :empty="cart.groups.value.length === 0"
           :refreshing="cart.status.value === 'error' && cart.isFetching.value"
