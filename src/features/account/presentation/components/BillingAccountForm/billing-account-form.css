@@ -1,50 +1,151 @@
-.billing-account-form {
+.billing-form {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--tt-space-4);
+  font-family: var(--tt-font-sans);
+  color: var(--tt-ink);
 }
 
-.billing-account-form__consent {
+.billing-form__note {
+  margin: 0;
+  color: var(--tt-ink-muted);
+  font-size: var(--tt-type-body-s-size);
+  line-height: var(--tt-type-body-s-line);
+}
+
+.billing-form__kinds {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  width: 100%;
-}
-
-.billing-account-form__more {
-  align-self: flex-start;
+  gap: var(--tt-space-1);
+  min-inline-size: 0;
+  margin: 0;
   padding: 0;
-  border: none;
-  background: none;
-  color: var(--n-color-target, #2080f0);
-  font-size: 13px;
-  font-weight: 600;
+  border: 0;
+}
+
+.billing-form__label {
+  padding: 0;
+  color: var(--tt-ink);
+  font-size: var(--tt-type-caption-size);
+  line-height: var(--tt-type-caption-line);
+  font-weight: var(--tt-type-title-weight);
+}
+
+/* One choice among three, as a segmented control: the radios keep the arrow keys. */
+.billing-form__segments {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--tt-space-1);
+  padding: var(--tt-space-1);
+  border: thin solid var(--tt-line);
+  border-radius: var(--tt-radius-m);
+  background: var(--tt-surface-raised);
+}
+
+.billing-form__segment {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: calc(var(--tt-control-l) - var(--tt-space-2));
+  border-radius: calc(var(--tt-radius-m) - var(--tt-space-1));
+  color: var(--tt-ink-muted);
+  font-size: var(--tt-type-body-s-size);
+  line-height: var(--tt-type-body-s-line);
+  font-weight: var(--tt-type-title-weight);
   cursor: pointer;
 }
 
-.billing-account-form__details {
-  font-size: 12px;
-  line-height: 1.5;
-  color: #6b7280;
+.billing-form__segment input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
 }
 
-.billing-account-form__details p {
-  margin: 0 0 6px;
+.billing-form__segment:has(input:checked) {
+  background: var(--tt-primary-soft);
+  box-shadow: inset 0 0 0 thin var(--tt-primary-soft-border);
+  color: var(--tt-primary-ink);
 }
 
-.billing-account-form__alert {
-  margin-bottom: 12px;
+.billing-form__segment:has(input:focus-visible) {
+  outline: medium solid var(--tt-focus-ring, var(--tt-primary));
+  outline-offset: calc(var(--tt-space-1) / 2);
 }
 
-.billing-account-form__actions {
+.billing-form__consent {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 8px;
+  gap: var(--tt-space-2);
 }
 
-.billing-account-form__note {
-  margin: 0 0 12px;
-  font-size: 13px;
-  color: var(--tt-ink-muted, #6b7280);
+.billing-form__check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--tt-space-3);
+  font-size: var(--tt-type-body-s-size);
+  line-height: var(--tt-type-body-s-line);
+  cursor: pointer;
+}
+
+.billing-form__check input {
+  flex: none;
+  inline-size: var(--tt-icon-m);
+  block-size: var(--tt-icon-m);
+  margin: 0;
+  accent-color: var(--tt-primary);
+}
+
+.billing-form__check input[aria-invalid='true'] {
+  outline: thin solid var(--tt-danger-ink);
+}
+
+.billing-form__error {
+  color: var(--tt-danger-ink);
+  font-style: normal;
+  font-size: var(--tt-type-caption-size);
+  line-height: var(--tt-type-caption-line);
+}
+
+.billing-form__more {
+  position: relative;
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--tt-primary-ink);
+  font-family: inherit;
+  font-size: var(--tt-type-caption-size);
+  line-height: var(--tt-type-caption-line);
+  font-weight: var(--tt-type-title-weight);
+  cursor: pointer;
+}
+
+/* The link reads small; its touch zone does not. */
+.billing-form__more::after {
+  content: '';
+  position: absolute;
+  inset: 50% auto auto 50%;
+  inline-size: max(100%, var(--tt-control-m));
+  block-size: var(--tt-control-m);
+  transform: translate(-50%, -50%);
+}
+
+.billing-form__details {
+  color: var(--tt-ink-muted);
+  font-size: var(--tt-type-caption-size);
+  line-height: var(--tt-type-caption-line);
+}
+
+.billing-form__details p {
+  margin: 0 0 var(--tt-space-2);
+}
+
+.billing-form__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tt-space-2);
+  margin-block-start: var(--tt-space-1);
 }

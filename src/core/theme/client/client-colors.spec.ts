@@ -22,10 +22,10 @@ const CLIENT = [
   'src/shared/components/BillingSheet',
   'src/assets/styles/payphone-box.css',
 ]
-// Still on the old theme on purpose: the organizer profile and the billing form wait for Pablo's
-// decision on the panel theme; the bridge for the profile is scoped to its own container.
+// Still on the old theme on purpose: the organizer profile keeps its look; its bridge is scoped
+// to its own container.
 const WAITING_FOR_DECISION = [
-  /account\/presentation\/components\/(Profile(BlockCard|BlockIcon|Form|IdentityStrip|OrganizerDesktop|OrganizerMobile|PaneHeader)|EmailSection|PhoneList|BillingAccountForm|InvoiceCard)\//,
+  /account\/presentation\/components\/(Profile(BlockCard|BlockIcon|Form|IdentityStrip|OrganizerDesktop|OrganizerMobile|PaneHeader)|EmailSection|PhoneList|InvoiceCard)\//,
   /account\/presentation\/views\/(profile-content\.css|organizer-profile-bridge\.css)$/,
   /account\/constants\/invoice-state-config\.ts$/,
 ]
