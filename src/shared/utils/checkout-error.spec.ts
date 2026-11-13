@@ -20,9 +20,9 @@ describe('checkoutProblem', () => {
     ['billing.invalid_id_number', 'billing'],
     ['order.customer_profile_required', 'profile'],
     ['payment.card_unavailable', 'card-unavailable'],
-    ['cart.cart_empty', 'already-ordered'],
-    ['cart.event_not_in_cart', 'already-ordered'],
-    ['cart.no_active_cart', 'already-ordered'],
+    ['cart.cart_empty', 'cart-missing'],
+    ['cart.event_not_in_cart', 'cart-missing'],
+    ['cart.no_active_cart', 'cart-missing'],
     ['order.something_else', 'unknown'],
   ])('reads %s as %s', (key, problem) => {
     expect(checkoutProblem(apiError(422, key))).toBe(problem)
@@ -66,7 +66,11 @@ describe('checkoutProblemText', () => {
       'El pago con tarjeta no está disponible',
       'Puedes pagar este pedido por transferencia.',
     ],
-    ['already-ordered', 'Este pedido ya se creó', 'Lo encuentras en Mis fotos.'],
+    [
+      'cart-missing',
+      'No encontramos estas fotos en tu carrito',
+      'Si ya confirmaste este pedido, está en Mis fotos. Si no, vuelve a la galería y agrégalas de nuevo.',
+    ],
     [
       'network',
       'No se pudo completar',

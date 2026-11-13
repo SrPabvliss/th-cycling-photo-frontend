@@ -133,15 +133,33 @@ describe('usePlaceOrder', () => {
     expect(placeOrder.problem.value).toBe('network')
   })
 
-  it('still tries the order when the cart merge fails', async () => {
+  it('stops, and creates no order, when the cart merge gets no answer', async () => {
     post.mockImplementation((url: string) =>
       url === '/cart/merge'
-        ? Promise.reject(new Error('already merged'))
+        ? Promise.reject(new AxiosError('Network Error', 'ERR_NETWORK'))
         : Promise.resolve({ data: { orders: [ORDER] }, meta: {} }),
     )
     const { placeOrder } = setup()
 
-    expect(await placeOrder.place(INPUT)).toEqual([ORDER])
+    expect(await placeOrder.place(INPUT)).toBeNull()
+    expect(calledUrls()).toEqual(['/cart/merge'])
+    expect(placeOrder.problem.value).toBe('network')
+  })
+
+  it('stops, and creates no order, when the cart merge fails on the server', async () => {
+    const response = { status: 500, data: {}, headers: {}, config: {} } as AxiosResponse
+    post.mockImplementation((url: string) =>
+      url === '/cart/merge'
+        ? Promise.reject(
+            new AxiosError('failed', 'ERR_BAD_RESPONSE', undefined, undefined, response),
+          )
+        : Promise.resolve({ data: { orders: [ORDER] }, meta: {} }),
+    )
+    const { placeOrder } = setup()
+
+    expect(await placeOrder.place(INPUT)).toBeNull()
+    expect(checkouts()).toHaveLength(0)
+    expect(placeOrder.problem.value).toBe('network')
   })
 
   it('does not create the order when the consent could not be recorded', async () => {

@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/vue-query'
+import { isAxiosError } from 'axios'
 import { readonly, ref, type Ref } from 'vue'
 
 import { API_ROUTES } from '@/core/api/api-routes'
@@ -10,6 +11,9 @@ import { useCartStore } from '@/shared/stores/cart.store'
 import type { ICheckoutOrderResult } from '@/shared/types/cart.types'
 import { checkoutProblem, type CheckoutProblem } from '@/shared/utils/checkout-error'
 import type { PaymentMethod } from '@/shared/types/payment-method.types'
+
+const isServerFailure = (error: unknown) =>
+  isAxiosError(error) && (error.response?.status ?? 0) >= 500
 
 export interface IPlaceOrderInput {
   eventId: string
@@ -49,14 +53,18 @@ export function usePlaceOrder(): IPlaceOrder {
     problem.value = null
 
     try {
-      // An anonymous cart the buyer filled before signing in becomes the account's.
+      // An anonymous cart the buyer filled before signing in becomes the account's. The server
+      // answers fine when there is nothing to merge, so a failure here is a real one: ordering
+      // anyway would leave those photos out and read as "not in your cart". Stop, nothing is lost.
       await httpClient.post(
         API_ROUTES.CART.MERGE,
         { sessionId: cartStore.sessionId },
         { silent: true },
       )
-    } catch {
-      // Already merged, or nothing to merge.
+    } catch (error) {
+      const failed = checkoutProblem(error)
+      problem.value = failed === 'unknown' && isServerFailure(error) ? 'network' : failed
+      return null
     }
 
     try {

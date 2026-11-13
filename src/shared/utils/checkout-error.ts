@@ -6,7 +6,7 @@ export type CheckoutProblem =
   | 'billing'
   | 'profile'
   | 'card-unavailable'
-  | 'already-ordered'
+  | 'cart-missing'
   | 'network'
   | 'unknown'
 
@@ -14,11 +14,11 @@ const PROBLEM_BY_KEY: Record<string, CheckoutProblem> = {
   'billing.invoice_consent_required': 'consent',
   'order.customer_profile_required': 'profile',
   'payment.card_unavailable': 'card-unavailable',
-  // The cart no longer holds the photos of the event: the order was created already (going back
-  // to the checkout after ordering, or a second tab).
-  'cart.cart_empty': 'already-ordered',
-  'cart.event_not_in_cart': 'already-ordered',
-  'cart.no_active_cart': 'already-ordered',
+  // The server found no photos of this event in the cart. The order may exist already (back to
+  // the checkout after ordering, a second tab), or the photos were taken out: it cannot tell.
+  'cart.cart_empty': 'cart-missing',
+  'cart.event_not_in_cart': 'cart-missing',
+  'cart.no_active_cart': 'cart-missing',
 }
 
 interface IApiErrorBody {
@@ -59,7 +59,10 @@ const TEXT: Record<CheckoutProblem, { title: string; text: string }> = {
     title: 'El pago con tarjeta no está disponible',
     text: 'Puedes pagar este pedido por transferencia.',
   },
-  'already-ordered': { title: 'Este pedido ya se creó', text: 'Lo encuentras en Mis fotos.' },
+  'cart-missing': {
+    title: 'No encontramos estas fotos en tu carrito',
+    text: 'Si ya confirmaste este pedido, está en Mis fotos. Si no, vuelve a la galería y agrégalas de nuevo.',
+  },
   network: {
     title: 'No se pudo completar',
     text: 'Parece un problema de conexión. Nada se perdió: intenta de nuevo.',
