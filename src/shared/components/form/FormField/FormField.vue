@@ -47,7 +47,8 @@ const describedby = computed(
   font-weight: var(--tt-type-title-weight);
 }
 
-.form-field :slotted(input:not([type='checkbox']):not([type='radio'])),
+/* :where adds no weight, so the focus and error borders below still win. */
+.form-field :slotted(input:where(:not([type='checkbox'], [type='radio']))),
 .form-field :slotted(select) {
   inline-size: 100%;
   min-inline-size: 0;
