@@ -18,7 +18,11 @@ export function usePreviewGallery(token: Ref<string>) {
       return toPreviewData(response.data)
     },
     enabled: computed(() => !!token.value),
+    // Each read counts against the link's limit of 10 per minute: no retries, no reading again
+    // on focus, and five minutes before it is considered old.
     retry: false,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60_000,
   })
 
   const isExpired = computed(() => {
