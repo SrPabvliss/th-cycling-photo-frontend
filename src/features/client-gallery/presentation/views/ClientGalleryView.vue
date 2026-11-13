@@ -13,6 +13,7 @@ import { usePhotoSelection } from '../../composables/use-photo-selection'
 import { previewProblem } from '../../utils/preview-problem'
 import PreviewBar from '../components/PreviewBar/PreviewBar.vue'
 import PreviewPicker from '../components/PreviewPicker/PreviewPicker.vue'
+import PreviewViewer from '../components/PreviewViewer/PreviewViewer.vue'
 
 const SKELETON_TILES = 6
 
@@ -136,6 +137,14 @@ function proceed() {
     <template v-else-if="step === 'pick'">
       <PreviewPicker :preview="preview" :selection="selection" @open="viewing = $event" />
       <PreviewBar :count="selection.selected.value.length" @continue="proceed" />
+      <PreviewViewer
+        v-if="viewing"
+        :photos="preview.photos"
+        :photo-id="viewing"
+        :selection="selection"
+        @close="viewing = null"
+        @update:photo-id="viewing = $event"
+      />
     </template>
   </div>
 </template>
