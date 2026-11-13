@@ -20,7 +20,7 @@ export const cartRoutes: RouteRecordRaw[] = [
     path: `${CHECKOUT_PATH}/:eventId`,
     name: CART_ROUTE_NAMES.CHECKOUT,
     component: () => import('./presentation/views/CheckoutView.vue'),
-    meta: { public: true, shell: { footer: false } },
+    meta: { public: true, shell: { footer: false, seasonBar: true } },
   },
   {
     path: `${CHECKOUT_PATH}/:eventId/method`,

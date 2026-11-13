@@ -6,7 +6,13 @@ import { resolveClientShell, type IClientShell } from './client-shell'
 
 const Stub = { render: () => null }
 
-const DEFAULT_SHELL: IClientShell = { tab: null, tabBar: false, header: true, footer: true }
+const DEFAULT_SHELL: IClientShell = {
+  tab: null,
+  tabBar: false,
+  header: true,
+  footer: true,
+  seasonBar: false,
+}
 
 describe('resolveClientShell', () => {
   const router = createRouter({
@@ -35,6 +41,7 @@ describe('resolveClientShell', () => {
       tabBar: true,
       header: true,
       footer: true,
+      seasonBar: false,
     })
   })
 
@@ -44,6 +51,7 @@ describe('resolveClientShell', () => {
       tabBar: true,
       header: true,
       footer: true,
+      seasonBar: false,
     })
   })
 
@@ -53,6 +61,7 @@ describe('resolveClientShell', () => {
       tabBar: false,
       header: true,
       footer: false,
+      seasonBar: false,
     })
   })
 })
@@ -61,22 +70,70 @@ describe('the shell each client route of the app asks for', () => {
   const uuid = '3f0c8f5e-1c1d-4b7a-9a52-0e3d5c7b9a10'
 
   const cases: [path: string, shell: IClientShell][] = [
-    ['/', { tab: 'home', tabBar: true, header: true, footer: true }],
-    ['/gallery', { tab: 'events', tabBar: true, header: true, footer: true }],
-    ['/gallery/vuelta-al-cotopaxi', { tab: 'events', tabBar: false, header: true, footer: false }],
-    ['/account/orders', { tab: 'photos', tabBar: true, header: true, footer: true }],
-    [`/account/orders/${uuid}`, { tab: 'photos', tabBar: false, header: true, footer: false }],
-    ['/account/profile', { tab: 'home', tabBar: false, header: true, footer: false }],
-    ['/account/verify-email', { tab: null, tabBar: false, header: true, footer: false }],
-    ['/login', { tab: null, tabBar: false, header: true, footer: false }],
-    ['/register', { tab: null, tabBar: false, header: true, footer: false }],
-    ['/forgot-password', { tab: null, tabBar: false, header: true, footer: false }],
-    ['/reset-password', { tab: null, tabBar: false, header: true, footer: false }],
-    [`/checkout/${uuid}`, { tab: null, tabBar: false, header: true, footer: false }],
-    ['/checkout/payment', { tab: null, tabBar: false, header: true, footer: false }],
-    ['/checkout/payphone/return', { tab: null, tabBar: false, header: true, footer: false }],
-    ['/preview/some-token', { tab: null, tabBar: false, header: false, footer: false }],
-    ['/delivery/some-token', { tab: null, tabBar: false, header: false, footer: false }],
+    ['/', { tab: 'home', tabBar: true, header: true, footer: true, seasonBar: true }],
+    ['/gallery', { tab: 'events', tabBar: true, header: true, footer: true, seasonBar: true }],
+    [
+      '/gallery/vuelta-al-cotopaxi',
+      { tab: 'events', tabBar: false, header: true, footer: false, seasonBar: true },
+    ],
+    [
+      '/account/orders',
+      { tab: 'photos', tabBar: true, header: true, footer: true, seasonBar: true },
+    ],
+    [
+      `/account/orders/${uuid}`,
+      { tab: 'photos', tabBar: false, header: true, footer: false, seasonBar: true },
+    ],
+    [
+      '/account/profile',
+      { tab: 'home', tabBar: false, header: true, footer: false, seasonBar: false },
+    ],
+    [
+      '/account/verify-email',
+      { tab: null, tabBar: false, header: true, footer: false, seasonBar: false },
+    ],
+    ['/login', { tab: null, tabBar: false, header: true, footer: false, seasonBar: false }],
+    ['/register', { tab: null, tabBar: false, header: true, footer: false, seasonBar: false }],
+    [
+      '/forgot-password',
+      { tab: null, tabBar: false, header: true, footer: false, seasonBar: false },
+    ],
+    [
+      '/reset-password',
+      { tab: null, tabBar: false, header: true, footer: false, seasonBar: false },
+    ],
+    [
+      `/checkout/${uuid}`,
+      { tab: null, tabBar: false, header: true, footer: false, seasonBar: true },
+    ],
+    [
+      `/checkout/${uuid}/method`,
+      { tab: null, tabBar: false, header: true, footer: false, seasonBar: false },
+    ],
+    [
+      `/checkout/received/${uuid}`,
+      { tab: null, tabBar: false, header: true, footer: false, seasonBar: false },
+    ],
+    [
+      `/checkout/confirmed/${uuid}`,
+      { tab: null, tabBar: false, header: true, footer: false, seasonBar: false },
+    ],
+    [
+      '/checkout/payment',
+      { tab: null, tabBar: false, header: true, footer: false, seasonBar: false },
+    ],
+    [
+      '/checkout/payphone/return',
+      { tab: null, tabBar: false, header: true, footer: false, seasonBar: false },
+    ],
+    [
+      '/preview/some-token',
+      { tab: null, tabBar: false, header: false, footer: false, seasonBar: false },
+    ],
+    [
+      '/delivery/some-token',
+      { tab: null, tabBar: false, header: false, footer: false, seasonBar: true },
+    ],
     ['/privacy', DEFAULT_SHELL],
     ['/terms', DEFAULT_SHELL],
     ['/tenant-terms', DEFAULT_SHELL],

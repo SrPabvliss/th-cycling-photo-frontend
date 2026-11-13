@@ -1,10 +1,9 @@
 import { ref, type Ref } from 'vue'
 
-import { BANNER_LOADERS, type IBannerFile } from '../banners/banner-loaders'
-import type { AdFormat } from '../ads-config'
+import { BANNER_LOADERS, type BannerFileKey, type IBannerFile } from '../banners/banner-loaders'
 
 // One download per format and visit, shared by every slot; a failed one is not tried again.
-const cache = new Map<AdFormat, Promise<IBannerFile>>()
+const cache = new Map<BannerFileKey, Promise<IBannerFile>>()
 
 /** For tests: forget what was downloaded. */
 export function resetBannerCache() {
@@ -17,7 +16,7 @@ export interface IBannerFormat {
   load(): void
 }
 
-export function useBannerFormat(format: AdFormat): IBannerFormat {
+export function useBannerFormat(format: BannerFileKey): IBannerFormat {
   const banner = ref<IBannerFile | null>(null)
   const failed = ref(false)
 

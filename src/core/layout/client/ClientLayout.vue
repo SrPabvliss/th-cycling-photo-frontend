@@ -11,10 +11,14 @@ import { useClientShell } from './client-shell'
 // knows no route by name.
 const shell = useClientShell()
 const overlays = useLayoutSlot(LAYOUT_SLOTS.CLIENT_OVERLAY)
+const seasonBars = useLayoutSlot(LAYOUT_SLOTS.CLIENT_SEASON_BAR)
 </script>
 
 <template>
   <div class="client-layout" :data-tab-bar="shell.tabBar ? 'true' : undefined">
+    <template v-if="shell.seasonBar">
+      <component :is="bar" v-for="(bar, index) in seasonBars" :key="index" />
+    </template>
     <ClientHeader v-if="shell.header" />
     <div v-else class="client-layout__brand">
       <ClientLogo />

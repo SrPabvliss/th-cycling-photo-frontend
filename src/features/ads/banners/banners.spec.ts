@@ -85,6 +85,12 @@ describe('generated house banners', () => {
     expect(a.styles.casco).toContain('7.2cqw')
   })
 
+  it('keeps the season bar border inside its height', () => {
+    for (const file of ['season-narrow.json', 'season-wide.json']) {
+      expect(read(file).frame, file).toMatch(/height: \d+px; box-sizing: border-box;/)
+    }
+  })
+
   it('says it is generated', () => {
     for (const file of FILES) expect(read(file).$generated, file).toMatch(/generado, no editar/)
   })

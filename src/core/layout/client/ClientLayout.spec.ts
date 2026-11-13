@@ -33,6 +33,11 @@ async function mountAt(path: string) {
           { path: 'plain', component: Screen('pantalla simple') },
           { path: 'detail', component: Screen('detalle'), meta: { shell: { footer: false } } },
           {
+            path: 'season',
+            component: Screen('con temporada'),
+            meta: { shell: { seasonBar: true } },
+          },
+          {
             path: 'private',
             component: Screen('enlace privado'),
             meta: { shell: { header: false, footer: false } },
@@ -110,6 +115,23 @@ describe('ClientLayout', () => {
     const { wrapper } = await mountAt('/private')
 
     expect(has(wrapper, 'client-overlay')).toBe(true)
+  })
+
+  it('puts what features registered for the season bar above the header, only where asked', async () => {
+    registerLayoutSlot(
+      LAYOUT_SLOTS.CLIENT_SEASON_BAR,
+      defineComponent({ render: () => h('aside', { 'data-test': 'season-bar' }) }),
+    )
+
+    const plain = await mountAt('/plain')
+    expect(has(plain.wrapper, 'season-bar')).toBe(false)
+
+    const { wrapper } = await mountAt('/season')
+    const root = wrapper.get('.client-layout').element
+    const bar = wrapper.get('[data-test="season-bar"]').element
+    const header = wrapper.get('[data-test="ClientHeader"]').element
+    expect(root.firstElementChild).toBe(bar)
+    expect(bar.compareDocumentPosition(header) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
   it('applies the shell of the next route without mounting the layout again', async () => {

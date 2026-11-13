@@ -9,6 +9,6 @@ export const deliveryRoutes: RouteRecordRaw[] = [
     path: '/delivery/:token',
     name: DELIVERY_ROUTE_NAMES.DELIVERY,
     component: () => import('./presentation/views/DeliveryView.vue'),
-    meta: { public: true, shell: { header: false, footer: false } },
+    meta: { public: true, shell: { header: false, footer: false, seasonBar: true } },
   },
 ]

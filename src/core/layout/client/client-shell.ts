@@ -13,6 +13,8 @@ export interface IClientShellMeta {
   /** Full header. Without it the shell shows only the logo. */
   header?: boolean
   footer?: boolean
+  /** House season bar above the header (or above the logo strip). */
+  seasonBar?: boolean
 }
 
 export interface IClientShell {
@@ -20,9 +22,16 @@ export interface IClientShell {
   tabBar: boolean
   header: boolean
   footer: boolean
+  seasonBar: boolean
 }
 
-const DEFAULT_SHELL: IClientShell = { tab: null, tabBar: false, header: true, footer: true }
+const DEFAULT_SHELL: IClientShell = {
+  tab: null,
+  tabBar: false,
+  header: true,
+  footer: true,
+  seasonBar: false,
+}
 
 /**
  * Shell of a route: the `meta.shell` of the deepest matched record that declares one, completed

@@ -24,8 +24,8 @@ describe('useBannerFormat', () => {
     await flushPromises()
 
     expect(loaders.B).toHaveBeenCalledTimes(1)
-    expect(first.banner.value?.styles.topo).toBe('t')
-    expect(second.banner.value?.styles.casco).toBe('c')
+    expect(first.banner.value?.styles?.topo).toBe('t')
+    expect(second.banner.value?.styles?.casco).toBe('c')
   })
 
   it('gives up for the visit when the file cannot be downloaded', async () => {

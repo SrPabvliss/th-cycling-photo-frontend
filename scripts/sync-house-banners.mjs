@@ -91,7 +91,15 @@ for (const [variant, name] of [
 ]) {
   files[`season-${name}.json`] = {
     $generated: HEADER,
-    frame: check(`T.${variant}`, clean(BN.T[variant]), null),
+    // The bar keeps exactly the height the app reserves for it: its bottom border goes inside.
+    frame: check(
+      `T.${variant}`,
+      clean(BN.T[variant]).replace(
+        /height: (\d+)px; overflow: hidden;/,
+        'height: $1px; box-sizing: border-box; overflow: hidden;',
+      ),
+      null,
+    ),
     styles: styles(BN.E[variant], `E.${variant}`, 'E'),
   }
   files[`sponsor-${name}.json`] = {

@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { computed, onMounted, onScopeDispose, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 
 import maskUrl from '@/assets/ads/helmet-mask.webp'
 import { AD_RATIO, ADS_ENABLED, type AdFormat } from '../../../ads-config'
 import { BANNER_COPY } from '../../../banners/banner-copy'
 import { useBannerFormat } from '../../../composables/use-banner-format'
+import { useNearScreen } from '../../../composables/use-near-screen'
 import { AD_STARTED_AT, fillBanner, organizerSlide, slideDelay } from '../../../utils/ad-rotation'
 
 const STYLES = ['topo', 'casco', 'textura', 'facetado'] as const
-/** How near the screen a slot starts downloading its banners. */
-const LOAD_MARGIN = '200px'
 
 // A house ad: it keeps the shape of its format from the first paint and rotates four styles.
 // The banners are decorative, so the moving part is hidden from screen readers and the keyboard.
@@ -30,7 +29,7 @@ const format = computed<AdFormat>(() =>
 // The format can change (turning the phone): each one keeps its own download.
 const loaded = computed(() => useBannerFormat(format.value))
 const root = ref<HTMLElement | null>(null)
-const near = ref(false)
+const near = useNearScreen(root, ADS_ENABLED)
 
 watch(
   [near, loaded],
@@ -40,26 +39,6 @@ watch(
   { immediate: true },
 )
 
-let observer: IntersectionObserver | null = null
-onMounted(() => {
-  if (!ADS_ENABLED || !root.value) return
-  if (typeof IntersectionObserver === 'undefined') {
-    near.value = true
-    return
-  }
-  observer = new IntersectionObserver(
-    (entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        near.value = true
-        observer?.disconnect()
-      }
-    },
-    { rootMargin: LOAD_MARGIN },
-  )
-  observer.observe(root.value)
-})
-onScopeDispose(() => observer?.disconnect())
-
 const slides = computed(() => {
   const file = loaded.value.banner.value
   if (!file) return []
@@ -67,7 +46,8 @@ const slides = computed(() => {
   const now = Date.now()
   const all = STYLES.map((style, index) => {
     const message = index === organizerAt ? 'organizador' : 'marca'
-    const html = (message === 'organizador' && file.organizer?.[style]) || file.styles[style] || ''
+    const html =
+      (message === 'organizador' && file.organizer?.[style]) || file.styles?.[style] || ''
     return {
       style,
       html: fillBanner(html, { ...BANNER_COPY[format.value][message], maskUrl }),

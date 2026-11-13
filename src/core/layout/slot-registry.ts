@@ -6,6 +6,8 @@ export const LAYOUT_SLOTS = {
   PUBLIC_NAV_OVERLAY: 'public-nav-overlay',
   /** Layers that float over every client screen, with or without the header. */
   CLIENT_OVERLAY: 'client-overlay',
+  /** The house season bar, above the header of the client screens that ask for it. */
+  CLIENT_SEASON_BAR: 'client-season-bar',
 } as const
 
 export type LayoutSlot = (typeof LAYOUT_SLOTS)[keyof typeof LAYOUT_SLOTS]
