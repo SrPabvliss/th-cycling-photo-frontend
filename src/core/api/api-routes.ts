@@ -140,6 +140,7 @@ export const API_ROUTES = {
   PUBLIC_EVENTS: {
     BASE: PUBLIC_EVENTS_BASE,
     GET_ALL: PUBLIC_EVENTS_BASE,
+    FILTERS: `${PUBLIC_EVENTS_BASE}/filters`,
     GET_BY_SLUG: (slug: string) => `${PUBLIC_EVENTS_BASE}/${slug}`,
     PHOTOS: (slug: string) => `${PUBLIC_EVENTS_BASE}/${slug}/photos`,
   },
