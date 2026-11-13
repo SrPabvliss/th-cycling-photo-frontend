@@ -1,5 +1,9 @@
 import { nextTick, onScopeDispose, watch, type Ref } from 'vue'
 
+// Open layers, the last one on top. Only the top one answers the keyboard: a sheet opened over
+// the cart closes alone on Escape and keeps Tab to itself.
+const openLayers: symbol[] = []
+
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
@@ -13,6 +17,7 @@ export function useDialogFocus(
   isOpen: () => boolean,
   onEscape: () => void,
 ): void {
+  const layer = Symbol('dialog layer')
   let opener: HTMLElement | null = null
   let previousOverflow = ''
   let isActive = false
@@ -23,6 +28,7 @@ export function useDialogFocus(
     )
 
   function onKeydown(event: KeyboardEvent) {
+    if (openLayers[openLayers.length - 1] !== layer) return
     if (event.key === 'Escape') {
       event.preventDefault()
       onEscape()
@@ -50,6 +56,7 @@ export function useDialogFocus(
   function activate() {
     if (isActive) return
     isActive = true
+    openLayers.push(layer)
     opener = document.activeElement instanceof HTMLElement ? document.activeElement : null
     previousOverflow = document.documentElement.style.overflow
     document.documentElement.style.overflow = 'hidden'
@@ -59,6 +66,7 @@ export function useDialogFocus(
   function release() {
     if (!isActive) return
     isActive = false
+    openLayers.splice(openLayers.indexOf(layer), 1)
     document.documentElement.style.overflow = previousOverflow
     document.removeEventListener('keydown', onKeydown)
     // Back to what opened it, if it is still on the page.

@@ -118,4 +118,71 @@ describe('useDialogFocus', () => {
 
     expect(document.documentElement.style.overflow).toBe('')
   })
+
+  describe('with one layer over another (the price sheet over the cart)', () => {
+    const Layer = (name: string) =>
+      defineComponent({
+        props: { open: Boolean },
+        emits: ['close'],
+        setup(props, { emit }) {
+          const panel = ref<HTMLElement | null>(null)
+          useDialogFocus(
+            panel,
+            () => props.open,
+            () => emit('close'),
+          )
+          return () =>
+            props.open
+              ? h('div', { ref: panel, tabindex: -1, id: name }, [
+                  h('button', { id: `${name}-first` }, 'uno'),
+                  h('button', { id: `${name}-last` }, 'dos'),
+                ])
+              : null
+        },
+      })
+
+    async function openBoth() {
+      document.body.innerHTML = ''
+      const below = mount(Layer('below'), { props: { open: true }, attachTo: document.body })
+      await nextTick()
+      await nextTick()
+      const opener = document.getElementById('below-last') as HTMLButtonElement
+      opener.focus()
+      const above = mount(Layer('above'), { props: { open: true }, attachTo: document.body })
+      await nextTick()
+      await nextTick()
+      return { below, above, opener }
+    }
+
+    it('lets Escape close only the layer on top', async () => {
+      const { below, above } = await openBoth()
+
+      press('Escape')
+
+      expect(above.emitted('close')).toHaveLength(1)
+      expect(below.emitted('close')).toBeUndefined()
+    })
+
+    it('keeps Tab inside the layer on top', async () => {
+      await openBoth()
+      expect(document.activeElement?.id).toBe('above-first')
+
+      press('Tab')
+      document.getElementById('above-last')!.focus()
+      press('Tab')
+
+      expect(document.activeElement?.id).toBe('above-first')
+    })
+
+    it('gives the keyboard back to the layer below once the top one closes', async () => {
+      const { below, above, opener } = await openBoth()
+
+      await above.setProps({ open: false })
+      await nextTick()
+      expect(document.activeElement).toBe(opener)
+
+      press('Escape')
+      expect(below.emitted('close')).toHaveLength(1)
+    })
+  })
 })
