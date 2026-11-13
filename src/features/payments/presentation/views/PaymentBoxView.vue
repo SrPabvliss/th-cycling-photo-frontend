@@ -8,7 +8,10 @@ import { ROUTE_NAMES } from '@/core/navigation/route-names'
 import { checkoutPath, ROUTE_PATHS } from '@/core/navigation/route-paths'
 import NotFoundView from '@/core/views/NotFoundView.vue'
 import { useCreatePaymentIntent } from '@/features/payments/composables/mutations/use-create-payment-intent'
+import { useDeclinedActions } from '@/features/payments/composables/use-declined-actions'
 import { findPaymentGateway } from '@/features/payments/gateways/registry'
+import { rememberCardPaymentEvent } from '@/features/payments/utils/card-payment-event'
+import CheckoutProblemAlert from '@/shared/components/CheckoutProblemAlert/CheckoutProblemAlert.vue'
 import { EmptyState } from '@/shared/components/empty-state'
 import { BusyNote, ErrorState } from '@/shared/components/loading'
 import { formatMoney } from '@/shared/pricing/tier-cards'
@@ -81,10 +84,15 @@ function goBack() {
   router.push(eventId.value ? checkoutPath(eventId.value) : ROUTE_PATHS.PUBLIC_GALLERY)
 }
 
+const transfer = useDeclinedActions(orderIds)
+
 watch(
   orderIds,
   (ids) => {
-    if (ids.length > 0) requestIntent()
+    if (ids.length === 0) return
+    // The gateway sends the buyer back without the event: kept for the way back to the order.
+    if (eventId.value) rememberCardPaymentEvent(ids, eventId.value)
+    requestIntent()
   },
   { immediate: true },
 )
@@ -124,13 +132,29 @@ watch(
       </template>
     </EmptyState>
 
-    <ErrorState
-      v-else-if="failure === 'failed'"
-      title="No pudimos abrir el pago"
-      text="No se hizo ningún cargo."
-      :retrying="isCreatingIntent"
-      @retry="requestIntent"
-    />
+    <template v-else-if="failure === 'failed'">
+      <ErrorState
+        title="No pudimos abrir el pago"
+        text="No se hizo ningún cargo."
+        :retrying="isCreatingIntent"
+        @retry="requestIntent"
+      />
+      <NButton
+        size="large"
+        block
+        :loading="transfer.isSwitching.value"
+        :disabled="transfer.isSwitching.value"
+        :aria-busy="transfer.isSwitching.value ? 'true' : undefined"
+        @click="transfer.payByTransfer()"
+      >
+        Pagar por transferencia
+      </NButton>
+      <CheckoutProblemAlert
+        v-if="transfer.problem.value"
+        :problem="transfer.problem.value"
+        :gallery-path="ROUTE_PATHS.PUBLIC_GALLERY"
+      />
+    </template>
 
     <component
       :is="gateway.checkoutComponent"

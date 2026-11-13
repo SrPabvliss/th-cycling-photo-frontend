@@ -29,6 +29,11 @@ const CheckoutStub = defineComponent({
   template: '<div class="gateway-checkout" />',
 })
 
+const payByTransfer = vi.fn()
+vi.mock('@/features/payments/composables/use-declined-actions', () => ({
+  useDeclinedActions: () => ({ payByTransfer, isSwitching: ref(false), problem: ref(null) }),
+}))
+
 const findPaymentGateway = vi.fn()
 vi.mock('@/features/payments/gateways/registry', () => ({
   findPaymentGateway: (provider: string) => findPaymentGateway(provider),
@@ -37,6 +42,7 @@ vi.mock('@/core/views/NotFoundView.vue', () => ({
   default: { template: '<div data-test="not-found">404</div>' },
 }))
 
+import { cardPaymentEvent } from '../../utils/card-payment-event'
 import PaymentBoxView from './PaymentBoxView.vue'
 
 function setupGateway() {
@@ -80,6 +86,8 @@ beforeEach(() => {
   mutate.mockClear()
   findPaymentGateway.mockReset()
   routeQuery.value = { orders: 'o1,o2', evento: 'e1' }
+  payByTransfer.mockReset()
+  sessionStorage.clear()
   intentData.value = undefined
   intentError.value = undefined
   isPending.value = false
@@ -124,6 +132,21 @@ describe('PaymentBoxView', () => {
 
     expect(mutate).toHaveBeenCalledTimes(2)
     expect(mutate).toHaveBeenLastCalledWith(['o1', 'o2'])
+  })
+
+  it('offers to pay by transfer instead when the payment could not be opened', async () => {
+    intentError.value = new AxiosError('Network Error', 'ERR_NETWORK')
+    const { wrapper } = await mountView()
+
+    await buttonNamed(wrapper, 'Pagar por transferencia')!.trigger('click')
+
+    expect(payByTransfer).toHaveBeenCalledTimes(1)
+  })
+
+  it('remembers the event of the orders for the way back from the gateway', async () => {
+    await mountView()
+
+    expect(cardPaymentEvent(['o1', 'o2'])).toBe('e1')
   })
 
   it('treats a gateway that fails to set up like a payment that could not open', async () => {

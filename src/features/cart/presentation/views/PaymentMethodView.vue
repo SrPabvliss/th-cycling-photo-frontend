@@ -13,7 +13,7 @@ import { usePricingTiersQuery } from '@/shared/pricing/use-pricing-tiers'
 import type { PaymentMethod } from '@/shared/types/payment-method.types'
 import { usePlaceOrder } from '../../composables/use-place-order'
 import { useCheckoutDraftStore } from '../../stores/checkout-draft.store'
-import CheckoutProblemAlert from '../components/CheckoutProblemAlert/CheckoutProblemAlert.vue'
+import CheckoutProblemAlert from '@/shared/components/CheckoutProblemAlert/CheckoutProblemAlert.vue'
 
 interface IMethodOption {
   value: PaymentMethod

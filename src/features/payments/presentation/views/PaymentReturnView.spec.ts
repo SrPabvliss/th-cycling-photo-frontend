@@ -4,12 +4,20 @@ import { ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 import type { PaymentOutcome } from '../../utils/payment-outcome'
+import { rememberCardPaymentEvent } from '../../utils/card-payment-event'
 import PaymentReturnView from './PaymentReturnView.vue'
 
 const outcome = ref<PaymentOutcome>('confirming')
 const orderIds = ref<string[]>([])
 const retry = vi.fn()
 const isAsking = ref(true)
+
+const payByTransfer = vi.fn()
+const isSwitching = ref(false)
+const switchProblem = ref<string | null>(null)
+vi.mock('../../composables/use-declined-actions', () => ({
+  useDeclinedActions: () => ({ payByTransfer, isSwitching, problem: switchProblem }),
+}))
 
 vi.mock('../../composables/use-payment-return', () => ({
   usePaymentReturn: () => ({ outcome, orderIds, retry, isAsking }),
@@ -34,6 +42,10 @@ describe('PaymentReturnView', () => {
     outcome.value = 'confirming'
     orderIds.value = []
     isAsking.value = true
+    payByTransfer.mockReset()
+    isSwitching.value = false
+    switchProblem.value = null
+    sessionStorage.clear()
     retry.mockReset()
   })
   afterEach(() => {
@@ -81,6 +93,55 @@ describe('PaymentReturnView', () => {
 
     expect(wrapper.get('h1').text()).toBe('No se pudo cobrar tu tarjeta')
     expect(wrapper.text()).toContain('No se hizo ningún cargo. Tus fotos siguen en el carrito.')
+  })
+
+  it('offers another card, transfer, or the way back to the order of the event', async () => {
+    outcome.value = 'declined'
+    orderIds.value = ['o1', 'o2']
+    rememberCardPaymentEvent(['o1', 'o2'], 'e1')
+    const wrapper = await mountView()
+
+    const link = (name: string) =>
+      wrapper
+        .findAll('a')
+        .find((each) => each.text().trim() === name)
+        ?.attributes('href')
+    expect(link('Intentar con otra tarjeta')).toBe('/checkout/payment?orders=o1,o2&evento=e1')
+    expect(link('Volver al pedido')).toBe('/checkout/e1')
+
+    await wrapper
+      .findAll('button')
+      .find((each) => each.text().trim() === 'Pagar por transferencia')!
+      .trigger('click')
+    expect(payByTransfer).toHaveBeenCalledTimes(1)
+  })
+
+  it('leads back to the gallery when the event is not known', async () => {
+    outcome.value = 'declined'
+    orderIds.value = ['o1']
+    const wrapper = await mountView()
+
+    const back = wrapper.findAll('a').find((each) => each.text().trim() === 'Volver al pedido')
+    expect(back?.attributes('href')).toBe('/gallery')
+    const again = wrapper
+      .findAll('a')
+      .find((each) => each.text().trim() === 'Intentar con otra tarjeta')
+    expect(again?.attributes('href')).toBe('/checkout/payment?orders=o1')
+  })
+
+  it('shows the transfer switch busy, and its problem next to it', async () => {
+    outcome.value = 'declined'
+    orderIds.value = ['o1']
+    isSwitching.value = true
+    switchProblem.value = 'network'
+    const wrapper = await mountView()
+
+    const button = wrapper
+      .findAll('button')
+      .find((each) => each.text().includes('Pagar por transferencia'))!
+    expect(button.attributes('disabled')).toBeDefined()
+    expect(button.attributes('aria-busy')).toBe('true')
+    expect(wrapper.get('[role="alert"]').text()).toContain('Parece un problema de conexión.')
   })
 
   it('offers to retry when the payment could not be asked about', async () => {

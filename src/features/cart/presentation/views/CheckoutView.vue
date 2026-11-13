@@ -19,7 +19,7 @@ import { formatMoney } from '@/shared/pricing/tier-cards'
 import { usePricingTiersQuery } from '@/shared/pricing/use-pricing-tiers'
 import { useCheckoutDraftStore } from '../../stores/checkout-draft.store'
 import { usePlaceOrder } from '../../composables/use-place-order'
-import CheckoutProblemAlert from '../components/CheckoutProblemAlert/CheckoutProblemAlert.vue'
+import CheckoutProblemAlert from '@/shared/components/CheckoutProblemAlert/CheckoutProblemAlert.vue'
 import CheckoutSummary from '../components/CheckoutSummary/CheckoutSummary.vue'
 
 const SKELETON_THUMBS = 3

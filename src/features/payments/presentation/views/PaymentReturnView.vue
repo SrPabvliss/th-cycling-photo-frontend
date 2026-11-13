@@ -2,12 +2,29 @@
 import { computed } from 'vue'
 import { NButton } from 'naive-ui'
 
-import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+import { checkoutPath, ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { EmptyState } from '@/shared/components/empty-state'
 import { BusyNote, ErrorState } from '@/shared/components/loading'
+import CheckoutProblemAlert from '@/shared/components/CheckoutProblemAlert/CheckoutProblemAlert.vue'
+import { useDeclinedActions } from '../../composables/use-declined-actions'
 import { usePaymentReturn } from '../../composables/use-payment-return'
+import { cardPaymentEvent } from '../../utils/card-payment-event'
 
 const { outcome, orderIds, isAsking, retry } = usePaymentReturn()
+const transfer = useDeclinedActions(orderIds)
+
+// Declined: the same orders can take another card (a new intent) or a transfer.
+const eventId = computed(() => cardPaymentEvent(orderIds.value))
+const anotherCard = computed(() => ({
+  path: ROUTE_PATHS.PAYMENT_BOX,
+  query: {
+    orders: orderIds.value.join(','),
+    ...(eventId.value ? { evento: eventId.value } : {}),
+  },
+}))
+const backToOrder = computed(() =>
+  eventId.value ? checkoutPath(eventId.value) : ROUTE_PATHS.PUBLIC_GALLERY,
+)
 
 const orderPath = computed(() =>
   orderIds.value[0]
@@ -59,7 +76,31 @@ const orderPath = computed(() =>
       title="No se pudo cobrar tu tarjeta"
       text="No se hizo ningún cargo. Tus fotos siguen en el carrito."
       :heading-level="1"
-    />
+    >
+      <template #actions>
+        <RouterLink v-slot="{ href, navigate }" :to="anotherCard" custom>
+          <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
+            Intentar con otra tarjeta
+          </NButton>
+        </RouterLink>
+        <NButton
+          size="large"
+          block
+          :loading="transfer.isSwitching.value"
+          :disabled="transfer.isSwitching.value"
+          :aria-busy="transfer.isSwitching.value ? 'true' : undefined"
+          @click="transfer.payByTransfer()"
+        >
+          Pagar por transferencia
+        </NButton>
+        <CheckoutProblemAlert
+          v-if="transfer.problem.value"
+          :problem="transfer.problem.value"
+          :gallery-path="backToOrder"
+        />
+        <RouterLink class="payment-return__link" :to="backToOrder">Volver al pedido</RouterLink>
+      </template>
+    </EmptyState>
 
     <ErrorState
       v-else

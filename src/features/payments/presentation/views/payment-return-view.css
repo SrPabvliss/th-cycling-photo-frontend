@@ -42,3 +42,14 @@
   font-size: var(--tt-type-body-size);
   line-height: var(--tt-type-body-line);
 }
+
+.payment-return__link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--tt-control-m);
+  color: var(--tt-primary-ink);
+  text-decoration: none;
+  font-size: var(--tt-type-body-s-medium-size);
+  font-weight: var(--tt-type-title-weight);
+}
