@@ -8,13 +8,15 @@ import type { IApiCurrentUser } from '@/core/auth/current-user'
 import { ACCOUNT_QUERY_KEYS } from '../../constants/query-keys'
 import type { IConfirmEmailVerificationRequest } from '../../types/requests/confirm-email-verification.request'
 
-export function useConfirmEmailVerification() {
+export function useConfirmEmailVerification(options: { silent?: boolean } = {}) {
   const queryClient = useQueryClient()
   const authStore = useSessionStore()
 
   return useMutation({
     mutationFn: async (payload: IConfirmEmailVerificationRequest) => {
-      await httpClient.post(API_ROUTES.AUTH.EMAIL_VERIFICATION.CONFIRM, payload)
+      await httpClient.post(API_ROUTES.AUTH.EMAIL_VERIFICATION.CONFIRM, payload, {
+        silent: options.silent,
+      })
     },
     onSuccess: async () => {
       if (!authStore.accessToken) return
