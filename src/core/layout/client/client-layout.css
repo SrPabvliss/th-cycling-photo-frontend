@@ -7,6 +7,16 @@ html[data-tt-area='client'] #app {
   height: auto;
 }
 
+html[data-tt-area='client'] body {
+  background: var(--tt-surface);
+  color: var(--tt-ink);
+  font-family: var(--tt-font-sans);
+}
+
+html[data-tt-area='client'][data-tt-scheme='dark'] {
+  color-scheme: dark;
+}
+
 .client-layout {
   display: flex;
   flex-direction: column;

@@ -18,7 +18,7 @@
   margin: 0;
   font-size: 14px;
   line-height: 1.65;
-  color: var(--tt-neutral-dark);
+  color: var(--tt-ink, var(--tt-neutral-dark));
   text-align: center;
 }
 

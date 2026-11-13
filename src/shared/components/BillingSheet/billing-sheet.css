@@ -1,7 +1,7 @@
 .billing-sheet__scrim {
   position: fixed;
   inset: 0;
-  background: rgba(17, 24, 39, 0.35);
+  background: var(--tt-scrim, rgba(17, 24, 39, 0.35));
   z-index: 60;
   animation: billing-sheet-fade 0.18s ease-out;
 }
@@ -18,9 +18,9 @@
   right: 0;
   bottom: 0;
   max-height: 92vh;
-  background: #fff;
+  background: var(--tt-surface-raised, #fff);
   border-radius: 16px 16px 0 0;
-  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.16);
+  box-shadow: var(--tt-shadow-sheet, 0 -8px 24px rgba(0, 0, 0, 0.16));
   z-index: 61;
   display: flex;
   flex-direction: column;
@@ -54,7 +54,7 @@
   width: 40px;
   height: 4px;
   border-radius: 999px;
-  background: #d1d5db;
+  background: var(--tt-line, #d1d5db);
 }
 
 .billing-sheet__head {
@@ -63,12 +63,12 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 16px 12px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--tt-line-subtle, #e5e7eb);
 }
 
 .billing-sheet__head b {
   font-size: 15px;
-  color: #1a1f2c;
+  color: var(--tt-ink, #1a1f2c);
 }
 
 .billing-sheet__close {
@@ -77,7 +77,7 @@
   border: none;
   background: none;
   font-size: 16px;
-  color: #6b7280;
+  color: var(--tt-ink-muted, #6b7280);
   cursor: pointer;
 }
 

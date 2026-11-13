@@ -107,14 +107,14 @@ function confirm() {
   gap: 10px;
   align-items: flex-start;
   padding: 10px 12px;
-  border: 1px solid #e5e7eb;
+  border: thin solid var(--tt-line);
   border-radius: 10px;
   cursor: pointer;
 }
 
 .billing-picker__account--selected {
-  border-color: #2080f0;
-  background: #f3f8ff;
+  border-color: var(--tt-primary);
+  background: var(--tt-primary-soft);
 }
 
 .billing-picker__text {
@@ -122,7 +122,7 @@ function confirm() {
   flex-direction: column;
   gap: 2px;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--tt-ink-muted);
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -132,7 +132,7 @@ function confirm() {
 }
 
 .billing-picker__text strong {
-  color: #1a1f2c;
+  color: var(--tt-ink);
   font-size: 14px;
 }
 
@@ -141,7 +141,7 @@ function confirm() {
   padding: 4px 0;
   border: none;
   background: none;
-  color: #2080f0;
+  color: var(--tt-primary-ink);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;

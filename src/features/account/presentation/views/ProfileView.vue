@@ -173,3 +173,5 @@ const plural = (count: number, one: string, many: string) => `${count} ${count =
 </template>
 
 <style scoped src="./styles/profile-view.css"></style>
+
+<style src="./organizer-profile-bridge.css"></style>
