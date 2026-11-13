@@ -237,8 +237,11 @@ describe('usePaymentReturn', () => {
     confirm.mockReturnValue(new Promise(() => {}))
     serve({ [TX_URL]: transaction('confirming'), [ORDER_URL]: order('confirming') })
     await start()
-    await advance(10_000 + 120_000)
+    await advance(10_000)
+    expect(state.isAsking.value).toBe(true)
+    await advance(120_000)
     const after = calls(TX_URL)
+    expect(state.isAsking.value).toBe(false)
 
     await advance(30_000)
     expect(calls(TX_URL)).toBe(after)

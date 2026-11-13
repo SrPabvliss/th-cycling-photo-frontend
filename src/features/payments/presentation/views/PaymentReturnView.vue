@@ -7,7 +7,7 @@ import { EmptyState } from '@/shared/components/empty-state'
 import { BusyNote, ErrorState } from '@/shared/components/loading'
 import { usePaymentReturn } from '../../composables/use-payment-return'
 
-const { outcome, orderIds, retry } = usePaymentReturn()
+const { outcome, orderIds, isAsking, retry } = usePaymentReturn()
 
 const orderPath = computed(() =>
   orderIds.value[0]
@@ -30,8 +30,17 @@ const orderPath = computed(() =>
       <p class="payment-return__text">No cierres esta página. Tarda unos segundos.</p>
     </div>
 
-    <div v-else-if="outcome === 'late'" class="payment-return__wait" aria-busy="true">
-      <BusyNote text="Seguimos confirmando tu pago" class="payment-return__spinner" />
+    <!-- After two minutes it stops asking: the spinner goes, the words and the way out stay. -->
+    <div
+      v-else-if="outcome === 'late'"
+      class="payment-return__wait"
+      :aria-busy="isAsking ? 'true' : undefined"
+    >
+      <BusyNote
+        v-if="isAsking"
+        text="Seguimos confirmando tu pago"
+        class="payment-return__spinner"
+      />
       <h1 class="payment-return__title">Seguimos confirmando tu pago</h1>
       <p class="payment-return__text">
         Está tardando más de lo normal. No se cobra dos veces. Puedes salir de esta página: el

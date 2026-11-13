@@ -35,6 +35,8 @@ const RESOLVED_DECLINED = new Set(['declined', 'expired', 'reversed', 'cancelled
 export interface IPaymentReturn {
   outcome: Readonly<Ref<PaymentOutcome>>
   orderIds: Readonly<Ref<string[]>>
+  /** Still waiting for an answer. False once the two minutes of asking are over. */
+  isAsking: Readonly<Ref<boolean>>
   retry(): void
 }
 
@@ -69,11 +71,13 @@ export function usePaymentReturn(): IPaymentReturn {
   let pollTimer: ReturnType<typeof setInterval> | undefined
   let pollStopTimer: ReturnType<typeof setTimeout> | undefined
   let disposed = false
+  const polling = ref(false)
 
   function stopPolling() {
     clearInterval(pollTimer)
     clearTimeout(pollStopTimer)
     pollTimer = undefined
+    polling.value = false
   }
 
   function fetchTransaction(id: string) {
@@ -168,6 +172,7 @@ export function usePaymentReturn(): IPaymentReturn {
     if (current === 'late' && !pollTimer && confirmation) {
       const id = confirmation.clientTransactionId
       pollTimer = setInterval(() => void poll(id), POLL_EVERY_MS)
+      polling.value = true
       pollStopTimer = setTimeout(stopPolling, POLL_FOR_MS)
       return
     }
@@ -188,6 +193,9 @@ export function usePaymentReturn(): IPaymentReturn {
   return {
     outcome: readonly(outcome),
     orderIds: readonly(orderIds) as Readonly<Ref<string[]>>,
+    isAsking: computed(
+      () => outcome.value === 'confirming' || (outcome.value === 'late' && polling.value),
+    ),
     retry: () => void run(),
   }
 }

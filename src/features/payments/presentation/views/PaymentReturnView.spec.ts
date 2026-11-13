@@ -9,9 +9,10 @@ import PaymentReturnView from './PaymentReturnView.vue'
 const outcome = ref<PaymentOutcome>('confirming')
 const orderIds = ref<string[]>([])
 const retry = vi.fn()
+const isAsking = ref(true)
 
 vi.mock('../../composables/use-payment-return', () => ({
-  usePaymentReturn: () => ({ outcome, orderIds, retry }),
+  usePaymentReturn: () => ({ outcome, orderIds, retry, isAsking }),
 }))
 
 const mounted: { unmount(): void }[] = []
@@ -32,6 +33,7 @@ describe('PaymentReturnView', () => {
     document.body.innerHTML = ''
     outcome.value = 'confirming'
     orderIds.value = []
+    isAsking.value = true
     retry.mockReset()
   })
   afterEach(() => {
@@ -58,6 +60,19 @@ describe('PaymentReturnView', () => {
     expect(wrapper.text()).not.toContain('Pago confirmado')
     const link = wrapper.findAll('a').find((each) => each.text().trim() === 'Ver mi pedido')
     expect(link?.attributes('href')).toBe('/account/orders/o1')
+  })
+
+  it('stops the spinner, keeping the words and the way to the order, once it stops asking', async () => {
+    outcome.value = 'late'
+    orderIds.value = ['o1']
+    isAsking.value = false
+    const wrapper = await mountView()
+
+    expect(wrapper.find('[role="status"]').exists()).toBe(false)
+    expect(wrapper.find('[aria-busy="true"]').exists()).toBe(false)
+    expect(wrapper.get('h1').text()).toBe('Seguimos confirmando tu pago')
+    expect(wrapper.text()).toContain('No se cobra dos veces.')
+    expect(wrapper.findAll('a').some((each) => each.text().trim() === 'Ver mi pedido')).toBe(true)
   })
 
   it('says the card could not be charged, and that nothing was', async () => {
