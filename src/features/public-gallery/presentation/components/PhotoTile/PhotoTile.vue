@@ -64,6 +64,7 @@ const altText = computed(() =>
 <style scoped>
 /* 3:4, reserved before the image arrives. */
 .photo-tile {
+  --tt-focus-ring: var(--tt-on-navy);
   position: relative;
   aspect-ratio: 3 / 4;
   overflow: hidden;

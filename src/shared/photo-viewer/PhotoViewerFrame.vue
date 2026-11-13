@@ -125,6 +125,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
 <style scoped>
 /* Always dark, whatever the scheme: a photo is looked at against a dark room. */
 .photo-viewer {
+  --tt-focus-ring: var(--tt-on-navy);
   position: fixed;
   inset: 0;
   z-index: var(--tt-layer-viewer);

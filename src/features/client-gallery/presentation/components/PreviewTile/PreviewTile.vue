@@ -40,6 +40,7 @@ const emit = defineEmits<{
 
 <style scoped>
 .preview-tile {
+  --tt-focus-ring: var(--tt-on-navy);
   position: relative;
   overflow: hidden;
   aspect-ratio: 3 / 4;

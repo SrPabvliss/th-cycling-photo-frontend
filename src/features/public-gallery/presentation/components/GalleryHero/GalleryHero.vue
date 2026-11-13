@@ -68,6 +68,7 @@ function goBack() {
 <style scoped>
 /* Fixed height: the banner holds its room before the cover arrives. */
 .gallery-hero {
+  --tt-focus-ring: var(--tt-on-navy);
   position: relative;
   flex: none;
   block-size: calc(var(--tt-ilu-page) - var(--tt-space-5) + var(--tt-space-1));

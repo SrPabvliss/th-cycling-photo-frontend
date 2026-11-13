@@ -50,3 +50,10 @@ html[data-tt-area='client'][data-tt-scheme='dark'] {
     block-size: var(--tt-header-desktop);
   }
 }
+
+/* The keyboard always shows where it is. Text fields mark their own focus on their frame. */
+html[data-tt-area='client'] :focus-visible:not(input, textarea, select) {
+  /* Dark surfaces set --tt-focus-ring to a light color so the ring still stands out. */
+  outline: medium solid var(--tt-focus-ring, var(--tt-primary));
+  outline-offset: calc(var(--tt-space-1) / 2);
+}

@@ -24,6 +24,7 @@ const year = new Date().getFullYear()
 
 <style scoped>
 .client-footer {
+  --tt-focus-ring: var(--tt-on-navy);
   flex: none;
   padding: var(--tt-space-5) var(--tt-space-4) var(--tt-space-6);
   border-block-start: thin solid color-mix(in srgb, var(--tt-on-navy) 12%, transparent);
