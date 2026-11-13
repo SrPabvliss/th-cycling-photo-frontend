@@ -17,6 +17,8 @@ export function useLoginMutation() {
       const loginResponse = await httpClient.post<IApiAuthTokens>(
         API_ROUTES.AUTH.LOGIN,
         credentials,
+        // The screen says what went wrong; a 401 here is a wrong password, not an old session.
+        { silent: true, skipAuthRetry: true },
       )
       const accessToken = loginResponse.data.accessToken
 

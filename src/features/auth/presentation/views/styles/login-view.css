@@ -1,77 +1,17 @@
-.login-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - 140px);
-  padding: 40px 32px;
-  background: #f8f9fa;
-}
-
-.login-card {
-  width: 100%;
-  max-width: 440px;
-}
-
-.login-header {
+.login-form {
   display: flex;
   flex-direction: column;
+  gap: var(--tt-space-4);
+  font-family: var(--tt-font-sans);
+}
+
+.login-form__link {
+  align-self: flex-start;
+  display: flex;
   align-items: center;
-  gap: 4px;
-  margin-bottom: 32px;
-}
-
-.login-title {
-  /* Pull the title up to compensate for transparent padding inside the
-     helmet PNG — the optical gap was larger than the CSS gap. */
-  margin: -8px 0 0;
-  font-size: 26px;
-  font-weight: 700;
-  color: #1a1f2c;
-}
-
-.login-subtitle {
-  margin: 0;
-  font-size: 14px;
-  color: #6b7280;
-}
-
-.login-forgot {
-  margin: 0;
-  text-align: center;
-  font-size: 13px;
-}
-
-.login-forgot a {
-  color: #105080;
-  font-weight: 500;
+  min-block-size: var(--tt-space-6);
+  color: var(--tt-primary-ink);
   text-decoration: none;
-}
-
-.login-forgot a:hover {
-  text-decoration: underline;
-}
-
-.login-remember {
-  margin-bottom: 20px;
-}
-
-.login-submit {
-  margin-bottom: 16px;
-}
-
-.login-create-account {
-  margin: 0;
-  text-align: center;
-  font-size: 13px;
-  color: #6b7280;
-}
-
-.login-create-account a {
-  color: #105080;
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.login-create-account a:hover {
-  text-decoration: underline;
+  font-size: var(--tt-type-body-s-medium-size);
+  font-weight: var(--tt-type-title-weight);
 }

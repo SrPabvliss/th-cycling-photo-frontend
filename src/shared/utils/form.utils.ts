@@ -42,3 +42,18 @@ export function fieldInput(field: AnyFieldApi) {
     onBlur: field.handleBlur,
   }
 }
+
+/**
+ * The message a client form field shows: its first error, once it was touched or the form was
+ * sent. Null otherwise.
+ */
+export function fieldErrorText(field: AnyFieldApi, submitted = false): string | null {
+  const { isTouched, errors } = field.state.meta
+  if (!isTouched && !submitted) return null
+  return getFieldErrors(errors.slice(0, 1)) ?? null
+}
+
+/** After sending with errors, the focus goes to the first field marked invalid in `root`. */
+export function focusFirstInvalid(root: HTMLElement | null | undefined): void {
+  root?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()
+}

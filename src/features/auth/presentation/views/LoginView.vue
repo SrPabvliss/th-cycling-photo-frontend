@@ -1,130 +1,154 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { computed, nextTick, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useForm } from '@tanstack/vue-form'
-import { NAlert, NFormItem, NInput, NButton, NCard, NIcon } from 'naive-ui'
-import { MailOutline, LockClosedOutline } from '@vicons/ionicons5'
+import { NButton, useMessage } from 'naive-ui'
 
-import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
-import { getHomePath } from '@/core/auth/role-config'
-import TitanLogo from '@/core/layout/public/TitanLogo.vue'
-import AuthModeTabs from '../components/AuthModeTabs/AuthModeTabs.vue'
+import { getHomePath } from '@/core/auth/nav-config'
+import { safeRedirect } from '@/core/navigation/safe-redirect'
+import { useCartState } from '@/shared/cart'
+import { fieldErrorText, focusFirstInvalid } from '@/shared/utils/form.utils'
+import AuthPage from '../components/AuthPage/AuthPage.vue'
+import AuthTabs from '../components/AuthTabs/AuthTabs.vue'
+import FormAlert from '../components/FormAlert/FormAlert.vue'
+import FormField from '../components/FormField/FormField.vue'
 import { useAuth } from '../../composables/use-auth'
 import { LOGIN_FORM_DEFAULTS, loginFormSchema } from '../../constants/login-form.schema'
 import { AUTH_ROUTE_NAMES } from '../../routes'
+import { failedStatus, generalProblem, type IFormProblem } from '../../utils/form-problem'
 
-const router = useRouter()
+const CREDENTIALS_PROBLEM: IFormProblem = {
+  title: 'Correo o contraseña incorrectos',
+  text: 'Revisa los datos e intenta de nuevo.',
+}
+
 const route = useRoute()
+const router = useRouter()
+const message = useMessage()
 const { login, isLoggingIn } = useAuth()
+const cart = useCartState()
 
-const redirectQuery = computed(() => (route.query.redirect as string | undefined) ?? null)
-const showCheckoutNotice = computed(() => redirectQuery.value?.startsWith('/checkout') ?? false)
+// Only a route of this app: a link built elsewhere cannot send the buyer out of Titan TV.
+const redirect = computed(() => safeRedirect(route.query.redirect))
+const subtitle = computed(() =>
+  redirect.value?.startsWith('/checkout/')
+    ? 'Para continuar con tu pedido.'
+    : 'Entra para ver y descargar tus fotos.',
+)
+
+const formRef = ref<HTMLFormElement | null>(null)
+const submitted = ref(false)
+const problem = ref<IFormProblem | null>(null)
 
 const form = useForm({
   defaultValues: LOGIN_FORM_DEFAULTS,
   onSubmit: async ({ value }) => {
+    problem.value = null
+    // Counted before signing in: the account's cart is read again afterwards.
+    const hadPhotos = cart.totalCount.value > 0
     try {
-      const user = await login({ ...value, email: value.email.trim() })
-      router.push(redirectQuery.value ?? getHomePath(user.permissions))
-    } catch {
-      // Error toast is shown by error interceptor
+      const user = await login({ email: value.email.trim(), password: value.password })
+      await router.replace(redirect.value ?? getHomePath(user.permissions))
+      message.success(
+        hadPhotos
+          ? `Hola, ${user.firstName}. Tus fotos siguen en el carrito.`
+          : `Hola, ${user.firstName}.`,
+      )
+    } catch (error) {
+      problem.value = failedStatus(error) === 401 ? CREDENTIALS_PROBLEM : generalProblem(error)
     }
   },
 })
+
+async function send() {
+  if (isLoggingIn.value) return
+  submitted.value = true
+  await form.handleSubmit()
+  if (!form.state.isValid) {
+    await nextTick()
+    focusFirstInvalid(formRef.value)
+  }
+}
 </script>
 
 <template>
-  <div class="login-page">
-    <NCard class="login-card">
-      <div class="login-header">
-        <TitanLogo :size="56" />
-        <h1 class="login-title">Bienvenido</h1>
-        <p class="login-subtitle">Accede a tu cuenta o crea una nueva.</p>
-      </div>
+  <AuthPage title="Iniciar sesión" :subtitle="subtitle">
+    <template #tabs>
+      <AuthTabs current="login" :redirect="redirect" />
+    </template>
 
-      <AuthModeTabs mode="login" :redirect="redirectQuery" />
+    <form ref="formRef" class="login-form" novalidate @submit.prevent="send">
+      <FormAlert v-if="problem" tone="bad" :title="problem.title" :text="problem.text" />
 
-      <NAlert v-if="showCheckoutNotice" type="info" :show-icon="true" style="margin-bottom: 16px">
-        Inicia sesión para completar tu pedido.
-      </NAlert>
-
-      <form
-        @submit="
-          (e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            form.handleSubmit()
-          }
-        "
+      <form.Field
+        name="email"
+        :validators="{ onBlur: loginFormSchema.shape.email, onSubmit: loginFormSchema.shape.email }"
       >
-        <form.Field
-          name="email"
-          :validators="{
-            onBlur: loginFormSchema.shape.email,
-            onSubmit: loginFormSchema.shape.email,
-          }"
-        >
-          <template v-slot="{ field }">
-            <NFormItem label="Correo electrónico" required v-bind="fieldStatus(field)">
-              <NInput placeholder="correo@ejemplo.com" v-bind="fieldInput(field)">
-                <template #prefix>
-                  <NIcon :component="MailOutline" color="#9CA3AF" />
-                </template>
-              </NInput>
-            </NFormItem>
-          </template>
-        </form.Field>
-
-        <form.Field
-          name="password"
-          :validators="{
-            onBlur: loginFormSchema.shape.password,
-            onSubmit: loginFormSchema.shape.password,
-          }"
-        >
-          <template v-slot="{ field }">
-            <NFormItem label="Contraseña" required v-bind="fieldStatus(field)">
-              <NInput
-                type="password"
-                show-password-on="click"
-                placeholder="••••••••"
+        <template #default="{ field }">
+          <FormField id="login-email" label="Correo" :error="fieldErrorText(field, submitted)">
+            <template #default="{ id, describedby, invalid }">
+              <input
+                :id="id"
+                type="email"
+                autocomplete="email"
+                placeholder="tu@correo.com"
+                :aria-describedby="describedby"
+                :aria-invalid="invalid"
                 :value="field.state.value"
-                @update:value="field.handleChange"
+                @input="field.handleChange(($event.target as HTMLInputElement).value)"
                 @blur="field.handleBlur"
-                @keydown.enter="form.handleSubmit()"
-              >
-                <template #prefix>
-                  <NIcon :component="LockClosedOutline" color="#9CA3AF" />
-                </template>
-              </NInput>
-            </NFormItem>
-          </template>
-        </form.Field>
+              />
+            </template>
+          </FormField>
+        </template>
+      </form.Field>
 
-        <form.Subscribe>
-          <template v-slot="{ canSubmit }">
-            <NButton
-              type="primary"
-              block
-              size="large"
-              :loading="isLoggingIn"
-              :disabled="!canSubmit"
-              attr-type="submit"
-              class="login-submit"
-            >
-              Iniciar sesión
-            </NButton>
-          </template>
-        </form.Subscribe>
-      </form>
+      <form.Field
+        name="password"
+        :validators="{
+          onBlur: loginFormSchema.shape.password,
+          onSubmit: loginFormSchema.shape.password,
+        }"
+      >
+        <template #default="{ field }">
+          <FormField
+            id="login-password"
+            label="Contraseña"
+            :error="fieldErrorText(field, submitted)"
+          >
+            <template #default="{ id, describedby, invalid }">
+              <input
+                :id="id"
+                type="password"
+                autocomplete="current-password"
+                :aria-describedby="describedby"
+                :aria-invalid="invalid"
+                :value="field.state.value"
+                @input="field.handleChange(($event.target as HTMLInputElement).value)"
+                @blur="field.handleBlur"
+              />
+            </template>
+          </FormField>
+        </template>
+      </form.Field>
 
-      <p class="login-forgot">
-        <RouterLink :to="{ name: AUTH_ROUTE_NAMES.FORGOT_PASSWORD }">
-          ¿Olvidaste tu contraseña?
-        </RouterLink>
-      </p>
-    </NCard>
-  </div>
+      <RouterLink class="login-form__link" :to="{ name: AUTH_ROUTE_NAMES.FORGOT_PASSWORD }">
+        ¿Olvidaste tu contraseña?
+      </RouterLink>
+
+      <NButton
+        type="primary"
+        size="large"
+        block
+        attr-type="submit"
+        :loading="isLoggingIn"
+        :disabled="isLoggingIn"
+        :aria-busy="isLoggingIn ? 'true' : undefined"
+      >
+        Iniciar sesión
+      </NButton>
+    </form>
+  </AuthPage>
 </template>
 
 <style scoped src="./styles/login-view.css" />

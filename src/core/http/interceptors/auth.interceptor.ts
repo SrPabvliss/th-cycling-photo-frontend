@@ -35,10 +35,15 @@ export function registerAuthInterceptor(axios: AxiosInstance): void {
   // --- Response interceptor: silent refresh on 401 ---
   axios.interceptors.response.use(undefined, async (error: AxiosError) => {
     const originalRequest = error.config as
-      | (InternalAxiosRequestConfig & { _skipAuthRetry?: boolean })
+      | (InternalAxiosRequestConfig & { _skipAuthRetry?: boolean; skipAuthRetry?: boolean })
       | undefined
 
-    if (!originalRequest || error.response?.status !== 401 || originalRequest._skipAuthRetry) {
+    if (
+      !originalRequest ||
+      error.response?.status !== 401 ||
+      originalRequest._skipAuthRetry ||
+      originalRequest.skipAuthRetry
+    ) {
       return Promise.reject(error)
     }
 
