@@ -39,7 +39,7 @@
 
 .landing__hero-text {
   position: absolute;
-  z-index: 1;
+  z-index: var(--tt-layer-lift);
   inset-block-start: calc(var(--tt-space-6) + var(--tt-space-2));
   inset-inline: var(--landing-gutter);
   display: flex;
@@ -70,7 +70,7 @@
 /* The finder sits over the bottom of the hero. */
 .landing__finder {
   position: relative;
-  z-index: 2;
+  z-index: var(--tt-layer-lift-over);
   margin: calc(var(--landing-finder-overlap) * -1) var(--landing-gutter) 0;
 }
 

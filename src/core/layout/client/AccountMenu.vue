@@ -206,7 +206,7 @@ watch(() => route.fullPath, close)
 .account-menu {
   position: fixed;
   inset: 0;
-  z-index: 1500;
+  z-index: var(--tt-layer-menu);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;

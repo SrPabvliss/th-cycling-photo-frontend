@@ -61,7 +61,7 @@ const nextTier = computed(() =>
 .preview-bar {
   position: sticky;
   inset-block-end: 0;
-  z-index: 30;
+  z-index: var(--tt-layer-cart-bar);
   display: flex;
   flex-direction: column;
   gap: var(--tt-space-2);

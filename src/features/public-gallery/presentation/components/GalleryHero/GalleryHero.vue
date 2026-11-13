@@ -94,7 +94,7 @@ function goBack() {
 
 .gallery-hero__back {
   position: absolute;
-  z-index: 1;
+  z-index: var(--tt-layer-lift);
   inset-block-start: var(--tt-space-2);
   inset-inline-start: var(--tt-space-2);
   display: flex;
@@ -121,7 +121,7 @@ function goBack() {
 
 .gallery-hero__text {
   position: absolute;
-  z-index: 1;
+  z-index: var(--tt-layer-lift);
   inset-inline: var(--tt-space-4);
   inset-block-end: var(--tt-space-4);
   display: flex;

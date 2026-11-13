@@ -1,6 +1,8 @@
 /* The season bar scrolls away with the page; the sticky header stays. Its own layers stay inside
  * it (isolation), so nothing of the bar ever covers the header, a sheet or a dialog. */
 .season-bar {
+  position: relative;
+  z-index: var(--tt-layer-season);
   flex: none;
   isolation: isolate;
 }

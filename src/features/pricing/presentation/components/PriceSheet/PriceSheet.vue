@@ -158,7 +158,7 @@ const thirdPhotoNote = computed(() => {
 .price-sheet {
   position: fixed;
   inset: 0;
-  z-index: 1600;
+  z-index: var(--tt-layer-sheet);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;

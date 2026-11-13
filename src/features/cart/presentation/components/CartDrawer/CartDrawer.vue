@@ -201,7 +201,7 @@ function explainPrices() {
 .cart-drawer {
   position: fixed;
   inset: 0;
-  z-index: 1550;
+  z-index: var(--tt-layer-drawer);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;

@@ -91,7 +91,7 @@ function confirm() {
   position: fixed;
   inset: 0;
   /* Above the cart drawer (1550) and the photo viewer (1700): it asks about what is under it. */
-  z-index: 1800;
+  z-index: var(--tt-layer-dialog);
   display: flex;
   align-items: flex-end;
   justify-content: center;

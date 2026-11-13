@@ -18,7 +18,7 @@ import { routeProgressActive } from './route-progress'
   position: fixed;
   inset-block-start: 0;
   inset-inline: 0;
-  z-index: 6000;
+  z-index: var(--tt-layer-route, 6000);
   block-size: var(--tt-top-progress-height);
   overflow: hidden;
   pointer-events: none;

@@ -127,7 +127,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
 .photo-viewer {
   position: fixed;
   inset: 0;
-  z-index: 1700;
+  z-index: var(--tt-layer-viewer);
   display: flex;
   flex-direction: column;
   outline: none;

@@ -48,7 +48,7 @@ const shell = useClientShell()
   position: fixed;
   inset-inline: 0;
   inset-block-end: 0;
-  z-index: 40;
+  z-index: var(--tt-layer-tab-bar);
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   /* Border included: the layout reserves exactly this height under the page. */

@@ -89,7 +89,7 @@ const accountButton = ref<HTMLButtonElement | null>(null)
 .client-header {
   position: sticky;
   inset-block-start: 0;
-  z-index: 50;
+  z-index: var(--tt-layer-header);
   flex: none;
   display: flex;
   align-items: center;

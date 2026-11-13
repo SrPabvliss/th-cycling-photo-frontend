@@ -4,6 +4,7 @@ import '@/assets/styles/phone-input.css'
 import '@/assets/styles/modal-form.css'
 import '@/core/theme/theme-vars.css'
 import '@/core/theme/client/awana-tokens.css'
+import '@/core/theme/client/layers.css'
 import '@/assets/styles/payphone-box.css'
 import '@/core/config/env'
 
