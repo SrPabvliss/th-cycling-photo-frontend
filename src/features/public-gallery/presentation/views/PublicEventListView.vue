@@ -1,27 +1,114 @@
 <script setup lang="ts">
-import { NEmpty, NSpin } from 'naive-ui'
+import { computed } from 'vue'
+import { NButton } from 'naive-ui'
 
-import { PublicEventCard, usePublicEventsQuery } from '@/shared/public-events'
+import { EmptyState } from '@/shared/components/empty-state'
+import { LoadBoundary } from '@/shared/components/loading'
+import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
+import {
+  PublicEventCard,
+  PublicEventCardSkeleton,
+  usePublicEventFiltersQuery,
+  usePublicEventsQuery,
+} from '@/shared/public-events'
+import { useEventListFilters } from '../../composables/use-event-list-filters'
+import EventFilterChips from '../components/EventFilterChips/EventFilterChips.vue'
 
-const { events: sortedEvents, isPending } = usePublicEventsQuery()
+const SKELETON_COUNT = 3
+
+const { searchText, chip, filters, reset } = useEventListFilters()
+
+const {
+  status,
+  events,
+  isFetching,
+  isPlaceholderData,
+  isFetchingNextPage,
+  isFetchNextPageError,
+  hasNextPage,
+  refetch,
+  fetchNextPage,
+} = usePublicEventsQuery(filters)
+
+// Without the event types the list still filters by everything else: not an error of the screen.
+const { data: filterOptions } = usePublicEventFiltersQuery()
+const eventTypes = computed(() => filterOptions.value?.eventTypes ?? [])
+
+// New filters are loading over the previous list: it stays on screen, dimmed. Loading one more
+// page of the same list is not that.
+const isRefreshing = computed(() => isFetching.value && !isFetchingNextPage.value)
+// What is on screen while new filters load belongs to the previous ones: it says nothing yet
+// about whether the new ones have results.
+const isEmpty = computed(() => events.value.length === 0 && !isPlaceholderData.value)
+
+const canLoadMore = computed(() => hasNextPage.value && !isFetchNextPageError.value)
+const sentinel = useInfiniteScrollTrigger(() => fetchNextPage(), {
+  isBusy: isFetching,
+  canLoadMore,
+})
 </script>
 
 <template>
-  <div class="pel">
-    <div class="pel__header">
-      <h1 class="pel__title">Eventos</h1>
-      <p class="pel__subtitle">Encuentra tus fotos de competencia</p>
-    </div>
+  <div class="event-list">
+    <h1 class="event-list__title">Eventos</h1>
 
-    <div v-if="isPending" class="pel__loading">
-      <NSpin size="large" />
-    </div>
+    <label class="event-list__search">
+      <svg class="event-list__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" />
+        <path d="M20 20l-3.5-3.5" />
+      </svg>
+      <input
+        v-model="searchText"
+        class="event-list__search-input"
+        type="search"
+        placeholder="Busca por nombre o ciudad"
+        aria-label="Buscar eventos"
+        autocomplete="off"
+        enterkeyhint="search"
+      />
+    </label>
 
-    <div v-else-if="sortedEvents.length > 0" class="pel__grid">
-      <PublicEventCard v-for="event in sortedEvents" :key="event.slug" :event="event" />
-    </div>
+    <EventFilterChips v-model="chip" :event-types="eventTypes" />
 
-    <NEmpty v-else description="No hay eventos disponibles" class="pel__empty" />
+    <LoadBoundary
+      :status="status"
+      :empty="isEmpty"
+      :refreshing="isRefreshing"
+      error-title="No pudimos cargar los eventos"
+      error-text="Puede ser tu conexión."
+      @retry="refetch()"
+    >
+      <template #skeleton>
+        <div class="event-list__grid" aria-label="Cargando eventos">
+          <PublicEventCardSkeleton v-for="n in SKELETON_COUNT" :key="n" />
+        </div>
+      </template>
+
+      <template #empty>
+        <EmptyState
+          illustration="sinEventos"
+          title="No hay eventos con ese filtro"
+          text="Prueba con otro nombre o quita el filtro."
+        >
+          <template #actions>
+            <NButton text type="primary" size="large" @click="reset">Ver todos los eventos</NButton>
+          </template>
+        </EmptyState>
+      </template>
+
+      <div class="event-list__grid">
+        <PublicEventCard v-for="event in events" :key="event.slug" :event="event" />
+        <template v-if="isFetchingNextPage">
+          <PublicEventCardSkeleton v-for="n in SKELETON_COUNT" :key="`next-${n}`" />
+        </template>
+      </div>
+
+      <div v-if="canLoadMore" ref="sentinel" class="event-list__sentinel" aria-hidden="true" />
+
+      <div v-if="hasNextPage && isFetchNextPageError" class="event-list__more">
+        <NButton size="large" @click="fetchNextPage()">Cargar más</NButton>
+      </div>
+    </LoadBoundary>
   </div>
 </template>
 
