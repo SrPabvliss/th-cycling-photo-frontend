@@ -157,17 +157,48 @@ describe('BillingSection', () => {
     await buttonIn(cards(wrapper)[1]!, 'Eliminar')!.trigger('click')
     await flushPromises()
     expect(remove).not.toHaveBeenCalled()
-    expect(wrapper.text()).toContain('Eliminar estos datos')
+    expect(wrapper.text()).toContain('¿Eliminar estos datos?')
     expect(wrapper.text()).toContain(
       'Tus pedidos anteriores conservan los datos con los que se hicieron.',
     )
 
-    await buttonIn(wrapper.get('[role="dialog"]'), 'Eliminar')!.trigger('click')
+    await buttonIn(wrapper.get('[role="alertdialog"]'), 'Eliminar')!.trigger('click')
     await flushPromises()
 
     expect(remove).toHaveBeenCalledWith('b2')
     expect(success).toHaveBeenCalledWith('Datos de facturación eliminados.')
     expect(cards(wrapper)).toHaveLength(1)
+  })
+
+  it('asks in a dialog that starts on keeping the data, so Enter does not delete', async () => {
+    const wrapper = await mountSection()
+
+    await buttonIn(cards(wrapper)[1]!, 'Eliminar')!.trigger('click')
+    await flushPromises()
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    const dialog = wrapper.get('[role="alertdialog"]')
+    expect(dialog.text()).toContain('¿Eliminar estos datos?')
+    expect(document.activeElement?.textContent?.trim()).toBe('Conservar')
+
+    await buttonIn(dialog, 'Conservar')!.trigger('click')
+    await flushPromises()
+    expect(wrapper.find('[role="alertdialog"]').exists()).toBe(false)
+    expect(remove).not.toHaveBeenCalled()
+  })
+
+  it('says what went wrong when deleting fails, keeping the data', async () => {
+    remove.mockRejectedValue(apiError(500))
+    const wrapper = await mountSection()
+
+    await buttonIn(cards(wrapper)[1]!, 'Eliminar')!.trigger('click')
+    await flushPromises()
+    await buttonIn(wrapper.get('[role="alertdialog"]'), 'Eliminar')!.trigger('click')
+    await flushPromises()
+
+    expect(wrapper.find('[role="alertdialog"]').exists()).toBe(false)
+    expect(wrapper.find('.form-alert').exists()).toBe(true)
+    expect(cards(wrapper)).toHaveLength(2)
   })
 
   it('shows the empty state after deleting the only account', async () => {
@@ -179,7 +210,7 @@ describe('BillingSection', () => {
 
     await buttonIn(cards(wrapper)[0]!, 'Eliminar')!.trigger('click')
     await flushPromises()
-    await buttonIn(wrapper.get('[role="dialog"]'), 'Eliminar')!.trigger('click')
+    await buttonIn(wrapper.get('[role="alertdialog"]'), 'Eliminar')!.trigger('click')
     await flushPromises()
 
     expect(wrapper.text()).toContain('Todavía no tienes datos de facturación')
@@ -191,7 +222,7 @@ describe('BillingSection', () => {
 
     await buttonIn(cards(wrapper)[1]!, 'Eliminar')!.trigger('click')
     await flushPromises()
-    await buttonIn(wrapper.get('[role="dialog"]'), 'Eliminar')!.trigger('click')
+    await buttonIn(wrapper.get('[role="alertdialog"]'), 'Eliminar')!.trigger('click')
     await flushPromises()
 
     expect(info).toHaveBeenCalledWith('Esos datos ya no existen.')

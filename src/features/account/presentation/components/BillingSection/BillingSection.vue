@@ -5,6 +5,7 @@ import { isAxiosError } from 'axios'
 
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
+import ConfirmDialog from '@/shared/components/confirm-dialog/ConfirmDialog.vue'
 import { EmptyState } from '@/shared/components/empty-state'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { ErrorState, TtSkeleton } from '@/shared/components/loading'
@@ -47,17 +48,17 @@ const prefill = computed(() => ({
   email: session.currentUser?.email ?? '',
 }))
 
-// --- One sheet: add, edit or confirm deleting ---
-const sheet = ref<'closed' | 'add' | 'edit' | 'delete'>('closed')
+// --- One sheet to add or edit; deleting is confirmed in a dialog that starts on keeping ---
+const sheet = ref<'closed' | 'add' | 'edit'>('closed')
 const target = ref<IBillingAccount | null>(null)
 const serverError = ref<IBillingServerError | null>(null)
-const problem = ref<IFormProblem | null>(null)
 const busyId = ref<string | null>(null)
+const deleting = ref<IBillingAccount | null>(null)
+const deleteProblem = ref<IFormProblem | null>(null)
 
-function open(kind: 'add' | 'edit' | 'delete', account: IBillingAccount | null = null) {
+function open(kind: 'add' | 'edit', account: IBillingAccount | null = null) {
   target.value = account
   serverError.value = null
-  problem.value = null
   sheet.value = kind
 }
 
@@ -65,11 +66,17 @@ function close() {
   sheet.value = 'closed'
 }
 
+function askDelete(account: IBillingAccount) {
+  deleteProblem.value = null
+  deleting.value = account
+}
+
 const isGone = (error: unknown) => isAxiosError(error) && error.response?.status === 404
 
 // Gone already (deleted elsewhere): read the list again so it leaves the screen.
 async function forgetGone() {
   close()
+  deleting.value = null
   message.info('Esos datos ya no existen.')
   await refetch()
 }
@@ -103,17 +110,18 @@ async function saveEdit(request: ICreateBillingAccountRequest) {
 }
 
 async function confirmDelete() {
-  const account = target.value
+  const account = deleting.value
   if (!account || deleteAccount.isPending.value) return
-  problem.value = null
   try {
     await deleteAccount.mutateAsync(account.id)
   } catch (error) {
     if (isGone(error)) return forgetGone()
-    problem.value = generalProblem(error)
+    // The data stays: say why, next to the list.
+    deleting.value = null
+    deleteProblem.value = generalProblem(error)
     return
   }
-  close()
+  deleting.value = null
   message.success('Datos de facturación eliminados.')
 }
 
@@ -175,6 +183,12 @@ const editInitial = computed<ICreateBillingAccountRequest | undefined>(() =>
     </EmptyState>
 
     <template v-else>
+      <FormAlert
+        v-if="deleteProblem"
+        tone="bad"
+        :title="deleteProblem.title"
+        :text="deleteProblem.text"
+      />
       <ul class="billing-section__list">
         <li v-for="account in accounts" :key="account.id" class="billing-section__card">
           <div class="billing-section__head">
@@ -203,7 +217,7 @@ const editInitial = computed<ICreateBillingAccountRequest | undefined>(() =>
             <button
               type="button"
               class="billing-section__action billing-section__action--danger"
-              @click="open('delete', account)"
+              @click="askDelete(account)"
             >
               Eliminar
             </button>
@@ -215,31 +229,20 @@ const editInitial = computed<ICreateBillingAccountRequest | undefined>(() =>
       </NButton>
     </template>
 
-    <BillingSheet
-      v-if="sheet !== 'closed'"
-      :title="sheet === 'delete' ? 'Eliminar estos datos' : 'Datos de facturación'"
-      @close="close"
-    >
-      <div v-if="sheet === 'delete'" class="billing-section__confirm">
-        <p class="billing-section__line">
-          Tus pedidos anteriores conservan los datos con los que se hicieron.
-        </p>
-        <FormAlert v-if="problem" tone="bad" :title="problem.title" :text="problem.text" />
-        <NButton
-          type="error"
-          size="large"
-          block
-          :loading="deleteAccount.isPending.value"
-          :disabled="deleteAccount.isPending.value"
-          @click="confirmDelete"
-        >
-          Eliminar
-        </NButton>
-        <NButton size="large" block @click="close">Conservar</NButton>
-      </div>
+    <ConfirmDialog
+      :open="!!deleting"
+      title="¿Eliminar estos datos?"
+      text="Tus pedidos anteriores conservan los datos con los que se hicieron."
+      confirm-label="Eliminar"
+      keep-label="Conservar"
+      :busy="deleteAccount.isPending.value"
+      @confirm="confirmDelete"
+      @keep="deleting = null"
+    />
 
+    <BillingSheet v-if="sheet !== 'closed'" title="Datos de facturación" @close="close">
       <BillingAccountForm
-        v-else-if="sheet === 'edit'"
+        v-if="sheet === 'edit'"
         mode="edit"
         :needs-consent="false"
         :prefill="prefill"
@@ -266,13 +269,6 @@ const editInitial = computed<ICreateBillingAccountRequest | undefined>(() =>
 
 <style scoped>
 .billing-section,
-.billing-section__confirm {
-  display: flex;
-  flex-direction: column;
-  gap: var(--tt-space-4);
-  font-family: var(--tt-font-sans);
-}
-
 .billing-section__list {
   display: flex;
   flex-direction: column;
