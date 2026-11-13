@@ -1,88 +1,106 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { NAlert, NCard } from 'naive-ui'
+import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { isAxiosError } from 'axios'
 
-import { getHomePath } from '@/core/auth/role-config'
-import TitanLogo from '@/core/layout/public/TitanLogo.vue'
-import AuthModeTabs from '../components/AuthModeTabs/AuthModeTabs.vue'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+import { safeRedirect } from '@/core/navigation/safe-redirect'
+import { useSendEmailVerification } from '@/features/account/composables/mutations/use-send-email-verification'
+import AuthPage from '../components/AuthPage/AuthPage.vue'
+import AuthTabs from '../components/AuthTabs/AuthTabs.vue'
+import FormAlert from '../components/FormAlert/FormAlert.vue'
+import RegisterForm, { type RegisterField } from '../components/RegisterForm/RegisterForm.vue'
 import { useAuth } from '../../composables/use-auth'
-import { toRegisterRequest } from '../../mappers/register-form.mapper'
 import type { IRegisterFormData } from '../../constants/register-form.schema'
-import RegisterForm from '../components/RegisterForm/RegisterForm.vue'
+import { toRegisterRequest } from '../../mappers/register-form.mapper'
+import { generalProblem, type IFormProblem } from '../../utils/form-problem'
 
-const router = useRouter()
+const EMAIL_TAKEN_KEY = 'auth.email_already_exists'
+
+// Fields of the api and the field of the form that shows their message.
+const FIELD_OF: Record<string, RegisterField> = {
+  email: 'email',
+  password: 'password',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  phoneNumber: 'phoneNumber',
+  countryId: 'countryId',
+  birthDate: 'birthDay',
+  guardianConsent: 'guardianConsent',
+  acceptedTerms: 'acceptedTerms',
+}
+
 const route = useRoute()
+const router = useRouter()
 const { register, isRegistering } = useAuth()
+const sendCode = useSendEmailVerification({ silent: true })
 
-const redirectQuery = computed(() => (route.query.redirect as string | undefined) ?? null)
-const showCheckoutNotice = computed(() => redirectQuery.value?.startsWith('/checkout') ?? false)
+const redirect = computed(() => safeRedirect(route.query.redirect))
+const redirectQuery = computed(() => (redirect.value ? { redirect: redirect.value } : {}))
+
+const serverErrors = ref<Partial<Record<RegisterField, string>>>({})
+const emailTaken = ref(false)
+const problem = ref<IFormProblem | null>(null)
+
+function fieldErrors(error: unknown): Partial<Record<RegisterField, string>> {
+  if (!isAxiosError(error) || error.response?.status !== 400) return {}
+  const fields = (error.response.data as { error?: { fields?: Record<string, string[]> } })?.error
+    ?.fields
+  const found: Partial<Record<RegisterField, string>> = {}
+  for (const [name, messages] of Object.entries(fields ?? {})) {
+    const target = FIELD_OF[name]
+    if (target && messages[0]) found[target] = messages[0]
+  }
+  return found
+}
 
 async function handleSubmit(formData: IRegisterFormData) {
+  problem.value = null
+  emailTaken.value = false
+  serverErrors.value = {}
   try {
-    const user = await register(toRegisterRequest(formData))
-    router.push(redirectQuery.value ?? getHomePath(user.permissions))
-  } catch {
-    // Error toast shown by interceptor
+    await register(toRegisterRequest(formData))
+  } catch (error) {
+    const key = isAxiosError(error)
+      ? (error.response?.data as { error?: { messageKey?: string } } | undefined)?.error?.messageKey
+      : undefined
+    if (isAxiosError(error) && error.response?.status === 409 && key === EMAIL_TAKEN_KEY) {
+      emailTaken.value = true
+      return
+    }
+    const byField = fieldErrors(error)
+    if (Object.keys(byField).length > 0) serverErrors.value = byField
+    else problem.value = generalProblem(error)
+    return
   }
+
+  // The account exists and the session is open: confirm the email right away. If the code
+  // could not be sent, the confirmation screen offers to send it again.
+  try {
+    await sendCode.mutateAsync()
+  } catch {
+    // "Reenviar código" is there.
+  }
+  await router.replace({ path: `${ROUTE_PATHS.ACCOUNT}/verify-email`, query: redirectQuery.value })
 }
 </script>
 
 <template>
-  <div class="register-page">
-    <NCard class="register-card">
-      <div class="register-header">
-        <TitanLogo :size="56" />
-        <h1 class="register-title">Crear cuenta</h1>
-        <p class="register-subtitle">Regístrate para solicitar tus fotos de competencia.</p>
-      </div>
+  <AuthPage title="Crear cuenta" subtitle="Para comprar y guardar tus fotos de competencia.">
+    <template #tabs>
+      <AuthTabs current="register" :redirect="redirect" />
+    </template>
 
-      <AuthModeTabs mode="register" :redirect="redirectQuery" />
-
-      <NAlert v-if="showCheckoutNotice" type="info" :show-icon="true" style="margin-bottom: 16px">
-        Crea tu cuenta para completar tu pedido.
-      </NAlert>
-
-      <RegisterForm :is-submitting="isRegistering" @submit="handleSubmit" />
-    </NCard>
-  </div>
+    <RegisterForm
+      :is-submitting="isRegistering"
+      :server-errors="serverErrors"
+      :email-taken="emailTaken"
+      :login-to="{ path: ROUTE_PATHS.LOGIN, query: redirectQuery }"
+      @submit="handleSubmit"
+    >
+      <template #problem>
+        <FormAlert v-if="problem" tone="bad" :title="problem.title" :text="problem.text" />
+      </template>
+    </RegisterForm>
+  </AuthPage>
 </template>
-
-<style scoped>
-.register-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - 140px);
-  padding: 40px 32px;
-  background: #f8f9fa;
-}
-
-.register-card {
-  width: 100%;
-  max-width: 520px;
-}
-
-.register-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  margin-bottom: 28px;
-}
-
-.register-title {
-  /* Compensate for transparent padding inside the helmet PNG. */
-  margin: -8px 0 0;
-  font-size: 26px;
-  font-weight: 700;
-  color: #1a1f2c;
-}
-
-.register-subtitle {
-  margin: 0;
-  font-size: 14px;
-  color: #6b7280;
-  text-align: center;
-}
-</style>

@@ -41,16 +41,20 @@ export const REGISTER_FORM_DEFAULTS: IRegisterFormData = {
 
 /** Field-level validators for individual form.Field bindings */
 export const registerFieldValidators = {
-  email: z.string().trim().min(1, 'El correo es requerido').email('Correo inválido'),
+  email: z
+    .string()
+    .trim()
+    .min(1, 'Escribe un correo válido, como tu@correo.com.')
+    .email('Escribe un correo válido, como tu@correo.com.'),
   password: z.string().refine(isAccountPassword, PASSWORD_RULE_MESSAGE),
-  confirmPassword: z.string().min(1, 'Confirma tu contraseña'),
-  firstName: z.string().min(1, 'El nombre es requerido').max(100),
-  lastName: z.string().min(1, 'El apellido es requerido').max(100),
+  confirmPassword: z.string().min(1, 'Repite tu contraseña.'),
+  firstName: z.string().trim().min(1, 'Escribe tu nombre.').max(100, 'Escribe tu nombre.'),
+  lastName: z.string().trim().min(1, 'Escribe tu apellido.').max(100, 'Escribe tu apellido.'),
   // phoneNumber: validated inline in RegisterForm.vue using intl-tel-input's
   // change-validity event (isPhoneValid ref). Kept out of the schema so the
   // schema doesn't lie about the source of truth.
-  countryId: z.number({ error: 'Selecciona un país' }),
+  countryId: z.number({ error: 'Elige tu país.' }),
   acceptedTerms: z.literal(true, {
-    error: 'Debes aceptar la política de privacidad y los términos',
+    error: 'Acepta la política y los términos para continuar.',
   }),
 }

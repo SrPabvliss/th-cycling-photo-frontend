@@ -13,7 +13,14 @@ export function useRegisterMutation() {
 
   return useMutation({
     mutationFn: async (data: IRegisterRequest) => {
-      const registerResponse = await httpClient.post<IApiAuthTokens>(API_ROUTES.AUTH.REGISTER, data)
+      // The form says what went wrong, on each field.
+      const registerResponse = await httpClient.post<IApiAuthTokens>(
+        API_ROUTES.AUTH.REGISTER,
+        data,
+        {
+          silent: true,
+        },
+      )
       const accessToken = registerResponse.data.accessToken
 
       authStore.setAccessToken(accessToken)

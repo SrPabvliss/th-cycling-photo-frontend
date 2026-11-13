@@ -8,9 +8,17 @@ interface BirthDateFieldsParams {
   month: Ref<number | null>
   day: Ref<number | null>
   onInvalidDay: () => void
+  /** What a date missing its day, month or year says. */
+  incompleteMessage?: string
 }
 
-export function useBirthDateFields({ year, month, day, onInvalidDay }: BirthDateFieldsParams) {
+export function useBirthDateFields({
+  year,
+  month,
+  day,
+  onInvalidDay,
+  incompleteMessage = 'Completa tu fecha de nacimiento',
+}: BirthDateFieldsParams) {
   const currentYear = new Date().getFullYear()
   const maxYear = currentYear - MIN_AGE_YEARS
   const minYear = currentYear - MAX_AGE_YEARS
@@ -34,7 +42,7 @@ export function useBirthDateFields({ year, month, day, onInvalidDay }: BirthDate
 
   function validate(): string | undefined {
     if (day.value == null || month.value == null || year.value == null) {
-      return 'Completa tu fecha de nacimiento'
+      return incompleteMessage
     }
     if (!isValidCalendarDate(year.value, month.value, day.value)) {
       return 'Fecha inválida'

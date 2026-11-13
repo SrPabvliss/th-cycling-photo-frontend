@@ -24,7 +24,9 @@ const describedby = computed(
   <div class="form-field" :class="{ 'form-field--error': !!error }">
     <label class="form-field__label" :for="id">{{ label }}</label>
     <slot :id="id" :describedby="describedby" :invalid="error ? true : undefined" />
-    <em v-if="error" :id="errorId" class="form-field__error">{{ error }}</em>
+    <em v-if="error" :id="errorId" class="form-field__error">
+      <slot name="error">{{ error }}</slot>
+    </em>
     <small v-if="hint" :id="hintId" class="form-field__hint">{{ hint }}</small>
   </div>
 </template>
@@ -84,6 +86,11 @@ const describedby = computed(
 
 .form-field__error {
   color: var(--tt-danger-ink);
+}
+
+.form-field__error :slotted(a) {
+  color: inherit;
+  font-weight: var(--tt-type-title-weight);
 }
 
 .form-field__hint {
