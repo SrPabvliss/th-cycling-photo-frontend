@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton } from 'naive-ui'
 
@@ -11,8 +11,8 @@ import { quotePhotos } from '@/shared/pricing/quote'
 import { formatMoney } from '@/shared/pricing/tier-cards'
 import { usePricingTiersQuery } from '@/shared/pricing/use-pricing-tiers'
 import type { PaymentMethod } from '@/shared/types/payment-method.types'
-import { BILLING_QUERY, CONSENT_QUERY } from '../../constants/checkout-query'
 import { usePlaceOrder } from '../../composables/use-place-order'
+import { useCheckoutDraftStore } from '../../stores/checkout-draft.store'
 import CheckoutProblemAlert from '../components/CheckoutProblemAlert/CheckoutProblemAlert.vue'
 
 interface IMethodOption {
@@ -37,14 +37,23 @@ const OPTIONS: IMethodOption[] = [
 const route = useRoute()
 const router = useRouter()
 
-const eventId = computed(() => route.params.eventId as string)
-const checkout = computed(() => checkoutPath(eventId.value))
-// The confirm screen hands over the billing account it showed and whether the consent was ticked.
-const billingAccountId = computed(() => {
-  const raw = route.query[BILLING_QUERY]
-  return typeof raw === 'string' && raw ? raw : null
+// Fixed on entering: while the buyer leaves, the route already points elsewhere and this screen
+// must not act on it (no way leads from one event's method screen to another's).
+const draftEventId = route.params.eventId as string
+const eventId = computed(() => draftEventId)
+const checkout = computed(() => checkoutPath(draftEventId))
+
+// What the buyer chose on the confirm screen, kept in memory. Never read from the address: the
+// invoice consent counts only when it comes from the box. A reload or a direct link has none.
+const drafts = useCheckoutDraftStore()
+const draft = computed(() => drafts.draftFor(draftEventId))
+const billingAccountId = computed(() => draft.value?.billingAccountId ?? null)
+const consentTicked = computed(() => draft.value?.consentChecked === true)
+
+// Back to the confirm screen keeps the draft; anywhere else ends this purchase.
+onBeforeUnmount(() => {
+  if (router.currentRoute.value.path !== checkoutPath(draftEventId)) drafts.forget(draftEventId)
 })
-const consentTicked = computed(() => route.query[CONSENT_QUERY] === '1')
 
 // --- What this screen needs, read again: it can be opened from a bookmark or history ---
 const cart = useCartState()
@@ -142,6 +151,7 @@ async function proceed() {
   })
   if (!orders?.[0]) return
 
+  drafts.forget(draftEventId)
   leaving = true
   if (method === 'transfer') {
     router.replace(`${ROUTE_PATHS.CHECKOUT}/received/${orders[0].orderId}`)
@@ -156,7 +166,7 @@ async function proceed() {
 </script>
 
 <template>
-  <div class="payment-method">
+  <div v-if="draft" class="payment-method">
     <div class="payment-method__title-row">
       <RouterLink class="payment-method__back" :to="checkout" aria-label="Volver al pedido">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>

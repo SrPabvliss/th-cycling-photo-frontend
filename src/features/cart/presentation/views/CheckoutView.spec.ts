@@ -8,6 +8,7 @@ import { toCurrentUser } from '@/core/auth/current-user.mapper'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import type { ICartGroup } from '@/shared/types/cart.types'
 import type { CheckoutProblem } from '@/shared/utils/checkout-error'
+import { useCheckoutDraftStore } from '../../stores/checkout-draft.store'
 import CheckoutView from './CheckoutView.vue'
 
 const REAL_TIERS = [
@@ -115,20 +116,33 @@ function signIn() {
 const Stub = { render: () => null }
 const mounted: { unmount(): void }[] = []
 
+const ROUTES = () => [
+  { path: '/gallery', component: Stub },
+  { path: '/gallery/:slug', component: Stub },
+  { path: '/login', component: Stub },
+  { path: '/account/orders', name: 'account-orders', component: Stub },
+  { path: '/account/profile', name: 'account-profile', component: Stub },
+  { path: '/checkout/:eventId', component: CheckoutView },
+  { path: '/checkout/:eventId/method', component: Stub },
+  { path: '/checkout/received/:orderId', component: Stub },
+]
+
+/** Mounts the app's router outlet, so screens leave by navigation as they do in the app. */
+async function mountOutlet(path: string) {
+  const router = createRouter({ history: createMemoryHistory(), routes: ROUTES() })
+  await router.push(path)
+  mounted.push(
+    mount(
+      { template: '<RouterView />' },
+      { attachTo: document.body, global: { plugins: [router] } },
+    ),
+  )
+  await flushPromises()
+  return router
+}
+
 async function mountView() {
-  const router = createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: '/gallery', component: Stub },
-      { path: '/gallery/:slug', component: Stub },
-      { path: '/login', component: Stub },
-      { path: '/account/orders', name: 'account-orders', component: Stub },
-      { path: '/account/profile', name: 'account-profile', component: Stub },
-      { path: '/checkout/:eventId', component: CheckoutView },
-      { path: '/checkout/:eventId/method', component: Stub },
-      { path: '/checkout/received/:orderId', component: Stub },
-    ],
-  })
+  const router = createRouter({ history: createMemoryHistory(), routes: ROUTES() })
   await router.push('/checkout/e1')
   const component = mount(CheckoutView, { attachTo: document.body, global: { plugins: [router] } })
   mounted.push(component)
@@ -241,7 +255,11 @@ describe('CheckoutView', () => {
     await flushPromises()
 
     expect(router.currentRoute.value.path).toBe('/checkout/e1/method')
-    expect(router.currentRoute.value.query).toEqual({ factura: 'b1' })
+    expect(router.currentRoute.value.query).toEqual({})
+    expect(useCheckoutDraftStore().draftFor('e1')).toEqual({
+      billingAccountId: 'b1',
+      consentChecked: false,
+    })
     expect(place).not.toHaveBeenCalled()
   })
 
@@ -255,7 +273,28 @@ describe('CheckoutView', () => {
     await primary(wrapper).trigger('click')
     await flushPromises()
 
-    expect(router.currentRoute.value.query).toEqual({ factura: 'b1', consentimiento: '1' })
+    expect(router.currentRoute.value.query).toEqual({})
+    expect(useCheckoutDraftStore().draftFor('e1')).toEqual({
+      billingAccountId: 'b1',
+      consentChecked: true,
+    })
+  })
+
+  it('keeps the draft for the method screen, and forgets it leaving the purchase', async () => {
+    signIn()
+    const drafts = useCheckoutDraftStore()
+    drafts.keep('e1', { billingAccountId: 'b1', consentChecked: true })
+
+    const router = await mountOutlet('/checkout/e1')
+    await router.push('/checkout/e1/method')
+    await flushPromises()
+    expect(drafts.draftFor('e1')).not.toBeNull()
+
+    await router.push('/checkout/e1')
+    await flushPromises()
+    await router.push('/gallery')
+    await flushPromises()
+    expect(drafts.draftFor('e1')).toBeNull()
   })
 
   it('creates the transfer order and opens it, when the event takes no cards', async () => {

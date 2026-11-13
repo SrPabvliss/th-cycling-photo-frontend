@@ -6,6 +6,7 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 
 import type { ICartGroup } from '@/shared/types/cart.types'
 import type { CheckoutProblem } from '@/shared/utils/checkout-error'
+import { useCheckoutDraftStore } from '../../stores/checkout-draft.store'
 import PaymentMethodView from './PaymentMethodView.vue'
 
 const REAL_TIERS = [
@@ -77,19 +78,32 @@ vi.mock('../../composables/use-place-order', () => ({
 const Stub = { render: () => null }
 const mounted: { unmount(): void }[] = []
 
-async function mountView(path = '/checkout/e1/method?factura=b1') {
-  const router = createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: '/gallery/:slug?', component: Stub },
-      { path: '/account/orders', name: 'account-orders', component: Stub },
-      { path: '/account/profile', name: 'account-profile', component: Stub },
-      { path: '/checkout/payment', component: Stub },
-      { path: '/checkout/received/:orderId', component: Stub },
-      { path: '/checkout/:eventId', component: Stub },
-      { path: '/checkout/:eventId/method', component: PaymentMethodView },
-    ],
-  })
+const ROUTES = () => [
+  { path: '/gallery/:slug?', component: Stub },
+  { path: '/account/orders', name: 'account-orders', component: Stub },
+  { path: '/account/profile', name: 'account-profile', component: Stub },
+  { path: '/checkout/payment', component: Stub },
+  { path: '/checkout/received/:orderId', component: Stub },
+  { path: '/checkout/:eventId', component: Stub },
+  { path: '/checkout/:eventId/method', component: PaymentMethodView },
+]
+
+/** Mounts the app's router outlet, so screens leave by navigation as they do in the app. */
+async function mountOutlet(path: string) {
+  const router = createRouter({ history: createMemoryHistory(), routes: ROUTES() })
+  await router.push(path)
+  mounted.push(
+    mount(
+      { template: '<RouterView />' },
+      { attachTo: document.body, global: { plugins: [router] } },
+    ),
+  )
+  await flushPromises()
+  return router
+}
+
+async function mountView(path = '/checkout/e1/method') {
+  const router = createRouter({ history: createMemoryHistory(), routes: ROUTES() })
   await router.push(path)
   const component = mount(PaymentMethodView, {
     attachTo: document.body,
@@ -112,6 +126,7 @@ describe('PaymentMethodView', () => {
   beforeEach(() => {
     document.body.innerHTML = ''
     setActivePinia(createPinia())
+    useCheckoutDraftStore().keep('e1', { billingAccountId: 'b1', consentChecked: false })
     Object.assign(state, {
       cartStatus: 'success',
       photos: 3,
@@ -164,7 +179,8 @@ describe('PaymentMethodView', () => {
 
   it('creates the card order and goes to pay it, with the ids', async () => {
     place.mockResolvedValue([ORDER, { ...ORDER, orderId: 'o10' }])
-    const { wrapper, router } = await mountView('/checkout/e1/method?factura=b1&consentimiento=1')
+    useCheckoutDraftStore().keep('e1', { billingAccountId: 'b1', consentChecked: true })
+    const { wrapper, router } = await mountView()
 
     await card(wrapper).trigger('click')
     await continueButton(wrapper).trigger('click')
@@ -213,8 +229,9 @@ describe('PaymentMethodView', () => {
     expect(router.currentRoute.value.path).toBe('/checkout/e1')
   })
 
-  it('sends back to the checkout without a billing choice', async () => {
-    const { router } = await mountView('/checkout/e1/method')
+  it('sends back to the checkout without a draft from the confirm screen', async () => {
+    useCheckoutDraftStore().forget('e1')
+    const { router } = await mountView()
 
     expect(router.currentRoute.value.path).toBe('/checkout/e1')
   })
@@ -231,6 +248,52 @@ describe('PaymentMethodView', () => {
     const { router } = await mountView()
 
     expect(router.currentRoute.value.path).toBe('/checkout/e1')
+  })
+
+  it('never takes the billing choice or the consent from the address', async () => {
+    useCheckoutDraftStore().forget('e1')
+    state.needsConsent = true
+    const { wrapper, router } = await mountView('/checkout/e1/method?factura=b1&consentimiento=1')
+
+    expect(router.currentRoute.value.path).toBe('/checkout/e1')
+    expect(wrapper.find('[data-test="method-continue"]').exists()).toBe(false)
+    expect(place).not.toHaveBeenCalled()
+  })
+
+  it('forgets the draft once the order is created', async () => {
+    place.mockResolvedValue([ORDER])
+    const { wrapper } = await mountView()
+
+    await transfer(wrapper).trigger('click')
+    await continueButton(wrapper).trigger('click')
+    await flushPromises()
+
+    expect(useCheckoutDraftStore().draftFor('e1')).toBeNull()
+  })
+
+  it('keeps the draft when the order could not be created', async () => {
+    place.mockResolvedValue(null)
+    const { wrapper } = await mountView()
+
+    await transfer(wrapper).trigger('click')
+    await continueButton(wrapper).trigger('click')
+    await flushPromises()
+
+    expect(useCheckoutDraftStore().draftFor('e1')).not.toBeNull()
+  })
+
+  it('keeps the draft going back to the confirm screen, and forgets it leaving the purchase', async () => {
+    const router = await mountOutlet('/checkout/e1/method')
+    await router.push('/checkout/e1')
+    await flushPromises()
+    expect(router.currentRoute.value.path).toBe('/checkout/e1')
+    expect(useCheckoutDraftStore().draftFor('e1')).not.toBeNull()
+
+    await router.push('/checkout/e1/method')
+    await flushPromises()
+    await router.push('/gallery')
+    await flushPromises()
+    expect(useCheckoutDraftStore().draftFor('e1')).toBeNull()
   })
 
   it('waits for the data before deciding anything', async () => {

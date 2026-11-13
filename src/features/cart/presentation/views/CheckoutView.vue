@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton } from 'naive-ui'
 
@@ -17,7 +17,7 @@ import { useEventPaymentOptionsQuery } from '@/shared/composables/use-event-paym
 import { quotePhotos } from '@/shared/pricing/quote'
 import { formatMoney } from '@/shared/pricing/tier-cards'
 import { usePricingTiersQuery } from '@/shared/pricing/use-pricing-tiers'
-import { BILLING_QUERY, CONSENT_QUERY } from '../../constants/checkout-query'
+import { useCheckoutDraftStore } from '../../stores/checkout-draft.store'
 import { usePlaceOrder } from '../../composables/use-place-order'
 import CheckoutProblemAlert from '../components/CheckoutProblemAlert/CheckoutProblemAlert.vue'
 import CheckoutSummary from '../components/CheckoutSummary/CheckoutSummary.vue'
@@ -88,20 +88,26 @@ const canContinue = computed(
   () => isBillingReady.value && !isLoadingOptions.value && !isPlacing.value,
 )
 
+// The draft lives while the buyer moves between this screen and the method screen of the event.
+const drafts = useCheckoutDraftStore()
+const draftEventId = route.params.eventId as string
+onBeforeUnmount(() => {
+  if (router.currentRoute.value.path !== `${checkoutPath(draftEventId)}/method`) {
+    drafts.forget(draftEventId)
+  }
+})
+
 async function confirm() {
   if (!canContinue.value || !selectedBillingAccountId.value) return
 
   if (takesCards.value) {
     // The method screen creates the order: it gets the billing data chosen here and whether the
-    // consent was ticked, which would otherwise be lost on the way.
-    const consent = needsInvoiceConsent.value && invoiceConsentChecked.value
-    router.push({
-      path: `${checkoutPath(eventId.value)}/method`,
-      query: {
-        [BILLING_QUERY]: selectedBillingAccountId.value,
-        ...(consent ? { [CONSENT_QUERY]: '1' } : {}),
-      },
+    // consent box was ticked, in memory, never in the address.
+    drafts.keep(eventId.value, {
+      billingAccountId: selectedBillingAccountId.value,
+      consentChecked: needsInvoiceConsent.value && invoiceConsentChecked.value,
     })
+    router.push(`${checkoutPath(eventId.value)}/method`)
     return
   }
 
