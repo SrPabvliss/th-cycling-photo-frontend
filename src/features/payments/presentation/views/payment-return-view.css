@@ -1,48 +1,44 @@
+/* Back from the gateway. One narrow column, centred. */
 .payment-return {
-  min-height: 60vh;
+  flex: 1 0 auto;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
-  padding: 40px 20px;
+  inline-size: 100%;
+  max-inline-size: calc(var(--tt-space-8) * 7);
+  margin-inline: auto;
+  padding: var(--tt-space-6) var(--tt-space-4);
+  color: var(--tt-ink);
+  font-family: var(--tt-font-sans);
 }
 
-.payment-return__deliveries {
+.payment-return__wait {
   display: flex;
   flex-direction: column;
-  gap: 12px;
   align-items: center;
+  gap: var(--tt-space-3);
+  text-align: center;
 }
 
-.payment-return__notice {
+.payment-return__spinner :deep(.busy-note__text) {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.payment-return__title {
   margin: 0;
-  max-width: 42ch;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  opacity: 0.85;
+  font-size: var(--tt-type-heading-l-size);
+  line-height: var(--tt-type-heading-l-line);
+  font-weight: var(--tt-type-heading-l-weight);
 }
 
-.payment-return__reference {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  align-items: center;
-  margin-bottom: 12px;
-  padding: 12px 16px;
-  border: 1px solid var(--tt-neutral-light, #e4e8ec);
-  border-radius: 10px;
-  background: var(--tt-background, #fafbfc);
-}
-
-.payment-return__reference span {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--tt-neutral-mid, #6a7380);
-}
-
-.payment-return__reference code {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--tt-neutral-dark, #16233a);
+.payment-return__text {
+  margin: 0;
+  color: var(--tt-ink-muted);
+  font-size: var(--tt-type-body-size);
+  line-height: var(--tt-type-body-line);
 }

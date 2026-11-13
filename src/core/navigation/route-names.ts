@@ -53,6 +53,7 @@ export const ROUTE_NAMES = {
 
   // Payments
   PAYMENT_RETURN: 'payment-return',
+  PAYMENT_CONFIRMED: 'payment-confirmed',
   PAYMENT_BOX: 'payment-box',
 
   // Photos
