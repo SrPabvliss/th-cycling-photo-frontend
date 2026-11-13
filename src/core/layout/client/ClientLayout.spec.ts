@@ -4,6 +4,7 @@ import { defineComponent, h, onMounted } from 'vue'
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router'
 
 import { LAYOUT_SLOTS, registerLayoutSlot } from '@/core/layout/slot-registry'
+import { ErrorState } from '@/shared/components/loading'
 import ClientLayout from './ClientLayout.vue'
 
 const layoutMounted = vi.fn()
@@ -32,6 +33,11 @@ async function mountAt(path: string) {
           { path: '', component: Screen('inicio'), meta: { shell: { tab: 'home', tabBar: true } } },
           { path: 'plain', component: Screen('pantalla simple') },
           { path: 'detail', component: Screen('detalle'), meta: { shell: { footer: false } } },
+          {
+            path: 'season-error',
+            component: defineComponent({ render: () => h(ErrorState) }),
+            meta: { shell: { seasonBar: true } },
+          },
           {
             path: 'season',
             component: Screen('con temporada'),
@@ -132,6 +138,17 @@ describe('ClientLayout', () => {
     const header = wrapper.get('[data-test="ClientHeader"]').element
     expect(root.firstElementChild).toBe(bar)
     expect(bar.compareDocumentPosition(header) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('takes the season bar away while the screen shows a problem', async () => {
+    registerLayoutSlot(
+      LAYOUT_SLOTS.CLIENT_SEASON_BAR,
+      defineComponent({ render: () => h('aside', { 'data-test': 'season-bar' }) }),
+    )
+    const { wrapper } = await mountAt('/season-error')
+
+    expect(has(wrapper, 'season-bar')).toBe(false)
+    expect(wrapper.get('main').text()).toContain('No pudimos cargar esto')
   })
 
   it('applies the shell of the next route without mounting the layout again', async () => {

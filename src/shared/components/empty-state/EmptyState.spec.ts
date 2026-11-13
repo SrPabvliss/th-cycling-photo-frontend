@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { nextTick } from 'vue'
 
 import EmptyState from './EmptyState.vue'
 import { ILLUSTRATIONS, type IllustrationKey } from './illustrations'
@@ -64,5 +65,26 @@ describe('illustrations', () => {
     expect(markup).not.toContain('rgb(')
     expect(markup).not.toContain('<svg')
     expect(markup).toContain('var(--tt-')
+  })
+
+  it('counts as a problem on the client screen only when it says it is one', async () => {
+    const { hasScreenProblem } = await import('@/core/layout/client/screen-problem')
+    const host = document.createElement('main')
+    host.className = 'client-layout__main'
+    document.body.appendChild(host)
+
+    const plain = mount(EmptyState, { props: { title: 'Todavía no tienes fotos' }, attachTo: host })
+    await nextTick()
+    expect(hasScreenProblem.value).toBe(false)
+    plain.unmount()
+
+    const problem = mount(EmptyState, {
+      props: { title: 'Este enlace ya venció', problem: true },
+      attachTo: host,
+    })
+    await nextTick()
+    expect(hasScreenProblem.value).toBe(true)
+    problem.unmount()
+    expect(hasScreenProblem.value).toBe(false)
   })
 })

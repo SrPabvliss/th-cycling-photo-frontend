@@ -169,6 +169,7 @@ function submitCorrection(request: Parameters<typeof correctBilling.mutate>[0]) 
 
     <EmptyState
       v-else-if="paymentFailed"
+      problem
       illustration="pagoRechazado"
       title="El pago no se completó"
       text="No se hizo ningún cargo. Tus fotos siguen en el carrito."
@@ -186,6 +187,7 @@ function submitCorrection(request: Parameters<typeof correctBilling.mutate>[0]) 
 
     <EmptyState
       v-else-if="isNotFound"
+      problem
       illustration="enlaceRoto"
       title="No encontramos este pedido"
       text="Puede que sea de otra cuenta."

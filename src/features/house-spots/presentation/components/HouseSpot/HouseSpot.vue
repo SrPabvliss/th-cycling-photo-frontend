@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 
+import { hasScreenProblem } from '@/core/layout/client/screen-problem'
 import { SPOT_RATIO, SPOTS_ENABLED, type SpotFormat } from '../../../spots-config'
 import { PIECE_COPY } from '../../../pieces/piece-copy'
 import { useSpotPieces } from '../../../composables/use-spot-pieces'
@@ -72,7 +73,8 @@ const slides = computed(() => {
 const hasDots = computed(
   () => (format.value === 'A' || format.value === 'B') && !reducedMotion.value,
 )
-const isGone = computed(() => !SPOTS_ENABLED || loaded.value.failed.value)
+// No house ad goes with a screen that shows a problem.
+const isGone = computed(() => !SPOTS_ENABLED || loaded.value.failed.value || hasScreenProblem.value)
 watch(
   () => loaded.value.failed.value,
   (failed) => {

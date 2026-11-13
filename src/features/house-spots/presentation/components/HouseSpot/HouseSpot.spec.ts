@@ -142,4 +142,27 @@ describe('HouseSpot', () => {
     expect(wrapper.get('.house-spot__dots').attributes('aria-hidden')).toBe('true')
     expect(wrapper.findAll('.house-spot__dot')).toHaveLength(4)
   })
+
+  it('stays away while the screen shows a problem', async () => {
+    const { defineComponent, h, ref, nextTick } = await import('vue')
+    const { useScreenProblem } = await import('@/core/layout/client/screen-problem')
+    const Problem = defineComponent({
+      setup() {
+        const root = ref<HTMLElement | null>(null)
+        useScreenProblem(root)
+        return () => h('div', { ref: root }, 'No pudimos cargar esto')
+      },
+    })
+    const host = document.createElement('main')
+    host.className = 'client-layout__main'
+    document.body.appendChild(host)
+    const problem = mount(Problem, { attachTo: host })
+    await nextTick()
+
+    const wrapper = mount(HouseSpot, { props: { format: 'D', seed: 31 } })
+
+    expect(wrapper.html()).toBe('<!--v-if-->')
+    problem.unmount()
+    host.remove()
+  })
 })

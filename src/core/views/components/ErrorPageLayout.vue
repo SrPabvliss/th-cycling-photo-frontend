@@ -14,7 +14,13 @@ defineProps<{
 
 <template>
   <div class="error-page">
-    <EmptyState :illustration="illustration" :title="title" :text="description" :heading-level="1">
+    <EmptyState
+      :illustration="illustration"
+      :title="title"
+      :text="description"
+      :heading-level="1"
+      problem
+    >
       <template #actions>
         <slot name="actions" />
       </template>

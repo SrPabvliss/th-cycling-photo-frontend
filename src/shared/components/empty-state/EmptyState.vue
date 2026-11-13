@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
+import { useScreenProblem } from '@/core/layout/client/screen-problem'
 import { ILLUSTRATION_VIEW_BOX, ILLUSTRATIONS, type IllustrationKey } from './illustrations'
 
 const props = withDefaults(
@@ -10,9 +11,14 @@ const props = withDefaults(
     text?: string
     /** 1 on the pages where this is the main title (404, 500); 2 inside a screen. */
     headingLevel?: 1 | 2
+    /** It tells of a problem (a link that expired, a page that is not there), not of an empty list. */
+    problem?: boolean
   }>(),
-  { headingLevel: 2 },
+  { headingLevel: 2, problem: false },
 )
+
+const root = ref<HTMLElement | null>(null)
+useScreenProblem(root, () => props.problem)
 
 // The key may come from data at run time: one that does not exist draws nothing.
 const drawing = computed(() =>
@@ -23,7 +29,7 @@ const drawing = computed(() =>
 </script>
 
 <template>
-  <div class="empty-state">
+  <div ref="root" class="empty-state">
     <!-- Markup generated from the design files by scripts/sync-illustrations.mjs, never user data. -->
     <!-- eslint-disable vue/no-v-html -->
     <svg

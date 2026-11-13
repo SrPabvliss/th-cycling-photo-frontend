@@ -94,6 +94,7 @@ const allLabel = computed(() =>
 
     <EmptyState
       v-else-if="problem === 'expired'"
+      problem
       illustration="enlaceExpirado"
       title="Este enlace ya venció"
       text="Si compraste las fotos con tu cuenta, siguen en Mis fotos."
@@ -111,6 +112,7 @@ const allLabel = computed(() =>
 
     <EmptyState
       v-else-if="problem === 'access-limit'"
+      problem
       illustration="enlaceExpirado"
       title="Este enlace llegó a su límite de usos"
       text="Por seguridad, cada enlace se puede abrir un número limitado de veces. Si compraste las fotos con tu cuenta, siguen en Mis fotos."
@@ -128,6 +130,7 @@ const allLabel = computed(() =>
 
     <EmptyState
       v-else-if="problem === 'not-found'"
+      problem
       illustration="enlaceRoto"
       title="Este enlace no es válido"
       text="Puede que esté incompleto. Ábrelo otra vez desde el correo o el mensaje que te llegó."

@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { NButton } from 'naive-ui'
+
+import { useScreenProblem } from '@/core/layout/client/screen-problem'
 
 withDefaults(
   defineProps<{
@@ -18,10 +21,13 @@ withDefaults(
 const emit = defineEmits<{
   retry: []
 }>()
+
+const root = ref<HTMLElement | null>(null)
+useScreenProblem(root)
 </script>
 
 <template>
-  <div class="error-state" role="alert">
+  <div ref="root" class="error-state" role="alert">
     <p class="error-state__title">{{ title }}</p>
     <p class="error-state__text">{{ text }}</p>
     <NButton

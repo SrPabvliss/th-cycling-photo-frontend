@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 
+import { hasScreenProblem } from '@/core/layout/client/screen-problem'
 import { SPOTS_ENABLED } from '../../../spots-config'
 import { useSpotPieces } from '../../../composables/use-spot-pieces'
 import { useNearScreen } from '../../../composables/use-near-screen'
@@ -41,7 +42,8 @@ const html = computed(() => {
   return fillPiece(file.html, { ...delays, maskUrl: file.maskUrl ?? '' })
 })
 
-const isGone = computed(() => !SPOTS_ENABLED || loaded.value.failed.value)
+// No house ad goes with a screen that shows a problem.
+const isGone = computed(() => !SPOTS_ENABLED || loaded.value.failed.value || hasScreenProblem.value)
 </script>
 
 <template>
