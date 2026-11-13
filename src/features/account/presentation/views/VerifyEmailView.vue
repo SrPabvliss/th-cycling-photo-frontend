@@ -6,7 +6,7 @@ import { isAxiosError } from 'axios'
 
 import { safeRedirect } from '@/core/navigation/safe-redirect'
 import AuthPage from '@/features/auth/presentation/components/AuthPage/AuthPage.vue'
-import FormAlert from '@/features/auth/presentation/components/FormAlert/FormAlert.vue'
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { EmptyState } from '@/shared/components/empty-state'
 import { BusyNote, ErrorState } from '@/shared/components/loading'
 import { useConfirmEmailVerification } from '../../composables/mutations/use-confirm-email-verification'

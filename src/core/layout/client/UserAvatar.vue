@@ -6,7 +6,7 @@ import { userInitial } from './user-initial'
 const props = withDefaults(
   defineProps<{
     name?: string | null
-    size?: 's' | 'm'
+    size?: 's' | 'm' | 'l'
   }>(),
   { name: null, size: 's' },
 )
@@ -53,6 +53,12 @@ const initial = computed(() => userInitial(props.name))
 .user-avatar--m {
   inline-size: var(--tt-avatar-desktop);
   block-size: var(--tt-avatar-desktop);
+}
+
+.user-avatar--l {
+  inline-size: calc(var(--tt-control-l) + var(--tt-space-3));
+  block-size: calc(var(--tt-control-l) + var(--tt-space-3));
+  font-size: var(--tt-type-heading-l-size);
 }
 
 .user-avatar__person {

@@ -1,15 +1,112 @@
-.profile-view {
+/* Organizer profile: the frame it had before. */
+.profile-view-organizer {
   padding: 24px 32px 64px;
 }
 
 @media (max-width: 767px) {
-  .profile-view {
+  .profile-view-organizer {
     padding: 16px 16px 96px;
   }
 }
 
 @media (max-width: 479px) {
-  .profile-view {
+  .profile-view-organizer {
     padding: 12px 12px 96px;
+  }
+}
+
+/* Buyer profile. One column of folded sections. */
+.profile {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tt-space-5);
+  inline-size: 100%;
+  max-inline-size: calc(var(--tt-space-8) * 9);
+  margin-inline: auto;
+  padding: var(--tt-space-1) var(--tt-space-4) var(--tt-space-7);
+  color: var(--tt-ink);
+  font-family: var(--tt-font-sans);
+}
+
+.profile__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--tt-space-2);
+  min-block-size: var(--tt-control-m);
+}
+
+.profile__back {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--tt-control-m);
+  block-size: var(--tt-control-m);
+  margin-inline-start: calc(var(--tt-space-2) * -1);
+  border-radius: var(--tt-radius-pill);
+  color: var(--tt-ink);
+}
+
+.profile__back svg {
+  inline-size: var(--tt-icon-l);
+  block-size: var(--tt-icon-l);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.profile__title {
+  margin: 0;
+  font-family: var(--tt-type-display-s-family);
+  font-stretch: var(--tt-display-stretch);
+  font-size: var(--tt-type-display-s-size);
+  line-height: var(--tt-type-display-s-line);
+  font-weight: var(--tt-type-display-s-weight);
+  text-transform: uppercase;
+}
+
+.profile__sections {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--tt-radius-l);
+  background: var(--tt-surface-raised);
+  box-shadow: var(--tt-card-edge), var(--tt-shadow-1);
+}
+
+.profile__skeleton,
+.profile__skeleton-lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tt-space-3);
+}
+
+.profile__skeleton-head {
+  display: flex;
+  align-items: center;
+  gap: var(--tt-space-4);
+}
+
+.profile__skeleton-lines {
+  flex: 1;
+  gap: var(--tt-space-2);
+}
+
+.profile__note {
+  margin: 0;
+  color: var(--tt-ink-muted);
+  font-size: var(--tt-type-body-s-size);
+}
+
+@media (min-width: 768px) {
+  .profile {
+    padding: var(--tt-space-5) var(--tt-space-6) var(--tt-space-7);
+  }
+
+  .profile__logout {
+    align-self: flex-start;
   }
 }

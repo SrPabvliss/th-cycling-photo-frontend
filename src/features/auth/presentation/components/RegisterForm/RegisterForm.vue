@@ -23,8 +23,8 @@ import {
 } from '../../../constants/register-form.schema'
 import { isMinor } from '../../../utils/age.utils'
 import { dialCodeOf, usePhonePrefix } from '../../../utils/phone-prefix'
-import FormAlert from '../FormAlert/FormAlert.vue'
-import FormField from '../FormField/FormField.vue'
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
+import FormField from '@/shared/components/form/FormField/FormField.vue'
 
 export type RegisterField = keyof IRegisterFormData
 

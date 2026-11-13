@@ -10,12 +10,12 @@ import { useCartState } from '@/shared/cart'
 import { fieldErrorText, focusFirstInvalid } from '@/shared/utils/form.utils'
 import AuthPage from '../components/AuthPage/AuthPage.vue'
 import AuthTabs from '../components/AuthTabs/AuthTabs.vue'
-import FormAlert from '../components/FormAlert/FormAlert.vue'
-import FormField from '../components/FormField/FormField.vue'
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
+import FormField from '@/shared/components/form/FormField/FormField.vue'
 import { useAuth } from '../../composables/use-auth'
 import { LOGIN_FORM_DEFAULTS, loginFormSchema } from '../../constants/login-form.schema'
 import { AUTH_ROUTE_NAMES } from '../../routes'
-import { failedStatus, generalProblem, type IFormProblem } from '../../utils/form-problem'
+import { failedStatus, generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
 
 const CREDENTIALS_PROBLEM: IFormProblem = {
   title: 'Correo o contraseña incorrectos',

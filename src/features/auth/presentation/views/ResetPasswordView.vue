@@ -9,8 +9,8 @@ import { EmptyState } from '@/shared/components/empty-state'
 import { BusyNote } from '@/shared/components/loading'
 import { fieldErrorText, focusFirstInvalid } from '@/shared/utils/form.utils'
 import AuthPage from '../components/AuthPage/AuthPage.vue'
-import FormAlert from '../components/FormAlert/FormAlert.vue'
-import FormField from '../components/FormField/FormField.vue'
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
+import FormField from '@/shared/components/form/FormField/FormField.vue'
 import {
   useResetPasswordMutation,
   useValidateResetTokenMutation,
@@ -20,7 +20,7 @@ import {
   resetPasswordFieldValidators,
 } from '../../constants/reset-password-form.schema'
 import { AUTH_ROUTE_NAMES, FORGOT_PASSWORD_PATH } from '../../routes'
-import { failedStatus, generalProblem, type IFormProblem } from '../../utils/form-problem'
+import { failedStatus, generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
 
 const session = useSessionStore()
 const { mutateAsync: validateToken } = useValidateResetTokenMutation()

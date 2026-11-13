@@ -6,15 +6,15 @@ import { NButton } from 'naive-ui'
 import { EmptyState } from '@/shared/components/empty-state'
 import { fieldErrorText, focusFirstInvalid } from '@/shared/utils/form.utils'
 import AuthPage from '../components/AuthPage/AuthPage.vue'
-import FormAlert from '../components/FormAlert/FormAlert.vue'
-import FormField from '../components/FormField/FormField.vue'
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
+import FormField from '@/shared/components/form/FormField/FormField.vue'
 import { useForgotPasswordMutation } from '../../composables/mutations/use-forgot-password'
 import {
   FORGOT_PASSWORD_FORM_DEFAULTS,
   forgotPasswordFormSchema,
 } from '../../constants/forgot-password-form.schema'
 import { AUTH_ROUTE_NAMES } from '../../routes'
-import { generalProblem, type IFormProblem } from '../../utils/form-problem'
+import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
 
 const { mutateAsync: requestLink, isPending } = useForgotPasswordMutation()
 
