@@ -127,9 +127,6 @@ export const API_ROUTES = {
     UNASSIGN: (eventId: string, categoryId: string) =>
       `${EVENTS_BASE}/${eventId}/photo-categories/${categoryId}`,
   },
-  PARTICIPANT_CATEGORIES: {
-    GET_ALL: '/participant-categories',
-  },
   EVENT_TYPES: {
     GET_ALL: '/event-types',
   },

@@ -6,6 +6,8 @@ import { computed, reactive, ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 import type { IPreviewData } from '../../types/responses/preview-data.response'
+import { toCurrentUser } from '@/core/auth/current-user.mapper'
+import { useSessionStore } from '@/core/auth/stores/session.store'
 import ClientGalleryView from './ClientGalleryView.vue'
 
 const state = reactive({
@@ -36,6 +38,31 @@ vi.mock('@/shared/pricing/use-pricing-tiers', () => ({
     })),
   }),
 }))
+
+vi.mock('../components/PreviewConfirm/PreviewConfirm.vue', async () => {
+  const { defineComponent, h } = await import('vue')
+  return {
+    default: defineComponent({
+      name: 'PreviewConfirm',
+      emits: ['back', 'linkProblem', 'photosChanged'],
+      setup(_, { emit }) {
+        return () =>
+          h('div', { 'data-test': 'confirm-step' }, [
+            h('button', {
+              'data-test': 'ordered',
+              onClick: () => emit('linkProblem', 'already-ordered'),
+            }),
+            h('button', {
+              'data-test': 'not-available',
+              onClick: () => emit('linkProblem', 'not-available'),
+            }),
+            h('button', { 'data-test': 'changed', onClick: () => emit('photosChanged') }),
+            h('button', { 'data-test': 'back', onClick: () => emit('back') }),
+          ])
+      },
+    }),
+  }
+})
 
 const PREVIEW = (overrides: Partial<IPreviewData> = {}): IPreviewData => ({
   token: 'tok',
@@ -160,5 +187,69 @@ describe('ClientGalleryView', () => {
     await flushPromises()
 
     expect(router.currentRoute.value.fullPath).toBe('/login?redirect=/preview/tok')
+  })
+
+  async function atConfirmStep() {
+    useSessionStore().setSession(
+      'token',
+      toCurrentUser({
+        id: 'u1',
+        email: 'a@b.c',
+        firstName: 'Ana',
+        lastName: null,
+        role: 'customer',
+      }),
+    )
+    const mountedView = await mountView()
+    await mountedView.wrapper.findAll('button[aria-pressed]')[0]!.trigger('click')
+    await mountedView.wrapper
+      .findAll('button')
+      .find((each) => each.text() === 'Continuar')!
+      .trigger('click')
+    await flushPromises()
+    return mountedView
+  }
+
+  it('goes to the confirm step with a session', async () => {
+    const { wrapper } = await atConfirmStep()
+
+    expect(wrapper.find('[data-test="confirm-step"]').exists()).toBe(true)
+  })
+
+  it('says the preview was already ordered when the order says so', async () => {
+    const { wrapper } = await atConfirmStep()
+
+    await wrapper.get('[data-test="ordered"]').trigger('click')
+
+    expect(wrapper.get('h1').text()).toBe('Ya hiciste este pedido')
+  })
+
+  it('says the preview is no longer available', async () => {
+    const { wrapper } = await atConfirmStep()
+
+    await wrapper.get('[data-test="not-available"]').trigger('click')
+
+    expect(wrapper.get('h1').text()).toBe('Esta vista previa ya no está disponible')
+    expect(wrapper.text()).toContain('Pídele al organizador que te la comparta de nuevo.')
+  })
+
+  it('reads the preview again and goes back to picking when its photos changed', async () => {
+    const { wrapper } = await atConfirmStep()
+
+    await wrapper.get('[data-test="changed"]').trigger('click')
+    await flushPromises()
+
+    expect(refetch).toHaveBeenCalled()
+    expect(wrapper.find('[data-test="confirm-step"]').exists()).toBe(false)
+    expect(wrapper.text()).toContain('Algunas fotos ya no están en esta vista previa')
+    expect(wrapper.text()).toContain('Revisa tu selección y confirma de nuevo.')
+  })
+
+  it('goes back to picking with the photos still chosen', async () => {
+    const { wrapper } = await atConfirmStep()
+
+    await wrapper.get('[data-test="back"]').trigger('click')
+
+    expect(wrapper.findAll('button[aria-pressed="true"]')).toHaveLength(1)
   })
 })

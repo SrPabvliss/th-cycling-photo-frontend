@@ -60,7 +60,9 @@ describe('billingChanges', () => {
 })
 
 describe('useUpdateBillingAccount', () => {
-  beforeEach(() => patch.mockReset())
+  beforeEach(() => {
+    patch.mockReset()
+  })
 
   it('patches the account with the changes and reads the accounts again', async () => {
     patch.mockResolvedValue({ data: { id: 'b1' } })

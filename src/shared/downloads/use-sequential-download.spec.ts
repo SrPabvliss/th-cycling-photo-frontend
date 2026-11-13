@@ -36,7 +36,9 @@ function held() {
 }
 
 describe('useSequentialDownload', () => {
-  beforeEach(() => downloadFile.mockReset())
+  beforeEach(() => {
+    downloadFile.mockReset()
+  })
 
   it('downloads the files in order, one at a time', async () => {
     downloadFile.mockResolvedValue(undefined)

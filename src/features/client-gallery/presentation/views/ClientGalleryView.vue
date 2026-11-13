@@ -11,7 +11,9 @@ import { ErrorState, TtSkeleton, useDelayedFlag } from '@/shared/components/load
 import { usePreviewGallery } from '../../composables/queries/use-preview-gallery'
 import { usePhotoSelection } from '../../composables/use-photo-selection'
 import { previewProblem } from '../../utils/preview-problem'
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import PreviewBar from '../components/PreviewBar/PreviewBar.vue'
+import PreviewConfirm from '../components/PreviewConfirm/PreviewConfirm.vue'
 import PreviewPicker from '../components/PreviewPicker/PreviewPicker.vue'
 import PreviewViewer from '../components/PreviewViewer/PreviewViewer.vue'
 
@@ -32,8 +34,13 @@ const selection = usePhotoSelection(token, photoIds)
 const step = ref<'pick' | 'confirm'>('pick')
 const viewing = ref<string | null>(null)
 
-// What the link itself says, before any order: gone, never there, or already ordered.
+// What the order found out about the link while confirming.
+const orderLinkProblem = ref<'already-ordered' | 'expired' | 'not-available' | null>(null)
+const photosChanged = ref(false)
+
+// What the link itself says: gone, never there, no longer offered, or already ordered.
 const linkProblem = computed(() => {
+  if (orderLinkProblem.value) return orderLinkProblem.value
   if (preview.value?.status === 'converted') return 'already-ordered'
   if (preview.value?.status === 'expired') return 'expired'
   if (status.value !== 'error') return null
@@ -51,7 +58,15 @@ watch(
   { once: true },
 )
 
+// Some photos left the preview: read it again (the selection drops them) and pick again.
+async function onPhotosChanged() {
+  photosChanged.value = true
+  step.value = 'pick'
+  await refetch()
+}
+
 function proceed() {
+  photosChanged.value = false
   if (selection.selected.value.length === 0) return
   if (!session.isAuthenticated) {
     const back = safeRedirect(`/preview/${encodeURIComponent(token.value)}`)
@@ -119,6 +134,14 @@ function proceed() {
       </template>
     </EmptyState>
 
+    <EmptyState
+      v-else-if="linkProblem === 'not-available'"
+      illustration="enlaceRoto"
+      title="Esta vista previa ya no está disponible"
+      text="Pídele al organizador que te la comparta de nuevo."
+      :heading-level="1"
+    />
+
     <ErrorState
       v-else-if="linkProblem || !preview"
       title="No pudimos cargar tus fotos"
@@ -134,7 +157,22 @@ function proceed() {
       :heading-level="1"
     />
 
-    <template v-else-if="step === 'pick'">
+    <PreviewConfirm
+      v-else-if="step === 'confirm'"
+      :preview="preview"
+      :selection="selection"
+      @back="step = 'pick'"
+      @link-problem="orderLinkProblem = $event"
+      @photos-changed="onPhotosChanged"
+    />
+
+    <template v-else>
+      <FormAlert
+        v-if="photosChanged"
+        tone="bad"
+        title="Algunas fotos ya no están en esta vista previa"
+        text="Revisa tu selección y confirma de nuevo."
+      />
       <PreviewPicker :preview="preview" :selection="selection" @open="viewing = $event" />
       <PreviewBar :count="selection.selected.value.length" @continue="proceed" />
       <PreviewViewer
