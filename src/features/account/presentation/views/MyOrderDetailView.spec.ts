@@ -337,6 +337,15 @@ describe('MyOrderDetailView', () => {
     expect(wrapper.get('.order-detail__muted').text()).toBe(line)
   })
 
+  it('does not name the payment method of a gift', async () => {
+    state.order = order('gifted', { paymentMethod: 'transfer' })
+    const wrapper = await mountView()
+
+    expect(wrapper.get('.order-detail__muted').text()).toBe('3 fotos')
+    expect(wrapper.text()).not.toContain('· Transferencia')
+    expect(wrapper.text()).toContain('Gratis')
+  })
+
   it('offers to retry when the order could not be loaded', async () => {
     Object.assign(state, { status: 'error', order: undefined, error: new Error('down') })
     const wrapper = await mountView()

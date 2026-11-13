@@ -86,7 +86,8 @@ const PAYMENT_METHOD_LABELS = { card: 'Tarjeta', transfer: 'Transferencia' } as 
 const photoLine = computed(() => {
   const count = order.value?.photos.length ?? 0
   const photos = count === 1 ? '1 foto' : `${count} fotos`
-  const method = order.value?.paymentMethod
+  // A gift keeps the method it was created with; it was not paid, so it is not named.
+  const method = order.value?.state === 'gifted' ? null : order.value?.paymentMethod
   return method ? `${photos} · ${PAYMENT_METHOD_LABELS[method]}` : photos
 })
 const amount = computed(() => {
