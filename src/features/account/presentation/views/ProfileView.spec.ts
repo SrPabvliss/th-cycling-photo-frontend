@@ -52,9 +52,9 @@ vi.mock('@/core/auth/use-logout', () => ({
 
 const SECTION_STUBS = {
   PersonalDataSection: { template: '<div data-test="body-datos" />' },
-  PhoneList: { template: '<div data-test="body-tels" />' },
-  EmailSection: { template: '<div data-test="body-correo" />' },
-  PasswordForm: { template: '<div data-test="body-clave" />' },
+  PhonesSection: { template: '<div data-test="body-tels" />' },
+  AccountEmailSection: { template: '<div data-test="body-correo" />' },
+  PasswordSection: { template: '<div data-test="body-clave" />' },
   BillingSection: { template: '<div data-test="body-fact" />' },
   ProfileContent: { template: '<div data-test="organizer" />' },
 }

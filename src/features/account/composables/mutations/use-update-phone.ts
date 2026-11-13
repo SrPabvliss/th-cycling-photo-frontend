@@ -6,7 +6,7 @@ import { ACCOUNT_QUERY_KEYS } from '../../constants/query-keys'
 import type { IUserPhone } from '../../types/responses/user-phone.response'
 import type { IUpdatePhoneRequest } from '../../types/requests/phone.request'
 
-export function useUpdatePhone() {
+export function useUpdatePhone(options: { silent?: boolean } = {}) {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -20,7 +20,7 @@ export function useUpdatePhone() {
       const response = await httpClient.patch<{ id: string }>(
         API_ROUTES.USER_PHONES.BY_ID(phoneId),
         payload,
-        { silentSuccess: true },
+        { silentSuccess: true, silent: options.silent },
       )
       return response.data
     },

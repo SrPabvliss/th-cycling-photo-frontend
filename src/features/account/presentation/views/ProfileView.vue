@@ -10,10 +10,10 @@ import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { ErrorState, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
 import { useMyBillingAccountsQuery } from '../../composables/queries/use-my-billing-accounts'
 import { useMyProfileQuery } from '../../composables/queries/use-my-profile'
-import EmailSection from '../components/EmailSection/EmailSection.vue'
-import PasswordForm from '../components/PasswordForm/PasswordForm.vue'
+import AccountEmailSection from '../components/AccountEmailSection/AccountEmailSection.vue'
+import PasswordSection from '../components/PasswordSection/PasswordSection.vue'
 import PersonalDataSection from '../components/PersonalDataSection/PersonalDataSection.vue'
-import PhoneList from '../components/PhoneList/PhoneList.vue'
+import PhonesSection from '../components/PhonesSection/PhonesSection.vue'
 import ProfileHeader from '../components/ProfileHeader/ProfileHeader.vue'
 import ProfileSection from '../components/ProfileSection/ProfileSection.vue'
 import ProfileContent from './ProfileContent.vue'
@@ -124,7 +124,7 @@ const plural = (count: number, one: string, many: string) => `${count} ${count =
           :open="openSection === 'tels'"
           @update:open="setOpen('tels', $event)"
         >
-          <PhoneList />
+          <PhonesSection />
         </ProfileSection>
         <ProfileSection
           id="correo"
@@ -135,7 +135,7 @@ const plural = (count: number, one: string, many: string) => `${count} ${count =
           :open="openSection === 'correo'"
           @update:open="setOpen('correo', $event)"
         >
-          <EmailSection />
+          <AccountEmailSection />
         </ProfileSection>
         <ProfileSection
           id="clave"
@@ -144,7 +144,7 @@ const plural = (count: number, one: string, many: string) => `${count} ${count =
           :open="openSection === 'clave'"
           @update:open="setOpen('clave', $event)"
         >
-          <PasswordForm />
+          <PasswordSection />
         </ProfileSection>
         <ProfileSection
           id="fact"

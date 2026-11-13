@@ -5,7 +5,7 @@ import { httpClient } from '@/core/http/axios-client'
 import { ACCOUNT_QUERY_KEYS } from '../../constants/query-keys'
 import type { IUserPhone } from '../../types/responses/user-phone.response'
 
-export function useSetPrimaryPhone() {
+export function useSetPrimaryPhone(options: { silent?: boolean } = {}) {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -13,7 +13,7 @@ export function useSetPrimaryPhone() {
       const response = await httpClient.patch<{ id: string }>(
         API_ROUTES.USER_PHONES.SET_PRIMARY(phoneId),
         undefined,
-        { silentSuccess: true },
+        { silentSuccess: true, silent: options.silent },
       )
       return response.data
     },

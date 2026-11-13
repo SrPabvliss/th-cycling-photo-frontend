@@ -5,14 +5,14 @@ import { httpClient } from '@/core/http/axios-client'
 import { ACCOUNT_QUERY_KEYS } from '../../constants/query-keys'
 import type { IUserPhone } from '../../types/responses/user-phone.response'
 
-export function useDeletePhone() {
+export function useDeletePhone(options: { silent?: boolean } = {}) {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (phoneId: IUserPhone['id']) => {
       const response = await httpClient.delete<{ id: string }>(
         API_ROUTES.USER_PHONES.BY_ID(phoneId),
-        { silentSuccess: true },
+        { silentSuccess: true, silent: options.silent },
       )
       return response.data
     },
