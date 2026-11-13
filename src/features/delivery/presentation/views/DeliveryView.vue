@@ -15,13 +15,14 @@ import PreviewNotFound from '@/shared/components/PreviewNotFound/PreviewNotFound
 const route = useRoute()
 const token = computed(() => route.params.token as string)
 
-const {
-  data: delivery,
-  isPending,
-  isExpired,
-  isNotFound,
-  ensureFreshUrls,
-} = useDeliveryQuery(token)
+// Bridge to the new query until this view is rebuilt.
+const { data: delivery, isPending, problem, ensureFresh } = useDeliveryQuery(token)
+const isExpired = computed(() => problem.value === 'expired' || problem.value === 'access-limit')
+const isNotFound = computed(() => problem.value === 'not-found')
+async function ensureFreshUrls() {
+  await ensureFresh()
+  return delivery.value
+}
 const { downloadSingle, downloadAll, isDownloadingAll, downloadProgress, downloadTotal } =
   usePhotoDownload()
 

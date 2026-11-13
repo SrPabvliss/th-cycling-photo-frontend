@@ -11,6 +11,8 @@ export interface IApiDeliveryPhoto {
   filename: string
   downloadUrl: string
   fileSize: number
+  /** Small image of the photo itself (TIT-116). Lasts an hour; may be missing, null or fail. */
+  thumbnailUrl?: string | null
 }
 
 /** API projection from GET /delivery/:token */
@@ -19,7 +21,7 @@ export interface IApiDeliveryData {
   eventName: string
   customerName: string
   status: string
-  expiresAt: string
+  expiresAt: string | null
   downloadCount: number
   photos: IApiDeliveryPhoto[]
 }
@@ -29,6 +31,7 @@ export interface IDeliveryPhoto {
   filename: string
   downloadUrl: string
   fileSize: number
+  thumbnailUrl: string | null
 }
 
 /** Frontend domain type */
@@ -37,7 +40,8 @@ export interface IDeliveryData {
   eventName: string
   customerName: string
   status: DeliveryStatus
-  expiresAt: Date
+  /** Null when the api does not say when the link ends. */
+  expiresAt: Date | null
   downloadCount: number
   photos: IDeliveryPhoto[]
 }

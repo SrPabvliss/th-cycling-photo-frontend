@@ -11,7 +11,7 @@ import type {
   IApiMyOrderDownloadPhoto,
   IMyOrderDetail,
 } from '../../../types/responses/my-order.response'
-import PurchasedPhotoTile from '../PurchasedPhotoTile/PurchasedPhotoTile.vue'
+import PurchasedPhotoTile from '@/shared/downloads/PurchasedPhotoTile.vue'
 
 /** Download addresses last an hour: older than this, they are asked for again first. */
 const FRESH_FOR_MS = 55 * 60_000

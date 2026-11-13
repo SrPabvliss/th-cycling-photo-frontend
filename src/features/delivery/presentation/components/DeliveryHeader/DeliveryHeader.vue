@@ -27,8 +27,10 @@ const totalSize = props.delivery.photos.reduce((sum, p) => sum + p.fileSize, 0)
       <span>{{ delivery.photos.length }} fotos</span>
       <span class="dh__dot" />
       <span>{{ formatFileSize(totalSize) }}</span>
-      <span class="dh__dot" />
-      <span>Disponible hasta {{ formatDate(delivery.expiresAt) }}</span>
+      <template v-if="delivery.expiresAt">
+        <span class="dh__dot" />
+        <span>Disponible hasta {{ formatDate(delivery.expiresAt) }}</span>
+      </template>
     </div>
   </div>
 </template>
