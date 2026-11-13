@@ -24,20 +24,6 @@ export const useCartStore = defineStore('cart', () => {
 
   const isDrawerOpen = ref(false)
 
-  const activeEventId = ref<string | null>(null)
-
-  const activeGroup = computed(
-    () => groups.value.find((g) => g.eventId === activeEventId.value) ?? null,
-  )
-
-  const otherGroups = computed(() =>
-    groups.value.filter((g) => g.eventId !== activeGroup.value?.eventId),
-  )
-
-  function setActiveEvent(eventId: string | null) {
-    activeEventId.value = eventId
-  }
-
   function setDrawerOpen(open: boolean) {
     isDrawerOpen.value = open
   }
@@ -60,10 +46,6 @@ export const useCartStore = defineStore('cart', () => {
     totalCount,
     eventCount,
     isDrawerOpen,
-    activeEventId,
-    activeGroup,
-    otherGroups,
-    setActiveEvent,
     setDrawerOpen,
     setGroups,
     isInCart,
