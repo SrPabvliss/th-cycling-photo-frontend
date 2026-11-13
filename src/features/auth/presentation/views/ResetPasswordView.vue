@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { nextTick, onMounted, ref } from 'vue'
 import { useForm } from '@tanstack/vue-form'
-import { NFormItem, NInput, NButton, NCard, NIcon, NSpin } from 'naive-ui'
-import { LockClosedOutline, AlertCircleOutline, ArrowBack } from '@vicons/ionicons5'
+import { NButton } from 'naive-ui'
 
-import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
-import TitanLogo from '@/core/layout/public/TitanLogo.vue'
-import { AUTH_ROUTE_NAMES, FORGOT_PASSWORD_PATH } from '../../routes'
 import { useSessionStore } from '@/core/auth/stores/session.store'
+import PasswordRules from '@/shared/auth/PasswordRules.vue'
+import { EmptyState } from '@/shared/components/empty-state'
+import { BusyNote } from '@/shared/components/loading'
+import { fieldErrorText, focusFirstInvalid } from '@/shared/utils/form.utils'
+import AuthPage from '../components/AuthPage/AuthPage.vue'
+import FormAlert from '../components/FormAlert/FormAlert.vue'
+import FormField from '../components/FormField/FormField.vue'
 import {
   useResetPasswordMutation,
   useValidateResetTokenMutation,
@@ -16,180 +18,194 @@ import {
 import {
   RESET_PASSWORD_FORM_DEFAULTS,
   resetPasswordFieldValidators,
-  resetPasswordFormSchema,
 } from '../../constants/reset-password-form.schema'
+import { AUTH_ROUTE_NAMES, FORGOT_PASSWORD_PATH } from '../../routes'
+import { failedStatus, generalProblem, type IFormProblem } from '../../utils/form-problem'
 
-const router = useRouter()
-const authStore = useSessionStore()
+const session = useSessionStore()
+const { mutateAsync: validateToken } = useValidateResetTokenMutation()
+const { mutateAsync: resetPassword, isPending: isSaving } = useResetPasswordMutation()
 
 const token = ref('')
-const isTokenChecked = ref(false)
-const isTokenValid = ref(false)
+const screen = ref<'checking' | 'form' | 'useless' | 'done'>('checking')
+const formRef = ref<HTMLFormElement | null>(null)
+const submitted = ref(false)
+const problem = ref<IFormProblem | null>(null)
 
-const { mutateAsync: validateToken } = useValidateResetTokenMutation()
-const { mutateAsync: resetPassword, isPending: isResetting } = useResetPasswordMutation()
-
+// The token travels in the fragment (never sent to a server) and leaves the address at once.
 onMounted(async () => {
-  const hashParams = new URLSearchParams(window.location.hash.slice(1))
-  token.value = hashParams.get('t') ?? ''
-  window.history.replaceState(null, '', window.location.pathname)
-
+  token.value = new URLSearchParams(window.location.hash.slice(1)).get('t') ?? ''
+  window.history.replaceState(window.history.state, '', window.location.pathname)
   if (!token.value) {
-    isTokenChecked.value = true
+    screen.value = 'useless'
     return
   }
-
   try {
-    isTokenValid.value = await validateToken(token.value)
+    screen.value = (await validateToken(token.value)) ? 'form' : 'useless'
   } catch {
-    isTokenValid.value = false
-  } finally {
-    isTokenChecked.value = true
+    screen.value = 'useless'
   }
 })
+
+function validateRepeat({ value }: { value: string }) {
+  if (!value) return 'Repite tu contraseña.'
+  return value !== form.getFieldValue('password') ? 'Las contraseñas no coinciden.' : undefined
+}
 
 const form = useForm({
   defaultValues: RESET_PASSWORD_FORM_DEFAULTS,
   onSubmit: async ({ value }) => {
+    problem.value = null
     try {
       await resetPassword({ token: token.value, password: value.password })
-      authStore.clearSession()
-      router.push({ name: AUTH_ROUTE_NAMES.LOGIN })
-    } catch {}
+      // Whoever was signed in here (maybe another account) is signed out.
+      session.clearSession()
+      screen.value = 'done'
+    } catch (error) {
+      const status = failedStatus(error)
+      if (status === 422 || status === 400) screen.value = 'useless'
+      else problem.value = generalProblem(error)
+    }
   },
 })
+
+async function save() {
+  if (isSaving.value) return
+  submitted.value = true
+  await form.handleSubmit()
+  if (!form.state.isValid) {
+    await nextTick()
+    focusFirstInvalid(formRef.value)
+  }
+}
 </script>
 
 <template>
-  <div v-if="isTokenChecked && (!token || !isTokenValid)" class="state-page">
-    <div class="state-page__content">
-      <div class="state-page__hero">
-        <span class="state-page__code">EXP</span>
-        <div class="state-page__icon state-page__icon--invalid">
-          <NIcon :component="AlertCircleOutline" :size="56" color="#fff" />
-        </div>
-      </div>
-
-      <h1 class="state-page__title">Enlace no válido</h1>
-      <p class="state-page__description">
-        Este enlace ya no es válido. Pudo haber expirado o haberse usado. Solicita uno nuevo.
-      </p>
-
-      <div class="state-page__actions">
-        <NButton type="primary" size="large" @click="router.push(FORGOT_PASSWORD_PATH)">
-          <template #icon><NIcon :component="ArrowBack" /></template>
-          Solicitar nuevo enlace
-        </NButton>
-      </div>
-    </div>
-
-    <div class="state-page__mountain" />
+  <div v-if="screen === 'checking'" class="reset-password__center">
+    <BusyNote text="Comprobando tu enlace" />
   </div>
 
-  <div v-else class="reset-password-page">
-    <NCard class="reset-password-card">
-      <div v-if="!isTokenChecked" class="reset-password-loading">
-        <NSpin size="large" />
-      </div>
-
-      <template v-else>
-        <div class="reset-password-header">
-          <TitanLogo :size="56" />
-          <h1 class="reset-password-title">Crea una nueva contraseña</h1>
-          <p class="reset-password-subtitle">Elige una contraseña segura para tu cuenta.</p>
-        </div>
-
-        <form
-          @submit="
-            (e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              form.handleSubmit()
-            }
-          "
-        >
-          <form.Field
-            name="password"
-            :validators="{
-              onBlur: resetPasswordFieldValidators.password,
-              onSubmit: resetPasswordFieldValidators.password,
-            }"
-          >
-            <template v-slot="{ field }">
-              <NFormItem label="Nueva contraseña" required v-bind="fieldStatus(field)">
-                <NInput
-                  type="password"
-                  show-password-on="click"
-                  placeholder="Mínimo 8 caracteres"
-                  v-bind="fieldInput(field)"
-                >
-                  <template #prefix>
-                    <NIcon :component="LockClosedOutline" color="#9CA3AF" />
-                  </template>
-                </NInput>
-              </NFormItem>
-            </template>
-          </form.Field>
-
-          <form.Field
-            name="confirmPassword"
-            :validators="{
-              onChangeListenTo: ['password'],
-              onChange: ({ value, fieldApi }) =>
-                value !== fieldApi.form.getFieldValue('password')
-                  ? 'Las contraseñas no coinciden'
-                  : undefined,
-              onSubmit: ({ value, fieldApi }) =>
-                resetPasswordFormSchema.safeParse({
-                  password: fieldApi.form.getFieldValue('password'),
-                  confirmPassword: value,
-                }).success
-                  ? undefined
-                  : 'Las contraseñas no coinciden',
-            }"
-          >
-            <template v-slot="{ field }">
-              <NFormItem label="Confirmar contraseña" required v-bind="fieldStatus(field)">
-                <NInput
-                  type="password"
-                  show-password-on="click"
-                  placeholder="Repite tu contraseña"
-                  v-bind="fieldInput(field)"
-                >
-                  <template #prefix>
-                    <NIcon :component="LockClosedOutline" color="#9CA3AF" />
-                  </template>
-                </NInput>
-              </NFormItem>
-            </template>
-          </form.Field>
-
-          <form.Subscribe>
-            <template v-slot="{ canSubmit }">
-              <NButton
-                type="primary"
-                block
-                size="large"
-                :loading="isResetting"
-                :disabled="!canSubmit || isResetting"
-                attr-type="submit"
-                class="reset-password-submit"
-              >
-                Restablecer contraseña
-              </NButton>
-            </template>
-          </form.Subscribe>
-        </form>
-
-        <p class="reset-password-back">
-          <RouterLink :to="{ name: AUTH_ROUTE_NAMES.LOGIN }">Volver al inicio de sesión</RouterLink>
-        </p>
+  <div v-else-if="screen === 'useless'" class="reset-password__center">
+    <EmptyState
+      illustration="enlaceExpirado"
+      title="Este enlace ya no sirve"
+      text="Los enlaces para cambiar la contraseña duran 30 minutos y se usan una sola vez."
+      :heading-level="1"
+    >
+      <template #actions>
+        <RouterLink v-slot="{ href, navigate }" :to="FORGOT_PASSWORD_PATH" custom>
+          <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
+            Pedir otro enlace
+          </NButton>
+        </RouterLink>
       </template>
-    </NCard>
+    </EmptyState>
   </div>
+
+  <div v-else-if="screen === 'done'" class="reset-password__center">
+    <EmptyState
+      illustration="correo"
+      title="Contraseña actualizada"
+      text="Ya puedes iniciar sesión con tu contraseña nueva."
+      :heading-level="1"
+    >
+      <template #actions>
+        <RouterLink v-slot="{ href, navigate }" :to="{ name: AUTH_ROUTE_NAMES.LOGIN }" custom>
+          <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
+            Iniciar sesión
+          </NButton>
+        </RouterLink>
+      </template>
+    </EmptyState>
+  </div>
+
+  <AuthPage v-else title="Crea una contraseña nueva">
+    <form ref="formRef" class="reset-password__form" novalidate @submit.prevent="save">
+      <FormAlert v-if="problem" tone="bad" :title="problem.title" :text="problem.text" />
+
+      <form.Field name="password" :validators="{ onSubmit: resetPasswordFieldValidators.password }">
+        <template #default="{ field }">
+          <div class="reset-password__password">
+            <FormField
+              id="reset-password"
+              label="Contraseña nueva"
+              :error="fieldErrorText(field, submitted)"
+            >
+              <template #default="{ id, describedby, invalid }">
+                <input
+                  :id="id"
+                  type="password"
+                  autocomplete="new-password"
+                  :aria-describedby="describedby"
+                  :aria-invalid="invalid"
+                  :value="field.state.value"
+                  @input="field.handleChange(($event.target as HTMLInputElement).value)"
+                />
+              </template>
+            </FormField>
+            <PasswordRules :value="field.state.value" />
+          </div>
+        </template>
+      </form.Field>
+
+      <form.Field name="confirmPassword" :validators="{ onSubmit: validateRepeat }">
+        <template #default="{ field }">
+          <FormField
+            id="reset-password2"
+            label="Repite la contraseña"
+            :error="fieldErrorText(field, submitted)"
+          >
+            <template #default="{ id, describedby, invalid }">
+              <input
+                :id="id"
+                type="password"
+                autocomplete="new-password"
+                :aria-describedby="describedby"
+                :aria-invalid="invalid"
+                :value="field.state.value"
+                @input="field.handleChange(($event.target as HTMLInputElement).value)"
+              />
+            </template>
+          </FormField>
+        </template>
+      </form.Field>
+
+      <NButton
+        type="primary"
+        size="large"
+        block
+        attr-type="submit"
+        :loading="isSaving"
+        :disabled="isSaving"
+        :aria-busy="isSaving ? 'true' : undefined"
+      >
+        Guardar contraseña
+      </NButton>
+    </form>
+  </AuthPage>
 </template>
 
-<style
-  src="@/features/client-gallery/presentation/components/OrderConfirmation/order-confirmation.css"
-></style>
-<style scoped src="./styles/reset-password-view.css" />
+<style scoped>
+.reset-password__center {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  inline-size: 100%;
+  max-inline-size: calc(var(--tt-space-8) * 7);
+  margin-inline: auto;
+  padding: var(--tt-space-6) var(--tt-space-4);
+}
+
+.reset-password__form,
+.reset-password__password {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tt-space-4);
+}
+
+.reset-password__password {
+  gap: var(--tt-space-2);
+}
+</style>

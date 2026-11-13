@@ -3,7 +3,7 @@ import { isAxiosError } from 'axios'
 // What an access form says when the server did not do what was asked, beyond a field.
 export interface IFormProblem {
   title: string
-  text: string
+  text?: string
 }
 
 export const NETWORK_PROBLEM: IFormProblem = {
@@ -17,8 +17,7 @@ export const UNKNOWN_PROBLEM: IFormProblem = {
 }
 
 export const TOO_MANY_PROBLEM: IFormProblem = {
-  title: 'Demasiados intentos',
-  text: 'Espera unos minutos y vuelve a intentarlo.',
+  title: 'Demasiados intentos. Espera unos minutos y vuelve a intentarlo.',
 }
 
 /** Status of a failed request; 0 when there was no answer (network) or it was not a request. */

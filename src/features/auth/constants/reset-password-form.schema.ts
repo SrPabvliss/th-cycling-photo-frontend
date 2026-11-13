@@ -11,13 +11,13 @@ export const RESET_PASSWORD_FORM_DEFAULTS: IResetPasswordFormData = {
 
 const resetPasswordShape = z.object({
   password: z.string().refine(isAccountPassword, PASSWORD_RULE_MESSAGE),
-  confirmPassword: z.string().min(1, 'Confirma la contraseña'),
+  confirmPassword: z.string().min(1, 'Repite tu contraseña.'),
 })
 
 export const resetPasswordFormSchema = resetPasswordShape.refine(
   (data) => data.password === data.confirmPassword,
   {
-    message: 'Las contraseñas no coinciden',
+    message: 'Las contraseñas no coinciden.',
     path: ['confirmPassword'],
   },
 )

@@ -19,7 +19,8 @@ export function useValidateResetTokenMutation() {
 export function useResetPasswordMutation() {
   return useMutation({
     mutationFn: async (payload: { token: string; password: string }) => {
-      await httpClient.post(API_ROUTES.AUTH.RESET_PASSWORD, payload)
+      // The screen says what went wrong.
+      await httpClient.post(API_ROUTES.AUTH.RESET_PASSWORD, payload, { silent: true })
     },
   })
 }
