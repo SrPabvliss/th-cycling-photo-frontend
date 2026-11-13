@@ -1,32 +1,25 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useForm } from '@tanstack/vue-form'
+import { ref } from 'vue'
 import { NAlert, NButton, NCheckbox, NFormItem, NInput, NRadioButton, NRadioGroup } from 'naive-ui'
 
 import { fieldInput, fieldStatus } from '@/shared/utils/form.utils'
-import { useCreateBillingAccount } from '@/features/account/composables/mutations/use-create-billing-account'
-import { useRecordInvoiceConsent } from '@/features/account/composables/mutations/use-record-invoice-consent'
+import {
+  useBillingAccountForm,
+  type BillingFormMode,
+} from '../../../composables/use-billing-account-form'
 import {
   BILLING_ID_TYPE_OPTIONS,
   billingAccountFieldValidators as v,
-  ID_NUMBER_FORMAT_MESSAGE,
-  type IBillingAccountFormData,
 } from '../../../constants/billing-account-form.schema'
 import { INVOICE_CONSENT } from '../../../constants/invoice-consent'
-import { isWellFormedIdNumber, normalizeIdNumber } from '../../../utils/billing-identification'
-import {
-  identificationMessageOf,
-  readBillingServerError,
-  type IBillingServerError,
-} from '../../../utils/billing-server-error'
+import type { IBillingServerError } from '../../../utils/billing-server-error'
 import type { ICreateBillingAccountRequest } from '../../../types/requests/billing-account.request'
 
 const props = withDefaults(
   defineProps<{
     needsConsent: boolean
     prefill: { legalName: string; email: string }
-    /** create: saves a new account. correct and edit: hand the request to the parent. */
-    mode?: 'create' | 'correct' | 'edit'
+    mode?: BillingFormMode
     initial?: ICreateBillingAccountRequest
     submitLabel?: string
     submitting?: boolean
@@ -41,82 +34,27 @@ const emit = defineEmits<{
   cancel: []
 }>()
 
-const isCorrecting = props.mode !== 'create'
-const isEditing = props.mode === 'edit'
-const asksConsent = !isCorrecting && props.needsConsent
-const recordInvoiceConsent = useRecordInvoiceConsent()
-const createBillingAccount = useCreateBillingAccount()
+const {
+  form,
+  idType,
+  isEditing,
+  asksConsent,
+  idNumberError,
+  alertError,
+  isSaving,
+  idNumberValidator,
+  idNumberPlaceholder,
+} = useBillingAccountForm({
+  mode: props.mode,
+  needsConsent: props.needsConsent,
+  prefill: props.prefill,
+  initial: props.initial,
+  serverError: () => props.serverError,
+  onSaved: (id) => emit('saved', id),
+  onSubmit: (request) => emit('submit', request),
+})
 
-const idNumberServerError = ref<string | null>(null)
-const createError = ref<string | null>(null)
 const showConsentDetails = ref(false)
-
-const CREATE_FALLBACK = 'No pudimos guardar tus datos de facturación. Intenta de nuevo.'
-
-const serverIdNumberError = computed(() =>
-  props.serverError ? identificationMessageOf(props.serverError) : null,
-)
-
-const idNumberError = computed(() => idNumberServerError.value ?? serverIdNumberError.value)
-
-const alertError = computed(() => {
-  if (createError.value) return createError.value
-  return props.serverError && !serverIdNumberError.value ? props.serverError.message : null
-})
-
-function toRequest(value: IBillingAccountFormData): ICreateBillingAccountRequest {
-  const address = value.address.trim()
-  return {
-    idType: value.idType,
-    idNumber: normalizeIdNumber(value.idType, value.idNumber),
-    legalName: value.legalName.trim(),
-    email: value.email.trim(),
-    ...(address ? { address } : {}),
-  }
-}
-
-const form = useForm({
-  defaultValues: {
-    idType: props.initial?.idType ?? 'national_id',
-    idNumber: props.initial?.idNumber ?? '',
-    legalName: props.initial?.legalName ?? props.prefill.legalName,
-    email: props.initial?.email ?? props.prefill.email,
-    address: props.initial?.address ?? '',
-    consent: false,
-  } as IBillingAccountFormData,
-  onSubmit: async ({ value }) => {
-    if (isCorrecting) {
-      emit('submit', toRequest(value))
-      return
-    }
-    idNumberServerError.value = null
-    createError.value = null
-    try {
-      if (asksConsent) await recordInvoiceConsent.mutateAsync()
-      const created = await createBillingAccount.mutateAsync(toRequest(value))
-      emit('saved', created.id)
-    } catch (caught) {
-      const serverError = readBillingServerError(caught, CREATE_FALLBACK)
-      const identificationMessage = identificationMessageOf(serverError)
-      if (identificationMessage) idNumberServerError.value = identificationMessage
-      else createError.value = serverError.message
-    }
-  },
-})
-
-const idType = form.useStore((state) => state.values.idType)
-
-function idNumberValidator({ value }: { value: string }) {
-  return isWellFormedIdNumber(idType.value, normalizeIdNumber(idType.value, value))
-    ? undefined
-    : ID_NUMBER_FORMAT_MESSAGE
-}
-
-function idNumberPlaceholder(): string {
-  if (idType.value === 'ruc') return '13 dígitos'
-  if (idType.value === 'passport') return 'Letras y números'
-  return '10 dígitos'
-}
 </script>
 
 <template>
@@ -168,7 +106,7 @@ function idNumberPlaceholder(): string {
         >
           <NInput
             data-test="billing-id-number"
-            :placeholder="idNumberPlaceholder()"
+            :placeholder="idNumberPlaceholder"
             :input-props="{
               inputmode: idType === 'passport' ? 'text' : 'numeric',
               autocomplete: 'off',
@@ -244,9 +182,7 @@ function idNumberPlaceholder(): string {
         block
         attr-type="submit"
         data-test="billing-submit"
-        :loading="
-          submitting || recordInvoiceConsent.isPending.value || createBillingAccount.isPending.value
-        "
+        :loading="submitting || isSaving"
       >
         {{ submitLabel }}
       </NButton>
