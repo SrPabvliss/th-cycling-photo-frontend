@@ -10,7 +10,11 @@ export function usePricingTiersQuery() {
   return useQuery({
     queryKey: PRICING_QUERY_KEYS.tiers(),
     queryFn: async () => {
-      const response = await httpClient.get<IApiPricingTiers>(API_ROUTES.PRICING.TIERS)
+      // Silent: the tiers only decorate a price that is already on screen; where they are missing
+      // the screen adapts instead of raising a toast.
+      const response = await httpClient.get<IApiPricingTiers>(API_ROUTES.PRICING.TIERS, {
+        silent: true,
+      })
       return toPricingTiers(response.data)
     },
     staleTime: 5 * 60_000,
