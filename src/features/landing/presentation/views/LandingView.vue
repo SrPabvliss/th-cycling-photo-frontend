@@ -8,22 +8,13 @@ import TitanLogo from '@/core/layout/public/TitanLogo.vue'
 import heroImage from '@/assets/brand/hero-downhill.webp'
 import aboutImage from '@/assets/brand/about-experience.webp'
 import ctaImage from '@/assets/brand/cta-explore.webp'
-import { ROUTE_NAMES } from '@/core/navigation/route-names'
-import { usePublicEventsQuery } from '@/shared/composables/use-public-events'
-import PublicEventCard from '@/shared/components/PublicEventCard/PublicEventCard.vue'
+import { PublicEventCard, usePublicEventsQuery } from '@/shared/public-events'
 
 const router = useRouter()
-const { data: events } = usePublicEventsQuery()
+const { events } = usePublicEventsQuery()
 
-const recentEvents = computed(() =>
-  [...(events.value ?? [])]
-    .sort((a, b) => b.startDate.getTime() - a.startDate.getTime())
-    .slice(0, 3),
-)
-
-function handleEventClick(slug: string) {
-  router.push({ name: ROUTE_NAMES.PUBLIC_GALLERY_EVENT_GALLERY, params: { slug } })
-}
+// The api sends the list newest first.
+const recentEvents = computed(() => events.value.slice(0, 3))
 </script>
 
 <template>
@@ -68,12 +59,7 @@ function handleEventClick(slug: string) {
         </NButton>
       </div>
       <div class="events-grid">
-        <PublicEventCard
-          v-for="event in recentEvents"
-          :key="event.slug"
-          :event="event"
-          @click="handleEventClick"
-        />
+        <PublicEventCard v-for="event in recentEvents" :key="event.slug" :event="event" />
       </div>
     </div>
   </section>

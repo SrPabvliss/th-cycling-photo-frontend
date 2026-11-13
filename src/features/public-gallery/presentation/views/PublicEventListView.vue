@@ -1,22 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { NEmpty, NSpin } from 'naive-ui'
 
-import { usePublicEventsQuery } from '../../composables/queries/use-public-events'
-import { PUBLIC_GALLERY_ROUTE_NAMES } from '../../routes'
-import PublicEventCard from '../components/PublicEventCard/PublicEventCard.vue'
+import { PublicEventCard, usePublicEventsQuery } from '@/shared/public-events'
 
-const router = useRouter()
-const { data: events, isPending } = usePublicEventsQuery()
-
-const sortedEvents = computed(() =>
-  [...(events.value ?? [])].sort((a, b) => b.startDate.getTime() - a.startDate.getTime()),
-)
-
-function handleEventClick(slug: string) {
-  router.push({ name: PUBLIC_GALLERY_ROUTE_NAMES.EVENT_GALLERY, params: { slug } })
-}
+const { events: sortedEvents, isPending } = usePublicEventsQuery()
 </script>
 
 <template>
@@ -31,12 +18,7 @@ function handleEventClick(slug: string) {
     </div>
 
     <div v-else-if="sortedEvents.length > 0" class="pel__grid">
-      <PublicEventCard
-        v-for="event in sortedEvents"
-        :key="event.slug"
-        :event="event"
-        @click="handleEventClick"
-      />
+      <PublicEventCard v-for="event in sortedEvents" :key="event.slug" :event="event" />
     </div>
 
     <NEmpty v-else description="No hay eventos disponibles" class="pel__empty" />
