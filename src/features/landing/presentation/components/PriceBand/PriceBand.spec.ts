@@ -20,7 +20,7 @@ const REAL_TIERS: ITier[] = [
 
 const query = reactive({ tiers: REAL_TIERS as ITier[] | undefined, isError: false })
 
-vi.mock('@/features/pricing/composables/queries/use-pricing-tiers', () => ({
+vi.mock('@/shared/pricing/use-pricing-tiers', () => ({
   usePricingTiersQuery: () => ({
     data: computed(() =>
       query.tiers ? { currency: 'USD', source: 'default', tiers: query.tiers } : undefined,

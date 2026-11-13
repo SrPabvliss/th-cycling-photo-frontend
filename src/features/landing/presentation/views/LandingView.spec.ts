@@ -34,7 +34,7 @@ vi.mock('@/shared/public-events', async (importOriginal) => ({
         },
 }))
 
-vi.mock('@/features/pricing/composables/queries/use-pricing-tiers', () => ({
+vi.mock('@/shared/pricing/use-pricing-tiers', () => ({
   usePricingTiersQuery: () => ({ data: computed(() => undefined), isError: computed(() => false) }),
 }))
 

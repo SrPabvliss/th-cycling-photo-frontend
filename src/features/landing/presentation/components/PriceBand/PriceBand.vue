@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { usePricingTiersQuery } from '@/features/pricing/composables/queries/use-pricing-tiers'
+import { usePricingTiersQuery } from '@/shared/pricing/use-pricing-tiers'
 import { usePriceSheet } from '@/features/pricing/composables/use-price-sheet'
 import { bestOpenTier, buildTierCards, formatMoney } from '@/shared/pricing/tier-cards'
 

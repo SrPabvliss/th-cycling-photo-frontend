@@ -249,7 +249,6 @@ export const API_ROUTES = {
   },
   PRICING: {
     BASE: PRICING_BASE,
-    PREVIEW: `${PRICING_BASE}/preview`,
     TIERS: `${PRICING_BASE}/tiers`,
   },
   PAYMENTS: {
