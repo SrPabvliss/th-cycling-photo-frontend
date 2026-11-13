@@ -6,7 +6,7 @@ import { isAxiosError } from 'axios'
 
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import NotFoundView from '@/core/views/NotFoundView.vue'
-import AdSlot from '@/features/ads/presentation/components/AdSlot/AdSlot.vue'
+import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
 import { useMyOrderDetailQuery } from '@/features/account/composables/queries/use-my-order-detail'
 import { EmptyState } from '@/shared/components/empty-state'
 import { ErrorState, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
@@ -87,13 +87,13 @@ const text = computed(() => {
           </RouterLink>
         </template>
       </EmptyState>
-      <AdSlot class="payment-confirmed__ad" format="A" :seed="19" />
+      <HouseSpot class="payment-confirmed__spot" format="A" :seed="19" />
     </template>
   </div>
 </template>
 
 <style scoped>
-.payment-confirmed__ad {
+.payment-confirmed__spot {
   margin-block-start: var(--tt-space-5);
 }
 

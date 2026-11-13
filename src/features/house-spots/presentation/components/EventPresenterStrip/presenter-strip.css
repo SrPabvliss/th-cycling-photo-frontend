@@ -1,0 +1,66 @@
+/* Keeps the strip's height from the first paint; its brand colors are its own in both schemes. */
+.presenter-strip__frame {
+  position: relative;
+  isolation: isolate;
+  block-size: calc(var(--tt-space-7) + var(--tt-space-2));
+  overflow: hidden;
+  border-radius: var(--tt-radius-m);
+  background: var(--tt-surface-sunken);
+}
+
+.presenter-strip__content :deep(.ss-slide) {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  opacity: 0;
+  animation: presenter-strip-slide 24s linear infinite;
+}
+
+.presenter-strip--still .presenter-strip__content :deep(.ss-slide) {
+  animation: none;
+}
+
+.presenter-strip--still .presenter-strip__content :deep(.ss-slide:first-child) {
+  opacity: 1;
+}
+
+@keyframes presenter-strip-slide {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  3% {
+    opacity: 1;
+    transform: none;
+  }
+  25% {
+    opacity: 1;
+    transform: none;
+  }
+  28% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .presenter-strip__content :deep(.ss-slide) {
+    animation: none;
+  }
+
+  .presenter-strip__content :deep(.ss-slide:first-child) {
+    opacity: 1;
+  }
+}
+
+@media (min-width: 768px) {
+  .presenter-strip__frame {
+    block-size: var(--tt-space-8);
+    border-radius: var(--tt-radius-l);
+  }
+}

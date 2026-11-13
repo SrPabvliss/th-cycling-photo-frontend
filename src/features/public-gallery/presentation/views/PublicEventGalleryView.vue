@@ -6,7 +6,7 @@ import { isAxiosError } from 'axios'
 
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import NotFoundView from '@/core/views/NotFoundView.vue'
-import SponsorStrip from '@/features/ads/presentation/components/SponsorStrip/SponsorStrip.vue'
+import EventPresenterStrip from '@/features/house-spots/presentation/components/EventPresenterStrip/EventPresenterStrip.vue'
 import { useCartActions, useCartState } from '@/shared/cart'
 import { EmptyState } from '@/shared/components/empty-state'
 import { ErrorState, LoadBoundary, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
@@ -19,7 +19,7 @@ import {
   usePublicEventPhotosInfinite,
 } from '../../composables/queries/use-public-event-photos'
 import { toCalendarDate } from '../../utils/calendar-date'
-import GalleryBanner from '../components/GalleryBanner/GalleryBanner.vue'
+import GalleryHero from '../components/GalleryHero/GalleryHero.vue'
 import GalleryCartBar from '../components/GalleryCartBar/GalleryCartBar.vue'
 import PhotoGridSection from '../components/PhotoGridSection/PhotoGridSection.vue'
 import PhotoGridSkeleton from '../components/PhotoGridSkeleton/PhotoGridSkeleton.vue'
@@ -182,7 +182,7 @@ const cartEvent = computed(() =>
     <!-- The event is loading: the shape of the screen, once the wait is long enough to show it. -->
     <div v-if="isEventPending || showEventSkeleton" class="gallery__loading" aria-busy="true">
       <template v-if="showEventSkeleton">
-        <TtSkeleton class="gallery__banner-skeleton" height="auto" radius="text" />
+        <TtSkeleton class="gallery__hero-skeleton" height="auto" radius="text" />
         <div class="gallery__body">
           <PhotoGridSkeleton />
         </div>
@@ -201,7 +201,7 @@ const cartEvent = computed(() =>
     />
 
     <template v-else>
-      <GalleryBanner :event="event" />
+      <GalleryHero :event="event" />
 
       <div v-if="!hasPhotos" class="gallery__body">
         <EmptyState
@@ -252,7 +252,7 @@ const cartEvent = computed(() =>
             {{ plateError }}
           </p>
 
-          <SponsorStrip class="gallery__sponsor" />
+          <EventPresenterStrip class="gallery__presenter" />
 
           <PublicGalleryFilterBar
             v-if="categories.length > 1"
@@ -310,7 +310,7 @@ const cartEvent = computed(() =>
               <!-- Every photo of the event can be thousands: only the rows on screen are drawn. -->
               <PublicPhotoGrid
                 v-else
-                with-ad
+                with-spot
                 :photos="photos"
                 :selected-ids="selectedIds"
                 :busy-ids="busyIds"

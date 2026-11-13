@@ -5,9 +5,12 @@ import { createPinia, setActivePinia } from 'pinia'
 import { computed, reactive } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
-vi.mock('@/features/ads/presentation/components/SponsorStrip/SponsorStrip.vue', async () => ({
-  default: (await import('@/features/ads/testing/ad-stubs')).SponsorStripStub,
-}))
+vi.mock(
+  '@/features/house-spots/presentation/components/EventPresenterStrip/EventPresenterStrip.vue',
+  async () => ({
+    default: (await import('@/features/house-spots/testing/spot-stubs')).EventPresenterStripStub,
+  }),
+)
 
 import PhotoTile from '../components/PhotoTile/PhotoTile.vue'
 import PublicEventGalleryView from './PublicEventGalleryView.vue'
@@ -145,9 +148,9 @@ async function mountAt(path = '/gallery/mama-rumi') {
 const PlainGridStub = {
   name: 'PublicPhotoGrid',
   components: { PhotoTile },
-  props: { photos: null, selectedIds: null, busyIds: null, withAd: Boolean },
+  props: { photos: null, selectedIds: null, busyIds: null, withSpot: Boolean },
   emits: ['open', 'toggle'],
-  template: `<div class="plain-grid" :data-with-ad="String(withAd)"><PhotoTile v-for="p in photos" :key="p.id" :photo="p"
+  template: `<div class="plain-grid" :data-with-spot="String(withSpot)"><PhotoTile v-for="p in photos" :key="p.id" :photo="p"
     :selected="selectedIds.has(p.id)" :busy="busyIds.has(p.id)"
     @open="$emit('open', $event)" @toggle="$emit('toggle', $event)" /></div>`,
 }
@@ -228,7 +231,7 @@ describe('PublicEventGalleryView', () => {
       const { wrapper } = await mountAt()
 
       expect(wrapper.get('h1').text()).toBe('Mama Rumi 2026')
-      expect(wrapper.get('.gallery-banner__eyebrow').text()).toBe('4–5 oct · Baños, Tungurahua')
+      expect(wrapper.get('.gallery-hero__eyebrow').text()).toBe('4–5 oct · Baños, Tungurahua')
     })
 
     it('says the photos are not there yet, with no cart bar, for an event without photos', async () => {
@@ -454,7 +457,7 @@ describe('PublicEventGalleryView', () => {
       expect(wrapper.get('.load-boundary').attributes('aria-busy')).toBe('true')
     })
 
-    it('keeps the banner and the search when only the photos fail', async () => {
+    it('keeps the hero and the search when only the photos fail', async () => {
       Object.assign(matched, { status: 'error', photos: [] })
       const { wrapper } = await mountAt()
 
@@ -491,10 +494,10 @@ describe('PublicEventGalleryView', () => {
   describe('house ads', () => {
     const many = () => Array.from({ length: 20 }, (_, index) => photo(`p${index + 1}`))
 
-    it('presents the event with the sponsor strip right under the plate search', async () => {
+    it('presents the event with the presenter strip right under the plate search', async () => {
       const { wrapper } = await mountAt()
 
-      const strip = wrapper.get('[data-test="sponsor-strip"]').element
+      const strip = wrapper.get('[data-test="presenter-strip"]').element
       const search = wrapper.get('form.gallery__search').element
       expect(search.compareDocumentPosition(strip) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
       expect(
@@ -506,7 +509,7 @@ describe('PublicEventGalleryView', () => {
       Object.assign(matched, { photos: many(), total: 20 })
       const { wrapper } = await mountAt()
 
-      expect(wrapper.get('.plain-grid').attributes('data-with-ad')).toBe('true')
+      expect(wrapper.get('.plain-grid').attributes('data-with-spot')).toBe('true')
     })
 
     it('has no ad tile among the results of a plate search', async () => {
@@ -514,7 +517,7 @@ describe('PublicEventGalleryView', () => {
       const { wrapper } = await mountAt('/gallery/mama-rumi?placa=127')
 
       expect(wrapper.find('.plain-grid').exists()).toBe(false)
-      expect(wrapper.find('[data-test="ad"]').exists()).toBe(false)
+      expect(wrapper.find('[data-test="house-spot"]').exists()).toBe(false)
     })
 
     it('moves the viewer from the 12th photo to the real 13th, past the ad tile', async () => {
@@ -527,12 +530,12 @@ describe('PublicEventGalleryView', () => {
       expect(ids[ids.indexOf('p12') + 1]).toBe('p13')
     })
 
-    it('has no sponsor strip for an event without photos yet', async () => {
+    it('has no presenter strip for an event without photos yet', async () => {
       detail.event = { ...baseEvent, photoCount: 0 }
       Object.assign(matched, { photos: [], total: 0 })
       const { wrapper } = await mountAt()
 
-      expect(wrapper.find('[data-test="sponsor-strip"]').exists()).toBe(false)
+      expect(wrapper.find('[data-test="presenter-strip"]').exists()).toBe(false)
     })
   })
 })

@@ -4,8 +4,8 @@ import { computed, reactive, ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 import type { IMyOrderListItem, MyOrderState } from '../../types/responses/my-order.response'
-vi.mock('@/features/ads/presentation/components/AdSlot/AdSlot.vue', async () => ({
-  default: (await import('@/features/ads/testing/ad-stubs')).AdSlotStub,
+vi.mock('@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue', async () => ({
+  default: (await import('@/features/house-spots/testing/spot-stubs')).HouseSpotStub,
 }))
 
 import MyOrdersView from './MyOrdersView.vue'
@@ -121,24 +121,24 @@ describe('MyOrdersView', () => {
     state.orders = ['a', 'b', 'c', 'd', 'e', 'f'].map((id) => order(id))
     const page = await mountView()
 
-    const ad = page.get('[data-test="ad"]')
+    const ad = page.get('[data-test="house-spot"]')
     expect(ad.attributes('data-format')).toBe('AB')
     expect(ad.attributes('data-seed')).toBe('11')
-    expect(ad.classes()).toContain('my-orders__ad')
+    expect(ad.classes()).toContain('my-orders__spot')
     expect(ad.element.previousElementSibling?.textContent).toContain('Evento d')
   })
 
   it('puts it after the only order of a one-order list, and never on an empty one', async () => {
     state.orders = [order('a')]
     const one = await mountView()
-    expect(one.get('[data-test="ad"]').element.previousElementSibling?.textContent).toContain(
-      'Evento a',
-    )
+    expect(
+      one.get('[data-test="house-spot"]').element.previousElementSibling?.textContent,
+    ).toContain('Evento a')
     mounted.pop()!.unmount()
 
     state.orders = []
     const empty = await mountView()
-    expect(empty.find('[data-test="ad"]').exists()).toBe(false)
+    expect(empty.find('[data-test="house-spot"]').exists()).toBe(false)
   })
 
   it('shows one row per order', async () => {

@@ -13,7 +13,7 @@ import { createPinia } from 'pinia'
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 
 import { useColorSchemeStore } from '@/core/theme/color-scheme.store'
-import { registerAdsLayoutSlots } from '@/features/ads/layout-slots'
+import { registerHouseSpotsLayoutSlots } from '@/features/house-spots/layout-slots'
 import { registerCartLayoutSlots } from '@/features/cart/layout-slots'
 import { registerCartPostLoginMerge } from '@/features/cart/post-login'
 import { registerNotificationLayoutSlots } from '@/features/notifications/layout-slots'
@@ -34,7 +34,7 @@ app.use(router)
 app.use(VueQueryPlugin, { queryClient })
 
 registerCartPostLoginMerge(queryClient)
-registerAdsLayoutSlots()
+registerHouseSpotsLayoutSlots()
 registerCartLayoutSlots()
 registerNotificationLayoutSlots()
 registerPricingLayoutSlots()

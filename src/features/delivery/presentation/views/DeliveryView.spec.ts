@@ -5,8 +5,8 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 
 import type { IDeliveryData } from '../../types/responses/delivery-data.response'
 import type { DeliveryProblem } from '../../utils/delivery-problem'
-vi.mock('@/features/ads/presentation/components/AdSlot/AdSlot.vue', async () => ({
-  default: (await import('@/features/ads/testing/ad-stubs')).AdSlotStub,
+vi.mock('@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue', async () => ({
+  default: (await import('@/features/house-spots/testing/spot-stubs')).HouseSpotStub,
 }))
 
 import DeliveryView from './DeliveryView.vue'
@@ -146,7 +146,7 @@ describe('DeliveryView', () => {
   it('ends with the house carousel, after the way to keep them at hand', async () => {
     const wrapper = await mountView()
 
-    const ad = wrapper.get('[data-test="ad"]')
+    const ad = wrapper.get('[data-test="house-spot"]')
     expect(ad.attributes('data-format')).toBe('AB')
     expect(ad.attributes('data-seed')).toBe('27')
     expect(ad.element.previousElementSibling?.classList.contains('delivery__hint')).toBe(true)

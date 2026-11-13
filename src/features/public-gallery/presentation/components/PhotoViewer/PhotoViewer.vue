@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import AdSlot from '@/features/ads/presentation/components/AdSlot/AdSlot.vue'
+import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
 import { useCartActions, useCartState, type ICartPhotoInput } from '@/shared/cart'
 import { quotePhotos, sortTiers } from '@/shared/pricing/quote'
 import { formatMoney } from '@/shared/pricing/tier-cards'
@@ -114,7 +114,7 @@ function toggleCart() {
       </button>
     </template>
     <template #after>
-      <AdSlot class="photo-viewer__ad" format="D" :seed="41" />
+      <HouseSpot class="photo-viewer__spot" format="D" :seed="41" />
     </template>
   </PhotoViewerFrame>
 </template>
@@ -159,7 +159,7 @@ function toggleCart() {
   cursor: pointer;
 }
 
-.photo-viewer__ad {
+.photo-viewer__spot {
   margin-inline: auto;
 }
 

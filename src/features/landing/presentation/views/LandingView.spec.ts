@@ -4,8 +4,8 @@ import { computed, reactive } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 import type { IPublicEventFilters, IPublicEventListItem } from '@/shared/public-events'
-vi.mock('@/features/ads/presentation/components/AdSlot/AdSlot.vue', async () => ({
-  default: (await import('@/features/ads/testing/ad-stubs')).AdSlotStub,
+vi.mock('@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue', async () => ({
+  default: (await import('@/features/house-spots/testing/spot-stubs')).HouseSpotStub,
 }))
 
 import LandingView from './LandingView.vue'
@@ -96,7 +96,7 @@ describe('LandingView', () => {
   it('gives the house carousel its own band right after the price band', async () => {
     const wrapper = await mountView()
 
-    const ad = wrapper.get('[data-test="ad"]')
+    const ad = wrapper.get('[data-test="house-spot"]')
     expect(ad.attributes('data-format')).toBe('AB')
     expect(ad.attributes('data-seed')).toBe('3')
     // The price band needs the tiers, which this spec leaves out: the ad is the band before the

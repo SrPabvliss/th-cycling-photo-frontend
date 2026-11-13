@@ -63,6 +63,6 @@
 }
 
 /* The house ad takes the whole width of the grid. */
-.my-orders__ad {
+.my-orders__spot {
   grid-column: 1 / -1;
 }

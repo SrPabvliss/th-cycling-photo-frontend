@@ -7,7 +7,7 @@ import { NButton } from 'naive-ui'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import { checkoutPath, ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { useBillingSelection } from '@/features/account/composables/use-billing-selection'
-import AdSlot from '@/features/ads/presentation/components/AdSlot/AdSlot.vue'
+import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
 import BillingAccountForm from '@/features/account/presentation/components/BillingAccountForm/BillingAccountForm.vue'
 import BillingAccountPicker from '@/features/account/presentation/components/BillingAccountPicker/BillingAccountPicker.vue'
 import BillingCard from '@/features/account/presentation/components/BillingCard/BillingCard.vue'
@@ -33,7 +33,7 @@ const session = useSessionStore()
 const eventId = computed(() => route.params.eventId as string)
 const isSignedIn = computed(() => session.isAuthenticated)
 // The house strip: under the summary from 768 px, under the buttons on a phone; not for a guest.
-const AD_SEED = 31
+const SPOT_SEED = 31
 const isWide = useMediaQuery('(min-width: 768px)')
 
 // --- The order: the photos of this event in the cart ---
@@ -182,7 +182,7 @@ async function confirm() {
             <h2 class="checkout__event-name">{{ group.eventName }}</h2>
           </div>
           <CheckoutSummary :group="group" />
-          <AdSlot v-if="isSignedIn && isWide" format="D" :seed="AD_SEED" />
+          <HouseSpot v-if="isSignedIn && isWide" format="D" :seed="SPOT_SEED" />
         </section>
 
         <aside class="checkout__side">
@@ -245,7 +245,7 @@ async function confirm() {
               Seguir explorando
             </RouterLink>
           </div>
-          <AdSlot v-if="isSignedIn && !isWide" format="D" :seed="AD_SEED" />
+          <HouseSpot v-if="isSignedIn && !isWide" format="D" :seed="SPOT_SEED" />
         </aside>
       </div>
     </LoadBoundary>

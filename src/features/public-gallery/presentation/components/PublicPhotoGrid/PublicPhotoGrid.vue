@@ -4,9 +4,13 @@ import { useWindowVirtualizer } from '@tanstack/vue-virtual'
 import { useElementSize, useMediaQuery } from '@vueuse/core'
 
 import tokens from '@/core/theme/client/awana-tokens.json'
-import { ADS_ENABLED } from '@/features/ads/ads-config'
-import AdSlot from '@/features/ads/presentation/components/AdSlot/AdSlot.vue'
-import { isAdTile, withAdTile, type IAdTile } from '@/features/ads/utils/ad-placement'
+import { SPOTS_ENABLED } from '@/features/house-spots/spots-config'
+import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
+import {
+  isSpotTile,
+  withSpotTile,
+  type ISpotTile,
+} from '@/features/house-spots/utils/spot-placement'
 import { TtSkeleton } from '@/shared/components/loading'
 import type { IPublicPhoto } from '../../../types/responses/public-photo.response'
 import PhotoTile from '../PhotoTile/PhotoTile.vue'
@@ -20,9 +24,9 @@ const LOADING_MORE_PLACEHOLDERS = 3
 // Rows from the end at which the next page is asked for, before the person gets there.
 const LOAD_MORE_MARGIN_ROWS = 2
 // The house ad tile: 13th cell, only when there are at least 13 photos (demo seed 59).
-const AD_POSITION = 12
-const AD_MIN_PHOTOS = 13
-const AD_SEED = 59
+const SPOT_POSITION = 12
+const SPOT_MIN_PHOTOS = 13
+const SPOT_SEED = 59
 
 const props = withDefaults(
   defineProps<{
@@ -32,9 +36,9 @@ const props = withDefaults(
     hasMore?: boolean
     isLoadingMore?: boolean
     /** A house ad tile among the photos. Never in a plate search. */
-    withAd?: boolean
+    withSpot?: boolean
   }>(),
-  { hasMore: false, isLoadingMore: false, withAd: false },
+  { hasMore: false, isLoadingMore: false, withSpot: false },
 )
 
 const emit = defineEmits<{
@@ -59,15 +63,15 @@ const rowHeight = computed(() => {
 
 // The tile is a cell like a photo, 3:4 too, so every row keeps the same height. It is not a
 // photo: the viewer moves through `photos`, never through these cells.
-const adGone = ref(false)
-const cells = computed<(IPublicPhoto | IAdTile)[]>(() =>
-  props.withAd && ADS_ENABLED && !adGone.value
-    ? withAdTile(props.photos, AD_POSITION, AD_MIN_PHOTOS)
+const spotGone = ref(false)
+const cells = computed<(IPublicPhoto | ISpotTile)[]>(() =>
+  props.withSpot && SPOTS_ENABLED && !spotGone.value
+    ? withSpotTile(props.photos, SPOT_POSITION, SPOT_MIN_PHOTOS)
     : props.photos,
 )
 
 const rows = computed(() => {
-  const result: (IPublicPhoto | IAdTile)[][] = []
+  const result: (IPublicPhoto | ISpotTile)[][] = []
   for (let start = 0; start < cells.value.length; start += columns.value) {
     result.push(cells.value.slice(start, start + columns.value))
   }
@@ -117,8 +121,13 @@ watch(
         class="photo-grid photo-grid-virtual__row"
         :style="{ transform: `translateY(${row.start - scrollMargin}px)` }"
       >
-        <template v-for="cell in rows[row.index]" :key="isAdTile(cell) ? 'ad' : cell.id">
-          <AdSlot v-if="isAdTile(cell)" format="C" :seed="AD_SEED" @unavailable="adGone = true" />
+        <template v-for="cell in rows[row.index]" :key="isSpotTile(cell) ? 'ad' : cell.id">
+          <HouseSpot
+            v-if="isSpotTile(cell)"
+            format="C"
+            :seed="SPOT_SEED"
+            @unavailable="spotGone = true"
+          />
           <PhotoTile
             v-else
             :photo="cell"

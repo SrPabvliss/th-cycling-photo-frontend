@@ -56,7 +56,7 @@ describe('PaymentReturnView', () => {
     const confirming = await mountView()
     expect(
       confirming
-        .find('[aria-label="Espacio publicitario"], .ad-slot, .season-bar, .sponsor-strip')
+        .find('[aria-label="Espacio publicitario"], .house-spot, .season-bar, .presenter-strip')
         .exists(),
     ).toBe(false)
 
@@ -65,7 +65,7 @@ describe('PaymentReturnView', () => {
     expect(confirming.text()).not.toBe('')
     expect(
       confirming
-        .find('[aria-label="Espacio publicitario"], .ad-slot, .season-bar, .sponsor-strip')
+        .find('[aria-label="Espacio publicitario"], .house-spot, .season-bar, .presenter-strip')
         .exists(),
     ).toBe(false)
   })

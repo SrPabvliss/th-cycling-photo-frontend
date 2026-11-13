@@ -1,0 +1,108 @@
+/* A house ad. The frame keeps the format's shape before the banners arrive; they keep their own
+ * brand colors in both schemes. */
+.house-spot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tt-space-2);
+  inline-size: 100%;
+}
+
+.house-spot__frame {
+  position: relative;
+  isolation: isolate;
+  inline-size: 100%;
+  overflow: hidden;
+  border-radius: var(--tt-radius-m);
+  background: var(--tt-surface-sunken);
+}
+
+.house-spot--B .house-spot__frame {
+  border-radius: var(--tt-radius-l);
+}
+
+.house-spot--D .house-spot__frame {
+  border-radius: var(--tt-radius-s);
+}
+
+.house-spot__slides {
+  position: absolute;
+  inset: 0;
+}
+
+.house-spot__slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  animation: house-spot-slide 24s linear infinite;
+}
+
+.house-spot__slide--still {
+  opacity: 1;
+  animation: none;
+}
+
+.house-spot__dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--tt-space-1) + var(--tt-space-1) / 2);
+  block-size: var(--tt-space-2);
+}
+
+.house-spot__dot {
+  display: block;
+  inline-size: calc(var(--tt-space-1) + var(--tt-space-1) / 2);
+  block-size: calc(var(--tt-space-1) + var(--tt-space-1) / 2);
+  border-radius: var(--tt-radius-pill);
+  background: var(--tt-line);
+  animation: house-spot-dot 24s linear infinite;
+}
+
+@keyframes house-spot-slide {
+  0% {
+    opacity: 0;
+    transform: translateX(8%);
+  }
+  3% {
+    opacity: 1;
+    transform: none;
+  }
+  25% {
+    opacity: 1;
+    transform: none;
+  }
+  28% {
+    opacity: 0;
+    transform: translateX(-8%);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-8%);
+  }
+}
+
+@keyframes house-spot-dot {
+  0%,
+  25% {
+    inline-size: calc(var(--tt-space-4) + var(--tt-space-1) / 2);
+    background: var(--tt-primary);
+  }
+  28%,
+  100% {
+    inline-size: calc(var(--tt-space-1) + var(--tt-space-1) / 2);
+    background: var(--tt-line);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .house-spot__slide,
+  .house-spot__dot {
+    animation: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .house-spot--D {
+    max-inline-size: calc(var(--tt-space-8) * 6 + var(--tt-space-6) + var(--tt-space-1));
+  }
+}

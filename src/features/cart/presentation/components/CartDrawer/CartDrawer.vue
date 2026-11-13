@@ -4,7 +4,7 @@ import { NButton } from 'naive-ui'
 
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import { checkoutPath, ROUTE_PATHS } from '@/core/navigation/route-paths'
-import AdSlot from '@/features/ads/presentation/components/AdSlot/AdSlot.vue'
+import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
 import { usePriceSheet } from '@/features/pricing/composables/use-price-sheet'
 import { useCartActions, useCartState } from '@/shared/cart'
 import { EmptyState } from '@/shared/components/empty-state'
@@ -189,7 +189,7 @@ function explainPrices() {
           </button>
 
           <!-- Only with photos: this slot is the cart's own content, never its empty state. -->
-          <AdSlot format="D" :seed="23" />
+          <HouseSpot format="D" :seed="23" />
         </LoadBoundary>
       </div>
     </div>

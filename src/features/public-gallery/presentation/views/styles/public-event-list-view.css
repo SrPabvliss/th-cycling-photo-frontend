@@ -100,6 +100,6 @@
 }
 
 /* The house ad takes the whole width of the grid. */
-.event-list__ad {
+.event-list__spot {
   grid-column: 1 / -1;
 }

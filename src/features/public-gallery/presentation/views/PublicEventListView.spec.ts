@@ -4,8 +4,8 @@ import { computed, reactive } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 import type { IPublicEventFilters, IPublicEventListItem } from '@/shared/public-events'
-vi.mock('@/features/ads/presentation/components/AdSlot/AdSlot.vue', async () => ({
-  default: (await import('@/features/ads/testing/ad-stubs')).AdSlotStub,
+vi.mock('@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue', async () => ({
+  default: (await import('@/features/house-spots/testing/spot-stubs')).HouseSpotStub,
 }))
 
 import PublicEventListView from './PublicEventListView.vue'
@@ -185,7 +185,7 @@ describe('PublicEventListView', () => {
   })
 
   describe('the house carousel', () => {
-    const ad = (wrapper: Wrapper) => wrapper.find('[data-test="ad"]')
+    const ad = (wrapper: Wrapper) => wrapper.find('[data-test="house-spot"]')
     const cardBefore = (wrapper: Wrapper) =>
       ad(wrapper).element.previousElementSibling?.getAttribute('href')
 
@@ -195,7 +195,7 @@ describe('PublicEventListView', () => {
 
       expect(ad(wrapper).attributes('data-format')).toBe('AB')
       expect(ad(wrapper).attributes('data-seed')).toBe('7')
-      expect(ad(wrapper).classes()).toContain('event-list__ad')
+      expect(ad(wrapper).classes()).toContain('event-list__spot')
       expect(cardBefore(wrapper)).toBe('/gallery/c')
       expect(cards(wrapper)).toHaveLength(5)
     })

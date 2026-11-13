@@ -9,8 +9,8 @@ import { useSessionStore } from '@/core/auth/stores/session.store'
 import type { ICartGroup } from '@/shared/types/cart.types'
 import type { CheckoutProblem } from '@/shared/utils/checkout-error'
 import { useCheckoutDraftStore } from '../../stores/checkout-draft.store'
-vi.mock('@/features/ads/presentation/components/AdSlot/AdSlot.vue', async () => ({
-  default: (await import('@/features/ads/testing/ad-stubs')).AdSlotStub,
+vi.mock('@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue', async () => ({
+  default: (await import('@/features/house-spots/testing/spot-stubs')).HouseSpotStub,
 }))
 
 import CheckoutView from './CheckoutView.vue'
@@ -235,11 +235,11 @@ describe('CheckoutView', () => {
       signIn()
       const { wrapper } = await mountView()
 
-      const ad = wrapper.get('[data-test="ad"]')
+      const ad = wrapper.get('[data-test="house-spot"]')
       expect(ad.attributes('data-format')).toBe('D')
       expect(ad.attributes('data-seed')).toBe('31')
       expect(ad.element.previousElementSibling?.classList.contains('checkout__actions')).toBe(true)
-      expect(wrapper.findAll('[data-test="ad"]')).toHaveLength(1)
+      expect(wrapper.findAll('[data-test="house-spot"]')).toHaveLength(1)
     })
 
     it('goes under the summary from 768 px', async () => {
@@ -247,20 +247,20 @@ describe('CheckoutView', () => {
       signIn()
       const { wrapper } = await mountView()
 
-      const ad = wrapper.get('[data-test="ad"]')
+      const ad = wrapper.get('[data-test="house-spot"]')
       expect(ad.element.parentElement?.classList.contains('checkout__main')).toBe(true)
-      expect(wrapper.findAll('[data-test="ad"]')).toHaveLength(1)
+      expect(wrapper.findAll('[data-test="house-spot"]')).toHaveLength(1)
     })
 
     it('is not there without a session or without photos', async () => {
       const guest = await mountView()
-      expect(guest.wrapper.find('[data-test="ad"]').exists()).toBe(false)
+      expect(guest.wrapper.find('[data-test="house-spot"]').exists()).toBe(false)
       while (mounted.length) mounted.pop()!.unmount()
 
       signIn()
       state.groups = []
       const empty = await mountView()
-      expect(empty.wrapper.find('[data-test="ad"]').exists()).toBe(false)
+      expect(empty.wrapper.find('[data-test="house-spot"]').exists()).toBe(false)
     })
   })
 

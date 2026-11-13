@@ -3,8 +3,8 @@ import { computed } from 'vue'
 import { NButton } from 'naive-ui'
 
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
-import AdSlot from '@/features/ads/presentation/components/AdSlot/AdSlot.vue'
-import { adIndexAfter } from '@/features/ads/utils/ad-placement'
+import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
+import { spotIndexAfter } from '@/features/house-spots/utils/spot-placement'
 import { EmptyState } from '@/shared/components/empty-state'
 import { LoadBoundary } from '@/shared/components/loading'
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
@@ -44,9 +44,9 @@ const anyConfirming = computed(() => orders.value.some((order) => order.state ==
 useVisiblePolling(anyConfirming, CONFIRMING_POLL_MS, () => refetch())
 
 // The house carousel goes across the list after the fourth order, or after the last of fewer.
-const AD_AFTER = 4
-const AD_SEED = 11
-const adAfter = computed(() => adIndexAfter(orders.value.length, AD_AFTER))
+const SPOT_AFTER = 4
+const SPOT_SEED = 11
+const spotAfter = computed(() => spotIndexAfter(orders.value.length, SPOT_AFTER))
 </script>
 
 <template>
@@ -86,7 +86,12 @@ const adAfter = computed(() => adIndexAfter(orders.value.length, AD_AFTER))
       <div class="my-orders__list">
         <template v-for="(order, index) in orders" :key="order.id">
           <OrderRow :order="order" />
-          <AdSlot v-if="index === adAfter" class="my-orders__ad" format="AB" :seed="AD_SEED" />
+          <HouseSpot
+            v-if="index === spotAfter"
+            class="my-orders__spot"
+            format="AB"
+            :seed="SPOT_SEED"
+          />
         </template>
         <template v-if="isFetchingNextPage">
           <OrderRowSkeleton v-for="row in NEXT_PAGE_SKELETONS" :key="`next-${row}`" />

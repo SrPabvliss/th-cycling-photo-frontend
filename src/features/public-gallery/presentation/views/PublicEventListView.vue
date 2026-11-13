@@ -2,8 +2,8 @@
 import { computed } from 'vue'
 import { NButton } from 'naive-ui'
 
-import AdSlot from '@/features/ads/presentation/components/AdSlot/AdSlot.vue'
-import { adIndexAfter } from '@/features/ads/utils/ad-placement'
+import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
+import { spotIndexAfter } from '@/features/house-spots/utils/spot-placement'
 import { EmptyState } from '@/shared/components/empty-state'
 import { LoadBoundary } from '@/shared/components/loading'
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
@@ -50,9 +50,9 @@ const sentinel = useInfiniteScrollTrigger(() => fetchNextPage(), {
 })
 
 // The house carousel spans the grid after the third card, or after the last of a shorter list.
-const AD_AFTER = 3
-const AD_SEED = 7
-const adAfter = computed(() => adIndexAfter(events.value.length, AD_AFTER))
+const SPOT_AFTER = 3
+const SPOT_SEED = 7
+const spotAfter = computed(() => spotIndexAfter(events.value.length, SPOT_AFTER))
 </script>
 
 <template>
@@ -106,7 +106,12 @@ const adAfter = computed(() => adIndexAfter(events.value.length, AD_AFTER))
       <div class="event-list__grid">
         <template v-for="(event, index) in events" :key="event.slug">
           <PublicEventCard :event="event" />
-          <AdSlot v-if="index === adAfter" class="event-list__ad" format="AB" :seed="AD_SEED" />
+          <HouseSpot
+            v-if="index === spotAfter"
+            class="event-list__spot"
+            format="AB"
+            :seed="SPOT_SEED"
+          />
         </template>
         <template v-if="isFetchingNextPage">
           <PublicEventCardSkeleton v-for="n in SKELETON_COUNT" :key="`next-${n}`" />

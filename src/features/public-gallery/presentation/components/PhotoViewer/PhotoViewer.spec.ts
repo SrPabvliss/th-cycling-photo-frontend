@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { computed, nextTick, reactive } from 'vue'
 
-vi.mock('@/features/ads/presentation/components/AdSlot/AdSlot.vue', async () => ({
-  default: (await import('@/features/ads/testing/ad-stubs')).AdSlotStub,
+vi.mock('@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue', async () => ({
+  default: (await import('@/features/house-spots/testing/spot-stubs')).HouseSpotStub,
 }))
 
 import PhotoViewer from './PhotoViewer.vue'
@@ -198,7 +198,7 @@ describe('PhotoViewer', () => {
   it('closes with the 320×50 house strip under its footer', () => {
     const wrapper = mountViewer()
 
-    const ad = wrapper.get('[data-test="ad"]')
+    const ad = wrapper.get('[data-test="house-spot"]')
     expect(ad.attributes('data-format')).toBe('D')
     expect(ad.attributes('data-seed')).toBe('41')
     const cart = cartButton(wrapper).element

@@ -148,7 +148,7 @@ describe('PaymentMethodView', () => {
 
     expect(
       wrapper
-        .find('[aria-label="Espacio publicitario"], .ad-slot, .season-bar, .sponsor-strip')
+        .find('[aria-label="Espacio publicitario"], .house-spot, .season-bar, .presenter-strip')
         .exists(),
     ).toBe(false)
   })

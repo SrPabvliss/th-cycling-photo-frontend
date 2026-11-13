@@ -11,8 +11,8 @@
   flex: 1;
 }
 
-/* Same height as the banner it stands for (GalleryBanner.vue). */
-.gallery__banner-skeleton {
+/* Same height as the banner it stands for (GalleryHero.vue). */
+.gallery__hero-skeleton {
   block-size: calc(var(--tt-ilu-page) - var(--tt-space-5) + var(--tt-space-1));
 }
 
@@ -154,7 +154,7 @@
 }
 
 @media (min-width: 768px) {
-  .gallery__banner-skeleton {
+  .gallery__hero-skeleton {
     block-size: calc(var(--tt-ilu-page) + var(--tt-space-8) - var(--tt-space-1));
   }
 

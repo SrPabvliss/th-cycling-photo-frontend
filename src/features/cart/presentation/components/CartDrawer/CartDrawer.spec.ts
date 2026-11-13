@@ -9,8 +9,8 @@ import { useSessionStore } from '@/core/auth/stores/session.store'
 import { usePriceSheet } from '@/features/pricing/composables/use-price-sheet'
 import { useCartStore } from '@/shared/stores/cart.store'
 import type { ICartGroup } from '@/shared/types/cart.types'
-vi.mock('@/features/ads/presentation/components/AdSlot/AdSlot.vue', async () => ({
-  default: (await import('@/features/ads/testing/ad-stubs')).AdSlotStub,
+vi.mock('@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue', async () => ({
+  default: (await import('@/features/house-spots/testing/spot-stubs')).HouseSpotStub,
 }))
 
 import CartDrawer from './CartDrawer.vue'
@@ -182,7 +182,7 @@ describe('CartDrawer', () => {
     cart.groups = [group('a', 3)]
     const { wrapper } = await open()
 
-    const ad = wrapper.get('[data-test="ad"]')
+    const ad = wrapper.get('[data-test="house-spot"]')
     expect(ad.attributes('data-format')).toBe('D')
     expect(ad.attributes('data-seed')).toBe('23')
     expect(ad.element.previousElementSibling?.textContent?.trim()).toBe(
@@ -196,7 +196,7 @@ describe('CartDrawer', () => {
       document.body.innerHTML = ''
       Object.assign(cart, { status, groups: [] })
       const { wrapper } = await open()
-      expect(wrapper.find('[data-test="ad"]').exists(), status).toBe(false)
+      expect(wrapper.find('[data-test="house-spot"]').exists(), status).toBe(false)
     }
   })
 
