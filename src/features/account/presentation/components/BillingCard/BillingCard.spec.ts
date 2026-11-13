@@ -44,8 +44,16 @@ describe('BillingCard', () => {
       props: { accounts: [account], selectedId: 'ba-1', needsConsent: true, consented: false },
     })
 
-    await wrapper.find('[data-test="billing-card-consent"]').trigger('click')
+    await wrapper.find('[data-test="billing-card-consent"] input').setValue(true)
 
     expect(wrapper.emitted('update:consented')).toEqual([[true]])
+  })
+
+  it('has no consent box when the consent was given', () => {
+    const wrapper = mount(BillingCard, {
+      props: { accounts: [account], selectedId: 'ba-1', needsConsent: false, consented: false },
+    })
+
+    expect(wrapper.find('[data-test="billing-card-consent"]').exists()).toBe(false)
   })
 })

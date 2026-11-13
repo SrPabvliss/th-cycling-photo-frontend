@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { NButton, NCheckbox } from 'naive-ui'
 
 import { INVOICE_CONSENT } from '@/features/account/constants/invoice-consent'
 import type {
@@ -35,16 +34,16 @@ const selected = computed(
 <template>
   <section class="billing-card" :class="{ 'billing-card--empty': !selected }">
     <template v-if="!selected">
-      <h3 class="billing-card__title">Datos de facturación</h3>
+      <span class="billing-card__eyebrow">Datos de facturación</span>
       <p class="billing-card__hint">Necesitamos tus datos para enviarte la factura electrónica.</p>
-      <NButton type="primary" block data-test="billing-add" @click="emit('add')">
+      <button type="button" class="billing-card__add" data-test="billing-add" @click="emit('add')">
         Agregar datos de facturación
-      </NButton>
+      </button>
     </template>
 
     <template v-else>
       <div class="billing-card__head">
-        <h3 class="billing-card__title">Factura a</h3>
+        <span class="billing-card__eyebrow">Factura a</span>
         <button
           type="button"
           class="billing-card__link"
@@ -60,16 +59,106 @@ const selected = computed(
       </span>
       <span class="billing-card__line">{{ selected.email }}</span>
 
-      <NCheckbox
-        v-if="needsConsent"
-        v-model:checked="consented"
-        class="billing-card__consent"
-        data-test="billing-card-consent"
-      >
-        {{ INVOICE_CONSENT.CHECKBOX }}
-      </NCheckbox>
+      <!-- The api will not create an order without this consent: it is asked here when the
+           buyer has billing data but never gave it. -->
+      <label v-if="needsConsent" class="billing-card__consent" data-test="billing-card-consent">
+        <input v-model="consented" type="checkbox" class="billing-card__check" />
+        <span>{{ INVOICE_CONSENT.CHECKBOX }}</span>
+      </label>
     </template>
   </section>
 </template>
 
-<style scoped src="./billing-card.css" />
+<style scoped>
+.billing-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tt-space-1);
+  padding: var(--tt-space-3) var(--tt-space-4);
+  border-radius: var(--tt-radius-l);
+  background: var(--tt-surface-raised);
+  box-shadow: var(--tt-card-edge), var(--tt-shadow-2);
+  color: var(--tt-ink);
+  font-family: var(--tt-font-sans);
+}
+
+.billing-card--empty {
+  gap: var(--tt-space-2);
+}
+
+.billing-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.billing-card__eyebrow {
+  color: var(--tt-ink-muted);
+  font-size: var(--tt-type-eyebrow-size);
+  line-height: var(--tt-type-eyebrow-line);
+  font-weight: var(--tt-type-eyebrow-weight);
+  letter-spacing: var(--tt-type-eyebrow-tracking);
+  text-transform: uppercase;
+}
+
+.billing-card__hint,
+.billing-card__line {
+  margin: 0;
+  color: var(--tt-ink-muted);
+  font-size: var(--tt-type-caption-size);
+  line-height: var(--tt-type-caption-line);
+  overflow-wrap: anywhere;
+}
+
+.billing-card__name {
+  font-size: var(--tt-type-body-size);
+  font-weight: var(--tt-type-body-medium-weight);
+}
+
+.billing-card__link {
+  min-block-size: var(--tt-space-6);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--tt-primary-ink);
+  font-family: inherit;
+  font-size: var(--tt-type-body-s-medium-size);
+  font-weight: var(--tt-type-title-weight);
+  cursor: pointer;
+}
+
+.billing-card__add {
+  block-size: var(--tt-control-m);
+  margin-block-start: var(--tt-space-2);
+  border: 0;
+  border-radius: var(--tt-radius-m);
+  background: var(--tt-primary);
+  color: var(--tt-on-primary);
+  font-family: inherit;
+  font-size: var(--tt-type-body-s-medium-size);
+  font-weight: var(--tt-type-title-weight);
+  cursor: pointer;
+}
+
+.billing-card__consent {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--tt-space-2);
+  margin-block-start: var(--tt-space-2);
+  padding: var(--tt-space-3);
+  border-radius: var(--tt-radius-m);
+  background: var(--tt-primary-soft);
+  color: var(--tt-ink);
+  font-size: var(--tt-type-body-s-size);
+  line-height: var(--tt-type-body-s-line);
+  cursor: pointer;
+}
+
+.billing-card__check {
+  flex: none;
+  inline-size: var(--tt-icon-m);
+  block-size: var(--tt-icon-m);
+  margin: calc(var(--tt-space-1) / 2) 0 0;
+  accent-color: var(--tt-primary);
+}
+</style>
