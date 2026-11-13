@@ -148,7 +148,7 @@ describe('ProfileView (buyer)', () => {
     const { wrapper } = await mountView('/account/profile?seccion=fact')
 
     expect(head(wrapper, 'Datos de facturación').attributes('aria-expanded')).toBe('true')
-    expect(wrapper.get('#perfil-fact').attributes('hidden')).toBeUndefined()
+    expect(wrapper.find('[data-test="body-fact"]').exists()).toBe(true)
   })
 
   it('says when there is no billing data', async () => {

@@ -95,12 +95,6 @@
   gap: var(--tt-space-2);
 }
 
-.profile__note {
-  margin: 0;
-  color: var(--tt-ink-muted);
-  font-size: var(--tt-type-body-s-size);
-}
-
 @media (min-width: 768px) {
   .profile {
     padding: var(--tt-space-5) var(--tt-space-6) var(--tt-space-7);

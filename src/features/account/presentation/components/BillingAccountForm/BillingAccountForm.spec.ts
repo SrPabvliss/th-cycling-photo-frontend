@@ -217,4 +217,36 @@ describe('BillingAccountForm', () => {
       expect(alertOf(wrapper).text()).toContain('No pudimos enviar la corrección')
     })
   })
+
+  it('edits saved data: says when it applies, asks no consent and hands the request over', async () => {
+    const wrapper = mount(BillingAccountForm, {
+      props: {
+        needsConsent: true,
+        mode: 'edit',
+        prefill: { legalName: '', email: '' },
+        initial: {
+          idType: 'national_id',
+          idNumber: '1710034065',
+          legalName: 'Juan Pérez',
+          email: 'juan@correo.com',
+        },
+        submitLabel: 'Guardar cambios',
+      },
+    })
+
+    expect(wrapper.get('[data-test="billing-edit-note"]').text()).toBe(
+      'Los cambios aplican a tus próximas compras.',
+    )
+    expect(wrapper.text()).not.toContain('Acepto recibir')
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+
+    expect(createAccount).not.toHaveBeenCalled()
+    expect(wrapper.emitted('submit')?.[0]?.[0]).toEqual({
+      idType: 'national_id',
+      idNumber: '1710034065',
+      legalName: 'Juan Pérez',
+      email: 'juan@correo.com',
+    })
+  })
 })

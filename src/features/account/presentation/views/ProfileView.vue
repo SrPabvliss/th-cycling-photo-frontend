@@ -10,6 +10,7 @@ import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { ErrorState, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
 import { useMyBillingAccountsQuery } from '../../composables/queries/use-my-billing-accounts'
 import { useMyProfileQuery } from '../../composables/queries/use-my-profile'
+import BillingSection from '../components/BillingSection/BillingSection.vue'
 import AccountEmailSection from '../components/AccountEmailSection/AccountEmailSection.vue'
 import PasswordSection from '../components/PasswordSection/PasswordSection.vue'
 import PersonalDataSection from '../components/PersonalDataSection/PersonalDataSection.vue'
@@ -154,7 +155,7 @@ const plural = (count: number, one: string, many: string) => `${count} ${count =
           :open="openSection === 'fact'"
           @update:open="setOpen('fact', $event)"
         >
-          <p class="profile__note">Los eliges al confirmar un pedido.</p>
+          <BillingSection />
         </ProfileSection>
       </div>
 

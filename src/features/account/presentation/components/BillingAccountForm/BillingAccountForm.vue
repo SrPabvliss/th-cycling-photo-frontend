@@ -25,7 +25,8 @@ const props = withDefaults(
   defineProps<{
     needsConsent: boolean
     prefill: { legalName: string; email: string }
-    mode?: 'create' | 'correct'
+    /** create: saves a new account. correct and edit: hand the request to the parent. */
+    mode?: 'create' | 'correct' | 'edit'
     initial?: ICreateBillingAccountRequest
     submitLabel?: string
     submitting?: boolean
@@ -40,7 +41,8 @@ const emit = defineEmits<{
   cancel: []
 }>()
 
-const isCorrecting = props.mode === 'correct'
+const isCorrecting = props.mode !== 'create'
+const isEditing = props.mode === 'edit'
 const asksConsent = !isCorrecting && props.needsConsent
 const recordInvoiceConsent = useRecordInvoiceConsent()
 const createBillingAccount = useCreateBillingAccount()
@@ -128,6 +130,10 @@ function idNumberPlaceholder(): string {
       }
     "
   >
+    <p v-if="isEditing" class="billing-account-form__note" data-test="billing-edit-note">
+      Los cambios aplican a tus próximas compras.
+    </p>
+
     <form.Field name="idType">
       <template v-slot="{ field }">
         <NFormItem label="Tipo de identificación" required>

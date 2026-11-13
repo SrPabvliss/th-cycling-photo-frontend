@@ -50,6 +50,7 @@ export const API_ROUTES = {
   BILLING_ACCOUNTS: {
     BASE: '/users/me/billing-accounts',
     DEFAULT: (billingAccountId: string) => `/users/me/billing-accounts/${billingAccountId}/default`,
+    BY_ID: (billingAccountId: string) => `/users/me/billing-accounts/${billingAccountId}`,
   },
   MY_PROFILE: {
     BASE: '/users/me',
