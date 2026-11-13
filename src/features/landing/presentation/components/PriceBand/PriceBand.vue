@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 
 import { usePricingTiersQuery } from '@/features/pricing/composables/queries/use-pricing-tiers'
+import { usePriceSheet } from '@/features/pricing/composables/use-price-sheet'
 import { bestOpenTier, buildTierCards, formatMoney } from '@/shared/pricing/tier-cards'
 
 // The band sells the volume price, so it only makes sense with at least two tiers to compare.
@@ -9,6 +10,7 @@ import { bestOpenTier, buildTierCards, formatMoney } from '@/shared/pricing/tier
 const MIN_TIERS = 2
 
 const { data } = usePricingTiersQuery()
+const priceSheet = usePriceSheet()
 
 const cards = computed(() =>
   data.value ? buildTierCards(data.value.tiers, data.value.currency) : [],
@@ -51,6 +53,10 @@ const lead = computed(() => {
         </span>
       </li>
     </ul>
+
+    <button type="button" class="price-band__example" @click="priceSheet.open()">
+      Ver un ejemplo
+    </button>
   </section>
 </template>
 
@@ -147,6 +153,24 @@ const lead = computed(() => {
 
 .price-band__card--best .price-band__price {
   font-size: var(--tt-type-display-m-size);
+}
+
+.price-band__example {
+  align-self: flex-start;
+  block-size: var(--tt-control-m);
+  padding-inline: calc(var(--tt-space-4) + var(--tt-space-1));
+  border: 0;
+  border-radius: var(--tt-radius-m);
+  background: var(--tt-primary-soft);
+  color: var(--tt-primary-ink);
+  font-family: inherit;
+  font-size: var(--tt-type-body-s-medium-size);
+  font-weight: var(--tt-type-title-weight);
+  cursor: pointer;
+}
+
+.price-band__example:hover {
+  background: var(--tt-primary-soft-border);
 }
 
 @media (min-width: 768px) {

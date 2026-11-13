@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { computed, reactive } from 'vue'
 
+import { usePriceSheet } from '@/features/pricing/composables/use-price-sheet'
 import PriceBand from './PriceBand.vue'
 
 interface ITier {
@@ -56,6 +57,21 @@ describe('PriceBand', () => {
     expect(lines(1)).toEqual(['−25%', '3 a 6 fotos', '$3,00', 'cada una · $4,00'])
     expect(lines(3)).toEqual(['Mejor precio · −50%', '10 o más fotos', '$2,00', 'cada una · $4,00'])
     expect(cards(wrapper)[1]!.get('s').text()).toBe('$4,00')
+  })
+
+  it('opens the price sheet from "see an example", pointing at no price', async () => {
+    const sheet = usePriceSheet()
+    sheet.close()
+    const wrapper = mount(PriceBand)
+
+    await wrapper
+      .findAll('button')
+      .find((button) => button.text() === 'Ver un ejemplo')!
+      .trigger('click')
+
+    expect(sheet.isOpen.value).toBe(true)
+    expect(sheet.quantity.value).toBe(0)
+    sheet.close()
   })
 
   it('explains the best price with the numbers that came', () => {

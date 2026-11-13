@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ErrorBoundary from '@/core/layout/ErrorBoundary.vue'
+import { LAYOUT_SLOTS, useLayoutSlot } from '@/core/layout/slot-registry'
 import ClientFooter from './ClientFooter.vue'
 import ClientHeader from './ClientHeader.vue'
 import ClientLogo from './ClientLogo.vue'
@@ -9,6 +10,7 @@ import { useClientShell } from './client-shell'
 // Shell of every client route. Each route says in `meta.shell` which parts it wants; the layout
 // knows no route by name.
 const shell = useClientShell()
+const overlays = useLayoutSlot(LAYOUT_SLOTS.CLIENT_OVERLAY)
 </script>
 
 <template>
@@ -27,6 +29,8 @@ const shell = useClientShell()
 
     <ClientFooter v-if="shell.footer" />
     <ClientTabBar v-if="shell.tabBar" />
+
+    <component :is="overlay" v-for="(overlay, index) in overlays" :key="index" />
   </div>
 </template>
 

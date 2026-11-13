@@ -3,6 +3,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { defineComponent, h, onMounted } from 'vue'
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router'
 
+import { LAYOUT_SLOTS, registerLayoutSlot } from '@/core/layout/slot-registry'
 import ClientLayout from './ClientLayout.vue'
 
 const layoutMounted = vi.fn()
@@ -98,6 +99,17 @@ describe('ClientLayout', () => {
     expect(wrapper.get('.client-layout__brand').find('[data-test="ClientLogo"]').exists()).toBe(
       true,
     )
+  })
+
+  it('mounts what features registered to float over every client screen', async () => {
+    registerLayoutSlot(
+      LAYOUT_SLOTS.CLIENT_OVERLAY,
+      defineComponent({ render: () => h('aside', { 'data-test': 'client-overlay' }) }),
+    )
+
+    const { wrapper } = await mountAt('/private')
+
+    expect(has(wrapper, 'client-overlay')).toBe(true)
   })
 
   it('applies the shell of the next route without mounting the layout again', async () => {

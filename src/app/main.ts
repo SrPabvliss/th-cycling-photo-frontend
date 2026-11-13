@@ -16,6 +16,7 @@ import { useColorSchemeStore } from '@/core/theme/color-scheme.store'
 import { registerCartLayoutSlots } from '@/features/cart/layout-slots'
 import { registerCartPostLoginMerge } from '@/features/cart/post-login'
 import { registerNotificationLayoutSlots } from '@/features/notifications/layout-slots'
+import { registerPricingLayoutSlots } from '@/features/pricing/layout-slots'
 import App from './App.vue'
 import { queryClientConfig } from './providers'
 import router from './router'
@@ -34,5 +35,6 @@ app.use(VueQueryPlugin, { queryClient })
 registerCartPostLoginMerge(queryClient)
 registerCartLayoutSlots()
 registerNotificationLayoutSlots()
+registerPricingLayoutSlots()
 
 app.mount('#app')

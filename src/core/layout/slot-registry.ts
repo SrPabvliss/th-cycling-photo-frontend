@@ -4,6 +4,8 @@ export const LAYOUT_SLOTS = {
   APP_NAV_ACTIONS: 'app-nav-actions',
   PUBLIC_NAV_ACTION: 'public-nav-action',
   PUBLIC_NAV_OVERLAY: 'public-nav-overlay',
+  /** Layers that float over every client screen, with or without the header. */
+  CLIENT_OVERLAY: 'client-overlay',
 } as const
 
 export type LayoutSlot = (typeof LAYOUT_SLOTS)[keyof typeof LAYOUT_SLOTS]
