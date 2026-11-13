@@ -29,6 +29,14 @@ const emit = defineEmits<{
 const selected = computed(
   () => props.accounts.find((account) => account.id === props.selectedId) ?? null,
 )
+
+const emailParts = computed(() => {
+  const email = selected.value?.email ?? ''
+  const at = email.indexOf('@')
+  return at > 0
+    ? { local: email.slice(0, at), domain: email.slice(at) }
+    : { local: email, domain: '' }
+})
 </script>
 
 <template>
@@ -57,7 +65,10 @@ const selected = computed(
       <span class="billing-card__line">
         {{ ID_TYPE_LABELS[selected.idType] }} {{ selected.idNumber }}
       </span>
-      <span class="billing-card__line">{{ selected.email }}</span>
+      <!-- A long email breaks at the @, not wherever the line ends. -->
+      <span class="billing-card__line billing-card__email" data-test="billing-email"
+        >{{ emailParts.local }}<wbr />{{ emailParts.domain }}</span
+      >
 
       <!-- The api will not create an order without this consent: it is asked here when the
            buyer has billing data but never gave it. -->
@@ -108,6 +119,11 @@ const selected = computed(
   font-size: var(--tt-type-caption-size);
   line-height: var(--tt-type-caption-line);
   overflow-wrap: anywhere;
+}
+
+/* Inside a word only when even the part after the @ does not fit. */
+.billing-card__email {
+  overflow-wrap: break-word;
 }
 
 .billing-card__name {
