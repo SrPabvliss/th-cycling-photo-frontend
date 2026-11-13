@@ -90,7 +90,8 @@ function confirm() {
 .confirm-dialog {
   position: fixed;
   inset: 0;
-  z-index: var(--tt-z-modal);
+  /* Above the cart drawer (1550) and the photo viewer (1700): it asks about what is under it. */
+  z-index: 1800;
   display: flex;
   align-items: flex-end;
   justify-content: center;
