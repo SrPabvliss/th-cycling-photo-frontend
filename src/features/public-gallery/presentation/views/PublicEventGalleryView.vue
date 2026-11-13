@@ -1,273 +1,350 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { NEmpty, NIcon, NSpin } from 'naive-ui'
-import { ArrowBack } from '@vicons/ionicons5'
+import { useRoute } from 'vue-router'
+import { NButton } from 'naive-ui'
+import { isAxiosError } from 'axios'
 
-import { formatDate } from '@/shared/utils/date.utils'
-import { getAssetPresetUrl } from '@/shared/utils/cdn.utils'
+import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+import NotFoundView from '@/core/views/NotFoundView.vue'
+import { useCartActions, useCartState } from '@/shared/cart'
+import { EmptyState } from '@/shared/components/empty-state'
+import { ErrorState, LoadBoundary, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
+import PhotoLightbox from '@/shared/components/PhotoLightbox/PhotoLightbox.vue'
+import { eventDateLabel } from '@/shared/public-events'
 import { useCartStore } from '@/shared/stores/cart.store'
-import { useAddToCart } from '@/shared/composables/use-add-to-cart'
-import { useRemoveFromCart } from '@/shared/composables/use-remove-from-cart'
 import { useGalleryPlate } from '../../composables/use-gallery-plate'
 import { usePublicEventDetailQuery } from '../../composables/queries/use-public-event-detail'
 import {
   usePublicEventNoBibPhotosInfinite,
   usePublicEventPhotosInfinite,
 } from '../../composables/queries/use-public-event-photos'
-import { PUBLIC_GALLERY_ROUTE_NAMES } from '../../routes'
+import type { IPublicPhoto } from '../../types/responses/public-photo.response'
+import { toCalendarDate } from '../../utils/calendar-date'
+import GalleryBanner from '../components/GalleryBanner/GalleryBanner.vue'
+import GalleryCartBar from '../components/GalleryCartBar/GalleryCartBar.vue'
 import PhotoGridSection from '../components/PhotoGridSection/PhotoGridSection.vue'
-import PublicPhotoGrid from '../components/PublicPhotoGrid/PublicPhotoGrid.vue'
-import PhotoLightbox from '@/shared/components/PhotoLightbox/PhotoLightbox.vue'
+import PhotoGridSkeleton from '../components/PhotoGridSkeleton/PhotoGridSkeleton.vue'
 import PublicGalleryFilterBar from '../components/PublicGalleryFilterBar/PublicGalleryFilterBar.vue'
+import PublicPhotoGrid from '../components/PublicPhotoGrid/PublicPhotoGrid.vue'
 
 const route = useRoute()
-const router = useRouter()
 const slug = computed(() => route.params.slug as string)
+const countFormat = new Intl.NumberFormat('es-EC')
+const photosWord = (count: number) => (count === 1 ? 'foto' : 'fotos')
 
-const { data: event, isPending: isEventPending } = usePublicEventDetailQuery(slug)
+// --- The event ---
+const {
+  data: event,
+  status: eventStatus,
+  error: eventError,
+  isFetching: isEventFetching,
+  refetch: refetchEvent,
+} = usePublicEventDetailQuery(slug)
 
+const isEventPending = computed(() => eventStatus.value === 'pending')
+const showEventSkeleton = useDelayedFlag(isEventPending)
+const isEventMissing = computed(
+  () => isAxiosError(eventError.value) && eventError.value.response?.status === 404,
+)
+const hasPhotos = computed(() => (event.value?.photoCount ?? 0) > 0)
+
+const eventDateText = computed(() => {
+  if (!event.value) return ''
+  const start = toCalendarDate(event.value.startDate)
+  const end = toCalendarDate(event.value.endDate)
+  return `${start === end ? 'el' : 'del'} ${eventDateLabel(start, end)}`
+})
+
+// The cart drawer still prices the event being browsed (rebuilt later in this stage).
 const cartStore = useCartStore()
-
 watch(
   () => event.value?.id ?? null,
   (eventId) => cartStore.setActiveEvent(eventId),
   { immediate: true },
 )
-
 onUnmounted(() => cartStore.setActiveEvent(null))
 
-const activeCategoryId = ref<number | null>(null)
-// The plate lives in the url. Until the screen is rebuilt, the old filter bar feeds it as typed.
-const { plate, draft, submit } = useGalleryPlate()
-
-const bibSearchActive = computed(() => plate.value !== null)
-
-function searchPlate(text: string) {
-  draft.value = text
-  submit()
-}
-
-// Matched stream (also serves as the default "all photos" stream when no
-// bib search is active). The backend swaps semantics based on whether
-// bibNumber is included in the params.
+// --- Plate and category ---
 const {
-  data: infiniteData,
-  isPending: isPhotosPending,
-  fetchNextPage,
+  plate,
+  draft,
+  error: plateError,
+  submit: searchPlate,
+  clear: clearPlate,
+} = useGalleryPlate()
+const categoryId = ref<number | null>(null)
+const categories = computed(() => event.value?.photoCategories ?? [])
+
+// --- Photos ---
+// With a plate, the main list is the photos of that exact plate; without one, every photo.
+const {
+  data: photoPages,
+  status: photosStatus,
+  isPlaceholderData,
   hasNextPage,
   isFetchingNextPage,
-} = usePublicEventPhotosInfinite(slug, activeCategoryId, plate)
+  fetchNextPage,
+  refetch: refetchPhotos,
+} = usePublicEventPhotosInfinite(slug, categoryId, plate)
 
-// Companion "no bib detected" stream — only enabled while the user is
-// searching by bib so the rider can find themselves when OCR missed the
-// plate. Has its own pagination so each section can grow independently.
+// Next to a plate search: the photos where no plate could be read, for the rider the recognition
+// missed. Paged on its own.
 const {
-  data: noBibInfiniteData,
-  fetchNextPage: fetchNextNoBibPage,
-  hasNextPage: hasNextNoBibPage,
-  isFetchingNextPage: isFetchingNextNoBibPage,
-} = usePublicEventNoBibPhotosInfinite(slug, activeCategoryId, plate)
+  data: noPlatePages,
+  hasNextPage: hasMoreNoPlate,
+  isFetchingNextPage: isFetchingMoreNoPlate,
+  fetchNextPage: fetchMoreNoPlate,
+} = usePublicEventNoBibPhotosInfinite(slug, categoryId, plate)
 
-const matchedPhotos = computed(() => infiniteData.value?.pages.flatMap((p) => p.items) ?? [])
-const noBibPhotos = computed(() => noBibInfiniteData.value?.pages.flatMap((p) => p.items) ?? [])
-
-// Lightbox should navigate through both sections in order: matched
-// first, then no_bib. When inactive only the main stream is shown.
-const allPhotos = computed(() =>
-  bibSearchActive.value ? [...matchedPhotos.value, ...noBibPhotos.value] : matchedPhotos.value,
+const photos = computed(() => photoPages.value?.pages.flatMap((page) => page.items) ?? [])
+const photosTotal = computed(() => photoPages.value?.pages[0]?.pagination.total ?? 0)
+const noPlatePhotos = computed(() =>
+  plate.value ? (noPlatePages.value?.pages.flatMap((page) => page.items) ?? []) : [],
 )
 
-const showNoBibSection = computed(
-  () => bibSearchActive.value && (noBibPhotos.value.length > 0 || isFetchingNextNoBibPage.value),
-)
-
-// --- Cart-based selection ---
-const { mutate: addToCart } = useAddToCart()
-const { mutate: removeFromCart } = useRemoveFromCart()
-
-const selectedIds = computed(() => {
-  const ids = new Set<string>()
-  for (const group of cartStore.groups) {
-    for (const photo of group.photos) {
-      ids.add(photo.id)
-    }
-  }
-  return ids
+// What is on screen while another search loads belongs to the previous one: its plate label and
+// its "no results" do not apply to the new search yet.
+const shownPlate = ref(plate.value)
+watch([plate, isPlaceholderData], ([current, isPrevious]) => {
+  if (!isPrevious) shownPlate.value = current
 })
+const isSearchEmpty = computed(
+  () => shownPlate.value !== null && photos.value.length === 0 && !isPlaceholderData.value,
+)
 
-function toggleSelect(photoId: string) {
-  if (cartStore.isInCart(photoId)) {
-    removeFromCart(photoId)
-  } else {
-    addToCart(photoId)
-  }
+const countText = computed(() =>
+  shownPlate.value
+    ? `${countFormat.format(photosTotal.value)} ${photosWord(photosTotal.value)} con la placa`
+    : `${countFormat.format(photosTotal.value)} ${photosWord(photosTotal.value)} · mostrando ${countFormat.format(photos.value.length)}`,
+)
+
+function loadMore() {
+  if (hasNextPage.value && !isFetchingNextPage.value) fetchNextPage()
+}
+function loadMoreNoPlate() {
+  if (hasMoreNoPlate.value && !isFetchingMoreNoPlate.value) fetchMoreNoPlate()
 }
 
-// --- Lightbox ---
+// --- Cart ---
+const cart = useCartState()
+const cartActions = useCartActions()
+
+const everyPhoto = computed(() => [...photos.value, ...noPlatePhotos.value])
+const selectedIds = computed(() => new Set(event.value ? cart.photoIdsFor(event.value.id) : []))
+const busyIds = computed(
+  () =>
+    new Set(
+      everyPhoto.value.filter((photo) => cartActions.isBusy(photo.id)).map((photo) => photo.id),
+    ),
+)
+
+function toggle(photoId: string) {
+  const photo = everyPhoto.value.find((each) => each.id === photoId)
+  if (!photo || !event.value) return
+
+  cartActions.toggle({
+    id: photo.id,
+    publicSlug: photo.publicSlug,
+    event: {
+      id: event.value.id,
+      name: event.value.name,
+      slug: event.value.slug,
+      startDate: event.value.startDate,
+      endDate: event.value.endDate,
+    },
+  })
+}
+
+// --- Photo viewer (the shared lightbox, until the client viewer replaces it) ---
 const showLightbox = ref(false)
 const lightboxIndex = ref(0)
 
-function openPreview(photoId: string) {
+function openPhoto(photoId: string) {
   lightboxIndex.value = Math.max(
     0,
-    allPhotos.value.findIndex((photo) => photo.id === photoId),
+    everyPhoto.value.findIndex((photo: IPublicPhoto) => photo.id === photoId),
   )
   showLightbox.value = true
 }
-
-// Filled in when the screen is rebuilt on the optimistic cart.
-const busyIds = new Set<string>()
-
-function handleLoadMore() {
-  if (hasNextPage.value && !isFetchingNextPage.value) {
-    fetchNextPage()
-  }
-}
-
-function handleLoadMoreNoBib() {
-  if (hasNextNoBibPage.value && !isFetchingNextNoBibPage.value) {
-    fetchNextNoBibPage()
-  }
-}
-
-// --- Hero image ---
-const heroUrl = computed(() => {
-  const hero =
-    event.value?.assets.find((a) => a.assetType === 'hero_image') ??
-    event.value?.assets.find((a) => a.assetType === 'cover_image')
-  return hero ? getAssetPresetUrl(hero.publicSlug, 'cover-lg') : null
-})
 </script>
 
 <template>
-  <div v-if="isEventPending" class="gallery-loading">
-    <NSpin size="large" />
-  </div>
+  <div class="gallery">
+    <!-- The event is loading: the shape of the screen, once the wait is long enough to show it. -->
+    <div v-if="isEventPending || showEventSkeleton" class="gallery__loading" aria-busy="true">
+      <template v-if="showEventSkeleton">
+        <TtSkeleton class="gallery__banner-skeleton" height="auto" radius="text" />
+        <div class="gallery__body">
+          <PhotoGridSkeleton />
+        </div>
+      </template>
+    </div>
 
-  <template v-else-if="event">
-    <!-- Hero -->
-    <div class="gallery-hero" :style="heroUrl ? { backgroundImage: `url(${heroUrl})` } : {}">
-      <div class="gallery-hero__overlay">
-        <div class="gallery-hero__content">
-          <button
-            class="gallery-hero__back"
-            @click="router.push({ name: PUBLIC_GALLERY_ROUTE_NAMES.EVENT_LIST })"
+    <NotFoundView v-else-if="isEventMissing" />
+
+    <ErrorState
+      v-else-if="!event"
+      class="gallery__error"
+      title="No pudimos cargar este evento"
+      text="Puede ser tu conexión."
+      :retrying="isEventFetching"
+      @retry="refetchEvent()"
+    />
+
+    <template v-else>
+      <GalleryBanner :event="event" />
+
+      <div v-if="!hasPhotos" class="gallery__body">
+        <EmptyState
+          illustration="sinEventos"
+          title="Las fotos todavía no están"
+          :text="`Este evento es ${eventDateText}. Publicamos las fotos después de la carrera.`"
+        >
+          <template #actions>
+            <RouterLink v-slot="{ href, navigate }" :to="ROUTE_PATHS.PUBLIC_GALLERY" custom>
+              <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
+                Ver otros eventos
+              </NButton>
+            </RouterLink>
+          </template>
+        </EmptyState>
+      </div>
+
+      <template v-else>
+        <div class="gallery__body">
+          <form class="gallery__search" novalidate @submit.prevent="searchPlate">
+            <label class="gallery__plate">
+              <span class="gallery__plate-label">N.º de placa</span>
+              <span class="gallery__plate-field">
+                <span aria-hidden="true" class="gallery__plate-hash">#</span>
+                <input
+                  v-model="draft"
+                  class="gallery__plate-input"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  placeholder="127"
+                  aria-label="Número de placa"
+                  :aria-invalid="plateError ? 'true' : undefined"
+                  :aria-describedby="plateError ? 'gallery-plate-error' : undefined"
+                />
+              </span>
+            </label>
+            <NButton
+              class="gallery__search-submit"
+              type="primary"
+              size="large"
+              attr-type="submit"
+              :loading="isPlaceholderData"
+            >
+              Buscar
+            </NButton>
+          </form>
+          <p v-if="plateError" id="gallery-plate-error" class="gallery__plate-error" role="alert">
+            {{ plateError }}
+          </p>
+
+          <PublicGalleryFilterBar
+            v-if="categories.length > 1"
+            v-model="categoryId"
+            :categories="categories"
+          />
+
+          <LoadBoundary
+            :status="photosStatus"
+            :refreshing="isPlaceholderData"
+            error-title="No pudimos cargar las fotos"
+            error-text="Puede ser tu conexión."
+            @retry="refetchPhotos()"
           >
-            <NIcon :component="ArrowBack" :size="18" />
-          </button>
-          <h1 class="gallery-hero__title">{{ event.name }}</h1>
-          <p class="gallery-hero__owner">Fotos de {{ event.ownerName }}</p>
-          <p class="gallery-hero__meta">
-            <template v-if="event.startDate.getTime() === event.endDate.getTime()">
-              {{ formatDate(event.startDate) }}
+            <template #skeleton>
+              <PhotoGridSkeleton />
             </template>
+
+            <EmptyState
+              v-if="isSearchEmpty"
+              illustration="sinResultados"
+              :title="`No hay fotos con la placa ${shownPlate}`"
+              text="Revisa el número. Buscamos la placa exacta, sin coincidencias parciales."
+            >
+              <template #actions>
+                <NButton size="large" block @click="clearPlate">Ver todas las fotos</NButton>
+              </template>
+            </EmptyState>
+
             <template v-else>
-              {{ formatDate(event.startDate) }} – {{ formatDate(event.endDate) }}
+              <div class="gallery__count-row">
+                <span class="gallery__count">
+                  {{ countText }}{{ shownPlate ? ' ' : ''
+                  }}<strong v-if="shownPlate">#{{ shownPlate }}</strong>
+                </span>
+                <button v-if="shownPlate" type="button" class="gallery__link" @click="clearPlate">
+                  Ver todas
+                </button>
+              </div>
+
+              <!-- A plate search is a short list: a plain grid, with the plate on every tile. -->
+              <PhotoGridSection
+                v-if="shownPlate"
+                :photos="photos"
+                :selected-ids="selectedIds"
+                :busy-ids="busyIds"
+                :plate="shownPlate"
+                :has-more="hasNextPage"
+                :is-loading-more="isFetchingNextPage"
+                @open="openPhoto"
+                @toggle="toggle"
+                @load-more="loadMore"
+              />
+
+              <!-- Every photo of the event can be thousands: only the rows on screen are drawn. -->
+              <PublicPhotoGrid
+                v-else
+                :photos="photos"
+                :selected-ids="selectedIds"
+                :busy-ids="busyIds"
+                :has-more="hasNextPage"
+                :is-loading-more="isFetchingNextPage"
+                @open="openPhoto"
+                @toggle="toggle"
+                @load-more="loadMore"
+              />
             </template>
-            <span v-if="event.cantonName || event.provinceName">
-              · {{ [event.cantonName, event.provinceName].filter(Boolean).join(', ') }}
-            </span>
-            · {{ event.photoCount }} fotos
-          </p>
-        </div>
-      </div>
-    </div>
 
-    <div class="gallery-body">
-      <PublicGalleryFilterBar
-        class="gallery-filter-bar"
-        :categories="event.photoCategories"
-        :selected-category-id="activeCategoryId"
-        :bib-number="draft"
-        bib-match="exact"
-        @update:selected-category-id="activeCategoryId = $event"
-        @update:bib-number="searchPlate"
-      />
-
-      <div v-if="isPhotosPending && allPhotos.length === 0" class="gallery-loading--tight">
-        <NSpin />
-      </div>
-
-      <!-- Bib search mode: two physically separate sections so the rider
-             can scan their matched photos first, then optionally browse
-             the photos where no bib was detected. -->
-      <template v-else-if="bibSearchActive">
-        <section class="gallery-section">
-          <p v-if="matchedPhotos.length === 0" class="gallery-section__empty">
-            No encontramos fotos donde se vea esa placa.
-          </p>
-          <PhotoGridSection
-            v-else
-            :photos="matchedPhotos"
-            :selected-ids="selectedIds"
-            :busy-ids="busyIds"
-            :has-more="hasNextPage"
-            :is-loading-more="isFetchingNextPage"
-            @toggle="toggleSelect"
-            @open="openPreview"
-            @load-more="handleLoadMore"
-          />
-        </section>
-
-        <div v-if="showNoBibSection" class="gallery-divider">
-          <div class="gallery-divider__line" />
-          <div class="gallery-divider__msg">
-            <strong>También puedes buscarte aquí.</strong>
-            <span>Mostramos fotos donde no detectamos placa.</span>
-          </div>
-          <div class="gallery-divider__line" />
+            <section v-if="noPlatePhotos.length > 0" class="gallery__no-plate">
+              <div class="gallery__no-plate-head">
+                <h2 class="gallery__no-plate-title">También puedes buscarte aquí.</h2>
+                <p class="gallery__no-plate-text">Mostramos fotos donde no detectamos placa.</p>
+              </div>
+              <PhotoGridSection
+                :photos="noPlatePhotos"
+                :selected-ids="selectedIds"
+                :busy-ids="busyIds"
+                :has-more="hasMoreNoPlate"
+                :is-loading-more="isFetchingMoreNoPlate"
+                @open="openPhoto"
+                @toggle="toggle"
+                @load-more="loadMoreNoPlate"
+              />
+            </section>
+          </LoadBoundary>
         </div>
 
-        <section v-if="showNoBibSection" class="gallery-section">
-          <PhotoGridSection
-            :photos="noBibPhotos"
-            :selected-ids="selectedIds"
-            :busy-ids="busyIds"
-            :has-more="hasNextNoBibPage"
-            :is-loading-more="isFetchingNextNoBibPage"
-            @toggle="toggleSelect"
-            @open="openPreview"
-            @load-more="handleLoadMoreNoBib"
-          />
-        </section>
-
-        <NEmpty
-          v-if="matchedPhotos.length === 0 && !showNoBibSection"
-          description="No encontramos resultados"
-          style="padding: 40px 0"
-        />
+        <GalleryCartBar :event-id="event.id" />
       </template>
+    </template>
 
-      <!-- Default mode (no bib search): keep the existing virtualized
-             grid for performance on full-event browsing. -->
-      <template v-else-if="allPhotos.length > 0">
-        <PublicPhotoGrid
-          :photos="allPhotos"
-          :selected-ids="selectedIds"
-          :busy-ids="busyIds"
-          @toggle="toggleSelect"
-          @open="openPreview"
-          @load-more="handleLoadMore"
-        />
-      </template>
-
-      <NEmpty v-else description="No hay fotos disponibles" style="padding: 40px 0" />
-    </div>
-  </template>
-
-  <!-- Lightbox -->
-  <PhotoLightbox
-    :photos="allPhotos"
-    :initial-index="lightboxIndex"
-    :show="showLightbox"
-    :selected-ids="selectedIds"
-    actions="select"
-    :paginated="true"
-    @update:show="showLightbox = $event"
-    @toggle="toggleSelect"
-    @load-more="handleLoadMore"
-  />
+    <PhotoLightbox
+      :photos="everyPhoto"
+      :initial-index="lightboxIndex"
+      :show="showLightbox"
+      :selected-ids="selectedIds"
+      actions="select"
+      :paginated="true"
+      @update:show="showLightbox = $event"
+      @toggle="toggle"
+      @load-more="loadMore"
+    />
+  </div>
 </template>
 
 <style scoped src="./styles/public-event-gallery-view.css" />

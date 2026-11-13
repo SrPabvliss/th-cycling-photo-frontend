@@ -13,6 +13,8 @@ export function usePublicEventDetailQuery(slug: MaybeRefOrGetter<string>) {
     queryFn: async () => {
       const { data } = await httpClient.get<IApiPublicEventDetail>(
         API_ROUTES.PUBLIC_EVENTS.GET_BY_SLUG(toValue(slug)),
+        // Silent: the gallery shows the failure itself, as a 404 or as an error to retry.
+        { silent: true },
       )
       return toPublicEventDetail(data)
     },
