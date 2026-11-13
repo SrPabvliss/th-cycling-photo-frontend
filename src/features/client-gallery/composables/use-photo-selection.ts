@@ -1,105 +1,97 @@
-import { ref, computed, watch, type Ref } from 'vue'
-
-import type { IPreviewPhoto } from '../types/responses/preview-data.response'
+import { computed, ref, watch, type ComputedRef, type Ref } from 'vue'
 
 const STORAGE_PREFIX = 'preview-selection:'
 
-function readStored(key: string): Set<string> {
+/**
+ * A short fingerprint of the link token for the storage key, so the token itself is never
+ * written down. Synchronous on purpose (the selection must be there on the first render);
+ * the token is long and random, so the fingerprint does not give it away.
+ */
+function fingerprint(token: string): string {
+  let h1 = 0xdeadbeef
+  let h2 = 0x41c6ce57
+  for (let index = 0; index < token.length; index += 1) {
+    const code = token.charCodeAt(index)
+    h1 = Math.imul(h1 ^ code, 2654435761)
+    h2 = Math.imul(h2 ^ code, 1597334677)
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909)
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909)
+  return (h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0')
+}
+
+const keyOf = (token: string) => STORAGE_PREFIX + fingerprint(token)
+
+function readStored(token: string): string[] {
   try {
-    const raw = sessionStorage.getItem(STORAGE_PREFIX + key)
+    const raw = sessionStorage.getItem(keyOf(token))
     const ids: unknown = raw ? JSON.parse(raw) : []
-    return new Set(Array.isArray(ids) ? ids.filter((id) => typeof id === 'string') : [])
+    return Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : []
   } catch {
-    return new Set()
+    return []
   }
 }
 
-function writeStored(key: string, ids: Set<string>) {
+function writeStored(token: string, ids: string[]) {
   try {
-    if (ids.size === 0) sessionStorage.removeItem(STORAGE_PREFIX + key)
-    else sessionStorage.setItem(STORAGE_PREFIX + key, JSON.stringify([...ids]))
+    if (ids.length === 0) sessionStorage.removeItem(keyOf(token))
+    else sessionStorage.setItem(keyOf(token), JSON.stringify(ids))
   } catch {
-    // Storage blocked (private mode): the selection just won't survive a reload.
+    // Storage blocked (private mode): the selection lives in memory for this visit.
   }
+}
+
+export interface IPhotoSelection {
+  selected: Readonly<Ref<string[]>>
+  isSelected(id: string): boolean
+  toggle(id: string): void
+  selectAll(): void
+  clear(): void
+  allSelected: ComputedRef<boolean>
 }
 
 /**
- * Photo selection of a preview link. With `storageKey` (the preview token) it is
- * kept in sessionStorage, so a buyer who leaves to sign up comes back to it.
+ * The photos a buyer picks on a preview link. Kept for the visit (sessionStorage, under a key
+ * derived from the token), so leaving to sign in or sign up and coming back finds them again.
+ * Restored ids no longer in the preview are dropped.
  */
-export function usePhotoSelection(
-  photos: Ref<IPreviewPhoto[] | undefined>,
-  storageKey?: Ref<string>,
-) {
-  const selectedIds = ref<Set<string>>(storageKey?.value ? readStored(storageKey.value) : new Set())
+export function usePhotoSelection(token: Ref<string>, photoIds: Ref<string[]>): IPhotoSelection {
+  const selected = ref<string[]>(token.value ? readStored(token.value) : [])
 
-  if (storageKey) {
-    watch(selectedIds, (ids) => {
-      if (storageKey.value) writeStored(storageKey.value, ids)
-    })
+  watch(selected, (ids) => {
+    if (token.value) writeStored(token.value, ids)
+  })
 
-    // Drop stored ids that are not (or no longer) part of this preview.
-    watch(
-      photos,
-      (list) => {
-        if (!list) return
-        const available = new Set(list.map((p) => p.id))
-        const kept = [...selectedIds.value].filter((id) => available.has(id))
-        if (kept.length !== selectedIds.value.size) selectedIds.value = new Set(kept)
-      },
-      { immediate: true },
-    )
-  }
-
-  const selectedCount = computed(() => selectedIds.value.size)
-
-  const selectedPhotos = computed<IPreviewPhoto[]>(
-    () => photos.value?.filter((p) => selectedIds.value.has(p.id)) ?? [],
+  watch(
+    photoIds,
+    (ids) => {
+      if (ids.length === 0) return
+      const available = new Set(ids)
+      const kept = selected.value.filter((id) => available.has(id))
+      if (kept.length !== selected.value.length) selected.value = kept
+    },
+    { immediate: true },
   )
 
-  const allSelected = computed(
-    () => (photos.value?.length ?? 0) > 0 && selectedCount.value === photos.value!.length,
-  )
-
-  function selectAll() {
-    selectedIds.value = new Set(photos.value?.map((p) => p.id) ?? [])
-  }
-
-  function clearSelection() {
-    selectedIds.value = new Set()
-  }
-
-  function toggleSelect(id: string) {
-    const next = new Set(selectedIds.value)
-    if (next.has(id)) {
-      next.delete(id)
-    } else {
-      next.add(id)
-    }
-    selectedIds.value = next
-  }
-
-  function removeFromSelection(id: string) {
-    const next = new Set(selectedIds.value)
-    next.delete(id)
-    selectedIds.value = next
-  }
-
-  /** Clears the selection and its stored copy, e.g. once the order is placed. */
-  function forgetSelection() {
-    selectedIds.value = new Set()
-    if (storageKey?.value) writeStored(storageKey.value, new Set())
-  }
+  const chosen = computed(() => new Set(selected.value))
 
   return {
-    selectedIds,
-    selectedCount,
-    selectedPhotos,
-    allSelected,
-    selectAll,
-    clearSelection,
-    toggleSelect,
-    removeFromSelection,
-    forgetSelection,
+    selected,
+    isSelected: (id) => chosen.value.has(id),
+    toggle: (id) => {
+      selected.value = chosen.value.has(id)
+        ? selected.value.filter((each) => each !== id)
+        : [...selected.value, id]
+    },
+    selectAll: () => {
+      selected.value = [...photoIds.value]
+    },
+    clear: () => {
+      selected.value = []
+      if (token.value) writeStored(token.value, [])
+    },
+    allSelected: computed(
+      () => photoIds.value.length > 0 && photoIds.value.every((id) => chosen.value.has(id)),
+    ),
   }
 }

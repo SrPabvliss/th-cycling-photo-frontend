@@ -76,17 +76,21 @@ const showAlreadyOrdered = computed(
 )
 
 const previewPhotos = computed(() => preview.value?.photos)
-const {
-  selectedIds,
-  selectedCount,
-  selectedPhotos,
-  allSelected,
-  selectAll,
-  clearSelection,
-  toggleSelect,
-  removeFromSelection,
-  forgetSelection,
-} = usePhotoSelection(previewPhotos, token)
+// Bridge to the new selection until this view is rebuilt as two steps.
+const previewPhotoIds = computed(() => previewPhotos.value?.map((photo) => photo.id) ?? [])
+const selection = usePhotoSelection(token, previewPhotoIds)
+const { allSelected, selectAll } = selection
+const selectedIds = computed(() => new Set(selection.selected.value))
+const selectedCount = computed(() => selection.selected.value.length)
+const selectedPhotos = computed(
+  () => previewPhotos.value?.filter((photo) => selectedIds.value.has(photo.id)) ?? [],
+)
+const clearSelection = selection.clear
+const toggleSelect = selection.toggle
+const removeFromSelection = (id: string) => {
+  if (selection.isSelected(id)) selection.toggle(id)
+}
+const forgetSelection = selection.clear
 
 function toggleSelectAll() {
   if (allSelected.value) {
