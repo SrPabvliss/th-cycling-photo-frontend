@@ -34,12 +34,24 @@ export function formatMoney(amount: number, currency: string): string {
 }
 
 const byQuantity = (a: IPriceTier, b: IPriceTier) => a.minQty - b.minQty
-const photos = (quantity: number) => (quantity === 1 ? 'foto' : 'fotos')
+
+/** Quantities of a tier, short: "1–2", "10+". */
+export function tierShortLabel(tier: IPriceTier): string {
+  if (tier.maxQty === null) return `${tier.minQty}+`
+  if (tier.maxQty === tier.minQty) return String(tier.minQty)
+  return `${tier.minQty}–${tier.maxQty}`
+}
+
+/** Quantities of a tier, in words: "1 a 2", "10 o más". */
+export function tierLongLabel(tier: IPriceTier): string {
+  if (tier.maxQty === null) return `${tier.minQty} o más`
+  if (tier.maxQty === tier.minQty) return String(tier.minQty)
+  return `${tier.minQty} a ${tier.maxQty}`
+}
 
 function tierLabel(tier: IPriceTier): string {
-  if (tier.maxQty === null) return `${tier.minQty} o más fotos`
-  if (tier.maxQty === tier.minQty) return `${tier.minQty} ${photos(tier.minQty)}`
-  return `${tier.minQty} a ${tier.maxQty} fotos`
+  const isOnePhoto = tier.maxQty === tier.minQty && tier.minQty === 1
+  return `${tierLongLabel(tier)} ${isOnePhoto ? 'foto' : 'fotos'}`
 }
 
 /** Index of the cheapest tier of a list sorted by quantity; the last one when several tie. */
