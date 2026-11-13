@@ -17,6 +17,7 @@ export const ROUTE_NAMES = {
 
   // Cart
   CART_CHECKOUT: 'cart-checkout',
+  CART_PAYMENT_METHOD: 'cart-payment-method',
 
   // Client gallery
   CLIENT_GALLERY: 'client-gallery',

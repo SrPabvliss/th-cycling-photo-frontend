@@ -152,7 +152,7 @@ const nextTier = computed(() =>
   align-items: center;
   justify-content: center;
   gap: var(--tt-space-1);
-  border: 2px dashed var(--tt-primary-soft-border);
+  border: medium dashed var(--tt-primary-soft-border);
   background: var(--tt-surface-sunken);
   color: var(--tt-primary-ink);
   text-decoration: none;

@@ -78,6 +78,8 @@ export function useBillingSelection(enabled: () => boolean) {
   }
 
   return {
+    /** The billing data was read: from here on, no account means the buyer has none. */
+    isBillingLoaded: computed(() => billingQuery.isSuccess.value),
     billingAccounts,
     needsInvoiceConsent,
     selectedBillingAccountId,

@@ -17,8 +17,9 @@ import { useEventPaymentOptionsQuery } from '@/shared/composables/use-event-paym
 import { quotePhotos } from '@/shared/pricing/quote'
 import { formatMoney } from '@/shared/pricing/tier-cards'
 import { usePricingTiersQuery } from '@/shared/pricing/use-pricing-tiers'
-import { checkoutProblemText } from '@/shared/utils/checkout-error'
+import { BILLING_QUERY, CONSENT_QUERY } from '../../constants/checkout-query'
 import { usePlaceOrder } from '../../composables/use-place-order'
+import CheckoutProblemAlert from '../components/CheckoutProblemAlert/CheckoutProblemAlert.vue'
 import CheckoutSummary from '../components/CheckoutSummary/CheckoutSummary.vue'
 
 const SKELETON_THUMBS = 3
@@ -50,6 +51,7 @@ const totalLabel = computed(() => {
 
 // --- Billing and how the event is paid ---
 const {
+  isBillingLoaded,
   billingAccounts,
   needsInvoiceConsent,
   selectedBillingAccountId,
@@ -71,7 +73,6 @@ const takesCards = computed(() => paymentOptions.value?.cardAvailable === true)
 
 // --- Placing the order ---
 const { place, isPlacing, problem } = usePlaceOrder()
-const problemText = computed(() => (problem.value ? checkoutProblemText(problem.value) : null))
 
 // The server answered from data this screen no longer agrees with: read it again.
 watch(
@@ -91,7 +92,16 @@ async function confirm() {
   if (!canContinue.value || !selectedBillingAccountId.value) return
 
   if (takesCards.value) {
-    router.push(`${checkoutPath(eventId.value)}/method`)
+    // The method screen creates the order: it gets the billing data chosen here and whether the
+    // consent was ticked, which would otherwise be lost on the way.
+    const consent = needsInvoiceConsent.value && invoiceConsentChecked.value
+    router.push({
+      path: `${checkoutPath(eventId.value)}/method`,
+      query: {
+        [BILLING_QUERY]: selectedBillingAccountId.value,
+        ...(consent ? { [CONSENT_QUERY]: '1' } : {}),
+      },
+    })
     return
   }
 
@@ -183,22 +193,7 @@ async function confirm() {
             @change="billingSheet = 'picker'"
           />
 
-          <div
-            v-if="problemText"
-            class="checkout__problem"
-            role="alert"
-            data-test="checkout-problem"
-          >
-            <strong>{{ problemText.title }}</strong>
-            <p>{{ problemText.text }}</p>
-            <div v-if="problem === 'cart-missing'" class="checkout__problem-links">
-              <RouterLink :to="{ name: 'account-orders' }">Ir a Mis fotos</RouterLink>
-              <RouterLink :to="galleryPath">Volver a la galería</RouterLink>
-            </div>
-            <RouterLink v-else-if="problem === 'profile'" :to="{ name: 'account-profile' }">
-              Completar mi perfil
-            </RouterLink>
-          </div>
+          <CheckoutProblemAlert v-if="problem" :problem="problem" :gallery-path="galleryPath" />
 
           <div class="checkout__actions">
             <RouterLink
@@ -225,7 +220,7 @@ async function confirm() {
               >
                 {{ takesCards ? 'Continuar al pago' : 'Confirmar pedido' }}{{ totalLabel }}
               </NButton>
-              <p v-if="!selectedBillingAccountId" class="checkout__hint">
+              <p v-if="isBillingLoaded && !selectedBillingAccountId" class="checkout__hint">
                 Agrega tus datos de facturación para confirmar.
               </p>
               <p v-else-if="paymentOptions && !takesCards" class="checkout__hint">

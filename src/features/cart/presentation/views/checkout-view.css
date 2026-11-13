@@ -82,8 +82,7 @@
   font-weight: var(--tt-type-heading-m-weight);
 }
 
-.checkout__notice,
-.checkout__problem {
+.checkout__notice {
   display: flex;
   flex-direction: column;
   gap: var(--tt-space-1);
@@ -98,25 +97,8 @@
   color: var(--tt-primary-ink);
 }
 
-.checkout__problem {
-  background: var(--tt-danger-soft);
-  color: var(--tt-danger-ink);
-}
-
-.checkout__notice p,
-.checkout__problem p {
+.checkout__notice p {
   margin: 0;
-}
-
-.checkout__problem a {
-  color: inherit;
-  font-weight: var(--tt-type-title-weight);
-}
-
-.checkout__problem-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--tt-space-4);
 }
 
 .checkout__hint {

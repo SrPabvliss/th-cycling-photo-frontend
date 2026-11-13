@@ -69,6 +69,7 @@ vi.mock('@/shared/composables/use-event-payment-options', () => ({
 }))
 vi.mock('@/features/account/composables/use-billing-selection', () => ({
   useBillingSelection: () => ({
+    isBillingLoaded: computed(() => true),
     billingAccounts: computed(() => state.accounts),
     needsInvoiceConsent: computed(() => state.needsConsent),
     selectedBillingAccountId: computed(() => state.accounts[0]?.id ?? null),
@@ -240,7 +241,21 @@ describe('CheckoutView', () => {
     await flushPromises()
 
     expect(router.currentRoute.value.path).toBe('/checkout/e1/method')
+    expect(router.currentRoute.value.query).toEqual({ factura: 'b1' })
     expect(place).not.toHaveBeenCalled()
+  })
+
+  it('carries the ticked consent to the payment method screen', async () => {
+    signIn()
+    state.cardAvailable = true
+    state.needsConsent = true
+    consentChecked.value = true
+    const { wrapper, router } = await mountView()
+
+    await primary(wrapper).trigger('click')
+    await flushPromises()
+
+    expect(router.currentRoute.value.query).toEqual({ factura: 'b1', consentimiento: '1' })
   })
 
   it('creates the transfer order and opens it, when the event takes no cards', async () => {
