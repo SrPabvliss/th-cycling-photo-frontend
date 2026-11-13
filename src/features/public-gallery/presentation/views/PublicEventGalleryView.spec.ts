@@ -40,10 +40,9 @@ vi.mock('../../composables/queries/use-public-event-photos', () => ({
   usePublicEventPhotosInfinite: (
     _slug: unknown,
     _category: unknown,
-    bibNumber: { value: string },
-    bibMatch: { value: string },
+    plate: { value: string | null },
   ) => {
-    photosAskedWith(bibNumber.value, bibMatch.value)
+    photosAskedWith(plate.value)
     return emptyStream()
   },
   usePublicEventNoBibPhotosInfinite: () => emptyStream(),
@@ -85,7 +84,7 @@ describe('PublicEventGalleryView, plate from the url', () => {
 
     expect(wrapper.getComponent(PublicGalleryFilterBar).props('bibNumber')).toBe('127')
     expect(wrapper.getComponent(PublicGalleryFilterBar).props('bibMatch')).toBe('exact')
-    expect(photosAskedWith).toHaveBeenCalledWith('127', 'exact')
+    expect(photosAskedWith).toHaveBeenCalledWith('127')
   })
 
   it('opens with no plate when the url carries none', async () => {

@@ -6,10 +6,10 @@ import { ArrowBack } from '@vicons/ionicons5'
 
 import { formatDate } from '@/shared/utils/date.utils'
 import { getAssetPresetUrl } from '@/shared/utils/cdn.utils'
-import { PLATE_QUERY, plateFromQuery } from '@/shared/utils/plate.utils'
 import { useCartStore } from '@/shared/stores/cart.store'
 import { useAddToCart } from '@/shared/composables/use-add-to-cart'
 import { useRemoveFromCart } from '@/shared/composables/use-remove-from-cart'
+import { useGalleryPlate } from '../../composables/use-gallery-plate'
 import { usePublicEventDetailQuery } from '../../composables/queries/use-public-event-detail'
 import {
   usePublicEventNoBibPhotosInfinite,
@@ -38,11 +38,15 @@ watch(
 onUnmounted(() => cartStore.setActiveEvent(null))
 
 const activeCategoryId = ref<number | null>(null)
-// The home finder arrives with the plate in the url: the gallery opens already searching it.
-const bibNumber = ref(plateFromQuery(route.query[PLATE_QUERY]))
-const bibMatch = ref<'exact' | 'starts' | 'contains'>('exact')
+// The plate lives in the url. Until the screen is rebuilt, the old filter bar feeds it as typed.
+const { plate, draft, submit } = useGalleryPlate()
 
-const bibSearchActive = computed(() => !!bibNumber.value.trim())
+const bibSearchActive = computed(() => plate.value !== null)
+
+function searchPlate(text: string) {
+  draft.value = text
+  submit()
+}
 
 // Matched stream (also serves as the default "all photos" stream when no
 // bib search is active). The backend swaps semantics based on whether
@@ -53,7 +57,7 @@ const {
   fetchNextPage,
   hasNextPage,
   isFetchingNextPage,
-} = usePublicEventPhotosInfinite(slug, activeCategoryId, bibNumber, bibMatch)
+} = usePublicEventPhotosInfinite(slug, activeCategoryId, plate)
 
 // Companion "no bib detected" stream — only enabled while the user is
 // searching by bib so the rider can find themselves when OCR missed the
@@ -63,7 +67,7 @@ const {
   fetchNextPage: fetchNextNoBibPage,
   hasNextPage: hasNextNoBibPage,
   isFetchingNextPage: isFetchingNextNoBibPage,
-} = usePublicEventNoBibPhotosInfinite(slug, activeCategoryId, bibNumber)
+} = usePublicEventNoBibPhotosInfinite(slug, activeCategoryId, plate)
 
 const matchedPhotos = computed(() => infiniteData.value?.pages.flatMap((p) => p.items) ?? [])
 const noBibPhotos = computed(() => noBibInfiniteData.value?.pages.flatMap((p) => p.items) ?? [])
@@ -169,11 +173,10 @@ const heroUrl = computed(() => {
         class="gallery-filter-bar"
         :categories="event.photoCategories"
         :selected-category-id="activeCategoryId"
-        :bib-number="bibNumber"
-        :bib-match="bibMatch"
+        :bib-number="draft"
+        bib-match="exact"
         @update:selected-category-id="activeCategoryId = $event"
-        @update:bib-number="bibNumber = $event"
-        @update:bib-match="bibMatch = $event"
+        @update:bib-number="searchPlate"
       />
 
       <div v-if="isPhotosPending && allPhotos.length === 0" class="gallery-loading--tight">
