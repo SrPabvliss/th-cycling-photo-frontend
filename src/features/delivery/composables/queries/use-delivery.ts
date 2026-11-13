@@ -42,6 +42,10 @@ export function useDeliveryQuery(token: Ref<string>) {
     await query.refetch()
   }
 
+  // Opened again in the same visit (back and forward, or from Mis fotos): the cached link may
+  // hold expired addresses. Without data the normal load runs, so this asks nothing more.
+  void ensureFresh()
+
   // Back to the tab after a while: only addresses about to expire are worth an access.
   const visibility = useDocumentVisibility()
   watch(visibility, (current) => {

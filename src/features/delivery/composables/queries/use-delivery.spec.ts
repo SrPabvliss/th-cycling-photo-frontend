@@ -26,7 +26,10 @@ const DATA = {
 
 let api!: ReturnType<typeof useDeliveryQuery>
 let wrapper: ReturnType<typeof mount> | null = null
-async function start() {
+let client = new QueryClient()
+/** Leaves the screen and opens it again in the same visit: the cached link is still there. */
+async function reopen() {
+  wrapper?.unmount()
   wrapper = mount(
     defineComponent({
       setup() {
@@ -34,13 +37,13 @@ async function start() {
         return () => null
       },
     }),
-    {
-      global: {
-        plugins: [[VueQueryPlugin, { queryClient: new QueryClient() }]],
-      },
-    },
+    { global: { plugins: [[VueQueryPlugin, { queryClient: client }]] } },
   )
   await flushPromises()
+}
+async function start() {
+  client = new QueryClient()
+  await reopen()
 }
 
 // Leaves the tab and comes back, the way both the page and the query library hear it.
@@ -111,5 +114,29 @@ describe('useDeliveryQuery', () => {
 
     expect(get).toHaveBeenCalledTimes(1)
     expect(api.problem.value).toBe('unknown')
+  })
+
+  it('does not read again on opening the screen again with recent data', async () => {
+    await start()
+    await vi.advanceTimersByTimeAsync(10 * MINUTE)
+
+    await reopen()
+
+    expect(get).toHaveBeenCalledTimes(1)
+  })
+
+  it('reads once on opening the screen again with addresses about to expire', async () => {
+    await start()
+    await vi.advanceTimersByTimeAsync(56 * MINUTE)
+
+    await reopen()
+
+    expect(get).toHaveBeenCalledTimes(2)
+  })
+
+  it('reads once, not twice, on the first opening', async () => {
+    await start()
+
+    expect(get).toHaveBeenCalledTimes(1)
   })
 })
