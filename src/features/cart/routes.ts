@@ -12,6 +12,7 @@ export function checkoutPath(eventId: string): string {
 export const CART_ROUTE_NAMES = {
   CHECKOUT: ROUTE_NAMES.CART_CHECKOUT,
   PAYMENT_METHOD: ROUTE_NAMES.CART_PAYMENT_METHOD,
+  ORDER_RECEIVED: ROUTE_NAMES.CART_ORDER_RECEIVED,
 } as const
 
 export const cartRoutes: RouteRecordRaw[] = [
@@ -25,6 +26,12 @@ export const cartRoutes: RouteRecordRaw[] = [
     path: `${CHECKOUT_PATH}/:eventId/method`,
     name: CART_ROUTE_NAMES.PAYMENT_METHOD,
     component: () => import('./presentation/views/PaymentMethodView.vue'),
+    meta: { requiresAuth: true, shell: { footer: false } },
+  },
+  {
+    path: `${CHECKOUT_PATH}/received/:orderId`,
+    name: CART_ROUTE_NAMES.ORDER_RECEIVED,
+    component: () => import('./presentation/views/OrderReceivedView.vue'),
     meta: { requiresAuth: true, shell: { footer: false } },
   },
 ]

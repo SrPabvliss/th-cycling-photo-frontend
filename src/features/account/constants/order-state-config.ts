@@ -17,6 +17,12 @@ export interface IOrderStateConfig {
 
 export const ORDER_STATE_CONFIG: Record<MyOrderState, IOrderStateConfig> = {
   in_process: { label: 'En proceso', color: '#f0a020', textColor: '#8a540d', icon: TimeOutline },
+  confirming: {
+    label: 'Confirmando pago',
+    color: '#f0a020',
+    textColor: '#8a540d',
+    icon: TimeOutline,
+  },
   ready: { label: 'Lista', color: '#18a058', textColor: '#0e6837', icon: CheckmarkCircleOutline },
   gifted: { label: 'Regalada', color: '#7c3aed', textColor: '#5b21b6', icon: GiftOutline },
   cancelled: {

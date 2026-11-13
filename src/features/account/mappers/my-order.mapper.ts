@@ -36,6 +36,7 @@ export function toMyOrderDetail(api: IApiMyOrderDetail): IMyOrderDetail {
     photos: api.photos,
     invoice: api.invoice ? toMyOrderInvoice(api.invoice) : null,
     billing: api.billing,
+    confirmingTransactionId: api.confirmingTransactionId ?? null,
   }
 }
 

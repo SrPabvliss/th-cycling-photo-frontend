@@ -1,7 +1,8 @@
 import type { BillingIdType } from './billing-account.response'
 import type { IApiMyOrderInvoice, IMyOrderInvoice } from './my-order-invoice.response'
 
-export type MyOrderState = 'in_process' | 'ready' | 'gifted' | 'cancelled'
+/** `confirming`: a card payment is being confirmed with the gateway. */
+export type MyOrderState = 'in_process' | 'confirming' | 'ready' | 'gifted' | 'cancelled'
 
 export interface IApiMyOrderPreviewPhoto {
   photoId: string
@@ -44,6 +45,8 @@ export interface IApiMyOrderDetail {
   photos: IApiMyOrderPhoto[]
   invoice: IApiMyOrderInvoice | null
   billing: IMyOrderBilling | null
+  /** Card payment being confirmed; null otherwise. */
+  confirmingTransactionId: string | null
 }
 
 export interface IApiMyOrderDownloadPhoto {
@@ -81,6 +84,8 @@ export interface IMyOrderDetail {
   photos: IApiMyOrderPhoto[]
   invoice: IMyOrderInvoice | null
   billing: IMyOrderBilling | null
+  /** Card payment being confirmed; null otherwise. */
+  confirmingTransactionId: string | null
 }
 
 export interface IMyOrderDownloads {
