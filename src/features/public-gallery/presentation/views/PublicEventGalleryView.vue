@@ -108,10 +108,16 @@ function toggleSelect(photoId: string) {
 const showLightbox = ref(false)
 const lightboxIndex = ref(0)
 
-function openPreview(index: number) {
-  lightboxIndex.value = index
+function openPreview(photoId: string) {
+  lightboxIndex.value = Math.max(
+    0,
+    allPhotos.value.findIndex((photo) => photo.id === photoId),
+  )
   showLightbox.value = true
 }
+
+// Filled in when the screen is rebuilt on the optimistic cart.
+const busyIds = new Set<string>()
 
 function handleLoadMore() {
   if (hasNextPage.value && !isFetchingNextPage.value) {
@@ -195,11 +201,11 @@ const heroUrl = computed(() => {
             v-else
             :photos="matchedPhotos"
             :selected-ids="selectedIds"
-            :base-index="0"
+            :busy-ids="busyIds"
             :has-more="hasNextPage"
             :is-loading-more="isFetchingNextPage"
             @toggle="toggleSelect"
-            @preview="openPreview"
+            @open="openPreview"
             @load-more="handleLoadMore"
           />
         </section>
@@ -217,11 +223,11 @@ const heroUrl = computed(() => {
           <PhotoGridSection
             :photos="noBibPhotos"
             :selected-ids="selectedIds"
-            :base-index="matchedPhotos.length"
+            :busy-ids="busyIds"
             :has-more="hasNextNoBibPage"
             :is-loading-more="isFetchingNextNoBibPage"
             @toggle="toggleSelect"
-            @preview="openPreview"
+            @open="openPreview"
             @load-more="handleLoadMoreNoBib"
           />
         </section>
@@ -239,8 +245,9 @@ const heroUrl = computed(() => {
         <PublicPhotoGrid
           :photos="allPhotos"
           :selected-ids="selectedIds"
+          :busy-ids="busyIds"
           @toggle="toggleSelect"
-          @preview="openPreview"
+          @open="openPreview"
           @load-more="handleLoadMore"
         />
       </template>
