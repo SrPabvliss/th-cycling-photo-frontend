@@ -24,7 +24,7 @@ const chips = computed<{ value: EventListChip; label: string }[]>(() => [
       v-for="chip in chips"
       :key="chip.value"
       type="button"
-      class="event-chips__chip"
+      class="event-chips__chip tt-hit-area"
       :aria-pressed="chosen === chip.value ? 'true' : 'false'"
       @click="chosen = chip.value"
     >
@@ -38,6 +38,9 @@ const chips = computed<{ value: EventListChip; label: string }[]>(() => [
 .event-chips {
   display: flex;
   gap: var(--tt-space-2);
+  /* Room for the chips' 44 px touch zone, which a scrolling row would otherwise clip. */
+  padding-block: calc((var(--tt-control-m) - var(--tt-control-s)) / 2);
+  margin-block: calc((var(--tt-control-m) - var(--tt-control-s)) / -2);
   overflow-x: auto;
   scrollbar-width: none;
 }

@@ -25,7 +25,7 @@ const TABS = [
       :to="{ path: tab.path, query }"
       replace
       role="tab"
-      class="auth-tabs__tab"
+      class="auth-tabs__tab tt-hit-area"
       :aria-selected="current === tab.key ? 'true' : 'false'"
     >
       {{ tab.text }}

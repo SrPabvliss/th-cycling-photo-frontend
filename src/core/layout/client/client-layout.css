@@ -57,3 +57,16 @@ html[data-tt-area='client'] :focus-visible:not(input, textarea, select) {
   outline: medium solid var(--tt-focus-ring, var(--tt-primary));
   outline-offset: calc(var(--tt-space-1) / 2);
 }
+
+/* A control drawn smaller than a thumb still answers on the full control size, without moving
+ * anything around it. */
+.tt-hit-area {
+  position: relative;
+}
+
+.tt-hit-area::after {
+  content: '';
+  position: absolute;
+  inset-block: min(0%, calc((100% - var(--tt-control-m)) / 2));
+  inset-inline: min(0%, calc((100% - var(--tt-control-m)) / 2));
+}

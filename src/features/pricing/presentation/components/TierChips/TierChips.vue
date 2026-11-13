@@ -33,7 +33,7 @@ const segments = computed(() => {
 <template>
   <button
     type="button"
-    class="tier-chips"
+    class="tier-chips tt-hit-area"
     aria-label="Precio por foto según cuántas lleves. Ver cómo funciona"
     @click="emit('open')"
   >

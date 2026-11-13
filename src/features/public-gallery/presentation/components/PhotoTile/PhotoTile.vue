@@ -47,7 +47,7 @@ const altText = computed(() =>
     <!-- Never disabled: taps are queued, and the last one decides (see use-cart-actions.ts). -->
     <button
       type="button"
-      class="photo-tile__toggle"
+      class="photo-tile__toggle tt-hit-area"
       :aria-pressed="selected ? 'true' : 'false'"
       :aria-label="selected ? 'Quitar del carrito' : 'Agregar al carrito'"
       :aria-busy="busy ? 'true' : undefined"

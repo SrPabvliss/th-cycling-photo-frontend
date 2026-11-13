@@ -147,7 +147,10 @@ async function send() {
         </template>
       </form.Field>
 
-      <RouterLink class="login-form__link" :to="{ name: AUTH_ROUTE_NAMES.FORGOT_PASSWORD }">
+      <RouterLink
+        class="login-form__link tt-hit-area"
+        :to="{ name: AUTH_ROUTE_NAMES.FORGOT_PASSWORD }"
+      >
         ¿Olvidaste tu contraseña?
       </RouterLink>
 

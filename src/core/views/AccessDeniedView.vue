@@ -30,7 +30,7 @@ function goBack() {
     <template #actions>
       <NButton type="primary" size="large" block @click="goBack">Volver</NButton>
       <RouterLink v-slot="{ navigate }" :to="ROUTE_PATHS.LOGIN" custom>
-        <NButton text type="primary" size="large" @click="navigate">
+        <NButton text class="tt-hit-area" type="primary" size="large" @click="navigate">
           Ingresar con otra cuenta
         </NButton>
       </RouterLink>

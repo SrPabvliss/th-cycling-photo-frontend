@@ -5,7 +5,11 @@ import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 </script>
 
 <template>
-  <RouterLink class="client-logo" :to="ROUTE_PATHS.LANDING" aria-label="Titan TV, inicio">
+  <RouterLink
+    class="client-logo tt-hit-area"
+    :to="ROUTE_PATHS.LANDING"
+    aria-label="Titan TV, inicio"
+  >
     <img class="client-logo__mark client-logo__mark--light" :src="helmetLightUrl" alt="" />
     <img class="client-logo__mark client-logo__mark--dark" :src="helmetDarkUrl" alt="" />
     TITAN TV

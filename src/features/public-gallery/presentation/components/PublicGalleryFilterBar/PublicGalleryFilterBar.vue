@@ -14,7 +14,7 @@ const selected = defineModel<number | null>({ required: true })
   <div class="gallery-categories" role="group" aria-label="Filtrar por categoría">
     <button
       type="button"
-      class="gallery-categories__chip"
+      class="gallery-categories__chip tt-hit-area"
       :aria-pressed="selected === null ? 'true' : 'false'"
       @click="selected = null"
     >
@@ -24,7 +24,7 @@ const selected = defineModel<number | null>({ required: true })
       v-for="category in categories"
       :key="category.id"
       type="button"
-      class="gallery-categories__chip"
+      class="gallery-categories__chip tt-hit-area"
       :aria-pressed="selected === category.id ? 'true' : 'false'"
       @click="selected = category.id"
     >
@@ -37,6 +37,9 @@ const selected = defineModel<number | null>({ required: true })
 .gallery-categories {
   display: flex;
   gap: var(--tt-space-2);
+  /* Room for the chips' 44 px touch zone, which a scrolling row would otherwise clip. */
+  padding-block: calc((var(--tt-control-m) - var(--tt-control-s)) / 2);
+  margin-block: calc((var(--tt-control-m) - var(--tt-control-s)) / -2);
   overflow-x: auto;
   scrollbar-width: none;
 }

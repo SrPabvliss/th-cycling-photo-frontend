@@ -16,7 +16,9 @@ import ErrorPageLayout from './components/ErrorPageLayout.vue'
         <NButton type="primary" size="large" block @click="navigate">Ir al inicio</NButton>
       </RouterLink>
       <RouterLink v-slot="{ navigate }" :to="ROUTE_PATHS.PUBLIC_GALLERY" custom>
-        <NButton text type="primary" size="large" @click="navigate">Ver eventos</NButton>
+        <NButton text class="tt-hit-area" type="primary" size="large" @click="navigate"
+          >Ver eventos</NButton
+        >
       </RouterLink>
     </template>
   </ErrorPageLayout>

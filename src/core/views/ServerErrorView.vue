@@ -61,7 +61,9 @@ async function copyError() {
   >
     <template #actions>
       <NButton type="primary" size="large" block @click="retry">Reintentar</NButton>
-      <NButton text type="primary" size="large" @click="goHome">Volver al inicio</NButton>
+      <NButton text class="tt-hit-area" type="primary" size="large" @click="goHome"
+        >Volver al inicio</NButton
+      >
     </template>
     <template v-if="errorDetail" #extra>
       <div class="error-detail">
