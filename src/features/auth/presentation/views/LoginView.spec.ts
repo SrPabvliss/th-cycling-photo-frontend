@@ -49,9 +49,10 @@ async function mountView(path = '/login') {
   return { wrapper: new DOMWrapper(document.body), router }
 }
 
-function httpError(status?: number) {
+function httpError(status?: number, messageKey?: string) {
   if (!status) return new AxiosError('Network Error', 'ERR_NETWORK')
-  const response = { status, data: {}, headers: {}, config: {} } as AxiosResponse
+  const data = messageKey ? { error: { code: 'BUSINESS_RULE', messageKey } } : {}
+  const response = { status, data, headers: {}, config: {} } as AxiosResponse
   return new AxiosError('failed', 'ERR_BAD_REQUEST', undefined, undefined, response)
 }
 
@@ -111,18 +112,33 @@ describe('LoginView', () => {
     expect(login).not.toHaveBeenCalled()
   })
 
-  it('says the credentials were not accepted, keeping the email', async () => {
-    login.mockRejectedValue(httpError(401))
+  it.each([
+    ['the api turns them down', 422, 'auth.invalid_credentials'],
+    ['the session is refused', 401, undefined],
+  ])(
+    'says the credentials were not accepted when %s, keeping the email',
+    async (_, status, key) => {
+      login.mockRejectedValue(httpError(status, key))
+      const { wrapper } = await mountView()
+
+      await fillAndSend(wrapper)
+
+      const alert = wrapper.get('[role="alert"]')
+      expect(alert.text()).toContain('Correo o contraseña incorrectos')
+      expect(alert.text()).toContain('Revisa los datos e intenta de nuevo.')
+      expect((wrapper.get('input[type="email"]').element as HTMLInputElement).value).toBe(
+        'ana@correo.com',
+      )
+    },
+  )
+
+  it('says when the account was deactivated', async () => {
+    login.mockRejectedValue(httpError(422, 'auth.account_deactivated'))
     const { wrapper } = await mountView()
 
     await fillAndSend(wrapper)
 
-    const alert = wrapper.get('[role="alert"]')
-    expect(alert.text()).toContain('Correo o contraseña incorrectos')
-    expect(alert.text()).toContain('Revisa los datos e intenta de nuevo.')
-    expect((wrapper.get('input[type="email"]').element as HTMLInputElement).value).toBe(
-      'ana@correo.com',
-    )
+    expect(wrapper.get('[role="alert"]').text()).toContain('Esta cuenta está desactivada')
   })
 
   it('says a dropped connection is one, without a credentials message', async () => {

@@ -3,6 +3,7 @@ import { computed, nextTick, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useForm } from '@tanstack/vue-form'
 import { NButton, useMessage } from 'naive-ui'
+import { isAxiosError } from 'axios'
 
 import { getHomePath } from '@/core/auth/nav-config'
 import { safeRedirect } from '@/core/navigation/safe-redirect'
@@ -20,6 +21,20 @@ import { failedStatus, generalProblem, type IFormProblem } from '@/shared/utils/
 const CREDENTIALS_PROBLEM: IFormProblem = {
   title: 'Correo o contraseña incorrectos',
   text: 'Revisa los datos e intenta de nuevo.',
+}
+const DEACTIVATED_PROBLEM: IFormProblem = {
+  title: 'Esta cuenta está desactivada',
+  text: 'Escríbenos a info@titantv.com.ec para revisarla.',
+}
+
+// The api turns down a sign in with 422 and a key; a 401 means the same here.
+function signInProblem(error: unknown): IFormProblem {
+  const key = isAxiosError(error)
+    ? (error.response?.data as { error?: { messageKey?: string } } | undefined)?.error?.messageKey
+    : undefined
+  if (key === 'auth.invalid_credentials' || failedStatus(error) === 401) return CREDENTIALS_PROBLEM
+  if (key === 'auth.account_deactivated') return DEACTIVATED_PROBLEM
+  return generalProblem(error)
 }
 
 const route = useRoute()
@@ -55,7 +70,7 @@ const form = useForm({
           : `Hola, ${user.firstName}.`,
       )
     } catch (error) {
-      problem.value = failedStatus(error) === 401 ? CREDENTIALS_PROBLEM : generalProblem(error)
+      problem.value = signInProblem(error)
     }
   },
 })
