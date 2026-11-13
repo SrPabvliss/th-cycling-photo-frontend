@@ -1,359 +1,262 @@
-/* Hero */
-.hero {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 88vh;
-  padding: 96px 32px;
-  overflow: hidden;
-  background: #0a0f1a;
-}
+/* Home. Mobile first; desktop starts at 768px. Sizes come from the redesign demo, written with
+ * the spacing scale where awana has no token of its own. */
+.landing {
+  --landing-hero-height: calc(var(--tt-ilu-page) * 1.5);
+  --landing-finder-overlap: var(--tt-gutter-desktop);
+  --landing-gutter: var(--tt-space-4);
 
-.hero-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* Keep the rider in frame even when the viewport gets very wide / very
-     narrow; downhill action is in the upper-left third of the photo. */
-  object-position: 35% 40%;
-  z-index: 0;
-}
-
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  /* "Negro azulado" — dark navy that reads almost-black but keeps a
-     faint brand-blue tint. Heavy enough to give text/logo high contrast
-     while letting the rider silhouette remain visible. */
-  background: linear-gradient(
-    180deg,
-    rgba(8, 18, 36, 0.78) 0%,
-    rgba(6, 14, 28, 0.85) 50%,
-    rgba(3, 8, 18, 0.94) 100%
-  );
-}
-
-.hero-content {
-  position: relative;
-  z-index: 2;
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 18px;
-  max-width: 760px;
+  color: var(--tt-ink);
+  font-family: var(--tt-font-sans);
 }
 
-.hero-title {
-  margin: 4px 0 0;
-  font-size: 46px;
-  font-weight: 800;
-  color: #fff;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
-}
-
-.hero-subtitle {
-  margin: 0;
-  font-size: 18px;
-  color: rgba(255, 255, 255, 0.85);
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
-}
-
-.hero-accent {
-  color: #7fb7e0;
-  font-weight: 600;
-}
-
-/* Events sections */
-.events-section {
-  padding: 48px 32px;
-  background: #f8f9fa;
-}
-.events-section--light {
-  background: #fff;
-}
-.events-inner {
-  max-width: 960px;
-  margin: 0 auto;
-}
-.events-section__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-.events-section__title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1a1f2c;
-  margin: 0 0 16px;
-}
-.events-section__header .events-section__title {
-  margin-bottom: 0;
-}
-.events-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-}
-
-/* About */
-.about {
-  padding: 80px 32px;
-  background: #fff;
-}
-
-.about-inner {
-  display: flex;
-  gap: 48px;
-  max-width: 1000px;
-  margin: 0 auto;
-  align-items: flex-start;
-}
-
-.about-image {
+/* Fixed height: the hero holds its room before the image arrives. */
+.landing__hero {
   position: relative;
-  flex: 0 0 380px;
-  height: 420px;
-  border-radius: 12px;
+  flex: none;
+  block-size: var(--landing-hero-height);
   overflow: hidden;
-  background: #0a0f1a;
+  background: var(--tt-navy);
+  color: var(--tt-on-navy);
 }
 
-.about-image-photo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* Center on the rider doing the trick (upper-mid of the frame). */
-  object-position: 50% 35%;
+.landing__hero img {
   display: block;
-}
-
-.about-image-caption {
-  position: absolute;
-  left: 20px;
-  right: 20px;
-  bottom: 16px;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
-}
-
-.about-text {
-  flex: 1;
-  padding-top: 16px;
-}
-
-.about-label {
-  font-size: 12px;
-  font-weight: 700;
-  color: #105080;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-.about-title {
-  margin: 12px 0 16px;
-  font-size: 28px;
-  font-weight: 700;
-  color: #1a1f2c;
-  line-height: 1.3;
-}
-
-.about-description {
-  margin: 0 0 24px;
-  font-size: 14px;
-  color: #6b7280;
-  line-height: 1.7;
-}
-
-.about-features {
-  display: flex;
-  gap: 24px;
-}
-
-.about-feature {
-  flex: 1;
-  padding-left: 16px;
-  border-left: 3px solid #e5e7eb;
-}
-
-.about-feature-title {
-  margin: 0 0 6px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #1a1f2c;
-}
-
-.about-feature-text {
-  margin: 0;
-  font-size: 13px;
-  color: #6b7280;
-  line-height: 1.5;
-}
-
-/* CTA */
-.cta {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 560px;
-  padding: 96px 32px;
-  background: #0a0f1a;
-  overflow: hidden;
-}
-
-.cta-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inline-size: 100%;
+  block-size: 100%;
   object-fit: cover;
-  /* Frame the rider doing the trick — sits slightly above center. */
-  object-position: 50% 30%;
-  z-index: 0;
+  object-position: 40% 20%;
 }
 
-.cta::before {
+.landing__hero::after {
   content: '';
   position: absolute;
   inset: 0;
+  background: var(--tt-photo-overlay);
+}
+
+.landing__hero-text {
+  position: absolute;
   z-index: 1;
-  background: linear-gradient(
-    180deg,
-    rgba(8, 18, 36, 0.78) 0%,
-    rgba(6, 14, 28, 0.85) 50%,
-    rgba(3, 8, 18, 0.92) 100%
+  inset-block-start: calc(var(--tt-space-6) + var(--tt-space-2));
+  inset-inline: var(--landing-gutter);
+  display: flex;
+  flex-direction: column;
+  gap: var(--tt-space-2);
+  max-inline-size: calc(var(--tt-container-max) - var(--tt-space-6));
+  margin-inline: auto;
+}
+
+.landing__hero-title {
+  margin: 0;
+  font-family: var(--tt-type-display-m-family);
+  font-stretch: var(--tt-display-stretch);
+  font-size: var(--tt-type-display-m-size);
+  line-height: var(--tt-type-display-m-line);
+  font-weight: var(--tt-type-display-m-weight);
+  text-transform: uppercase;
+}
+
+.landing__hero-lead {
+  max-inline-size: calc(var(--tt-ilu-page) * 2 + var(--tt-space-5));
+  margin: 0;
+  color: var(--tt-on-navy-muted);
+  font-size: var(--tt-type-body-size);
+  line-height: var(--tt-type-body-line);
+}
+
+/* The finder sits over the bottom of the hero. */
+.landing__finder {
+  position: relative;
+  z-index: 2;
+  margin: calc(var(--landing-finder-overlap) * -1) var(--landing-gutter) 0;
+}
+
+.landing__band {
+  inline-size: 100%;
+  max-inline-size: var(--tt-container-max);
+  margin-inline: auto;
+  padding: var(--tt-space-5) var(--landing-gutter) 0;
+}
+
+section.landing__band {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tt-space-3);
+}
+
+.landing__band-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--tt-space-3);
+}
+
+.landing__heading {
+  margin: 0;
+  font-size: var(--tt-type-heading-m-size);
+  line-height: var(--tt-type-heading-m-line);
+  font-weight: var(--tt-type-heading-m-weight);
+}
+
+.landing__link {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--tt-space-6);
+  color: var(--tt-primary-ink);
+  text-decoration: none;
+  font-size: var(--tt-type-body-s-medium-size);
+  font-weight: var(--tt-type-title-weight);
+}
+
+.landing__link:hover {
+  text-decoration: underline;
+}
+
+/* One row that scrolls sideways, with no visible scrollbar. */
+.landing__row {
+  display: flex;
+  gap: var(--tt-space-3);
+  overflow-x: auto;
+  padding-block-end: var(--tt-space-2);
+  scrollbar-width: none;
+}
+
+.landing__row::-webkit-scrollbar {
+  display: none;
+}
+
+/* While the events load the row already takes the height of a card: nothing below it jumps. */
+.landing__row--loading {
+  min-block-size: calc(
+    (var(--tt-sidebar-width) + var(--tt-space-7) - var(--tt-space-2)) * 218 / 272 +
+      var(--tt-space-5)
   );
 }
 
-.cta-overlay {
-  position: relative;
-  z-index: 2;
+.landing__alert {
+  display: flex;
+  gap: var(--tt-space-2);
+  padding: var(--tt-space-4);
+  border-radius: var(--tt-radius-m);
+  background: var(--tt-danger-soft);
+  color: var(--tt-danger-ink);
+  font-size: var(--tt-type-body-s-size);
+  line-height: var(--tt-type-body-s-line);
+}
+
+.landing__alert-icon {
+  flex: none;
+  inline-size: var(--tt-icon-m);
+  block-size: var(--tt-icon-m);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.landing__alert-title {
+  display: block;
+  font-size: var(--tt-type-body-size);
+  font-weight: var(--tt-type-heading-m-weight);
+}
+
+.landing__alert-text {
+  margin: var(--tt-space-1) 0 0;
+}
+
+.landing__alert-retry {
+  min-block-size: var(--tt-control-m);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: var(--tt-type-title-weight);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.landing__manifesto {
+  margin-block-start: var(--tt-space-5);
+  padding: var(--tt-space-6) var(--landing-gutter);
+  background: var(--tt-navy);
+  color: var(--tt-on-navy);
+}
+
+.landing__manifesto-inner {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  gap: var(--tt-space-3);
+  max-inline-size: calc(var(--tt-container-max) - var(--tt-space-6));
+  margin-inline: auto;
 }
 
-.cta-title {
-  margin: 0 0 12px;
-  font-size: 32px;
-  font-weight: 700;
-  color: #fff;
+.landing__eyebrow {
+  color: var(--tt-on-navy-eyebrow);
+  font-size: var(--tt-type-eyebrow-size);
+  line-height: var(--tt-type-eyebrow-line);
+  font-weight: var(--tt-type-eyebrow-weight);
+  letter-spacing: var(--tt-type-eyebrow-tracking);
+  text-transform: uppercase;
 }
 
-.cta-subtitle {
-  margin: 0 0 32px;
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.7);
-  max-width: 480px;
-  line-height: 1.6;
+.landing__manifesto-title {
+  margin: 0;
+  font-family: var(--tt-type-display-m-family);
+  font-stretch: var(--tt-display-stretch);
+  font-size: var(--tt-type-display-m-size);
+  line-height: var(--tt-type-display-m-line);
+  font-weight: var(--tt-type-display-m-weight);
+  text-transform: uppercase;
 }
 
-.cta-button {
-  color: #fff !important;
-  border-color: #fff !important;
+.landing__manifesto-text {
+  max-inline-size: calc(var(--tt-space-8) * 9 - var(--tt-space-4));
+  margin: 0;
+  color: var(--tt-on-navy-muted);
+  font-size: var(--tt-type-body-size);
+  line-height: var(--tt-type-body-line);
 }
 
-.cta-button:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .hero {
-    min-height: 72vh;
-    padding: 64px 20px;
+@media (min-width: 768px) {
+  .landing {
+    --landing-hero-height: calc(var(--tt-ilu-page) * 2 + var(--tt-space-5) - var(--tt-space-1));
+    --landing-finder-overlap: calc(
+      var(--tt-gutter-desktop) - var(--tt-space-2) - var(--tt-space-1) / 2
+    );
+    --landing-gutter: var(--tt-space-6);
   }
 
-  .hero-bg {
-    /* Recenter on the rider for narrower viewports. */
-    object-position: 42% 35%;
+  .landing__hero-text {
+    inset-block-start: calc(var(--tt-space-8) + var(--tt-space-2));
   }
 
-  .hero-content {
-    gap: 14px;
+  .landing__hero-title {
+    font-size: var(--tt-type-display-xl-size);
+    line-height: var(--tt-type-display-xl-line);
   }
 
-  .hero-title {
-    font-size: 30px;
+  .landing__finder {
+    inline-size: calc(100% - var(--landing-gutter) * 2);
+    max-inline-size: calc(var(--tt-space-8) * 14 - var(--tt-space-4));
+    margin-inline: auto;
   }
 
-  .hero-subtitle {
-    font-size: 16px;
+  .landing__band {
+    padding-block-start: calc(var(--tt-space-6) + var(--tt-space-2));
   }
 
-  .events-section {
-    padding: 32px 16px;
+  .landing__manifesto {
+    margin-block-start: var(--tt-space-7);
+    padding-block: var(--tt-space-8);
   }
 
-  .events-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .about {
-    padding: 48px 16px;
-  }
-
-  .about-inner {
-    flex-direction: column;
-    gap: 24px;
-    align-items: stretch;
-  }
-
-  .about-image {
-    flex: 0 0 auto;
-    width: 100%;
-    height: 260px;
-  }
-
-  .about-text {
-    padding-top: 0;
-  }
-
-  .about-title {
-    font-size: 22px;
-  }
-
-  .about-features {
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .cta {
-    min-height: 460px;
-    padding: 56px 20px;
-  }
-
-  .cta-bg {
-    object-position: 50% 35%;
-  }
-
-  .cta-title {
-    font-size: 24px;
-  }
-
-  .cta-subtitle {
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  .hero {
-    min-height: 65vh;
-    padding: 48px 16px;
-  }
-
-  .hero-title {
-    font-size: 26px;
+  .landing__manifesto-title {
+    font-size: var(--tt-type-display-l-size);
+    line-height: var(--tt-type-display-l-line);
   }
 }
