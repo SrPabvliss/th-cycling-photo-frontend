@@ -3,7 +3,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { basename, join, resolve } from 'node:path'
 
-import { hasBlockerTerm, KNOWN_OUTSIDE } from './blocker-terms.mjs'
+import { emittedName, hasBlockerTerm, KNOWN_OUTSIDE } from './blocker-terms.mjs'
 
 const DIST = resolve(process.argv[2] ?? 'dist')
 
@@ -15,7 +15,7 @@ function walk(dir) {
 }
 
 const files = walk(DIST)
-const badFiles = files.filter((path) => hasBlockerTerm(basename(path)))
+const badFiles = files.filter((path) => hasBlockerTerm(emittedName(basename(path))))
 const classes = new Set()
 for (const path of files.filter((each) => each.endsWith('.css'))) {
   for (const [, name] of readFileSync(path, 'utf8').matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)) {

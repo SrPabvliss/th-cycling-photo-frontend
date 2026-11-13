@@ -3,7 +3,7 @@ import { join, relative, resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 // @ts-expect-error plain ESM helper shared with the build check, without types
-import { hasBlockerTerm } from '../../../scripts/blocker-terms.mjs'
+import { emittedName, hasBlockerTerm } from '../../../scripts/blocker-terms.mjs'
 
 const ROOT = resolve(process.cwd())
 const FEATURE = resolve(ROOT, 'src/features/house-spots')
@@ -34,6 +34,14 @@ describe('house spots names', () => {
     expect(hasBlockerTerm('house-spot__frame')).toBe(false)
     expect(hasBlockerTerm('padding-shadow-radius')).toBe(false)
     expect(hasBlockerTerm('AddressForm')).toBe(false)
+  })
+
+  it('reads an emitted file by its name, not by the random hash the build adds', () => {
+    expect(emittedName('use-my-contracts-CQ740DAd.js')).toBe('use-my-contracts')
+    expect(hasBlockerTerm(emittedName('use-my-contracts-CQ740DAd.js'))).toBe(false)
+    expect(emittedName('sponsor-wide-DWO7KJoV.js')).toBe('sponsor-wide')
+    expect(hasBlockerTerm(emittedName('sponsor-wide-DWO7KJoV.js'))).toBe(true)
+    expect(emittedName('helmet-mask-LKA4CEnS.webp')).toBe('helmet-mask')
   })
 
   it('keeps every folder and file of the feature, and the mask, clear of them', () => {

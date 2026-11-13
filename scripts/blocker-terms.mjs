@@ -10,6 +10,14 @@ export function hasBlockerTerm(name) {
 }
 
 /**
+ * The name of an emitted file without its extension and the 8-character hash the build adds
+ * ("use-my-contracts-CQ740DAd.js" is "use-my-contracts"): a random hash can spell anything.
+ */
+export function emittedName(file) {
+  return file.replace(/\.[a-z0-9]+$/i, '').replace(/-[\w-]{8}$/, '')
+}
+
+/**
  * Names outside the house spots that match and stay, each with its reason. A new match fails.
  */
 export const KNOWN_OUTSIDE = {
