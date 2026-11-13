@@ -54,6 +54,8 @@ export interface IApiMyOrderDownloadPhoto {
   filename: string
   fileSize: number
   downloadUrl: string
+  /** Small image of the photo itself (TIT-116). Lasts an hour; may be null or fail. */
+  thumbnailUrl?: string | null
 }
 
 export interface IApiMyOrderDownloads {
