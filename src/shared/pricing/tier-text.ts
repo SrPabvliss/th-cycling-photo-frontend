@@ -1,4 +1,4 @@
-import { formatMoney } from '@/shared/pricing/tier-cards'
+import { formatMoney } from './tier-cards'
 import type { IPriceQuote } from './quote'
 
 /** What the buyer gains by adding more photos: "Con 1 foto más, todas bajan a $3,00 c/u". */

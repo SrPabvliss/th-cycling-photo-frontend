@@ -1,41 +1,10 @@
-import { useQuery } from '@tanstack/vue-query'
-import { watch } from 'vue'
+import { useCartState } from '@/shared/cart'
 
-import { API_ROUTES } from '@/core/api/api-routes'
-import { httpClient } from '@/core/http/axios-client'
-import { CART_QUERY_KEYS } from '../../constants/query-keys'
-import { useCartStore } from '@/shared/stores/cart.store'
-import { parseDateOnly } from '@/shared/utils/date.utils'
-import type { IApiCartGroup, ICartGroup } from '../../types/responses/cart.response'
-
-function toCartGroup(api: IApiCartGroup): ICartGroup {
-  return {
-    eventId: api.eventId,
-    eventName: api.eventName,
-    eventSlug: api.eventSlug,
-    startDate: parseDateOnly(api.startDate),
-    endDate: parseDateOnly(api.endDate),
-    photos: api.photos,
-  }
-}
-
+/**
+ * Loads the cart and keeps the store in step. The query itself lives in shared/cart, where the
+ * optimistic changes also write; this name stays for the header button, which only needs the cart
+ * to be loaded.
+ */
 export function useCartQuery() {
-  const cartStore = useCartStore()
-
-  const query = useQuery({
-    queryKey: CART_QUERY_KEYS.cart(),
-    queryFn: async () => {
-      const { data } = await httpClient.get<IApiCartGroup[]>(API_ROUTES.CART.GET, {
-        params: { sessionId: cartStore.sessionId },
-        silent: true,
-      })
-      return data.map(toCartGroup)
-    },
-  })
-
-  watch(query.data, (groups) => {
-    if (groups) cartStore.setGroups(groups)
-  })
-
-  return query
+  return useCartState()
 }

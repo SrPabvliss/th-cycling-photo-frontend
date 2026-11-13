@@ -1,4 +1,4 @@
-import type { IPriceTier } from '@/shared/pricing/tier-cards'
+import type { IPriceTier } from './tier-cards'
 
 /** What an order of `quantity` photos of one event costs, worked out from the volume tiers. */
 export interface IPriceQuote {
