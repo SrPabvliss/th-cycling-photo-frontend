@@ -1,19 +1,23 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+import { useCartState } from '@/shared/cart'
 import { useCartStore } from '@/shared/stores/cart.store'
-import { useCartQuery } from '../../../composables/queries/use-cart'
 
 const cartStore = useCartStore()
 
 // The nav renders slot components on their own, so an emit has nobody listening and a prop nobody
-// to set it: whatever this needs, it owns. Loading the cart used to live in the navbar.
-useCartQuery()
+// to set it: whatever this needs, it owns. Reading the cart state also loads the cart.
+const cart = useCartState()
 
-const label = computed(() => {
-  const count = cartStore.totalCount
-  return `Carrito, ${count} ${count === 1 ? 'foto' : 'fotos'}`
-})
+// Only a cart that was read can be counted: while it loads, or after it failed, there is no number.
+const count = computed(() => (cart.status.value === 'success' ? cart.totalCount.value : null))
+
+const label = computed(() =>
+  count.value === null
+    ? 'Carrito'
+    : `Carrito, ${count.value} ${count.value === 1 ? 'foto' : 'fotos'}`,
+)
 </script>
 
 <template>
@@ -42,8 +46,8 @@ const label = computed(() => {
       <circle cx="10" cy="20" r="1.4" fill="currentColor" />
       <circle cx="17" cy="20" r="1.4" fill="currentColor" />
     </svg>
-    <span v-if="cartStore.totalCount > 0" class="cart-icon__badge" aria-hidden="true">
-      {{ cartStore.totalCount > 99 ? '99+' : cartStore.totalCount }}
+    <span v-if="count" class="cart-icon__badge" aria-hidden="true">
+      {{ count > 99 ? '99+' : count }}
     </span>
   </button>
 </template>
