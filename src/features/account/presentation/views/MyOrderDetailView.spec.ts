@@ -309,13 +309,32 @@ describe('MyOrderDetailView', () => {
     expect(button(wrapper, 'XML')).toBeDefined()
   })
 
-  it('leads a cancelled order back to its event', async () => {
-    state.order = order('cancelled')
+  it('leads a cancelled order back to the gallery of its event', async () => {
+    state.order = order('cancelled', { eventSlug: 'mama-rumi-2026' })
     const wrapper = await mountView()
 
     expect(button(wrapper, 'Ir a la galería del evento')?.attributes('href')).toBe(
-      '/gallery?q=Mama+Rumi+2026',
+      '/gallery/mama-rumi-2026',
     )
+  })
+
+  it('offers no way to the event when the api does not say which one', async () => {
+    state.order = order('cancelled', { eventSlug: null })
+    const wrapper = await mountView()
+
+    expect(button(wrapper, 'Ir a la galería del evento')).toBeUndefined()
+  })
+
+  it.each([
+    ['card', '3 fotos · Tarjeta'],
+    ['transfer', '3 fotos · Transferencia'],
+    [null, '3 fotos'],
+    [undefined, '3 fotos'],
+  ] as const)('names the payment method %s when the api gives it', async (method, line) => {
+    state.order = order('ready', { paymentMethod: method })
+    const wrapper = await mountView()
+
+    expect(wrapper.get('.order-detail__muted').text()).toBe(line)
   })
 
   it('offers to retry when the order could not be loaded', async () => {

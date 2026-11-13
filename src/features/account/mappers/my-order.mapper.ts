@@ -35,6 +35,8 @@ export function toMyOrderDetail(api: IApiMyOrderDetail): IMyOrderDetail {
     invoice: api.invoice ? toMyOrderInvoice(api.invoice) : null,
     billing: api.billing,
     confirmingTransactionId: api.confirmingTransactionId ?? null,
+    paymentMethod: api.paymentMethod ?? null,
+    eventSlug: api.eventSlug ?? null,
   }
 }
 

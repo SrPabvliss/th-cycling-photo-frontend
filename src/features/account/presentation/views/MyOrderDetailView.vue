@@ -82,9 +82,12 @@ const phone = computed(() => {
   const main = phones.value?.find((each) => each.isPrimary)
   return main ? maskPhone(main.phoneNumber) : ''
 })
-const photoCount = computed(() => {
+const PAYMENT_METHOD_LABELS = { card: 'Tarjeta', transfer: 'Transferencia' } as const
+const photoLine = computed(() => {
   const count = order.value?.photos.length ?? 0
-  return count === 1 ? '1 foto' : `${count} fotos`
+  const photos = count === 1 ? '1 foto' : `${count} fotos`
+  const method = order.value?.paymentMethod
+  return method ? `${photos} · ${PAYMENT_METHOD_LABELS[method]}` : photos
 })
 const amount = computed(() => {
   if (!order.value) return null
@@ -92,11 +95,10 @@ const amount = computed(() => {
   if (order.value.subtotal == null || !order.value.currency) return null
   return formatMoney(Number(order.value.subtotal), order.value.currency)
 })
-// The detail has no event address: the events list, searching this event, is the closest.
-const eventGallery = computed(() => ({
-  path: ROUTE_PATHS.PUBLIC_GALLERY,
-  query: { q: order.value?.eventName ?? '' },
-}))
+// Only when the api names the event: a name alone could lead to another one.
+const eventGallery = computed(() =>
+  order.value?.eventSlug ? `${ROUTE_PATHS.PUBLIC_GALLERY}/${order.value.eventSlug}` : null,
+)
 
 // --- Cancelling ---
 const askingCancel = ref(false)
@@ -240,7 +242,7 @@ function submitCorrection(request: Parameters<typeof correctBilling.mutate>[0]) 
       <OrderPhotoGrid :order="order" />
 
       <div class="order-detail__total">
-        <span class="order-detail__muted">{{ photoCount }}</span>
+        <span class="order-detail__muted">{{ photoLine }}</span>
         <strong v-if="amount">{{ amount }}</strong>
       </div>
 
@@ -263,7 +265,7 @@ function submitCorrection(request: Parameters<typeof correctBilling.mutate>[0]) 
       </NButton>
 
       <RouterLink
-        v-if="order.state === 'cancelled'"
+        v-if="order.state === 'cancelled' && eventGallery"
         v-slot="{ href, navigate }"
         :to="eventGallery"
         custom

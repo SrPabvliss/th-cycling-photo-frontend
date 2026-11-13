@@ -107,4 +107,27 @@ describe('my-order.mapper', () => {
     expect(without.invoice).toBeNull()
     expect(without.billing).toBeNull()
   })
+
+  it('maps the payment method and the event gallery when the api sends them, null otherwise', () => {
+    const base = {
+      id: 'order-1',
+      state: 'ready' as const,
+      eventName: 'Vuelta',
+      createdAt: '2026-08-01T10:00:00.000Z',
+      subtotal: '9.00',
+      snapCurrency: 'USD',
+      canDownload: true,
+      canCancel: false,
+      photos: [],
+      invoice: null,
+      billing: null,
+      confirmingTransactionId: null,
+    }
+
+    const sent = toMyOrderDetail({ ...base, paymentMethod: 'card', eventSlug: 'vuelta-2026' })
+    const absent = toMyOrderDetail(base)
+
+    expect([sent.paymentMethod, sent.eventSlug]).toEqual(['card', 'vuelta-2026'])
+    expect([absent.paymentMethod, absent.eventSlug]).toEqual([null, null])
+  })
 })

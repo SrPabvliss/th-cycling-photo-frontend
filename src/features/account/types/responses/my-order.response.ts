@@ -47,6 +47,10 @@ export interface IApiMyOrderDetail {
   billing: IMyOrderBilling | null
   /** Card payment being confirmed; null otherwise. */
   confirmingTransactionId: string | null
+  /** How it is paid. Optional: older api versions do not send it. */
+  paymentMethod?: 'card' | 'transfer' | null
+  /** Public gallery of the event; null when it is no longer listed. Optional, like above. */
+  eventSlug?: string | null
 }
 
 export interface IApiMyOrderDownloadPhoto {
@@ -88,6 +92,10 @@ export interface IMyOrderDetail {
   billing: IMyOrderBilling | null
   /** Card payment being confirmed; null otherwise. */
   confirmingTransactionId: string | null
+  /** How it is paid. Optional: older api versions do not send it. */
+  paymentMethod?: 'card' | 'transfer' | null
+  /** Public gallery of the event; null when it is no longer listed. Optional, like above. */
+  eventSlug?: string | null
 }
 
 export interface IMyOrderDownloads {
