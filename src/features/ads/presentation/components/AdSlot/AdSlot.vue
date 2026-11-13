@@ -2,7 +2,6 @@
 import { computed, ref, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 
-import maskUrl from '@/assets/ads/helmet-mask.webp'
 import { AD_RATIO, ADS_ENABLED, type AdFormat } from '../../../ads-config'
 import { BANNER_COPY } from '../../../banners/banner-copy'
 import { useBannerFormat } from '../../../composables/use-banner-format'
@@ -55,7 +54,10 @@ const slides = computed(() => {
       (message === 'organizador' && file.organizer?.[style]) || file.styles?.[style] || ''
     return {
       style,
-      html: fillBanner(html, { ...BANNER_COPY[format.value][message], maskUrl }),
+      html: fillBanner(html, {
+        ...BANNER_COPY[format.value][message],
+        maskUrl: file.maskUrl ?? '',
+      }),
       delay: slideDelay(index, props.seed, AD_STARTED_AT, now),
     }
   })

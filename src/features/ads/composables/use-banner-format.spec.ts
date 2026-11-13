@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises } from '@vue/test-utils'
 
 const loaders = vi.hoisted(() => ({ A: vi.fn(), B: vi.fn(), C: vi.fn(), D: vi.fn() }))
-vi.mock('../banners/banner-loaders', () => ({ BANNER_LOADERS: loaders }))
+const loadMaskUrl = vi.hoisted(() => vi.fn())
+vi.mock('../banners/banner-loaders', () => ({ BANNER_LOADERS: loaders, loadMaskUrl }))
 
 import { resetBannerCache, useBannerFormat } from './use-banner-format'
 
@@ -12,6 +13,8 @@ describe('useBannerFormat', () => {
   beforeEach(() => {
     resetBannerCache()
     for (const loader of Object.values(loaders)) loader.mockReset()
+    loadMaskUrl.mockReset()
+    loadMaskUrl.mockResolvedValue('/helmet-mask.webp')
   })
 
   it('downloads a format once per visit, however many slots ask for it', async () => {
@@ -40,5 +43,28 @@ describe('useBannerFormat', () => {
     expect(slot.failed.value).toBe(true)
     expect(slot.banner.value).toBeNull()
     expect(loaders.D).toHaveBeenCalledTimes(1)
+  })
+
+  it('brings the helmet mask with the banners, never before', async () => {
+    loaders.C.mockResolvedValue({ default: FILE })
+    const slot = useBannerFormat('C')
+    expect(loadMaskUrl).not.toHaveBeenCalled()
+
+    slot.load()
+    await flushPromises()
+
+    expect(slot.banner.value?.maskUrl).toBe('/helmet-mask.webp')
+  })
+
+  it('counts a blocked mask as banners that could not be downloaded', async () => {
+    loaders.A.mockResolvedValue({ default: FILE })
+    loadMaskUrl.mockRejectedValue(new Error('blocked by an ad blocker'))
+    const slot = useBannerFormat('A')
+
+    slot.load()
+    await flushPromises()
+
+    expect(slot.failed.value).toBe(true)
+    expect(slot.banner.value).toBeNull()
   })
 })

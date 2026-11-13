@@ -10,7 +10,10 @@ vi.mock('../../../ads-config', async (original) => ({
 }))
 
 const loaders = vi.hoisted(() => ({ 'sponsor-narrow': vi.fn(), 'sponsor-wide': vi.fn() }))
-vi.mock('../../../banners/banner-loaders', () => ({ BANNER_LOADERS: loaders }))
+vi.mock('../../../banners/banner-loaders', () => ({
+  BANNER_LOADERS: loaders,
+  loadMaskUrl: async () => '/helmet-mask.webp',
+}))
 
 import { resetBannerCache } from '../../../composables/use-banner-format'
 import SponsorStrip from './SponsorStrip.vue'

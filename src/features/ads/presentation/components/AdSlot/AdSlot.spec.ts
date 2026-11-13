@@ -10,7 +10,10 @@ vi.mock('../../../ads-config', async (original) => ({
 }))
 
 const loaders = vi.hoisted(() => ({ A: vi.fn(), B: vi.fn(), C: vi.fn(), D: vi.fn() }))
-vi.mock('../../../banners/banner-loaders', () => ({ BANNER_LOADERS: loaders }))
+vi.mock('../../../banners/banner-loaders', () => ({
+  BANNER_LOADERS: loaders,
+  loadMaskUrl: async () => '/helmet-mask.webp',
+}))
 
 import { resetBannerCache } from '../../../composables/use-banner-format'
 import AdSlot from './AdSlot.vue'

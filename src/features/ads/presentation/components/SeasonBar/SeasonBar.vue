@@ -2,7 +2,6 @@
 import { computed, ref, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 
-import maskUrl from '@/assets/ads/helmet-mask.webp'
 import { ADS_ENABLED } from '../../../ads-config'
 import { BANNER_COPY } from '../../../banners/banner-copy'
 import { useBannerFormat } from '../../../composables/use-banner-format'
@@ -38,7 +37,7 @@ const html = computed(() => {
   const slides = STYLES.map((style, index) => {
     const copy = BANNER_COPY.E[index === organizerAt ? 'organizador' : 'marca']
     const delay = slideDelay(index, props.seed, AD_STARTED_AT, now)
-    const piece = fillBanner(file.styles?.[style] ?? '', { ...copy, maskUrl })
+    const piece = fillBanner(file.styles?.[style] ?? '', { ...copy, maskUrl: file.maskUrl ?? '' })
     return `<span class="season-bar__slide" style="animation-delay: ${delay}">${piece}</span>`
   })
   return fillBanner(file.frame, {

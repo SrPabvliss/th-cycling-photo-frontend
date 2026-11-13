@@ -10,7 +10,10 @@ vi.mock('../../../ads-config', async (original) => ({
 }))
 
 const loaders = vi.hoisted(() => ({ 'season-narrow': vi.fn(), 'season-wide': vi.fn() }))
-vi.mock('../../../banners/banner-loaders', () => ({ BANNER_LOADERS: loaders }))
+vi.mock('../../../banners/banner-loaders', () => ({
+  BANNER_LOADERS: loaders,
+  loadMaskUrl: async () => '/helmet-mask.webp',
+}))
 
 import { resetBannerCache } from '../../../composables/use-banner-format'
 import SeasonBar from './SeasonBar.vue'

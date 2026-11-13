@@ -2,7 +2,6 @@
 import { computed, ref, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 
-import maskUrl from '@/assets/ads/helmet-mask.webp'
 import { ADS_ENABLED } from '../../../ads-config'
 import { useBannerFormat } from '../../../composables/use-banner-format'
 import { useNearScreen } from '../../../composables/use-near-screen'
@@ -39,7 +38,7 @@ const html = computed(() => {
       slideDelay(index, props.seed, AD_STARTED_AT, now),
     ]),
   )
-  return fillBanner(file.html, { ...delays, maskUrl })
+  return fillBanner(file.html, { ...delays, maskUrl: file.maskUrl ?? '' })
 })
 
 const isGone = computed(() => !ADS_ENABLED || loaded.value.failed.value)

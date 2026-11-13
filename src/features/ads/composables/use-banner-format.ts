@@ -1,6 +1,11 @@
 import { ref, type Ref } from 'vue'
 
-import { BANNER_LOADERS, type BannerFileKey, type IBannerFile } from '../banners/banner-loaders'
+import {
+  BANNER_LOADERS,
+  loadMaskUrl,
+  type BannerFileKey,
+  type IBannerFile,
+} from '../banners/banner-loaders'
 
 // One download per format and visit, shared by every slot; a failed one is not tried again.
 const cache = new Map<BannerFileKey, Promise<IBannerFile>>()
@@ -23,7 +28,9 @@ export function useBannerFormat(format: BannerFileKey): IBannerFormat {
   function load() {
     let pending = cache.get(format)
     if (!pending) {
-      pending = BANNER_LOADERS[format]().then((module) => module.default)
+      pending = Promise.all([BANNER_LOADERS[format](), loadMaskUrl()]).then(
+        ([module, maskUrl]) => ({ ...module.default, maskUrl }),
+      )
       cache.set(format, pending)
     }
     pending.then(
