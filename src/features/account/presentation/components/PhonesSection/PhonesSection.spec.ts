@@ -113,7 +113,7 @@ describe('PhonesSection', () => {
     await flushPromises()
 
     expect(remove).not.toHaveBeenCalled()
-    expect(wrapper.text()).toContain('¿Eliminar este teléfono?')
+    expect(wrapper.get('[role="alertdialog"]').text()).toContain('¿Eliminar este teléfono?')
     await buttonNamed(wrapper, 'Eliminar teléfono')!.trigger('click')
     await flushPromises()
 

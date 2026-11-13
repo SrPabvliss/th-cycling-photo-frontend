@@ -6,6 +6,7 @@ import 'intl-tel-input/styles'
 
 import { dialCodeOf } from '@/features/auth/utils/phone-prefix'
 import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
+import ConfirmDialog from '@/shared/components/confirm-dialog/ConfirmDialog.vue'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import FormField from '@/shared/components/form/FormField/FormField.vue'
 import { ErrorState, TtSkeleton } from '@/shared/components/loading'
@@ -33,7 +34,7 @@ const list = computed(() => phones.value ?? [])
 const details = (phone: IUserPhone) =>
   [phone.label, phone.isWhatsapp ? 'Recibe WhatsApp' : 'Sin WhatsApp'].filter(Boolean).join(' · ')
 
-// --- The sheet: add or edit one number, or confirm deleting it ---
+// --- The sheet adds or edits one number; deleting it is confirmed in a dialog ---
 const sheet = ref<'closed' | 'form' | 'confirm'>('closed')
 const editing = ref<IUserPhone | null>(null)
 const number = ref('')
@@ -129,7 +130,9 @@ async function remove() {
   try {
     await deletePhone.mutateAsync(phone.id)
   } catch (error) {
+    // Back to the number, with what went wrong.
     problem.value = generalProblem(error)
+    sheet.value = 'form'
     return
   }
   close()
@@ -172,34 +175,23 @@ async function remove() {
       <NButton class="phones-section__add" @click="open(null)">Agregar teléfono</NButton>
     </template>
 
+    <ConfirmDialog
+      :open="sheet === 'confirm'"
+      title="¿Eliminar este teléfono?"
+      :text="editing?.phoneNumber ?? ''"
+      confirm-label="Eliminar teléfono"
+      keep-label="Conservar"
+      :busy="deletePhone.isPending.value"
+      @confirm="remove"
+      @keep="sheet = 'form'"
+    />
+
     <BillingSheet
-      v-if="sheet !== 'closed'"
-      :title="
-        sheet === 'confirm'
-          ? '¿Eliminar este teléfono?'
-          : editing
-            ? 'Editar teléfono'
-            : 'Agregar teléfono'
-      "
+      v-if="sheet === 'form'"
+      :title="editing ? 'Editar teléfono' : 'Agregar teléfono'"
       @close="close"
     >
-      <div v-if="sheet === 'confirm'" class="phones-section__sheet">
-        <p class="phones-section__details">{{ editing?.phoneNumber }}</p>
-        <FormAlert v-if="problem" tone="bad" :title="problem.title" :text="problem.text" />
-        <NButton
-          type="error"
-          size="large"
-          block
-          :loading="deletePhone.isPending.value"
-          :disabled="deletePhone.isPending.value"
-          @click="remove"
-        >
-          Eliminar teléfono
-        </NButton>
-        <NButton size="large" block @click="sheet = 'form'">Conservar</NButton>
-      </div>
-
-      <div v-else class="phones-section__sheet">
+      <div class="phones-section__sheet">
         <FormField id="telefono-numero" label="Número" :error="numberError">
           <template #default="{ id, describedby, invalid }">
             <div class="phones-section__phone tt-phone-input">
