@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { NButton } from 'naive-ui'
 import { isAxiosError } from 'axios'
@@ -10,7 +10,6 @@ import { useCartActions, useCartState } from '@/shared/cart'
 import { EmptyState } from '@/shared/components/empty-state'
 import { ErrorState, LoadBoundary, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
 import { eventDateLabel } from '@/shared/public-events'
-import { useCartStore } from '@/shared/stores/cart.store'
 import { useGalleryPlate } from '../../composables/use-gallery-plate'
 import { useGalleryViewer } from '../../composables/use-gallery-viewer'
 import { usePublicEventDetailQuery } from '../../composables/queries/use-public-event-detail'
@@ -54,15 +53,6 @@ const eventDateText = computed(() => {
   const end = toCalendarDate(event.value.endDate)
   return `${start === end ? 'el' : 'del'} ${eventDateLabel(start, end)}`
 })
-
-// The cart drawer still prices the event being browsed (rebuilt later in this stage).
-const cartStore = useCartStore()
-watch(
-  () => event.value?.id ?? null,
-  (eventId) => cartStore.setActiveEvent(eventId),
-  { immediate: true },
-)
-onUnmounted(() => cartStore.setActiveEvent(null))
 
 // --- Plate and category ---
 const {
