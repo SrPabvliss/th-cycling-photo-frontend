@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+import AdSlot from '@/features/ads/presentation/components/AdSlot/AdSlot.vue'
 import { useCartActions, useCartState, type ICartPhotoInput } from '@/shared/cart'
 import { quotePhotos, sortTiers } from '@/shared/pricing/quote'
 import { formatMoney } from '@/shared/pricing/tier-cards'
@@ -112,6 +113,9 @@ function toggleCart() {
         {{ cartLabel }}
       </button>
     </template>
+    <template #after>
+      <AdSlot class="photo-viewer__ad" format="D" :seed="41" />
+    </template>
   </PhotoViewerFrame>
 </template>
 
@@ -153,6 +157,10 @@ function toggleCart() {
   font-weight: var(--tt-type-title-weight);
   white-space: nowrap;
   cursor: pointer;
+}
+
+.photo-viewer__ad {
+  margin-inline: auto;
 }
 
 .photo-viewer__cart--remove {

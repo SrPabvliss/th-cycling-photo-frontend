@@ -112,7 +112,11 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
       </div>
 
       <div class="photo-viewer__bottom">
-        <slot name="footer" />
+        <div class="photo-viewer__bar">
+          <slot name="footer" />
+        </div>
+        <!-- Optional: what a screen puts under the footer (the gallery's house ad). -->
+        <slot name="after" />
       </div>
     </div>
   </Teleport>
@@ -203,8 +207,14 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
 
 .photo-viewer__bottom {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: var(--tt-space-3);
   padding: var(--tt-space-3) var(--tt-space-4) calc(var(--tt-space-3) + env(safe-area-inset-bottom));
+}
+
+.photo-viewer__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--tt-space-3);
 }
 </style>

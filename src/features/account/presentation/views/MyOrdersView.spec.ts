@@ -4,6 +4,10 @@ import { computed, reactive, ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 import type { IMyOrderListItem, MyOrderState } from '../../types/responses/my-order.response'
+vi.mock('@/features/ads/presentation/components/AdSlot/AdSlot.vue', async () => ({
+  default: (await import('@/features/ads/testing/ad-stubs')).AdSlotStub,
+}))
+
 import MyOrdersView from './MyOrdersView.vue'
 
 const state = reactive({
@@ -111,6 +115,30 @@ describe('MyOrdersView', () => {
     )
     const find = wrapper.findAll('a').find((each) => each.text().trim() === 'Buscar mis fotos')
     expect(find?.attributes('href')).toBe('/gallery')
+  })
+
+  it('puts the house carousel across the list after the fourth order', async () => {
+    state.orders = ['a', 'b', 'c', 'd', 'e', 'f'].map((id) => order(id))
+    const page = await mountView()
+
+    const ad = page.get('[data-test="ad"]')
+    expect(ad.attributes('data-format')).toBe('AB')
+    expect(ad.attributes('data-seed')).toBe('11')
+    expect(ad.classes()).toContain('my-orders__ad')
+    expect(ad.element.previousElementSibling?.textContent).toContain('Evento d')
+  })
+
+  it('puts it after the only order of a one-order list, and never on an empty one', async () => {
+    state.orders = [order('a')]
+    const one = await mountView()
+    expect(one.get('[data-test="ad"]').element.previousElementSibling?.textContent).toContain(
+      'Evento a',
+    )
+    mounted.pop()!.unmount()
+
+    state.orders = []
+    const empty = await mountView()
+    expect(empty.find('[data-test="ad"]').exists()).toBe(false)
   })
 
   it('shows one row per order', async () => {

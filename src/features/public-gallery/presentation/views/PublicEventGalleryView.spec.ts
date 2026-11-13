@@ -5,6 +5,10 @@ import { createPinia, setActivePinia } from 'pinia'
 import { computed, reactive } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
+vi.mock('@/features/ads/presentation/components/SponsorStrip/SponsorStrip.vue', async () => ({
+  default: (await import('@/features/ads/testing/ad-stubs')).SponsorStripStub,
+}))
+
 import PhotoTile from '../components/PhotoTile/PhotoTile.vue'
 import PublicEventGalleryView from './PublicEventGalleryView.vue'
 
@@ -141,9 +145,9 @@ async function mountAt(path = '/gallery/mama-rumi') {
 const PlainGridStub = {
   name: 'PublicPhotoGrid',
   components: { PhotoTile },
-  props: ['photos', 'selectedIds', 'busyIds'],
+  props: { photos: null, selectedIds: null, busyIds: null, withAd: Boolean },
   emits: ['open', 'toggle'],
-  template: `<div class="plain-grid"><PhotoTile v-for="p in photos" :key="p.id" :photo="p"
+  template: `<div class="plain-grid" :data-with-ad="String(withAd)"><PhotoTile v-for="p in photos" :key="p.id" :photo="p"
     :selected="selectedIds.has(p.id)" :busy="busyIds.has(p.id)"
     @open="$emit('open', $event)" @toggle="$emit('toggle', $event)" /></div>`,
 }
@@ -481,6 +485,54 @@ describe('PublicEventGalleryView', () => {
       await flushPromises()
       expect(asked.category).toBe(2)
       expect(chips[2]!.attributes('aria-pressed')).toBe('true')
+    })
+  })
+
+  describe('house ads', () => {
+    const many = () => Array.from({ length: 20 }, (_, index) => photo(`p${index + 1}`))
+
+    it('presents the event with the sponsor strip right under the plate search', async () => {
+      const { wrapper } = await mountAt()
+
+      const strip = wrapper.get('[data-test="sponsor-strip"]').element
+      const search = wrapper.get('form.gallery__search').element
+      expect(search.compareDocumentPosition(strip) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+      expect(
+        strip.previousElementSibling?.matches('form.gallery__search, .gallery__plate-error'),
+      ).toBe(true)
+    })
+
+    it('asks the full grid for its ad tile', async () => {
+      Object.assign(matched, { photos: many(), total: 20 })
+      const { wrapper } = await mountAt()
+
+      expect(wrapper.get('.plain-grid').attributes('data-with-ad')).toBe('true')
+    })
+
+    it('has no ad tile among the results of a plate search', async () => {
+      Object.assign(matched, { photos: many(), total: 20 })
+      const { wrapper } = await mountAt('/gallery/mama-rumi?placa=127')
+
+      expect(wrapper.find('.plain-grid').exists()).toBe(false)
+      expect(wrapper.find('[data-test="ad"]').exists()).toBe(false)
+    })
+
+    it('moves the viewer from the 12th photo to the real 13th, past the ad tile', async () => {
+      Object.assign(matched, { photos: many(), total: 20 })
+      const { wrapper } = await mountAt('/gallery/mama-rumi?foto=p12')
+
+      const viewer = wrapper.findComponent({ name: 'PhotoViewer' })
+      const ids = viewer.props('photos').map((each: IPhoto) => each.id)
+      expect(ids).toHaveLength(20)
+      expect(ids[ids.indexOf('p12') + 1]).toBe('p13')
+    })
+
+    it('has no sponsor strip for an event without photos yet', async () => {
+      detail.event = { ...baseEvent, photoCount: 0 }
+      Object.assign(matched, { photos: [], total: 0 })
+      const { wrapper } = await mountAt()
+
+      expect(wrapper.find('[data-test="sponsor-strip"]').exists()).toBe(false)
     })
   })
 })

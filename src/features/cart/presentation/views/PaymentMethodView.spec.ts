@@ -143,6 +143,16 @@ describe('PaymentMethodView', () => {
     while (mounted.length) mounted.pop()!.unmount()
   })
 
+  it('carries no advertising: it is a payment screen', async () => {
+    const { wrapper } = await mountView()
+
+    expect(
+      wrapper
+        .find('[aria-label="Espacio publicitario"], .ad-slot, .season-bar, .sponsor-strip')
+        .exists(),
+    ).toBe(false)
+  })
+
   it('shows the total and both methods, none chosen, and keeps Continuar off', async () => {
     const { wrapper } = await mountView()
 

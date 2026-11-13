@@ -5,6 +5,10 @@ import { computed, reactive } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 import type { IMyOrderDetail } from '@/features/account/types/responses/my-order.response'
+vi.mock('@/features/ads/presentation/components/AdSlot/AdSlot.vue', async () => ({
+  default: (await import('@/features/ads/testing/ad-stubs')).AdSlotStub,
+}))
+
 import PaymentConfirmedView from './PaymentConfirmedView.vue'
 
 const order = (state: IMyOrderDetail['state'], photos: number): IMyOrderDetail => ({
@@ -84,6 +88,21 @@ describe('PaymentConfirmedView', () => {
       '/account/orders/o1',
     )
     expect(linkNamed(wrapper, 'Seguir explorando')?.attributes('href')).toBe('/gallery')
+  })
+
+  it('shows the 2:1 house carousel under the confirmation', async () => {
+    const { wrapper } = await mountView()
+
+    const ad = wrapper.get('[data-test="ad"]')
+    expect(ad.attributes('data-format')).toBe('A')
+    expect(ad.attributes('data-seed')).toBe('19')
+  })
+
+  it('shows no ad while it cannot say the payment is confirmed', async () => {
+    state.order = order('confirming', 3)
+    const { wrapper } = await mountView()
+
+    expect(wrapper.find('[data-test="ad"]').exists()).toBe(false)
   })
 
   it('speaks of one photo when there is one', async () => {

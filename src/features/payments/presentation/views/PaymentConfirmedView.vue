@@ -6,6 +6,7 @@ import { isAxiosError } from 'axios'
 
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import NotFoundView from '@/core/views/NotFoundView.vue'
+import AdSlot from '@/features/ads/presentation/components/AdSlot/AdSlot.vue'
 import { useMyOrderDetailQuery } from '@/features/account/composables/queries/use-my-order-detail'
 import { EmptyState } from '@/shared/components/empty-state'
 import { ErrorState, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
@@ -68,28 +69,34 @@ const text = computed(() => {
       @retry="refetch()"
     />
 
-    <EmptyState
-      v-else-if="isReady"
-      illustration="fotosListas"
-      title="Pago confirmado"
-      :text="text"
-      :heading-level="1"
-    >
-      <template #actions>
-        <RouterLink v-slot="{ href, navigate }" :to="orderPath" custom>
-          <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
-            Ver y descargar mis fotos
-          </NButton>
-        </RouterLink>
-        <RouterLink class="payment-confirmed__link" :to="ROUTE_PATHS.PUBLIC_GALLERY">
-          Seguir explorando
-        </RouterLink>
-      </template>
-    </EmptyState>
+    <template v-else-if="isReady">
+      <EmptyState
+        illustration="fotosListas"
+        title="Pago confirmado"
+        :text="text"
+        :heading-level="1"
+      >
+        <template #actions>
+          <RouterLink v-slot="{ href, navigate }" :to="orderPath" custom>
+            <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
+              Ver y descargar mis fotos
+            </NButton>
+          </RouterLink>
+          <RouterLink class="payment-confirmed__link" :to="ROUTE_PATHS.PUBLIC_GALLERY">
+            Seguir explorando
+          </RouterLink>
+        </template>
+      </EmptyState>
+      <AdSlot class="payment-confirmed__ad" format="A" :seed="19" />
+    </template>
   </div>
 </template>
 
 <style scoped>
+.payment-confirmed__ad {
+  margin-block-start: var(--tt-space-5);
+}
+
 .payment-confirmed {
   flex: 1 0 auto;
   display: flex;

@@ -104,6 +104,7 @@ describe('AdSlot', () => {
     await flushPromises()
 
     expect(wrapper.html()).toBe('<!--v-if-->')
+    expect(wrapper.emitted('unavailable')).toHaveLength(1)
   })
 
   it('shows nothing and downloads nothing when ads are switched off', async () => {

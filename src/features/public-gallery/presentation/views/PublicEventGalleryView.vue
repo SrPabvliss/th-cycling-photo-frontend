@@ -6,6 +6,7 @@ import { isAxiosError } from 'axios'
 
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import NotFoundView from '@/core/views/NotFoundView.vue'
+import SponsorStrip from '@/features/ads/presentation/components/SponsorStrip/SponsorStrip.vue'
 import { useCartActions, useCartState } from '@/shared/cart'
 import { EmptyState } from '@/shared/components/empty-state'
 import { ErrorState, LoadBoundary, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
@@ -251,6 +252,8 @@ const cartEvent = computed(() =>
             {{ plateError }}
           </p>
 
+          <SponsorStrip class="gallery__sponsor" />
+
           <PublicGalleryFilterBar
             v-if="categories.length > 1"
             v-model="categoryId"
@@ -307,6 +310,7 @@ const cartEvent = computed(() =>
               <!-- Every photo of the event can be thousands: only the rows on screen are drawn. -->
               <PublicPhotoGrid
                 v-else
+                with-ad
                 :photos="photos"
                 :selected-ids="selectedIds"
                 :busy-ids="busyIds"

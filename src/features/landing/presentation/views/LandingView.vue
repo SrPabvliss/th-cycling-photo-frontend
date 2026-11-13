@@ -3,6 +3,7 @@ import { computed } from 'vue'
 
 import heroImage from '@/assets/landing/hero.webp'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+import AdSlot from '@/features/ads/presentation/components/AdSlot/AdSlot.vue'
 import { useDelayedFlag } from '@/shared/components/loading'
 import {
   PublicEventCard,
@@ -92,6 +93,9 @@ const hasRecentSection = computed(() => status.value !== 'success' || recentEven
     </section>
 
     <PriceBand class="landing__band" />
+
+    <!-- House ad in its own band (demo seed 3); gone without a trace if it cannot be shown. -->
+    <AdSlot class="landing__band" format="AB" :seed="3" />
 
     <section class="landing__manifesto">
       <div class="landing__manifesto-inner">

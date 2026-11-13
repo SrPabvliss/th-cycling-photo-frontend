@@ -2,6 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { computed, nextTick, reactive } from 'vue'
 
+vi.mock('@/features/ads/presentation/components/AdSlot/AdSlot.vue', async () => ({
+  default: (await import('@/features/ads/testing/ad-stubs')).AdSlotStub,
+}))
+
 import PhotoViewer from './PhotoViewer.vue'
 
 const REAL_TIERS = [
@@ -189,6 +193,16 @@ describe('PhotoViewer', () => {
     await cartButton(wrapper).trigger('click')
 
     expect(toggle).toHaveBeenCalledWith({ id: 'b', publicSlug: 'slug-b', event })
+  })
+
+  it('closes with the 320×50 house strip under its footer', () => {
+    const wrapper = mountViewer()
+
+    const ad = wrapper.get('[data-test="ad"]')
+    expect(ad.attributes('data-format')).toBe('D')
+    expect(ad.attributes('data-seed')).toBe('41')
+    const cart = cartButton(wrapper).element
+    expect(cart.compareDocumentPosition(ad.element) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
   it('stops the page behind from scrolling while it is open', async () => {

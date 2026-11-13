@@ -20,6 +20,11 @@ const props = defineProps<{
   seed: number
 }>()
 
+const emit = defineEmits<{
+  /** The banners could not be downloaded: whoever made room for the slot can take it back. */
+  unavailable: []
+}>()
+
 const isWide = useMediaQuery('(min-width: 768px)')
 const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)')
 const format = computed<AdFormat>(() =>
@@ -61,6 +66,12 @@ const hasDots = computed(
   () => (format.value === 'A' || format.value === 'B') && !reducedMotion.value,
 )
 const isGone = computed(() => !ADS_ENABLED || loaded.value.failed.value)
+watch(
+  () => loaded.value.failed.value,
+  (failed) => {
+    if (failed) emit('unavailable')
+  },
+)
 </script>
 
 <template>

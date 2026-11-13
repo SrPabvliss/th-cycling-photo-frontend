@@ -9,6 +9,7 @@
 
 .ad-slot__frame {
   position: relative;
+  isolation: isolate;
   inline-size: 100%;
   overflow: hidden;
   border-radius: var(--tt-radius-m);
@@ -102,7 +103,6 @@
 
 @media (min-width: 768px) {
   .ad-slot--D {
-    max-inline-size: calc(var(--tt-space-8) * 7);
-    margin-inline: auto;
+    max-inline-size: calc(var(--tt-space-8) * 6 + var(--tt-space-6) + var(--tt-space-1));
   }
 }

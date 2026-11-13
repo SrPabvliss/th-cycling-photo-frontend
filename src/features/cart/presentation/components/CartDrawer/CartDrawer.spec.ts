@@ -9,6 +9,10 @@ import { useSessionStore } from '@/core/auth/stores/session.store'
 import { usePriceSheet } from '@/features/pricing/composables/use-price-sheet'
 import { useCartStore } from '@/shared/stores/cart.store'
 import type { ICartGroup } from '@/shared/types/cart.types'
+vi.mock('@/features/ads/presentation/components/AdSlot/AdSlot.vue', async () => ({
+  default: (await import('@/features/ads/testing/ad-stubs')).AdSlotStub,
+}))
+
 import CartDrawer from './CartDrawer.vue'
 
 const REAL_TIERS = [
@@ -172,6 +176,28 @@ describe('CartDrawer', () => {
 
     expect(router.currentRoute.value.path).toBe('/gallery')
     expect(useCartStore().isDrawerOpen).toBe(false)
+  })
+
+  it('ends with the 320×50 house strip when it has photos', async () => {
+    cart.groups = [group('a', 3)]
+    const { wrapper } = await open()
+
+    const ad = wrapper.get('[data-test="ad"]')
+    expect(ad.attributes('data-format')).toBe('D')
+    expect(ad.attributes('data-seed')).toBe('23')
+    expect(ad.element.previousElementSibling?.textContent?.trim()).toBe(
+      'Cómo funcionan los precios',
+    )
+  })
+
+  it('has no house strip while empty, loading or failed', async () => {
+    for (const status of ['success', 'pending', 'error'] as const) {
+      while (mounted.length) mounted.pop()!.unmount()
+      document.body.innerHTML = ''
+      Object.assign(cart, { status, groups: [] })
+      const { wrapper } = await open()
+      expect(wrapper.find('[data-test="ad"]').exists(), status).toBe(false)
+    }
   })
 
   it('has one section per event, with a note that each is its own order', async () => {

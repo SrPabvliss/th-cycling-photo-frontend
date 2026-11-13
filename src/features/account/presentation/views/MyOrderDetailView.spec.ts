@@ -7,6 +7,10 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 
 import type { IMyOrderInvoice } from '../../types/responses/my-order-invoice.response'
 import type { IMyOrderDetail, MyOrderState } from '../../types/responses/my-order.response'
+vi.mock('@/features/ads/presentation/components/AdSlot/AdSlot.vue', async () => ({
+  default: (await import('@/features/ads/testing/ad-stubs')).AdSlotStub,
+}))
+
 import MyOrderDetailView from './MyOrderDetailView.vue'
 
 const state = reactive({
@@ -289,6 +293,27 @@ describe('MyOrderDetailView', () => {
 
     expect(error).toHaveBeenCalledWith('Este pedido ya no se puede cancelar.')
     expect(refetch).toHaveBeenCalled()
+  })
+
+  it('closes a ready order with the house carousel, after its invoice', async () => {
+    state.order = order('ready', { invoice: invoice('authorized') })
+    const wrapper = await mountView()
+
+    const ad = wrapper.get('[data-test="ad"]')
+    expect(ad.attributes('data-format')).toBe('AB')
+    expect(ad.attributes('data-seed')).toBe('47')
+    expect(ad.element.previousElementSibling?.classList.contains('invoice-block')).toBe(true)
+  })
+
+  it('shows the carousel on a gift, and on no order that is not ready', async () => {
+    state.order = order('gifted')
+    expect((await mountView()).find('[data-test="ad"]').exists()).toBe(true)
+
+    for (const each of ['in_process', 'confirming', 'cancelled'] as const) {
+      while (mounted.length) mounted.pop()!.unmount()
+      state.order = order(each)
+      expect((await mountView()).find('[data-test="ad"]').exists(), each).toBe(false)
+    }
   })
 
   it('offers to correct a rejected invoice', async () => {

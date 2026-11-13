@@ -4,6 +4,10 @@ import { computed, reactive } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 import type { IPublicEventFilters, IPublicEventListItem } from '@/shared/public-events'
+vi.mock('@/features/ads/presentation/components/AdSlot/AdSlot.vue', async () => ({
+  default: (await import('@/features/ads/testing/ad-stubs')).AdSlotStub,
+}))
+
 import LandingView from './LandingView.vue'
 
 type Status = 'pending' | 'error' | 'success'
@@ -87,6 +91,19 @@ describe('LandingView', () => {
   })
   afterEach(() => {
     vi.useRealTimers()
+  })
+
+  it('gives the house carousel its own band right after the price band', async () => {
+    const wrapper = await mountView()
+
+    const ad = wrapper.get('[data-test="ad"]')
+    expect(ad.attributes('data-format')).toBe('AB')
+    expect(ad.attributes('data-seed')).toBe('3')
+    // The price band needs the tiers, which this spec leaves out: the ad is the band before the
+    // closing manifesto, after the recent events.
+    expect(ad.element.nextElementSibling?.classList.contains('landing__manifesto')).toBe(true)
+    expect(ad.element.previousElementSibling?.textContent).toContain('Eventos recientes')
+    expect(ad.classes()).toContain('landing__band')
   })
 
   it('opens with the hero and the finder', async () => {

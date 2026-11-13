@@ -5,6 +5,7 @@ import { NButton, useMessage } from 'naive-ui'
 import { isAxiosError } from 'axios'
 
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+import AdSlot from '@/features/ads/presentation/components/AdSlot/AdSlot.vue'
 import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
 import ConfirmDialog from '@/shared/components/confirm-dialog/ConfirmDialog.vue'
 import { EmptyState } from '@/shared/components/empty-state'
@@ -255,6 +256,9 @@ function submitCorrection(request: Parameters<typeof correctBilling.mutate>[0]) 
         @download="(docId, file) => downloadTaxDocument.mutate({ docId, file })"
         @correct="openCorrection"
       />
+
+      <!-- House carousel at the end, only once the photos are there (demo seed 47). -->
+      <AdSlot v-if="order.state === 'ready' || order.state === 'gifted'" format="AB" :seed="47" />
 
       <NButton
         v-if="order.canCancel"

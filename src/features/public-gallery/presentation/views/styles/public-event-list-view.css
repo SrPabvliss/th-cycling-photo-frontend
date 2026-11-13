@@ -98,3 +98,8 @@
     gap: var(--tt-space-5);
   }
 }
+
+/* The house ad takes the whole width of the grid. */
+.event-list__ad {
+  grid-column: 1 / -1;
+}

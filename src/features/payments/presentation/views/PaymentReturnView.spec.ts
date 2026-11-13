@@ -52,6 +52,24 @@ describe('PaymentReturnView', () => {
     while (mounted.length) mounted.pop()!.unmount()
   })
 
+  it('carries no advertising, confirming or declined', async () => {
+    const confirming = await mountView()
+    expect(
+      confirming
+        .find('[aria-label="Espacio publicitario"], .ad-slot, .season-bar, .sponsor-strip')
+        .exists(),
+    ).toBe(false)
+
+    outcome.value = 'declined'
+    await flushPromises()
+    expect(confirming.text()).not.toBe('')
+    expect(
+      confirming
+        .find('[aria-label="Espacio publicitario"], .ad-slot, .season-bar, .sponsor-strip')
+        .exists(),
+    ).toBe(false)
+  })
+
   it('asks the buyer to stay while the payment is confirmed', async () => {
     const wrapper = await mountView()
 

@@ -4,6 +4,10 @@ import { computed, reactive } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 import type { IPublicEventFilters, IPublicEventListItem } from '@/shared/public-events'
+vi.mock('@/features/ads/presentation/components/AdSlot/AdSlot.vue', async () => ({
+  default: (await import('@/features/ads/testing/ad-stubs')).AdSlotStub,
+}))
+
 import PublicEventListView from './PublicEventListView.vue'
 
 type Status = 'pending' | 'error' | 'success'
@@ -178,6 +182,40 @@ describe('PublicEventListView', () => {
     expect(chip(wrapper, 'Todos').attributes('aria-pressed')).toBe('true')
     expect(askedWith()).toEqual({})
     expect(router.currentRoute.value.query).toEqual({})
+  })
+
+  describe('the house carousel', () => {
+    const ad = (wrapper: Wrapper) => wrapper.find('[data-test="ad"]')
+    const cardBefore = (wrapper: Wrapper) =>
+      ad(wrapper).element.previousElementSibling?.getAttribute('href')
+
+    it('spans the grid after the third card', async () => {
+      list.events = ['a', 'b', 'c', 'd', 'e'].map(event)
+      const { wrapper } = await mountView()
+
+      expect(ad(wrapper).attributes('data-format')).toBe('AB')
+      expect(ad(wrapper).attributes('data-seed')).toBe('7')
+      expect(ad(wrapper).classes()).toContain('event-list__ad')
+      expect(cardBefore(wrapper)).toBe('/gallery/c')
+      expect(cards(wrapper)).toHaveLength(5)
+    })
+
+    it('goes after the last card when there are fewer than three', async () => {
+      list.events = [event('a'), event('b')]
+      const { wrapper } = await mountView()
+
+      expect(cardBefore(wrapper)).toBe('/gallery/b')
+    })
+
+    it('never stands alone on an empty or failed list', async () => {
+      list.events = []
+      const empty = await mountView()
+      expect(ad(empty.wrapper).exists()).toBe(false)
+
+      list.status = 'error'
+      const failed = await mountView()
+      expect(ad(failed.wrapper).exists()).toBe(false)
+    })
   })
 
   it('shows one card per event', async () => {

@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { NButton } from 'naive-ui'
 
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+import AdSlot from '@/features/ads/presentation/components/AdSlot/AdSlot.vue'
 import { EmptyState } from '@/shared/components/empty-state'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { ErrorState, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
@@ -189,6 +190,8 @@ const allLabel = computed(() =>
         </RouterLink>
         y búscalas en Mis fotos.
       </p>
+
+      <AdSlot format="AB" :seed="27" />
     </template>
   </div>
 </template>
