@@ -265,9 +265,9 @@ function continueAfter() {
     </EmptyState>
   </div>
 
-  <AuthPage v-else-if="screen === 'offer'" title="Confirma tu correo">
+  <AuthPage v-else-if="screen === 'offer'" title="Verifiquemos tu correo">
     <p class="verify-email__text">
-      Te enviamos un código de 6 dígitos para confirmar que el correo es tuyo.
+      Confirma tu dirección y ahí te avisamos de tus compras y tus facturas.
     </p>
     <FormAlert v-if="alert" :tone="alert.tone" :title="alert.title" :text="alert.text" />
     <NButton
@@ -280,6 +280,7 @@ function continueAfter() {
     >
       Enviar código
     </NButton>
+    <RouterLink class="verify-email__link verify-email__later" to="/">Ahora no</RouterLink>
   </AuthPage>
 
   <AuthPage v-else title="Revisa tu correo">

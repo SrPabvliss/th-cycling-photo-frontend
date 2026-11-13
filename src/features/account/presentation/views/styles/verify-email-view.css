@@ -58,3 +58,10 @@
   color: var(--tt-ink-muted);
   cursor: default;
 }
+
+.verify-email__later {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}

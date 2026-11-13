@@ -276,6 +276,11 @@ describe('VerifyEmailView', () => {
     send.mockResolvedValue(undefined)
     const { wrapper } = await mountView()
 
+    expect(wrapper.get('h1').text()).toBe('Verifiquemos tu correo')
+    expect(wrapper.text()).toContain(
+      'Confirma tu dirección y ahí te avisamos de tus compras y tus facturas.',
+    )
+    expect(buttonNamed(wrapper, 'Ahora no')?.attributes('href')).toBe('/')
     await buttonNamed(wrapper, 'Enviar código')!.trigger('click')
     await flushPromises()
 
