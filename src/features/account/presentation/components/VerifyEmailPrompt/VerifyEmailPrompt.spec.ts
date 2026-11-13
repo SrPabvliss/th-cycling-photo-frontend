@@ -29,8 +29,9 @@ vi.mock('../../../composables/mutations/use-snooze-prompt', () => ({
 }))
 
 const modalStub = {
-  props: ['show'],
-  template: '<div v-if="show"><slot /><slot name="footer" /></div>',
+  name: 'Modal',
+  props: ['show', 'closable'],
+  template: '<div v-if="show"><slot name="header-extra" /><slot /><slot name="footer" /></div>',
 }
 
 function mountPrompt() {
@@ -45,6 +46,17 @@ beforeEach(() => {
 })
 
 describe('VerifyEmailPrompt', () => {
+  it('closes from a button named "Cerrar", not from the unnamed one of the library', async () => {
+    const wrapper = mountPrompt()
+
+    expect(wrapper.findComponent({ name: 'Modal' }).props('closable')).toBe(false)
+    const close = wrapper.get('button[aria-label="Cerrar"]')
+    await close.trigger('click')
+
+    expect(wrapper.find('.verify-email-prompt__text').exists()).toBe(false)
+    expect(mutate).not.toHaveBeenCalled()
+  })
+
   it('shows when the key is in pendingPrompts', () => {
     const w = mountPrompt()
     expect(w.text()).toContain('Verificar ahora')

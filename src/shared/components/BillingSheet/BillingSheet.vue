@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { NModal } from 'naive-ui'
 import { useMediaQuery, useScrollLock } from '@vueuse/core'
+import ModalCloseButton from '@/shared/components/ModalCloseButton/ModalCloseButton.vue'
 
 const DRAG_CLOSE_THRESHOLD = 110
 
@@ -76,8 +77,12 @@ function onGrabPointerUp() {
     preset="card"
     :title="title"
     :style="{ width: '480px', maxWidth: 'calc(100vw - 32px)' }"
+    :closable="false"
     @update:show="(visible: boolean) => !visible && emit('close')"
   >
+    <template #header-extra>
+      <ModalCloseButton @close="emit('close')" />
+    </template>
     <slot />
   </NModal>
 </template>

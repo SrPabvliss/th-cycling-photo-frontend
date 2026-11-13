@@ -45,3 +45,32 @@
     width: 100%;
   }
 }
+
+/* In the client area the prompt looks like the client's own dialogs (ConfirmDialog); the panel
+ * keeps the rules above. */
+:global([data-tt-area='client']) .verify-email-prompt {
+  border-radius: var(--tt-radius-l);
+  box-shadow: var(--tt-shadow-pop);
+  font-family: var(--tt-font-sans);
+}
+
+:global([data-tt-area='client']) .verify-email-prompt :deep(.n-card-header__main) {
+  font-size: var(--tt-type-heading-m-size);
+  line-height: var(--tt-type-heading-m-line);
+  font-weight: var(--tt-type-heading-m-weight);
+}
+
+:global([data-tt-area='client']) .verify-email-prompt__text {
+  color: var(--tt-ink-muted);
+  font-size: var(--tt-type-body-s-size);
+  line-height: var(--tt-type-body-s-line);
+}
+
+:global([data-tt-area='client']) .verify-email-prompt__actions {
+  flex-direction: column-reverse;
+  gap: var(--tt-space-2);
+}
+
+:global([data-tt-area='client']) .verify-email-prompt__actions .n-button {
+  inline-size: 100%;
+}

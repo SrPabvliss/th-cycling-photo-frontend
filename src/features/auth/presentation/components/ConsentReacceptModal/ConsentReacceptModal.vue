@@ -6,6 +6,7 @@ import { LEGAL_PATHS } from '@/features/legal/routes'
 import { useRecordConsentsMutation } from '../../../composables/mutations/use-record-consents'
 import { CONSENT_TYPE } from '../../../constants/consent.constants'
 import { useSessionStore } from '@/core/auth/stores/session.store'
+import ModalCloseButton from '@/shared/components/ModalCloseButton/ModalCloseButton.vue'
 
 const authStore = useSessionStore()
 const { mutateAsync: recordConsents, isPending } = useRecordConsentsMutation()
@@ -36,10 +37,14 @@ function dismiss() {
     title="Actualizamos nuestras políticas"
     class="consent-modal"
     style="width: 460px; max-width: calc(100vw - 32px)"
-    :closable="true"
+    :closable="false"
     :mask-closable="false"
     @close="dismiss"
   >
+    <template #header-extra>
+      <ModalCloseButton @close="dismiss" />
+    </template>
+
     <p class="consent-modal__text">
       Publicamos nuestra Política de Privacidad y nuestros Términos y Condiciones. Ahí explicamos
       qué datos tratamos, con quién los compartimos y cómo usamos WhatsApp para gestionar tus

@@ -6,6 +6,7 @@ import { NButton, NModal } from 'naive-ui'
 import { ROUTE_NAMES } from '@/core/navigation/route-names'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import { useSnoozePrompt } from '../../../composables/mutations/use-snooze-prompt'
+import ModalCloseButton from '@/shared/components/ModalCloseButton/ModalCloseButton.vue'
 
 const PROMPT_KEY = 'email_verification'
 
@@ -52,10 +53,14 @@ function closeLocally() {
     title="¿Nos ayudas con tu correo?"
     class="verify-email-prompt"
     style="width: 420px; max-width: calc(100vw - 32px)"
-    :closable="true"
+    :closable="false"
     :mask-closable="true"
     @close="closeLocally"
   >
+    <template #header-extra>
+      <ModalCloseButton @close="closeLocally" />
+    </template>
+
     <div class="verify-email-prompt__illustration" aria-hidden="true">
       <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle
