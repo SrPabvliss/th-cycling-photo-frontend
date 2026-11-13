@@ -57,6 +57,9 @@ function engineOf(queryClient: QueryClient): ICartEngine {
   return engine
 }
 
+/** How a change ended: on the server, undone on screen, or failed with a later tap in charge. */
+type ChangeOutcome = 'done' | 'undone' | 'superseded'
+
 // The server answers this when there is no cart to take the photo from: it is not in the cart,
 // which is what the person asked for.
 const NO_CART = 'cart.no_active_cart'
@@ -70,7 +73,8 @@ function isAlreadyOut(error: unknown): boolean {
  * Changes to the cart that show at once and reach the server in order.
  *
  * Each tap changes the cached cart right away and queues its request. If the request fails, only
- * that change is undone, and only if no later tap touched the same photo: the last tap decides.
+ * that change is undone and reported, and only if no later tap touched the same photo: the last
+ * tap decides, and a failure it already made up for is not worth a message.
  * Once the queue is empty the cart is read again, once, so the screen ends on what the server has.
  */
 export function useCartActions(): ICartActions {
@@ -104,12 +108,14 @@ export function useCartActions(): ICartActions {
     return engine.queue
       .run(request)
       .then(
-        () => true,
-        (error: unknown) => {
-          if (isAlreadyOut(error)) return true
-          // A later tap on the same photo already decided where it ends: leave it there.
-          if (engine.lastChangeOf.get(photoId) === change) undo()
-          return false
+        (): ChangeOutcome => 'done',
+        (error: unknown): ChangeOutcome => {
+          if (isAlreadyOut(error)) return 'done'
+          // A later tap on the same photo already decided where it ends: leave it there, and say
+          // nothing, since what the person sees is what they asked for last.
+          if (engine.lastChangeOf.get(photoId) !== change) return 'superseded'
+          undo()
+          return 'undone'
         },
       )
       .finally(() => {
@@ -135,8 +141,11 @@ export function useCartActions(): ICartActions {
           { silent: true },
         ),
       () => writeCart((groups) => withoutPhoto(groups, photo.id)),
-    ).then((done) => {
-      if (!done) return void message.error('No pudimos agregar la foto. Intenta de nuevo.')
+    ).then((outcome) => {
+      if (outcome === 'superseded') return
+      if (outcome === 'undone') {
+        return void message.error('No pudimos agregar la foto. Intenta de nuevo.')
+      }
 
       if (before && after && after.price < before.price) {
         const price = formatMoney(after.price, after.currency)
@@ -184,8 +193,11 @@ export function useCartActions(): ICartActions {
           silent: true,
         }),
       () => writeCart((groups) => withPhotoBack(groups, removal)),
-    ).then((done) => {
-      if (!done) return void message.error('No pudimos quitar la foto. Intenta de nuevo.')
+    ).then((outcome) => {
+      if (outcome === 'superseded') return
+      if (outcome === 'undone') {
+        return void message.error('No pudimos quitar la foto. Intenta de nuevo.')
+      }
 
       if (before && after && after.price > before.price) {
         const price = formatMoney(after.price, after.currency)

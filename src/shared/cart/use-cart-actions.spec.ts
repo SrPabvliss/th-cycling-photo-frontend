@@ -391,6 +391,36 @@ describe('useCartActions', () => {
       expect(state.isInCart('p1')).toBe(true)
       expect(http.delete).toHaveBeenCalledTimes(1)
       expect(http.post).toHaveBeenCalledTimes(2)
+      // Nothing was undone, so there is nothing to apologize for.
+      expect(toasts('error')).toEqual([])
+    })
+  })
+
+  describe('a failure a later tap already made up for', () => {
+    it('stays quiet when a failed remove was followed by an add', async () => {
+      const { state, actions } = await setup({ inCart: ['p1'] })
+      http.delete.mockRejectedValue(httpError(500))
+      http.get.mockResolvedValue(serverCart(['p1']))
+
+      actions.toggle(photo('p1'))
+      actions.toggle(photo('p1'))
+      await flushPromises()
+
+      expect(state.isInCart('p1')).toBe(true)
+      expect(toasts('error')).toEqual([])
+    })
+
+    it('still says so when the failed change is the last one of the photo', async () => {
+      const { state, actions } = await setup()
+      http.post.mockResolvedValueOnce({ data: {}, meta: {} }).mockRejectedValueOnce(httpError(500))
+      http.get.mockResolvedValue(serverCart([]))
+
+      actions.toggle(photo('p1'))
+      actions.toggle(photo('p1'))
+      actions.toggle(photo('p1'))
+      await flushPromises()
+
+      expect(state.isInCart('p1')).toBe(false)
       expect(toasts('error')).toEqual(['No pudimos agregar la foto. Intenta de nuevo.'])
     })
   })
