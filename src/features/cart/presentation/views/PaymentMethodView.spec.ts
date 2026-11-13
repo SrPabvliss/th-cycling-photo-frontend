@@ -173,7 +173,7 @@ describe('PaymentMethodView', () => {
     expect(place).toHaveBeenCalledWith(
       expect.objectContaining({ method: 'card', recordConsent: true }),
     )
-    expect(router.currentRoute.value.fullPath).toBe('/checkout/payment?orders=o9,o10')
+    expect(router.currentRoute.value.fullPath).toBe('/checkout/payment?orders=o9,o10&evento=e1')
   })
 
   it('moves the choice with the arrow keys, like a radio group', async () => {

@@ -148,7 +148,8 @@ async function proceed() {
   } else {
     router.push({
       path: ROUTE_PATHS.PAYMENT_BOX,
-      query: { orders: orders.map((order) => order.orderId).join(',') },
+      // The event lets the card screen lead back to this order.
+      query: { orders: orders.map((order) => order.orderId).join(','), evento: eventId.value },
     })
   }
 }

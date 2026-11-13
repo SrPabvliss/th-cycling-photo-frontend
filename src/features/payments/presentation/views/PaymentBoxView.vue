@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NAlert, NButton, NIcon, NSpin } from 'naive-ui'
-import { ChevronBackOutline } from '@vicons/ionicons5'
+import { NButton } from 'naive-ui'
 import { isAxiosError } from 'axios'
 
 import { ROUTE_NAMES } from '@/core/navigation/route-names'
-import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+import { checkoutPath, ROUTE_PATHS } from '@/core/navigation/route-paths'
+import NotFoundView from '@/core/views/NotFoundView.vue'
 import { useCreatePaymentIntent } from '@/features/payments/composables/mutations/use-create-payment-intent'
 import { findPaymentGateway } from '@/features/payments/gateways/registry'
-import { formatCurrency } from '@/shared/utils/currency.utils'
+import { EmptyState } from '@/shared/components/empty-state'
+import { BusyNote, ErrorState } from '@/shared/components/loading'
+import { formatMoney } from '@/shared/pricing/tier-cards'
 
-const SETUP_ERROR_MESSAGE = 'No podemos procesar pagos en este momento. Intenta nuevamente.'
+const CENTS_PER_UNIT = 100
 
 const route = useRoute()
 const router = useRouter()
@@ -30,44 +32,44 @@ const orderIds = computed(() => {
   const value = typeof raw === 'string' ? raw : ''
   return value.split(',').filter((id) => id.length > 0)
 })
+const eventId = computed(() => {
+  const raw = route.query.evento
+  return typeof raw === 'string' && raw ? raw : null
+})
 
 const gateway = computed(() => (intent.value ? findPaymentGateway(intent.value.provider) : null))
 
-const amount = computed(() =>
-  gateway.value && intent.value ? gateway.value.describeIntent(intent.value) : null,
-)
+const total = computed(() => {
+  const amount = gateway.value && intent.value ? gateway.value.describeIntent(intent.value) : null
+  return amount ? formatMoney(amount.amountCents / CENTS_PER_UNIT, amount.currency) : null
+})
 
-const failureKind = computed<'not-payable' | 'forbidden' | 'other' | null>(() => {
-  if (renderFailed.value) return 'other'
-  if (intent.value && !gateway.value) return 'other'
+// What went wrong, if anything. 'missing': no orders, or not the buyer's. 'not-payable': the
+// server will not charge these orders (paid already, cancelled). 'failed': nothing was charged
+// and trying again may work.
+const failure = computed<'missing' | 'not-payable' | 'failed' | null>(() => {
+  if (orderIds.value.length === 0) return 'missing'
+  if (renderFailed.value || (intent.value && !gateway.value)) return 'failed'
 
-  const err = intentError.value
-  if (!err) return null
-  if (!isAxiosError(err) || !err.response) return 'other'
-
-  const status = err.response.status
+  const error = intentError.value
+  if (!error) return null
+  const status = isAxiosError(error) ? (error.response?.status ?? 0) : 0
+  if (status === 403 || status === 404) return 'missing'
   if (status === 422) return 'not-payable'
-  if (status === 403 || status === 404) return 'forbidden'
-  return 'other'
+  return 'failed'
 })
 
-const failureMessage = computed(() => {
-  if (renderFailed.value || (intent.value && !gateway.value)) return SETUP_ERROR_MESSAGE
-
-  const err = intentError.value
-  if (isAxiosError(err) && err.response?.data?.error?.message) {
-    return err.response.data.error.message
-  }
-  return SETUP_ERROR_MESSAGE
+// Already in the buyer's language: the api translates it.
+const notPayableText = computed(() => {
+  const error = intentError.value
+  return isAxiosError(error)
+    ? (error.response?.data?.error?.message as string | undefined)
+    : undefined
 })
 
-function requestIntent(ids: string[]) {
+function requestIntent() {
   renderFailed.value = false
-  createIntent(ids)
-}
-
-function retry() {
-  requestIntent(orderIds.value)
+  createIntent(orderIds.value)
 }
 
 function handleSetupFailed(error: unknown) {
@@ -75,83 +77,60 @@ function handleSetupFailed(error: unknown) {
   renderFailed.value = true
 }
 
-function goToCart() {
-  router.push(ROUTE_PATHS.PUBLIC_GALLERY)
-}
-
-function goToOrders() {
-  router.push({ name: ROUTE_NAMES.ACCOUNT_ORDERS })
+function goBack() {
+  router.push(eventId.value ? checkoutPath(eventId.value) : ROUTE_PATHS.PUBLIC_GALLERY)
 }
 
 watch(
   orderIds,
   (ids) => {
-    if (ids.length === 0) {
-      router.replace(ROUTE_PATHS.PUBLIC_GALLERY)
-      return
-    }
-    requestIntent(ids)
+    if (ids.length > 0) requestIntent()
   },
   { immediate: true },
 )
 </script>
 
 <template>
-  <section v-if="orderIds.length > 0" class="payment-box-view">
-    <header class="payment-box-view__header">
-      <NButton quaternary size="small" data-test="back-to-cart" @click="goToCart">
-        <template #icon><NIcon :component="ChevronBackOutline" /></template>
-        Volver al carrito
-      </NButton>
+  <NotFoundView v-if="failure === 'missing'" />
 
-      <div class="payment-box-view__heading">
-        <h1 class="payment-box-view__title">Pagar con tarjeta</h1>
+  <section v-else class="payment-box">
+    <div class="payment-box__title-row">
+      <button type="button" class="payment-box__back" aria-label="Volver al pedido" @click="goBack">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
+      </button>
+      <h1 class="payment-box__title">Pago con tarjeta</h1>
+    </div>
 
-        <p v-if="amount" class="payment-box-view__amount">
-          {{ formatCurrency(amount.amountCents / 100, amount.currency) }}
-        </p>
-      </div>
-    </header>
+    <div v-if="total && !failure" class="payment-box__total">
+      <span class="payment-box__muted">Total</span>
+      <span class="payment-box__amount">{{ total }}</span>
+    </div>
 
-    <template v-if="failureKind">
-      <NAlert type="error" :show-icon="true" class="payment-box-view__error">
-        {{ failureMessage }}
-      </NAlert>
-
-      <template v-if="failureKind === 'not-payable'">
-        <NButton type="primary" size="large" block data-test="go-to-orders" @click="goToOrders">
-          Mis fotos
-        </NButton>
-
-        <NButton size="large" block data-test="go-to-cart" @click="goToCart">
-          Volver al carrito
+    <EmptyState
+      v-if="failure === 'not-payable'"
+      illustration="fueraDelCamino"
+      title="Este pedido ya no se puede pagar con tarjeta"
+      :text="notPayableText"
+    >
+      <template #actions>
+        <NButton
+          type="primary"
+          size="large"
+          block
+          @click="router.push({ name: ROUTE_NAMES.ACCOUNT_ORDERS })"
+        >
+          Ir a Mis fotos
         </NButton>
       </template>
+    </EmptyState>
 
-      <NButton
-        v-else-if="failureKind === 'forbidden'"
-        type="primary"
-        size="large"
-        block
-        data-test="go-to-cart"
-        @click="goToCart"
-      >
-        Volver al carrito
-      </NButton>
-
-      <NButton
-        v-else
-        type="primary"
-        size="large"
-        block
-        data-test="retry"
-        :loading="isCreatingIntent"
-        :disabled="isCreatingIntent"
-        @click="retry"
-      >
-        Reintentar
-      </NButton>
-    </template>
+    <ErrorState
+      v-else-if="failure === 'failed'"
+      title="No pudimos abrir el pago"
+      text="No se hizo ningún cargo."
+      :retrying="isCreatingIntent"
+      @retry="requestIntent"
+    />
 
     <component
       :is="gateway.checkoutComponent"
@@ -160,7 +139,7 @@ watch(
       @setup-failed="handleSetupFailed"
     />
 
-    <NSpin v-else size="small" class="payment-box-view__loading" />
+    <BusyNote v-else text="Abriendo la pasarela de pago" class="payment-box__busy" />
   </section>
 </template>
 
