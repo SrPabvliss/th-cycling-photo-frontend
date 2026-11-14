@@ -1,9 +1,13 @@
 <script setup lang="ts">
-// A message about the whole form, above or next to its button. 'bad' is announced at once.
+// A message about the whole form, above or next to its button, or about a group whose data did
+// not load. 'bad' is announced at once. Listening for `retry` adds the one inline "Reintentar".
 defineProps<{
   tone: 'bad' | 'info'
   title: string
   text?: string
+  /** A retry is on its way: the button takes no more presses. */
+  retrying?: boolean
+  onRetry?: () => void
 }>()
 </script>
 
@@ -16,6 +20,16 @@ defineProps<{
     <strong>{{ title }}</strong>
     <p v-if="text">{{ text }}</p>
     <slot />
+    <button
+      v-if="onRetry"
+      type="button"
+      class="form-alert__retry"
+      :disabled="retrying"
+      :aria-busy="retrying ? 'true' : undefined"
+      @click="onRetry()"
+    >
+      Reintentar
+    </button>
   </div>
 </template>
 
@@ -43,6 +57,24 @@ defineProps<{
 
 .form-alert p {
   margin: 0;
+}
+
+/* Same as the retry of the home's section notice: a link in the alert's own ink. */
+.form-alert__retry {
+  align-self: flex-start;
+  min-block-size: var(--tt-control-m);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: var(--tt-type-title-weight);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.form-alert__retry:disabled {
+  cursor: progress;
 }
 
 .form-alert :deep(a) {
