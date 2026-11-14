@@ -60,6 +60,12 @@ describe('illustrations', () => {
     )
   })
 
+  it('has the drawings of the error states', () => {
+    expect(Object.keys(ILLUSTRATIONS)).toEqual(
+      expect.arrayContaining(['sinConexion', 'tardando', 'sesionVencida']),
+    )
+  })
+
   it.each(Object.entries(ILLUSTRATIONS))('%s takes every color from a token', (_key, markup) => {
     expect(markup).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)
     expect(markup).not.toContain('rgb(')
