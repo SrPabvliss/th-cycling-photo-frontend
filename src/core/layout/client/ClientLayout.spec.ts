@@ -1,8 +1,10 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { defineComponent, h, onMounted } from 'vue'
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router'
+import { createPinia, setActivePinia } from 'pinia'
 
+import { useSessionStore } from '@/core/auth/stores/session.store'
 import { LAYOUT_SLOTS, registerLayoutSlot } from '@/core/layout/slot-registry'
 import { ErrorState } from '@/shared/components/loading'
 import ClientLayout from './ClientLayout.vue'
@@ -44,6 +46,11 @@ async function mountAt(path: string) {
             meta: { shell: { seasonBar: true } },
           },
           {
+            path: 'open',
+            component: Screen('pantalla pública'),
+            meta: { public: true },
+          },
+          {
             path: 'private',
             component: Screen('enlace privado'),
             meta: { shell: { header: false, footer: false } },
@@ -74,6 +81,32 @@ const has = (wrapper: Awaited<ReturnType<typeof mountAt>>['wrapper'], name: stri
   wrapper.find(`[data-test="${name}"]`).exists()
 
 describe('ClientLayout', () => {
+  beforeEach(() => setActivePinia(createPinia()))
+
+  it('says the session closed in place of a screen that needs it, with a way back in', async () => {
+    useSessionStore().expireSession()
+    const { wrapper } = await mountAt('/plain?page=2')
+
+    const main = wrapper.get('main')
+    expect(main.text()).not.toContain('pantalla simple')
+    expect(main.get('h1').text()).toBe('Tu sesión se cerró')
+    expect(main.text()).toContain(
+      'Inicia sesión de nuevo para continuar. Tu carrito sigue guardado.',
+    )
+    expect(main.get('svg').attributes('data-illustration')).toBe('sesionVencida')
+    const link = main.get('a')
+    expect(link.text()).toBe('Iniciar sesión')
+    expect(link.attributes('href')).toBe('/login?redirect=/plain?page=2')
+    wrapper.unmount()
+  })
+
+  it('keeps a public screen when the session closes', async () => {
+    useSessionStore().expireSession()
+    const { wrapper } = await mountAt('/open')
+
+    expect(wrapper.get('main').text()).toBe('pantalla pública')
+  })
+
   it('renders the screen of the route inside main', async () => {
     const { wrapper } = await mountAt('/plain')
 

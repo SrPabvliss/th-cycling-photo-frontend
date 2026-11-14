@@ -35,6 +35,7 @@ const drawing = computed(() =>
     <svg
       v-if="drawing"
       class="empty-state__illustration"
+      :data-illustration="illustration"
       :viewBox="ILLUSTRATION_VIEW_BOX"
       fill="none"
       aria-hidden="true"

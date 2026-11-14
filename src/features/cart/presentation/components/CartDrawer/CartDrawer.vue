@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { NButton } from 'naive-ui'
 
 import { useSessionStore } from '@/core/auth/stores/session.store'
+import { useSessionClosedScreen } from '@/core/layout/client/session-closed'
 import { checkoutPath, ROUTE_PATHS } from '@/core/navigation/route-paths'
 import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
 import { usePriceSheet } from '@/features/pricing/composables/use-price-sheet'
@@ -31,6 +32,13 @@ const priceSheet = usePriceSheet()
 
 const panel = ref<HTMLElement | null>(null)
 const close = () => cartStore.setDrawerOpen(false)
+
+// The session closed on a screen that needs it: that screen says so, once. The drawer gets out
+// of the way instead of saying it again on top.
+const isSessionClosed = useSessionClosedScreen()
+watch(isSessionClosed, (closed) => {
+  if (closed) close()
+})
 useDialogFocus(panel, () => cartStore.isDrawerOpen, close)
 
 // Every event of the cart is priced on its own: each one is a separate order with its own tier.
@@ -86,11 +94,7 @@ function explainPrices() {
         </div>
 
         <!-- The session expired with the cart on screen: say so, it is not an empty cart. -->
-        <SessionExpiredNotice
-          v-if="session.expired"
-          text="Inicia sesión de nuevo para seguir con tu carrito. Tus fotos siguen guardadas."
-          @leave="close"
-        />
+        <SessionExpiredNotice v-if="session.expired" @leave="close" />
 
         <LoadBoundary
           v-else

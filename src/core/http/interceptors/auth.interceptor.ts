@@ -2,6 +2,7 @@ import type { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axio
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { useSessionStore } from '@/core/auth/stores/session.store'
+import { areaOfRoute } from '@/core/theme/area'
 import { SessionExpiredError } from '../session-expired'
 
 let _isRefreshing = false
@@ -82,13 +83,17 @@ export function registerAuthInterceptor(axios: AxiosInstance): void {
       const authStore = useSessionStore()
       authStore.expireSession()
 
+      // A client screen already up stays: the client layout puts "Tu sesión se cerró" in its
+      // place, with a way to sign in and come back. The panel, and a first navigation with no
+      // screen yet, go to sign in as before.
       const { default: router } = await import('@/app/router')
       const current = router.currentRoute.value
-      const target =
-        current.matched.length > 0
-          ? current
-          : router.resolve(window.location.pathname + window.location.search)
-      if (target.meta.public !== true) {
+      const isScreenUp = current.matched.length > 0
+      const target = isScreenUp
+        ? current
+        : router.resolve(window.location.pathname + window.location.search)
+      const staysOnScreen = isScreenUp && areaOfRoute(current) === 'client'
+      if (target.meta.public !== true && !staysOnScreen) {
         router.push({ path: '/login', query: { redirect: target.fullPath } })
       }
 

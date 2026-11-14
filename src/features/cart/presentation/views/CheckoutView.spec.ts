@@ -199,7 +199,7 @@ describe('CheckoutView', () => {
     useSessionStore().expireSession()
     const { wrapper } = await mountView()
 
-    expect(wrapper.text()).toContain('Tu sesión venció')
+    expect(wrapper.text()).toContain('Tu sesión se cerró')
     expect(wrapper.text()).not.toContain('No hay fotos en este pedido')
     expect(buttonNamed(wrapper, 'Iniciar sesión')?.attributes('href')).toBe(
       '/login?redirect=/checkout/e1',

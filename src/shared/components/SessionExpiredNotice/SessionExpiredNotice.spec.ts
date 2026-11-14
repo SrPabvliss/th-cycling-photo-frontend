@@ -15,10 +15,7 @@ async function mountAt(path: string) {
     ],
   })
   await router.push(path)
-  const wrapper = mount(SessionExpiredNotice, {
-    props: { text: 'Inicia sesión de nuevo para seguir con tu carrito.' },
-    global: { plugins: [router] },
-  })
+  const wrapper = mount(SessionExpiredNotice, { global: { plugins: [router] } })
   await flushPromises()
   return { wrapper, router }
 }
@@ -27,8 +24,11 @@ describe('SessionExpiredNotice', () => {
   it('says the session expired and leads to sign in, back to the same screen', async () => {
     const { wrapper } = await mountAt('/gallery/mama-rumi?placa=127')
 
-    expect(wrapper.text()).toContain('Tu sesión venció')
-    expect(wrapper.text()).toContain('Inicia sesión de nuevo para seguir con tu carrito.')
+    expect(wrapper.get('h2').text()).toBe('Tu sesión se cerró')
+    expect(wrapper.text()).toContain(
+      'Inicia sesión de nuevo para continuar. Tu carrito sigue guardado.',
+    )
+    expect(wrapper.get('svg').attributes('data-illustration')).toBe('sesionVencida')
     const link = wrapper.get('a')
     expect(link.text()).toBe('Iniciar sesión')
     expect(link.attributes('href')).toBe('/login?redirect=/gallery/mama-rumi?placa=127')

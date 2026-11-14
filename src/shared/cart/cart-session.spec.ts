@@ -26,7 +26,9 @@ vi.mock('@/core/ui/discrete-api', () => ({ message }))
 // The interceptor sends to the login page from private screens; the cart is used on public ones.
 vi.mock('@/app/router', () => ({
   default: {
-    currentRoute: { value: { matched: [{}], meta: { public: true }, fullPath: '/gallery' } },
+    currentRoute: {
+      value: { matched: [{ meta: {} }], meta: { public: true }, fullPath: '/gallery' },
+    },
     resolve: vi.fn(),
     push: vi.fn(),
   },

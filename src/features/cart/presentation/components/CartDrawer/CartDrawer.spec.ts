@@ -65,17 +65,18 @@ function group(id: string, photos: number): ICartGroup {
 
 const Stub = { render: () => null }
 
-async function mountDrawer() {
+async function mountDrawer(path = '/') {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
-      { path: '/', component: Stub },
+      { path: '/', component: Stub, meta: { public: true } },
+      { path: '/account/orders', component: Stub },
       { path: '/gallery', component: Stub },
       { path: '/login', component: Stub },
       { path: '/checkout/:eventId', component: Stub },
     ],
   })
-  await router.push('/')
+  await router.push(path)
   useCartStore().setDrawerOpen(true)
   // The real teleport: a stubbed one rebuilds its content on every render and would hide whether
   // the drawer keeps its elements. The drawer is read from the page it was teleported to.
@@ -166,11 +167,21 @@ describe('CartDrawer', () => {
     expect(wrapper.find('.cart-drawer__skeleton').exists()).toBe(true)
   })
 
+  it('closes when the session closes on a screen that needs it: that screen says it once', async () => {
+    signIn()
+    await mountDrawer('/account/orders')
+
+    useSessionStore().expireSession()
+    await flushPromises()
+
+    expect(useCartStore().isDrawerOpen).toBe(false)
+  })
+
   it('says the session expired, not that the cart is empty, and leads back here after signing in', async () => {
     useSessionStore().expireSession()
     const { wrapper } = await open()
 
-    expect(wrapper.text()).toContain('Tu sesión venció')
+    expect(wrapper.text()).toContain('Tu sesión se cerró')
     expect(wrapper.text()).not.toContain('Tu carrito está vacío')
     const signIn = wrapper.findAll('a').find((link) => link.text() === 'Iniciar sesión')!
     expect(signIn.attributes('href')).toBe('/login?redirect=/')

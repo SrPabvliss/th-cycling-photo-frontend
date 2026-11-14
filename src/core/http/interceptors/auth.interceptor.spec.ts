@@ -6,13 +6,18 @@ import { useSessionStore } from '@/core/auth/stores/session.store'
 import { isSessionExpired } from '../session-expired'
 import { registerAuthInterceptor } from './auth.interceptor'
 
-vi.mock('@/app/router', () => ({
-  default: {
-    currentRoute: { value: { matched: [{}], meta: { public: true }, fullPath: '/login' } },
-    resolve: vi.fn(),
-    push: vi.fn(),
+const router = vi.hoisted(() => ({
+  currentRoute: {
+    value: { matched: [{ meta: {} }], meta: { public: true }, fullPath: '/login' } as {
+      matched: Array<{ meta: Record<string, unknown> }>
+      meta: Record<string, unknown>
+      fullPath: string
+    },
   },
+  resolve: vi.fn(),
+  push: vi.fn(),
 }))
+vi.mock('@/app/router', () => ({ default: router }))
 
 const calls: string[] = []
 const adapter: AxiosAdapter = async (config: InternalAxiosRequestConfig) => {
@@ -31,6 +36,8 @@ describe('auth interceptor', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     calls.length = 0
+    router.push.mockReset()
+    router.resolve.mockReset()
   })
 
   it('tries to renew the session on a 401', async () => {
@@ -89,5 +96,57 @@ describe('auth interceptor', () => {
 
     expect(calls).toEqual(['/auth/login'])
     expect((error as AxiosError).response?.status).toBe(401)
+  })
+
+  describe('when the session cannot be renewed', () => {
+    it('sends a panel screen to sign in, as before', async () => {
+      router.currentRoute.value = {
+        matched: [{ meta: { area: 'panel' } }],
+        meta: {},
+        fullPath: '/orders?status=paid',
+      }
+
+      await client()
+        .get('/orders')
+        .catch(() => undefined)
+
+      expect(router.push).toHaveBeenCalledWith({
+        path: '/login',
+        query: { redirect: '/orders?status=paid' },
+      })
+    })
+
+    it('sends to sign in on the first navigation, before any screen is up', async () => {
+      router.currentRoute.value = { matched: [], meta: {}, fullPath: '/' }
+      router.resolve.mockReturnValue({
+        matched: [{ meta: {} }],
+        meta: {},
+        fullPath: '/account/orders',
+      })
+
+      await client()
+        .get('/orders/me')
+        .catch(() => undefined)
+
+      expect(router.push).toHaveBeenCalledWith({
+        path: '/login',
+        query: { redirect: '/account/orders' },
+      })
+    })
+
+    it('stays on a client screen already up: the screen says the session closed', async () => {
+      router.currentRoute.value = {
+        matched: [{ meta: {} }],
+        meta: {},
+        fullPath: '/account/orders?page=2',
+      }
+
+      await client()
+        .get('/orders/me')
+        .catch(() => undefined)
+
+      expect(router.push).not.toHaveBeenCalled()
+      expect(useSessionStore().expired).toBe(true)
+    })
   })
 })

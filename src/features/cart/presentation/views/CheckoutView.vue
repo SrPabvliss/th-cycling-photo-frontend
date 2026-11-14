@@ -143,10 +143,7 @@ async function confirm() {
     </div>
 
     <!-- The session expired with the order on screen: say so, it is not an order without photos. -->
-    <SessionExpiredNotice
-      v-if="session.expired"
-      text="Inicia sesión de nuevo para seguir con tu pedido. Tus fotos siguen guardadas."
-    />
+    <SessionExpiredNotice v-if="session.expired" />
 
     <LoadBoundary
       v-else

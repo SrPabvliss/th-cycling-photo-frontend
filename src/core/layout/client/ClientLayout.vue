@@ -6,14 +6,17 @@ import ClientHeader from './ClientHeader.vue'
 import ClientLogo from './ClientLogo.vue'
 import ClientTabBar from './ClientTabBar.vue'
 import OfflineStrip from './OfflineStrip.vue'
+import SessionClosedScreen from './SessionClosedScreen.vue'
 import { useClientShell } from './client-shell'
 import { hasScreenProblem } from './screen-problem'
+import { useSessionClosedScreen } from './session-closed'
 
 // Shell of every client route. Each route says in `meta.shell` which parts it wants; the layout
 // knows no route by name.
 const shell = useClientShell()
 const overlays = useLayoutSlot(LAYOUT_SLOTS.CLIENT_OVERLAY)
 const seasonBars = useLayoutSlot(LAYOUT_SLOTS.CLIENT_SEASON_BAR)
+const isSessionClosed = useSessionClosedScreen()
 </script>
 
 <template>
@@ -30,7 +33,8 @@ const seasonBars = useLayoutSlot(LAYOUT_SLOTS.CLIENT_SEASON_BAR)
 
     <main class="client-layout__main">
       <!-- A screen that breaks keeps the shell around it, so the navigation still works. -->
-      <ErrorBoundary>
+      <SessionClosedScreen v-if="isSessionClosed" />
+      <ErrorBoundary v-else>
         <RouterView />
       </ErrorBoundary>
     </main>
