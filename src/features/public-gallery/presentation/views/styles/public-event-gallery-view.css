@@ -167,3 +167,7 @@
     max-inline-size: calc(var(--tt-ilu-page) * 2 + var(--tt-gutter-desktop));
   }
 }
+
+.gallery__more-problem {
+  margin-block-start: var(--tt-space-4);
+}

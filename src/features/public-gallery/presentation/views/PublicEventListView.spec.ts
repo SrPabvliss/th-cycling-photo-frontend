@@ -299,15 +299,24 @@ describe('PublicEventListView', () => {
     expect(wrapper.get('.load-boundary').attributes('aria-busy')).toBeUndefined()
   })
 
-  it('offers to load more by hand when the next page failed', async () => {
-    list.events = [event('a'), event('b')]
-    list.hasNextPage = true
-    list.isFetchNextPageError = true
+  it('keeps the events and says the next page failed, with a retry, when it does', async () => {
+    // vue-query marks the whole query as failed when only the next page did.
+    Object.assign(list, {
+      status: 'error',
+      events: [event('a'), event('b')],
+      hasNextPage: true,
+      isFetchNextPageError: true,
+    })
     const { wrapper } = await mountView()
 
-    await buttonNamed(wrapper, 'Cargar más')!.trigger('click')
-
     expect(cards(wrapper)).toHaveLength(2)
+    expect(wrapper.text()).not.toContain('No pudimos cargar los eventos')
+    const alert = wrapper.get('[data-test="more-problem"]')
+    expect(alert.classes()).toContain('form-alert')
+    expect(alert.text()).toContain('No pudimos cargar más eventos')
+    expect(wrapper.find('.event-list__sentinel').exists()).toBe(false)
+
+    await alert.get('button').trigger('click')
     expect(fetchNextPage).toHaveBeenCalledTimes(1)
   })
 
@@ -315,7 +324,7 @@ describe('PublicEventListView', () => {
     list.events = [event('a')]
     const { wrapper } = await mountView()
 
-    expect(buttonNamed(wrapper, 'Cargar más')).toBeUndefined()
+    expect(wrapper.find('[data-test="more-problem"]').exists()).toBe(false)
     expect(wrapper.find('.event-list__sentinel').exists()).toBe(false)
   })
 })

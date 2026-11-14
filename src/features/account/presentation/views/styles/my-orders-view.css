@@ -33,8 +33,7 @@
 }
 
 .my-orders__more {
-  display: flex;
-  justify-content: center;
+  margin-block-start: var(--tt-space-4);
 }
 
 .my-orders__end {

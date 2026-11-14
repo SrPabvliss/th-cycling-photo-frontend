@@ -6,6 +6,7 @@ import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
 import { spotIndexAfter } from '@/features/house-spots/utils/spot-placement'
 import { EmptyState } from '@/shared/components/empty-state'
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { LoadBoundary } from '@/shared/components/loading'
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import { useVisiblePolling } from '@/shared/composables/use-visible-polling'
@@ -34,6 +35,9 @@ const {
 const orders = computed(() => data.value?.pages.flatMap((page) => page.items) ?? [])
 
 const canLoadMore = computed(() => hasNextPage.value && !isFetchNextPageError.value)
+// vue-query marks the whole query as failed when only the next page did: what is on screen stays,
+// and the failure is said under it.
+const listStatus = computed(() => (isFetchNextPageError.value ? 'success' : status.value))
 const sentinel = useInfiniteScrollTrigger(() => fetchNextPage(), {
   isBusy: isFetching,
   canLoadMore,
@@ -54,7 +58,7 @@ const spotAfter = computed(() => spotIndexAfter(orders.value.length, SPOT_AFTER)
     <h1 class="my-orders__title">Mis fotos</h1>
 
     <LoadBoundary
-      :status="status"
+      :status="listStatus"
       :empty="orders.length === 0"
       :refreshing="status === 'error' && isFetching"
       error-title="No pudimos cargar tus fotos"
@@ -100,9 +104,16 @@ const spotAfter = computed(() => spotIndexAfter(orders.value.length, SPOT_AFTER)
 
       <div v-if="canLoadMore" ref="sentinel" class="my-orders__sentinel" aria-hidden="true" />
 
-      <div v-if="hasNextPage && isFetchNextPageError" class="my-orders__more">
-        <NButton size="large" @click="fetchNextPage()">Cargar más</NButton>
-      </div>
+      <FormAlert
+        v-if="hasNextPage && isFetchNextPageError"
+        class="my-orders__more"
+        data-test="more-problem"
+        tone="bad"
+        title="No pudimos cargar más compras"
+        text="Puede ser tu conexión. Lo que ya ves se queda."
+        :retrying="isFetchingNextPage"
+        @retry="fetchNextPage()"
+      />
 
       <p v-if="isAtTheEnd" class="my-orders__end">Esas son todas tus compras.</p>
     </LoadBoundary>

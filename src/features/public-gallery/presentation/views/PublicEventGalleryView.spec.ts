@@ -53,7 +53,9 @@ const matched = reactive({
   isFetching: false,
   hasNextPage: false,
   isFetchingNextPage: false,
+  isFetchNextPageError: false,
 })
+const fetchMorePhotos = vi.fn()
 const noBib = reactive({ photos: [] as IPhoto[] })
 const asked = { plate: null as string | null, category: null as number | null }
 const refetchDetail = vi.fn()
@@ -83,20 +85,24 @@ vi.mock('../../composables/queries/use-public-event-photos', () => ({
     data: computed(() => {
       asked.plate = plate.value
       asked.category = category.value
-      return matched.status === 'success' ? pagesOf(matched.photos, matched.total) : undefined
+      return matched.status === 'success' || matched.isFetchNextPageError
+        ? pagesOf(matched.photos, matched.total)
+        : undefined
     }),
     status: computed(() => matched.status),
+    isFetchNextPageError: computed(() => matched.isFetchNextPageError),
     isPlaceholderData: computed(() => matched.isPlaceholderData),
     isFetching: computed(() => matched.isFetching),
     hasNextPage: computed(() => matched.hasNextPage),
     isFetchingNextPage: computed(() => matched.isFetchingNextPage),
-    fetchNextPage: vi.fn(),
+    fetchNextPage: fetchMorePhotos,
     refetch: refetchPhotos,
   }),
   usePublicEventNoBibPhotosInfinite: () => ({
     data: computed(() => pagesOf(noBib.photos, noBib.photos.length)),
     hasNextPage: computed(() => false),
     isFetchingNextPage: computed(() => false),
+    isFetchNextPageError: computed(() => false),
     fetchNextPage: vi.fn(),
   }),
 }))
@@ -186,8 +192,10 @@ describe('PublicEventGalleryView', () => {
       isFetching: false,
       hasNextPage: false,
       isFetchingNextPage: false,
+      isFetchNextPageError: false,
     })
     noBib.photos = []
+    fetchMorePhotos.mockClear()
     refetchDetail.mockClear()
     refetchPhotos.mockClear()
     toggle.mockClear()
@@ -455,6 +463,25 @@ describe('PublicEventGalleryView', () => {
 
       expect(tiles(wrapper)).toHaveLength(3)
       expect(wrapper.get('.load-boundary').attributes('aria-busy')).toBe('true')
+    })
+
+    it('keeps the photos and says the next page failed, with a retry, when it does', async () => {
+      // vue-query marks the whole query as failed when only the next page did.
+      Object.assign(matched, {
+        status: 'error',
+        photos: [photo('a'), photo('b')],
+        total: 9,
+        hasNextPage: true,
+        isFetchNextPageError: true,
+      })
+      const { wrapper } = await mountAt()
+
+      expect(tiles(wrapper)).toHaveLength(2)
+      expect(wrapper.text()).not.toContain('No pudimos cargar las fotos')
+      const alert = wrapper.get('[data-test="more-problem"]')
+      expect(alert.text()).toContain('No pudimos cargar más fotos')
+      await alert.get('button').trigger('click')
+      expect(fetchMorePhotos).toHaveBeenCalledTimes(1)
     })
 
     it('keeps the hero and the search when only the photos fail', async () => {

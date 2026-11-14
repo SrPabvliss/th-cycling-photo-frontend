@@ -77,9 +77,7 @@
 }
 
 .event-list__more {
-  display: flex;
-  justify-content: center;
-  padding-block-start: var(--tt-space-4);
+  margin-block-start: var(--tt-space-4);
 }
 
 @media (min-width: 768px) {

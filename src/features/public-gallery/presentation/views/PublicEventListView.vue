@@ -5,6 +5,7 @@ import { NButton } from 'naive-ui'
 import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
 import { spotIndexAfter } from '@/features/house-spots/utils/spot-placement'
 import { EmptyState } from '@/shared/components/empty-state'
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { LoadBoundary } from '@/shared/components/loading'
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import {
@@ -44,6 +45,9 @@ const isRefreshing = computed(() => isFetching.value && !isFetchingNextPage.valu
 const isEmpty = computed(() => events.value.length === 0 && !isPlaceholderData.value)
 
 const canLoadMore = computed(() => hasNextPage.value && !isFetchNextPageError.value)
+// vue-query marks the whole query as failed when only the next page did: what is on screen stays,
+// and the failure is said under it.
+const listStatus = computed(() => (isFetchNextPageError.value ? 'success' : status.value))
 const sentinel = useInfiniteScrollTrigger(() => fetchNextPage(), {
   isBusy: isFetching,
   canLoadMore,
@@ -78,7 +82,7 @@ const spotAfter = computed(() => spotIndexAfter(events.value.length, SPOT_AFTER)
     <EventFilterChips v-model="chip" :event-types="eventTypes" />
 
     <LoadBoundary
-      :status="status"
+      :status="listStatus"
       :empty="isEmpty"
       :refreshing="isRefreshing"
       error-title="No pudimos cargar los eventos"
@@ -120,9 +124,16 @@ const spotAfter = computed(() => spotIndexAfter(events.value.length, SPOT_AFTER)
 
       <div v-if="canLoadMore" ref="sentinel" class="event-list__sentinel" aria-hidden="true" />
 
-      <div v-if="hasNextPage && isFetchNextPageError" class="event-list__more">
-        <NButton size="large" @click="fetchNextPage()">Cargar más</NButton>
-      </div>
+      <FormAlert
+        v-if="hasNextPage && isFetchNextPageError"
+        class="event-list__more"
+        data-test="more-problem"
+        tone="bad"
+        title="No pudimos cargar más eventos"
+        text="Puede ser tu conexión. Lo que ya ves se queda."
+        :retrying="isFetchingNextPage"
+        @retry="fetchNextPage()"
+      />
     </LoadBoundary>
   </div>
 </template>

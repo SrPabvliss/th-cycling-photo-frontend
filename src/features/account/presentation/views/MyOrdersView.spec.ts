@@ -148,15 +148,19 @@ describe('MyOrdersView', () => {
     expect(wrapper.findAll('.order-row')).toHaveLength(3)
   })
 
-  it('keeps the rows and offers to load more when the next page fails', async () => {
+  it('keeps the rows and says the next page failed, with a retry, when it does', async () => {
+    // vue-query marks the whole query as failed when only the next page did.
+    state.status = 'error'
     state.orders = [order('o1'), order('o2')]
     state.hasNextPage = true
     state.nextPageError = true
     const wrapper = await mountView()
 
     expect(wrapper.findAll('.order-row')).toHaveLength(2)
-    const more = wrapper.findAll('button').find((each) => each.text().trim() === 'Cargar más')!
-    await more.trigger('click')
+    expect(wrapper.text()).not.toContain('No pudimos cargar tus fotos')
+    const alert = wrapper.get('[data-test="more-problem"]')
+    expect(alert.text()).toContain('No pudimos cargar más compras')
+    await alert.get('button').trigger('click')
     expect(fetchNextPage).toHaveBeenCalled()
   })
 

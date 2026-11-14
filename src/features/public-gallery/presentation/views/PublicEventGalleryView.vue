@@ -9,6 +9,7 @@ import NotFoundView from '@/core/views/NotFoundView.vue'
 import EventPresenterStrip from '@/features/house-spots/presentation/components/EventPresenterStrip/EventPresenterStrip.vue'
 import { useCartActions, useCartState } from '@/shared/cart'
 import { EmptyState } from '@/shared/components/empty-state'
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { ErrorState, LoadBoundary, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
 import { eventDateLabel } from '@/shared/public-events'
 import { useGalleryPlate } from '../../composables/use-gallery-plate'
@@ -74,18 +75,27 @@ const {
   isPlaceholderData,
   hasNextPage,
   isFetchingNextPage,
+  isFetchNextPageError,
   fetchNextPage,
   refetch: refetchPhotos,
 } = usePublicEventPhotosInfinite(slug, categoryId, plate)
+// vue-query marks the whole query as failed when only the next page did: the photos on screen
+// stay, and the failure is said under them. Scrolling no longer asks again; the retry does.
+const photosBoundaryStatus = computed(() =>
+  isFetchNextPageError.value ? 'success' : photosStatus.value,
+)
+const hasMorePhotos = computed(() => hasNextPage.value && !isFetchNextPageError.value)
 
 // Next to a plate search: the photos where no plate could be read, for the rider the recognition
 // missed. Paged on its own.
 const {
   data: noPlatePages,
-  hasNextPage: hasMoreNoPlate,
+  hasNextPage: hasNextNoPlatePage,
   isFetchingNextPage: isFetchingMoreNoPlate,
+  isFetchNextPageError: isMoreNoPlateError,
   fetchNextPage: fetchMoreNoPlate,
 } = usePublicEventNoBibPhotosInfinite(slug, categoryId, plate)
+const hasMoreNoPlate = computed(() => hasNextNoPlatePage.value && !isMoreNoPlateError.value)
 
 const photos = computed(() => photoPages.value?.pages.flatMap((page) => page.items) ?? [])
 const photosTotal = computed(() => photoPages.value?.pages[0]?.pagination.total ?? 0)
@@ -110,7 +120,7 @@ const countText = computed(() =>
 )
 
 function loadMore() {
-  if (hasNextPage.value && !isFetchingNextPage.value) fetchNextPage()
+  if (hasMorePhotos.value && !isFetchingNextPage.value) fetchNextPage()
 }
 function loadMoreNoPlate() {
   if (hasMoreNoPlate.value && !isFetchingMoreNoPlate.value) fetchMoreNoPlate()
@@ -261,7 +271,7 @@ const cartEvent = computed(() =>
           />
 
           <LoadBoundary
-            :status="photosStatus"
+            :status="photosBoundaryStatus"
             :refreshing="isPlaceholderData"
             error-title="No pudimos cargar las fotos"
             error-text="Puede ser tu conexión."
@@ -300,7 +310,7 @@ const cartEvent = computed(() =>
                 :selected-ids="selectedIds"
                 :busy-ids="busyIds"
                 :plate="shownPlate"
-                :has-more="hasNextPage"
+                :has-more="hasMorePhotos"
                 :is-loading-more="isFetchingNextPage"
                 @open="viewer.open"
                 @toggle="toggle"
@@ -314,11 +324,21 @@ const cartEvent = computed(() =>
                 :photos="photos"
                 :selected-ids="selectedIds"
                 :busy-ids="busyIds"
-                :has-more="hasNextPage"
+                :has-more="hasMorePhotos"
                 :is-loading-more="isFetchingNextPage"
                 @open="viewer.open"
                 @toggle="toggle"
                 @load-more="loadMore"
+              />
+              <FormAlert
+                v-if="hasNextPage && isFetchNextPageError"
+                class="gallery__more-problem"
+                data-test="more-problem"
+                tone="bad"
+                title="No pudimos cargar más fotos"
+                text="Puede ser tu conexión. Las que ya ves se quedan."
+                :retrying="isFetchingNextPage"
+                @retry="fetchNextPage()"
               />
             </template>
 
@@ -336,6 +356,15 @@ const cartEvent = computed(() =>
                 @open="viewer.open"
                 @toggle="toggle"
                 @load-more="loadMoreNoPlate"
+              />
+              <FormAlert
+                v-if="hasNextNoPlatePage && isMoreNoPlateError"
+                class="gallery__more-problem"
+                tone="bad"
+                title="No pudimos cargar más fotos"
+                text="Puede ser tu conexión. Las que ya ves se quedan."
+                :retrying="isFetchingMoreNoPlate"
+                @retry="fetchMoreNoPlate()"
               />
             </section>
           </LoadBoundary>
