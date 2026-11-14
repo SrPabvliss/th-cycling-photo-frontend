@@ -174,20 +174,50 @@ describe('PhotoFinder', () => {
     expect(wrapper.findAll('option').map((option) => option.text())).toEqual(['Cargando carreras'])
   })
 
-  it('says the races could not load, offers to retry, and blocks the search', async () => {
+  it('says the races could not load on a line of its own, outside the race field', async () => {
     Object.assign(races, { status: 'error', events: [] })
     const { wrapper, push } = await mountFinder()
 
-    expect(wrapper.text()).toContain('No pudimos cargar las carreras.')
+    const problem = wrapper.get('[data-test="finder-problem"]')
+    expect(problem.attributes('role')).toBe('alert')
+    expect(problem.text()).toContain('No pudimos cargar las carreras')
+    expect(problem.text()).toContain('Puede ser tu conexión.')
+    expect(wrapper.get('.photo-finder__race').text()).not.toContain('No pudimos')
+    expect(wrapper.get('.photo-finder__race').find('button').exists()).toBe(false)
+    expect(select(wrapper).attributes('disabled')).toBeDefined()
+    expect(wrapper.findAll('option').map((option) => option.text())).toEqual(['Elige tu carrera'])
     expect(submit(wrapper).attributes('disabled')).toBeDefined()
 
-    await wrapper
-      .findAll('button')
-      .find((button) => button.text() === 'Reintentar')!
-      .trigger('click')
+    await problem.get('button').trigger('click')
     expect(refetch).toHaveBeenCalledTimes(1)
 
     await send(wrapper)
     expect(push).not.toHaveBeenCalled()
+  })
+
+  it('holds the retry while the races are asked again', async () => {
+    Object.assign(races, { status: 'error', events: [], isFetching: true })
+    const { wrapper } = await mountFinder()
+
+    expect(wrapper.get('[data-test="finder-problem"] button').attributes('disabled')).toBeDefined()
+  })
+
+  it('writes the field errors under their field, outside its border', async () => {
+    const { wrapper } = await mountFinder()
+    await send(wrapper)
+
+    const raceError = wrapper.get('#photo-finder-race-error')
+    expect(raceError.text()).toBe('Elige primero la carrera.')
+    expect(wrapper.get('.photo-finder__race').find('#photo-finder-race-error').exists()).toBe(false)
+    expect(select(wrapper).attributes('aria-describedby')).toBe('photo-finder-race-error')
+
+    await select(wrapper).setValue('mama-rumi')
+    await plate(wrapper).setValue('12a')
+    await send(wrapper)
+
+    expect(wrapper.get('.photo-finder__plate').find('#photo-finder-plate-error').exists()).toBe(
+      false,
+    )
+    expect(plate(wrapper).attributes('aria-describedby')).toBe('photo-finder-plate-error')
   })
 })

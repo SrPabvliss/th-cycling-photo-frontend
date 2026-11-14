@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { NButton } from 'naive-ui'
 
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { usePublicEventsQuery } from '@/shared/public-events'
 import { parsePlate } from '@/shared/utils/plate.utils'
 import { finderTarget } from '../../../utils/finder-target'
@@ -51,6 +52,7 @@ function search() {
 </script>
 
 <template>
+  <!-- Each control keeps its size: its error goes under it, the load problem below them all. -->
   <form class="photo-finder" novalidate @submit.prevent="search">
     <label class="photo-finder__race">
       <span class="photo-finder__label">Carrera</span>
@@ -69,16 +71,15 @@ function search() {
           <option v-for="race in races" :key="race.slug" :value="race.slug">{{ race.name }}</option>
         </template>
       </select>
-      <span v-if="raceError" id="photo-finder-race-error" class="photo-finder__error" role="alert">
-        {{ raceError }}
-      </span>
-      <span v-else-if="hasFailed" class="photo-finder__error" role="alert">
-        No pudimos cargar las carreras.
-        <button type="button" class="photo-finder__retry" :disabled="isFetching" @click="refetch()">
-          Reintentar
-        </button>
-      </span>
     </label>
+    <em
+      v-if="raceError"
+      id="photo-finder-race-error"
+      class="photo-finder__error photo-finder__error--race"
+      role="alert"
+    >
+      {{ raceError }}
+    </em>
 
     <label class="photo-finder__plate">
       <span class="photo-finder__label">N.º de placa</span>
@@ -95,15 +96,15 @@ function search() {
           :aria-describedby="plateError ? 'photo-finder-plate-error' : undefined"
         />
       </span>
-      <span
-        v-if="plateError"
-        id="photo-finder-plate-error"
-        class="photo-finder__error"
-        role="alert"
-      >
-        {{ plateError }}
-      </span>
     </label>
+    <em
+      v-if="plateError"
+      id="photo-finder-plate-error"
+      class="photo-finder__error photo-finder__error--plate"
+      role="alert"
+    >
+      {{ plateError }}
+    </em>
 
     <NButton
       class="photo-finder__submit"
@@ -120,15 +121,27 @@ function search() {
       </template>
       Buscar mis fotos
     </NButton>
+
+    <FormAlert
+      v-if="hasFailed"
+      class="photo-finder__problem"
+      data-test="finder-problem"
+      tone="bad"
+      title="No pudimos cargar las carreras"
+      text="Puede ser tu conexión."
+      :retrying="isFetching"
+      @retry="refetch()"
+    />
   </form>
 </template>
 
 <style scoped>
 /* Mobile first; desktop starts at 768px. */
+/* A grid with a row for each error, so a message never stretches a control or moves the button. */
 .photo-finder {
-  display: flex;
-  flex-direction: column;
-  gap: var(--tt-space-2);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'race' 'race-error' 'plate' 'plate-error' 'submit' 'problem';
   padding: var(--tt-space-3);
   border-radius: var(--tt-radius-l);
   background: var(--tt-surface-raised);
@@ -146,11 +159,22 @@ function search() {
 }
 
 .photo-finder__race {
+  grid-area: race;
   border: thin solid var(--tt-line);
 }
 
 .photo-finder__plate {
+  grid-area: plate;
   background: var(--tt-primary-soft);
+}
+
+.photo-finder__plate,
+.photo-finder__submit {
+  margin-block-start: var(--tt-space-2);
+}
+
+.photo-finder__submit {
+  grid-area: submit;
 }
 
 .photo-finder__label {
@@ -212,24 +236,35 @@ function search() {
   outline: thin solid var(--tt-primary);
 }
 
+/* After the focus rule, so the error still shows while the field has the focus. */
+.photo-finder__race:has([aria-invalid='true']),
+.photo-finder__plate:has([aria-invalid='true']) {
+  outline: thin solid var(--tt-danger-ink);
+}
+
+/* As in every client field: outside the border, a line below it. `contain` keeps a long message
+   from widening the plate's column; it wraps inside it instead. */
 .photo-finder__error {
+  contain: inline-size;
+  margin-block-start: var(--tt-space-1);
   color: var(--tt-danger-ink);
-  font-family: var(--tt-font-sans);
-  font-stretch: normal;
+  font-style: normal;
   font-size: var(--tt-type-caption-size);
   line-height: var(--tt-type-caption-line);
   font-weight: var(--tt-type-caption-weight);
 }
 
-.photo-finder__retry {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  font-weight: var(--tt-type-title-weight);
-  text-decoration: underline;
-  cursor: pointer;
+.photo-finder__error--race {
+  grid-area: race-error;
+}
+
+.photo-finder__error--plate {
+  grid-area: plate-error;
+}
+
+.photo-finder__problem {
+  grid-area: problem;
+  margin-block-start: var(--tt-space-3);
 }
 
 .photo-finder__icon {
@@ -244,15 +279,22 @@ function search() {
 
 @media (min-width: 768px) {
   .photo-finder {
-    flex-direction: row;
-    align-items: stretch;
-    gap: var(--tt-space-3);
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      'race plate submit'
+      'race-error plate-error .'
+      'problem problem problem';
+    column-gap: var(--tt-space-3);
     padding: var(--tt-space-4);
   }
 
   .photo-finder__race {
-    flex: 1;
     justify-content: center;
+  }
+
+  .photo-finder__plate,
+  .photo-finder__submit {
+    margin-block-start: 0;
   }
 
   .photo-finder__submit {
