@@ -168,16 +168,16 @@ describe('DeliveryView', () => {
     expect(wrapper.get('[data-test="refresh-problem"]').text()).toContain('Demasiados intentos')
   })
 
-  it.each([
-    ['expired', 'Este enlace ya venció'],
-    ['access-limit', 'Este enlace llegó a su límite de descargas'],
-  ] as const)('changes the screen when a refresh finds the link %s', async (problem) => {
-    Object.assign(state, { status: 'error', data: DATA(3), problem })
-    const wrapper = await mountView()
+  it.each(['expired', 'access-limit'] as const)(
+    'changes the screen when a refresh finds the link %s',
+    async (problem) => {
+      Object.assign(state, { status: 'error', data: DATA(3), problem })
+      const wrapper = await mountView()
 
-    expect(wrapper.findAll('button[aria-label="Descargar foto"]')).toHaveLength(0)
-    expect(wrapper.find('[data-test="refresh-problem"]').exists()).toBe(false)
-  })
+      expect(wrapper.findAll('button[aria-label="Descargar foto"]')).toHaveLength(0)
+      expect(wrapper.find('[data-test="refresh-problem"]').exists()).toBe(false)
+    },
+  )
 
   it('says it could not load at all when nothing was ever read', async () => {
     Object.assign(state, { status: 'error', data: undefined, problem: 'network' })
