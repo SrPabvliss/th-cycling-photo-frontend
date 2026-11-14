@@ -358,6 +358,15 @@ async function remove() {
   font-size: var(--tt-type-title-size);
 }
 
+.phones-section__phone :deep(.iti input:focus) {
+  border-color: var(--tt-primary);
+  box-shadow: 0 0 0 var(--tt-space-1) var(--tt-primary-soft);
+}
+
+.phones-section__phone :deep(.iti input[aria-invalid='true']) {
+  border-color: var(--tt-danger-ink);
+}
+
 @media (min-width: 768px) {
   .phones-section__add {
     align-self: flex-start;
