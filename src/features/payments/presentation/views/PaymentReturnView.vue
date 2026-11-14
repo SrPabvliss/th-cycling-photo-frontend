@@ -104,7 +104,7 @@ const orderPath = computed(() =>
 
     <ErrorState
       v-else
-      what="tu pago"
+      what="la confirmación de tu pago"
       stacked
       title="No pudimos confirmar tu pago"
       text="Puede ser tu conexión. No se cobra dos veces."

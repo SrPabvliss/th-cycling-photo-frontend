@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { NButton } from 'naive-ui'
 
+import { useOnline } from '@/core/network/use-online'
 import { problemKind } from '@/core/http/problem-kind'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
@@ -89,6 +90,9 @@ const downloadAll = useSequentialDownload({
 const allLabel = computed(() =>
   count.value === 1 ? 'Descargar la foto' : `Descargar las ${count.value} fotos`,
 )
+
+// Without network the offline strip says it once: this alert does not repeat it.
+const online = useOnline()
 </script>
 
 <template>
@@ -174,7 +178,7 @@ const allLabel = computed(() =>
     <template v-else>
       <h1 class="delivery__title">Tus fotos de {{ delivery.eventName }}</h1>
       <FormAlert
-        v-if="refreshProblem"
+        v-if="refreshProblem && online"
         data-test="refresh-problem"
         tone="warn"
         :title="refreshProblem.title"

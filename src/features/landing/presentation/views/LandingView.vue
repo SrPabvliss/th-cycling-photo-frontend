@@ -3,6 +3,7 @@ import { computed } from 'vue'
 
 import heroImage from '@/assets/landing/hero.webp'
 import { problemKind } from '@/core/http/problem-kind'
+import { useOnline } from '@/core/network/use-online'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
 import { ErrorState, useDelayedFlag } from '@/shared/components/loading'
@@ -24,10 +25,16 @@ const HERO_SIZE = { width: 1920, height: 1282 }
 const { status, error, isFetching, events, refetch } = usePublicEventsQuery()
 
 const recentEvents = computed(() => events.value.slice(0, RECENT_EVENTS))
-const isPending = computed(() => status.value === 'pending')
+const online = useOnline()
+const isPending = computed(() => status.value === 'pending' && online.value)
 const showSkeletons = useDelayedFlag(isPending)
 // A failed refresh with events on screen keeps them: only a list that never came is an error.
-const hasFailed = computed(() => status.value === 'error' && events.value.length === 0)
+// Without network vue-query pauses the load instead of failing it: that wait is said too.
+const hasFailed = computed(
+  () =>
+    events.value.length === 0 &&
+    (status.value === 'error' || (status.value === 'pending' && !online.value)),
+)
 // Loaded and nothing to show: the whole section goes, title included.
 const hasRecentSection = computed(() => status.value !== 'success' || recentEvents.value.length > 0)
 </script>

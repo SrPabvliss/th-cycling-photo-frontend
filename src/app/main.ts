@@ -12,6 +12,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 
+import { startOnlineState } from '@/core/network/use-online'
 import { useColorSchemeStore } from '@/core/theme/color-scheme.store'
 import { registerHouseSpotsLayoutSlots } from '@/features/house-spots/layout-slots'
 import { registerCartLayoutSlots } from '@/features/cart/layout-slots'
@@ -24,6 +25,8 @@ import router from './router'
 
 const app = createApp(App)
 const queryClient = new QueryClient(queryClientConfig)
+// vue-query hears from the device whether there is network before the first query runs.
+startOnlineState()
 
 const pinia = createPinia()
 

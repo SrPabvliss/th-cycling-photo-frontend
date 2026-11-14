@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { NButton } from 'naive-ui'
 import { isAxiosError } from 'axios'
 
+import { useOnline } from '@/core/network/use-online'
 import { problemKind } from '@/core/http/problem-kind'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import NotFoundView from '@/core/views/NotFoundView.vue'
@@ -187,6 +188,9 @@ const cartEvent = computed(() =>
       }
     : null,
 )
+
+// Without network the offline strip says it once: the "more photos" alerts do not repeat it.
+const online = useOnline()
 </script>
 
 <template>
@@ -335,7 +339,7 @@ const cartEvent = computed(() =>
                 @load-more="loadMore"
               />
               <FormAlert
-                v-if="hasNextPage && isFetchNextPageError"
+                v-if="hasNextPage && isFetchNextPageError && online"
                 class="gallery__more-problem"
                 data-test="more-problem"
                 tone="warn"
@@ -362,7 +366,7 @@ const cartEvent = computed(() =>
                 @load-more="loadMoreNoPlate"
               />
               <FormAlert
-                v-if="hasNextNoPlatePage && isMoreNoPlateError"
+                v-if="hasNextNoPlatePage && isMoreNoPlateError && online"
                 class="gallery__more-problem"
                 tone="warn"
                 title="No pudimos cargar más fotos"

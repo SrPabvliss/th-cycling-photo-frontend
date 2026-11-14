@@ -6,6 +6,7 @@ import IntlTelInput from 'intl-tel-input/vueWithUtils'
 import 'intl-tel-input/styles'
 import type { RouteLocationRaw } from 'vue-router'
 
+import { useOnline } from '@/core/network/use-online'
 import { useLocationOptions } from '@/features/locations/composables/use-location-options'
 import { LEGAL_PATHS } from '@/features/legal/routes'
 import PasswordRules from '@/shared/auth/PasswordRules.vue'
@@ -167,6 +168,9 @@ async function send() {
   submitted.value = true
   await sendClientForm(form, formRef.value)
 }
+
+// Without network the offline strip says it once: this alert does not repeat it.
+const online = useOnline()
 </script>
 
 <template>
@@ -335,7 +339,7 @@ async function send() {
       </div>
 
       <FormAlert
-        v-if="hasPlacesProblem"
+        v-if="hasPlacesProblem && online"
         data-test="places-problem"
         tone="warn"
         title="No pudimos cargar los países y ciudades"

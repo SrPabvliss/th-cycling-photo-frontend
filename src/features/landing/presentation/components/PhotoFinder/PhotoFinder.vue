@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { NButton } from 'naive-ui'
 
+import { useOnline } from '@/core/network/use-online'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { usePublicEventsQuery } from '@/shared/public-events'
 import { parsePlate } from '@/shared/utils/plate.utils'
@@ -49,6 +50,9 @@ function search() {
 
   router.push(finderTarget(raceSlug.value, plate))
 }
+
+// Without network the offline strip says it once: this alert does not repeat it.
+const online = useOnline()
 </script>
 
 <template>
@@ -123,7 +127,7 @@ function search() {
     </NButton>
 
     <FormAlert
-      v-if="hasFailed"
+      v-if="hasFailed && online"
       class="photo-finder__problem"
       data-test="finder-problem"
       tone="warn"

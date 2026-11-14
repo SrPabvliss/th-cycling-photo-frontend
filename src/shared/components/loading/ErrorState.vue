@@ -4,6 +4,7 @@ import { NButton } from 'naive-ui'
 
 import type { ProblemKind } from '@/core/http/problem-kind'
 import { useScreenProblem } from '@/core/layout/client/screen-problem'
+import { useOnline } from '@/core/network/use-online'
 import { ILLUSTRATION_VIEW_BOX, ILLUSTRATIONS } from '@/shared/components/empty-state/illustrations'
 import { problemCopy } from './problem-copy'
 
@@ -30,15 +31,18 @@ const emit = defineEmits<{
   retry: []
 }>()
 
-const copy = computed(() => problemCopy(props.kind, props.what))
-const canSayBetter = computed(() => props.kind === 'server' || props.kind === 'unknown')
+// Once the network is gone that is the problem, whatever the load failed with before.
+const online = useOnline()
+const kind = computed<ProblemKind>(() => (online.value ? props.kind : 'offline'))
+const copy = computed(() => problemCopy(kind.value, props.what))
+const canSayBetter = computed(() => kind.value === 'server' || kind.value === 'unknown')
 const shownTitle = computed(() => (canSayBetter.value && props.title) || copy.value.title)
 const shownText = computed(() => (canSayBetter.value && props.text) || copy.value.text)
 const drawing = computed(() =>
   copy.value.illustration ? ILLUSTRATIONS[copy.value.illustration] : null,
 )
 // Without network there is nothing to press: it comes back on its own.
-const isWaiting = computed(() => props.kind === 'offline')
+const isWaiting = computed(() => kind.value === 'offline')
 
 const root = ref<HTMLElement | null>(null)
 useScreenProblem(root)
@@ -159,8 +163,9 @@ useScreenProblem(root)
   align-self: center;
 }
 
-/* Desktop-wide container (the client's desktop cut): drawing, words, then the button on the
-   right, all centred on one line. */
+/* Desktop-wide container: drawing, words, then the button on the right, all centred on one line.
+ * Container queries cannot read custom properties, so the breakpoint is written out: desktop
+ * starts at 768, as in the rest of the app. */
 @container (min-width: 768px) {
   .error-state:not(.error-state--stacked) .error-state__box {
     --error-state-ilu: var(--error-state-ilu-wide);

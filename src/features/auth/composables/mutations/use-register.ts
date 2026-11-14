@@ -7,11 +7,13 @@ import { useSessionStore } from '@/core/auth/stores/session.store'
 import type { IApiCurrentUser } from '@/core/auth/current-user'
 import type { IApiAuthTokens } from '../../types/responses/auth-tokens.response'
 import type { IRegisterRequest } from '../../types/requests/register.request'
+import { CLIENT_MUTATION } from '@/shared/constants/client-mutation'
 
 export function useRegisterMutation() {
   const authStore = useSessionStore()
 
   return useMutation({
+    ...CLIENT_MUTATION,
     mutationFn: async (data: IRegisterRequest) => {
       // The form says what went wrong, on each field.
       const registerResponse = await httpClient.post<IApiAuthTokens>(

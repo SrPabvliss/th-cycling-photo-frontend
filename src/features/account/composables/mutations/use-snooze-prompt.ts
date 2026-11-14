@@ -5,11 +5,13 @@ import { httpClient } from '@/core/http/axios-client'
 import { toCurrentUser } from '@/core/auth/current-user.mapper'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import type { IApiCurrentUser } from '@/core/auth/current-user'
+import { CLIENT_MUTATION } from '@/shared/constants/client-mutation'
 
 export function useSnoozePrompt() {
   const authStore = useSessionStore()
 
   return useMutation({
+    ...CLIENT_MUTATION,
     mutationFn: async (key: string) => {
       await httpClient.post(API_ROUTES.AUTH.PROMPTS.SNOOZE(key))
     },

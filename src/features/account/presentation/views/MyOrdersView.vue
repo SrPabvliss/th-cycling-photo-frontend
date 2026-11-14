@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { NButton } from 'naive-ui'
 
+import { useOnline } from '@/core/network/use-online'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
 import { spotIndexAfter } from '@/features/house-spots/utils/spot-placement'
@@ -52,6 +53,9 @@ useVisiblePolling(anyConfirming, CONFIRMING_POLL_MS, () => refetch())
 const SPOT_AFTER = 4
 const SPOT_SEED = 11
 const spotAfter = computed(() => spotIndexAfter(orders.value.length, SPOT_AFTER))
+
+// Without network the offline strip says it once: this alert does not repeat it.
+const online = useOnline()
 </script>
 
 <template>
@@ -108,7 +112,7 @@ const spotAfter = computed(() => spotIndexAfter(orders.value.length, SPOT_AFTER)
       <div v-if="canLoadMore" ref="sentinel" class="my-orders__sentinel" aria-hidden="true" />
 
       <FormAlert
-        v-if="hasNextPage && isFetchNextPageError"
+        v-if="hasNextPage && isFetchNextPageError && online"
         class="my-orders__more"
         data-test="more-problem"
         tone="warn"

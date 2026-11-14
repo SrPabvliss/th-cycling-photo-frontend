@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 
 import { problemKind } from '@/core/http/problem-kind'
+import { useOnline } from '@/core/network/use-online'
 import ErrorState from './ErrorState.vue'
 import { useDelayedFlag } from './use-delayed-flag'
 
@@ -29,19 +30,25 @@ const emit = defineEmits<{
   retry: []
 }>()
 
-const isPending = computed(() => props.status === 'pending')
+// Without network vue-query pauses a load instead of failing it: it stays pending until the
+// network is back. That wait is said in place, never painted as a skeleton that does not end.
+const online = useOnline()
+const isOffline = computed(() => !online.value && props.status !== 'success')
+
+const isPending = computed(() => props.status === 'pending' && !isOffline.value)
 const showSkeleton = useDelayedFlag(isPending)
 
-const kind = computed(() => problemKind(props.error))
+const kind = computed(() => (isOffline.value ? 'offline' : problemKind(props.error)))
 
 // What was painted before the error (the skeleton, mostly) keeps its height, so the error takes
 // its place without the page jumping. Read before the error replaces it.
 const root = ref<HTMLElement | null>(null)
 const heldHeight = ref(0)
+const showsProblem = computed(() => props.status === 'error' || isOffline.value)
 watch(
-  () => props.status,
-  (status, previous) => {
-    if (status === 'error' && previous !== 'error') heldHeight.value = root.value?.offsetHeight ?? 0
+  showsProblem,
+  (now, before) => {
+    if (now && !before) heldHeight.value = root.value?.offsetHeight ?? 0
   },
   { flush: 'pre' },
 )
@@ -61,7 +68,7 @@ const isBusy = computed(
     <template v-else-if="isPending" />
 
     <ErrorState
-      v-else-if="status === 'error'"
+      v-else-if="showsProblem"
       :what="what"
       :kind="kind"
       :stacked="stacked"

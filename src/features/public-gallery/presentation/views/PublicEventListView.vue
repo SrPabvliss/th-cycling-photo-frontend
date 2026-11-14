@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { NButton } from 'naive-ui'
 
+import { useOnline } from '@/core/network/use-online'
 import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
 import { spotIndexAfter } from '@/features/house-spots/utils/spot-placement'
 import { EmptyState } from '@/shared/components/empty-state'
@@ -58,6 +59,9 @@ const sentinel = useInfiniteScrollTrigger(() => fetchNextPage(), {
 const SPOT_AFTER = 3
 const SPOT_SEED = 7
 const spotAfter = computed(() => spotIndexAfter(events.value.length, SPOT_AFTER))
+
+// Without network the offline strip says it once: this alert does not repeat it.
+const online = useOnline()
 </script>
 
 <template>
@@ -127,7 +131,7 @@ const spotAfter = computed(() => spotIndexAfter(events.value.length, SPOT_AFTER)
       <div v-if="canLoadMore" ref="sentinel" class="event-list__sentinel" aria-hidden="true" />
 
       <FormAlert
-        v-if="hasNextPage && isFetchNextPageError"
+        v-if="hasNextPage && isFetchNextPageError && online"
         class="event-list__more"
         data-test="more-problem"
         tone="warn"

@@ -1,9 +1,26 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { ref } from 'vue'
+
+const online = ref(true)
+vi.mock('@/core/network/use-online', () => ({ useOnline: () => online }))
 
 import FormAlert from './FormAlert.vue'
 
 describe('FormAlert', () => {
+  beforeEach(() => {
+    online.value = true
+  })
+
+  it('offers no retry without network: it comes back on its own', () => {
+    online.value = false
+    const wrapper = mount(FormAlert, {
+      props: { tone: 'warn', title: 'No pudimos cargar', onRetry: vi.fn() },
+    })
+
+    expect(wrapper.find('button').exists()).toBe(false)
+  })
+
   it('announces a bad message at once', () => {
     const wrapper = mount(FormAlert, { props: { tone: 'bad', title: 'No pudimos guardar' } })
 

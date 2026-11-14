@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+import { useOnline } from '@/core/network/use-online'
 import { checkoutPath } from '@/core/navigation/route-paths'
 import { usePriceSheet } from '@/features/pricing/composables/use-price-sheet'
 import TierChips from '@/features/pricing/presentation/components/TierChips/TierChips.vue'
@@ -39,6 +40,9 @@ const nextTier = computed(() =>
 const hasSomething = computed(
   () => !!pricing.value || count.value > 0 || cart.status.value === 'error',
 )
+
+// Without network the offline strip says it once: this alert does not repeat it.
+const online = useOnline()
 </script>
 
 <template>
@@ -53,7 +57,7 @@ const hasSomething = computed(
     />
 
     <FormAlert
-      v-if="cart.status.value === 'error'"
+      v-if="cart.status.value === 'error' && online"
       class="gallery-cart-bar__problem"
       data-test="cart-problem"
       tone="warn"

@@ -15,7 +15,9 @@ const props = defineProps<{
 
 const text = computed(() => checkoutProblemText(props.problem))
 // It did not get there (amber), or the server turned it down (red).
-const tone = computed(() => (props.problem === 'network' ? 'warn' : 'bad'))
+const tone = computed(() =>
+  props.problem === 'network' || props.problem === 'offline' ? 'warn' : 'bad',
+)
 </script>
 
 <template>

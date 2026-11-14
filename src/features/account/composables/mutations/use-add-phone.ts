@@ -4,11 +4,13 @@ import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
 import { ACCOUNT_QUERY_KEYS } from '../../constants/query-keys'
 import type { IAddPhoneRequest } from '../../types/requests/phone.request'
+import { CLIENT_MUTATION } from '@/shared/constants/client-mutation'
 
 export function useAddPhone(options: { silent?: boolean } = {}) {
   const queryClient = useQueryClient()
 
   return useMutation({
+    ...CLIENT_MUTATION,
     mutationFn: async (payload: IAddPhoneRequest) => {
       const response = await httpClient.post<{ id: string }>(API_ROUTES.USER_PHONES.BASE, payload, {
         silentSuccess: true,

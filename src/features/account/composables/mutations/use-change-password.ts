@@ -4,11 +4,13 @@ import { API_ROUTES } from '@/core/api/api-routes'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import { httpClient } from '@/core/http/axios-client'
 import type { IChangePasswordRequest } from '../../types/requests/change-password.request'
+import { CLIENT_MUTATION } from '@/shared/constants/client-mutation'
 
 export function useChangePassword(options: { silent?: boolean } = {}) {
   const authStore = useSessionStore()
 
   return useMutation({
+    ...CLIENT_MUTATION,
     mutationFn: async (payload: IChangePasswordRequest) => {
       const response = await httpClient.post<{ accessToken?: string } | null>(
         API_ROUTES.AUTH.CHANGE_PASSWORD,

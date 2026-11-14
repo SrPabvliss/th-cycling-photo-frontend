@@ -1,9 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
-import { computed, reactive } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 import type { IPublicEventFilters, IPublicEventListItem } from '@/shared/public-events'
+const online = ref(true)
+vi.mock('@/core/network/use-online', () => ({ useOnline: () => online }))
+
 import PhotoFinder from './PhotoFinder.vue'
 
 type Status = 'pending' | 'error' | 'success'
@@ -193,6 +196,15 @@ describe('PhotoFinder', () => {
 
     await send(wrapper)
     expect(push).not.toHaveBeenCalled()
+  })
+
+  it('leaves the lack of network to the offline strip, without repeating it', async () => {
+    online.value = false
+    Object.assign(races, { status: 'error', events: [] })
+    const { wrapper } = await mountFinder()
+
+    expect(wrapper.find('[data-test="finder-problem"]').exists()).toBe(false)
+    online.value = true
   })
 
   it('holds the retry while the races are asked again', async () => {

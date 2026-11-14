@@ -140,6 +140,19 @@ describe('ClientLayout', () => {
     expect(bar.compareDocumentPosition(header) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
+  it('puts the offline strip right under the header, after the season bar', async () => {
+    registerLayoutSlot(
+      LAYOUT_SLOTS.CLIENT_SEASON_BAR,
+      defineComponent({ render: () => h('aside', { 'data-test': 'season-bar' }) }),
+    )
+    const { wrapper } = await mountAt('/season')
+
+    const header = wrapper.get('[data-test="ClientHeader"]').element
+    const strip = wrapper.get('.offline-strip').element
+    expect(header.nextElementSibling).toBe(strip)
+    expect(strip.classList.contains('offline-strip--under-header')).toBe(true)
+  })
+
   it('takes the season bar away while the screen shows a problem', async () => {
     registerLayoutSlot(
       LAYOUT_SLOTS.CLIENT_SEASON_BAR,

@@ -1,12 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
-import { computed, reactive } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 import type { IPublicEventFilters, IPublicEventListItem } from '@/shared/public-events'
 vi.mock('@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue', async () => ({
   default: (await import('@/features/house-spots/testing/spot-stubs')).HouseSpotStub,
 }))
+
+const online = ref(true)
+vi.mock('@/core/network/use-online', () => ({ useOnline: () => online }))
 
 import LandingView from './LandingView.vue'
 
@@ -170,6 +173,19 @@ describe('LandingView', () => {
     expect(section.text()).toContain('Vuelve a intentarlo en un momento.')
     expect(wrapper.find('.form-alert').exists()).toBe(false)
     expect(cards(wrapper)).toHaveLength(0)
+  })
+
+  it('without network, says the events wait for it, with no button and no skeleton', async () => {
+    online.value = false
+    Object.assign(recent, { status: 'pending', events: [] })
+    const wrapper = await mountView()
+    await vi.advanceTimersByTimeAsync(400)
+
+    const section = wrapper.get('[data-test="recent-problem"]')
+    expect(section.text()).toContain('Sin conexión a internet')
+    expect(section.find('button').exists()).toBe(false)
+    expect(skeletons(wrapper)).toHaveLength(0)
+    online.value = true
   })
 
   it('asks for the events again when retrying', async () => {

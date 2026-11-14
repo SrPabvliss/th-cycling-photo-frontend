@@ -8,6 +8,7 @@ import type {
   IUpdateBillingAccountRequest,
 } from '../../types/requests/billing-account.request'
 import type { IBillingAccount } from '../../types/responses/billing-account.response'
+import { CLIENT_MUTATION } from '@/shared/constants/client-mutation'
 
 /**
  * What the edit form changed, as the api takes it (TIT-114): only the changed fields; the type
@@ -35,6 +36,7 @@ export function useUpdateBillingAccount() {
   const queryClient = useQueryClient()
 
   return useMutation({
+    ...CLIENT_MUTATION,
     mutationFn: async (input: { id: string; changes: IUpdateBillingAccountRequest }) => {
       const response = await httpClient.patch<{ id: string }>(
         API_ROUTES.BILLING_ACCOUNTS.BY_ID(input.id),

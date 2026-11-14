@@ -3,6 +3,7 @@ import { computed, ref, watch, type Ref } from 'vue'
 import { useForm } from '@tanstack/vue-form'
 import { NButton, useMessage } from 'naive-ui'
 
+import { useOnline } from '@/core/network/use-online'
 import { useBirthDateFields } from '@/features/auth/composables/use-birth-date-fields'
 import { GENDER_OPTIONS, MONTH_OPTIONS } from '@/features/auth/constants/register-form.options'
 import { registerFieldValidators as v } from '@/features/auth/constants/register-form.schema'
@@ -111,6 +112,9 @@ async function save() {
   submitted.value = true
   await sendClientForm(form, formRef.value)
 }
+
+// Without network the offline strip says it once: this alert does not repeat it.
+const online = useOnline()
 </script>
 
 <template>
@@ -223,7 +227,7 @@ async function save() {
     </div>
 
     <FormAlert
-      v-if="hasPlacesProblem"
+      v-if="hasPlacesProblem && online"
       data-test="places-problem"
       tone="warn"
       title="No pudimos cargar los países y ciudades"

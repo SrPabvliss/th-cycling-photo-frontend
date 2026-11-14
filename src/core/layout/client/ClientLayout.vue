@@ -5,6 +5,7 @@ import ClientFooter from './ClientFooter.vue'
 import ClientHeader from './ClientHeader.vue'
 import ClientLogo from './ClientLogo.vue'
 import ClientTabBar from './ClientTabBar.vue'
+import OfflineStrip from './OfflineStrip.vue'
 import { useClientShell } from './client-shell'
 import { hasScreenProblem } from './screen-problem'
 
@@ -25,6 +26,7 @@ const seasonBars = useLayoutSlot(LAYOUT_SLOTS.CLIENT_SEASON_BAR)
     <div v-else class="client-layout__brand">
       <ClientLogo />
     </div>
+    <OfflineStrip :under-header="shell.header" />
 
     <main class="client-layout__main">
       <!-- A screen that breaks keeps the shell around it, so the navigation still works. -->

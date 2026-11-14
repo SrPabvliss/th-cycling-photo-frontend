@@ -1,5 +1,7 @@
 import { isAxiosError } from 'axios'
 
+import { problemKind } from '@/core/http/problem-kind'
+
 /** What stopped an order from being created, in terms of what the buyer can do about it. */
 export type CheckoutProblem =
   | 'consent'
@@ -7,6 +9,7 @@ export type CheckoutProblem =
   | 'profile'
   | 'card-unavailable'
   | 'cart-missing'
+  | 'offline'
   | 'network'
   | 'unknown'
 
@@ -29,7 +32,7 @@ interface IApiErrorBody {
 /** Reads a failed order request (create it, or change how it is paid) as one problem. */
 export function checkoutProblem(error: unknown): CheckoutProblem {
   if (!isAxiosError(error)) return 'unknown'
-  if (!error.response) return 'network'
+  if (!error.response) return problemKind(error) === 'offline' ? 'offline' : 'network'
 
   const body = (error.response.data as { error?: IApiErrorBody } | undefined)?.error
   const key = body?.messageKey ?? ''
@@ -42,7 +45,7 @@ export function checkoutProblem(error: unknown): CheckoutProblem {
   return 'unknown'
 }
 
-const TEXT: Record<CheckoutProblem, { title: string; text: string }> = {
+const TEXT: Record<CheckoutProblem, { title: string; text?: string }> = {
   consent: {
     title: 'Falta tu autorización de factura',
     text: 'Marca la casilla para que podamos emitir tu factura electrónica.',
@@ -63,6 +66,7 @@ const TEXT: Record<CheckoutProblem, { title: string; text: string }> = {
     title: 'No encontramos estas fotos en tu carrito',
     text: 'Si ya confirmaste este pedido, está en Mis fotos. Si no, vuelve a la galería y agrégalas de nuevo.',
   },
+  offline: { title: 'Sin conexión a internet' },
   network: {
     title: 'No se pudo completar',
     text: 'Parece un problema de conexión. Nada se perdió: intenta de nuevo.',
@@ -70,6 +74,6 @@ const TEXT: Record<CheckoutProblem, { title: string; text: string }> = {
   unknown: { title: 'No se pudo completar', text: 'Intenta de nuevo en un momento.' },
 }
 
-export function checkoutProblemText(problem: CheckoutProblem): { title: string; text: string } {
+export function checkoutProblemText(problem: CheckoutProblem): { title: string; text?: string } {
   return TEXT[problem]
 }

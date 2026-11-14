@@ -1,11 +1,27 @@
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { ref } from 'vue'
+
+const online = ref(true)
+vi.mock('@/core/network/use-online', () => ({ useOnline: () => online }))
 
 import ErrorState from './ErrorState.vue'
 
 const what = 'los eventos'
 
 describe('ErrorState', () => {
+  beforeEach(() => {
+    online.value = true
+  })
+
+  it('waits for the network once it is gone, whatever the load failed with', () => {
+    online.value = false
+    const wrapper = mount(ErrorState, { props: { what, kind: 'server' } })
+
+    expect(wrapper.get('.error-state__title').text()).toBe('Sin conexión a internet')
+    expect(wrapper.find('button').exists()).toBe(false)
+  })
+
   it('says what did not show, with the drawing of its cause, as an alert', () => {
     const wrapper = mount(ErrorState, { props: { what } })
 

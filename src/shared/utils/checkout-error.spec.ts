@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { AxiosError, type AxiosResponse } from 'axios'
 
 import { checkoutProblem, checkoutProblemText, type CheckoutProblem } from './checkout-error'
@@ -35,6 +35,13 @@ describe('checkoutProblem', () => {
     }
 
     expect(checkoutProblem(error)).toBe('billing')
+  })
+
+  it('reads a request sent without network as the device being offline', () => {
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+
+    expect(checkoutProblem(new AxiosError('Network Error', 'ERR_NETWORK'))).toBe('offline')
+    vi.restoreAllMocks()
   })
 
   it('reads a request that got no answer as a network problem', () => {
@@ -79,5 +86,9 @@ describe('checkoutProblemText', () => {
     ['unknown', 'No se pudo completar', 'Intenta de nuevo en un momento.'],
   ])('words %s for the buyer', (problem, title, text) => {
     expect(checkoutProblemText(problem)).toEqual({ title, text })
+  })
+
+  it('says only that there is no internet when the device is offline', () => {
+    expect(checkoutProblemText('offline')).toEqual({ title: 'Sin conexión a internet' })
   })
 })

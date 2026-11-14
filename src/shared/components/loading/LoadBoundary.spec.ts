@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { ref } from 'vue'
 import { AxiosError } from 'axios'
+
+const online = ref(true)
+vi.mock('@/core/network/use-online', () => ({ useOnline: () => online }))
 
 import LoadBoundary from './LoadBoundary.vue'
 
@@ -23,7 +27,10 @@ function mountBoundary(props: {
 }
 
 describe('LoadBoundary', () => {
-  beforeEach(() => vi.useFakeTimers())
+  beforeEach(() => {
+    vi.useFakeTimers()
+    online.value = true
+  })
   afterEach(() => vi.useRealTimers())
 
   it('paints nothing while a pending load is still fast', () => {
@@ -155,5 +162,42 @@ describe('LoadBoundary', () => {
     const wrapper = mountBoundary({ status: 'error' })
 
     expect(wrapper.get('.error-state').attributes('style')).toBeUndefined()
+  })
+
+  it('without network, says so in place of a load that is waiting for it, with no button', () => {
+    online.value = false
+    const wrapper = mountBoundary({ status: 'pending' })
+
+    expect(wrapper.find('[data-test="skeleton"]').exists()).toBe(false)
+    expect(wrapper.text()).toContain('Sin conexión a internet')
+    expect(wrapper.text()).toContain('Los eventos aparecerán cuando vuelvas a tener conexión.')
+    expect(wrapper.find('button').exists()).toBe(false)
+  })
+
+  it('without network, a failed load waits too, whatever it failed with', () => {
+    online.value = false
+    const wrapper = mountBoundary({ status: 'error', error: new Error('boom') })
+
+    expect(wrapper.text()).toContain('Sin conexión a internet')
+    expect(wrapper.find('button').exists()).toBe(false)
+  })
+
+  it('without network, what is already on screen stays', () => {
+    online.value = false
+    const wrapper = mountBoundary({ status: 'success' })
+
+    expect(wrapper.find('[data-test="content"]').exists()).toBe(true)
+    expect(wrapper.text()).not.toContain('Sin conexión')
+  })
+
+  it('goes back to loading when the network comes back', async () => {
+    online.value = false
+    const wrapper = mountBoundary({ status: 'pending' })
+
+    online.value = true
+    await vi.advanceTimersByTimeAsync(400)
+
+    expect(wrapper.text()).not.toContain('Sin conexión')
+    expect(wrapper.find('[data-test="skeleton"]').exists()).toBe(true)
   })
 })

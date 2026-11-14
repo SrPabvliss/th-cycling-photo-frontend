@@ -7,12 +7,14 @@ import { useSessionStore } from '@/core/auth/stores/session.store'
 import type { IApiCurrentUser } from '@/core/auth/current-user'
 import { ACCOUNT_QUERY_KEYS } from '../../constants/query-keys'
 import type { IUpdateProfileRequest } from '../../types/requests/update-profile.request'
+import { CLIENT_MUTATION } from '@/shared/constants/client-mutation'
 
 export function useUpdateProfile(options: { silent?: boolean } = {}) {
   const queryClient = useQueryClient()
   const authStore = useSessionStore()
 
   return useMutation({
+    ...CLIENT_MUTATION,
     mutationFn: async (payload: IUpdateProfileRequest) => {
       const response = await httpClient.patch<{ id: string }>(API_ROUTES.MY_PROFILE.BASE, payload, {
         silent: options.silent,

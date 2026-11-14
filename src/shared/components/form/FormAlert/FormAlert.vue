@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, useSlots } from 'vue'
 
+import { useOnline } from '@/core/network/use-online'
+
 // A message about the whole form, above or next to its button, or about a group whose data did
 // not load. Tones: 'warn' for what could not load or send (network, server, slowness), 'bad' for
 // what the server refused (credentials, an order that can no longer be cancelled), 'info' for
@@ -18,7 +20,10 @@ const props = defineProps<{
 
 const slots = useSlots()
 
-const hasActions = computed(() => !!props.onRetry || !!slots.actions)
+// Without network there is nothing to retry: it comes back on its own when the network does.
+const online = useOnline()
+const canRetry = computed(() => !!props.onRetry && online.value)
+const hasActions = computed(() => canRetry.value || !!slots.actions)
 const isWarning = computed(() => props.tone !== 'info')
 </script>
 
@@ -50,12 +55,12 @@ const isWarning = computed(() => props.tone !== 'info')
       <div v-if="hasActions" class="form-alert__actions">
         <slot name="actions" />
         <button
-          v-if="onRetry"
+          v-if="canRetry"
           type="button"
           class="form-alert__out"
           :disabled="retrying"
           :aria-busy="retrying ? 'true' : undefined"
-          @click="onRetry()"
+          @click="onRetry?.()"
         >
           Reintentar
         </button>
