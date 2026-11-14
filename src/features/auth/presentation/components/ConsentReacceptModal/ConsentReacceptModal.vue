@@ -1,18 +1,21 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { NButton, NCheckbox, NModal } from 'naive-ui'
+import { NAlert, NButton, NCheckbox, NModal } from 'naive-ui'
 
 import { LEGAL_PATHS } from '@/features/legal/routes'
 import { useRecordConsentsMutation } from '../../../composables/mutations/use-record-consents'
 import { CONSENT_TYPE } from '../../../constants/consent.constants'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import ModalCloseButton from '@/shared/components/ModalCloseButton/ModalCloseButton.vue'
+import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
 
 const authStore = useSessionStore()
-const { mutateAsync: recordConsents, isPending } = useRecordConsentsMutation()
+// Silent: a failure is said inside the modal, which stays open to try again.
+const { mutateAsync: recordConsents, isPending } = useRecordConsentsMutation({ silent: true })
 
 const dismissed = ref(false)
 const accepted = ref(false)
+const problem = ref<IFormProblem | null>(null)
 
 const isVisible = computed(
   () =>
@@ -21,8 +24,13 @@ const isVisible = computed(
 )
 
 async function confirm() {
-  await recordConsents([CONSENT_TYPE.TERMS_PRIVACY])
-  accepted.value = false
+  problem.value = null
+  try {
+    await recordConsents([CONSENT_TYPE.TERMS_PRIVACY])
+    accepted.value = false
+  } catch (error) {
+    problem.value = generalProblem(error)
+  }
 }
 
 function dismiss() {
@@ -61,11 +69,23 @@ function dismiss() {
       pedidos.
     </NCheckbox>
 
+    <!-- Naive's alert takes the theme of the area it opens on: client or panel. -->
+    <NAlert
+      v-if="problem"
+      type="error"
+      class="consent-modal__problem"
+      data-test="consent-problem"
+      role="alert"
+      :title="problem.title"
+    >
+      {{ problem.text }}
+    </NAlert>
+
     <template #footer>
       <div class="consent-modal__actions">
         <NButton quaternary :disabled="isPending" @click="dismiss">Más tarde</NButton>
         <NButton type="primary" :disabled="!accepted" :loading="isPending" @click="confirm">
-          Aceptar
+          {{ problem ? 'Reintentar' : 'Aceptar' }}
         </NButton>
       </div>
     </template>

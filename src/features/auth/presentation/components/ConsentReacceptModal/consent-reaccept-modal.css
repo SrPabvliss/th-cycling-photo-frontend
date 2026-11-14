@@ -47,6 +47,10 @@
   color: var(--tt-ink, #374151);
 }
 
+.consent-modal__problem {
+  margin-block-start: 16px;
+}
+
 .consent-modal__actions {
   display: flex;
   justify-content: flex-end;
