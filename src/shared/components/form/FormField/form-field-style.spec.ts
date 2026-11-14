@@ -30,4 +30,10 @@ describe('form field look', () => {
       /border-color: var\(--tt-primary\)/,
     )
   })
+
+  it('keeps the error border while the field has the focus, where a failed send puts it', () => {
+    const rule = ruleFor(/\.form-field--error :slotted\(input:focus\)/)
+    expect(rule).toMatch(/border-color: var\(--tt-danger-ink\)/)
+    expect(rule).toMatch(/box-shadow: 0 0 0 var\(--tt-space-1\) var\(--tt-danger-soft\)/)
+  })
 })

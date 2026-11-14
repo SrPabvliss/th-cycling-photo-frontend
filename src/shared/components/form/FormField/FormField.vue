@@ -74,6 +74,13 @@ const describedby = computed(
   border-color: var(--tt-danger-ink);
 }
 
+/* A failed send puts the focus on the first field in error: it must still read as one. */
+.form-field--error :slotted(input:focus),
+.form-field--error :slotted(select:focus) {
+  border-color: var(--tt-danger-ink);
+  box-shadow: 0 0 0 var(--tt-space-1) var(--tt-danger-soft);
+}
+
 .form-field :slotted(select:disabled) {
   opacity: 0.5;
 }
