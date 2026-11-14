@@ -6,6 +6,8 @@ import type {
   BillingIdType,
   IBillingAccount,
 } from '@/features/account/types/responses/billing-account.response'
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
+import type { IFormProblem } from '@/shared/utils/form-problem'
 
 const ID_TYPE_LABELS: Record<BillingIdType, string> = {
   national_id: 'Cédula',
@@ -17,6 +19,7 @@ const props = defineProps<{
   accounts: IBillingAccount[]
   selectedId: string | null
   isSaving: boolean
+  problem?: IFormProblem | null
 }>()
 
 const emit = defineEmits<{
@@ -73,6 +76,8 @@ function confirm() {
     <NCheckbox v-model:checked="makeDefault" class="billing-picker__default">
       Usar siempre esta cuenta
     </NCheckbox>
+
+    <FormAlert v-if="problem" tone="bad" :title="problem.title" :text="problem.text" />
 
     <NButton
       type="primary"

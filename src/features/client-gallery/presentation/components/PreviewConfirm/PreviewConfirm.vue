@@ -77,6 +77,7 @@ const {
   selectedBillingAccountId,
   invoiceConsentChecked,
   billingSheet,
+  pickProblem,
   billingPrefill,
   isBillingReady,
   isSettingDefault,
@@ -294,6 +295,7 @@ async function confirm() {
         :accounts="billingAccounts"
         :selected-id="selectedBillingAccountId"
         :is-saving="isSettingDefault"
+        :problem="pickProblem"
         @choose="handleBillingChosen"
         @add="billingSheet = 'form'"
       />

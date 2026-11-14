@@ -1,6 +1,7 @@
 import { computed, ref, watch } from 'vue'
 
 import { useSessionStore } from '@/core/auth/stores/session.store'
+import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
 import { useSetDefaultBillingAccount } from './mutations/use-set-default-billing-account'
 import { useRecordInvoiceConsent } from './mutations/use-record-invoice-consent'
 import { useMyBillingAccountsQuery } from './queries/use-my-billing-accounts'
@@ -29,6 +30,9 @@ export function useBillingSelection(enabled: () => boolean) {
   const selectedBillingAccountId = ref<string | null>(null)
   const invoiceConsentChecked = ref(false)
   const billingSheet = ref<BillingSheet>(null)
+  /** Why the last pick did not go through, said in the picker above its button. */
+  const pickProblem = ref<IFormProblem | null>(null)
+  watch(billingSheet, () => (pickProblem.value = null))
 
   watch(
     billingAccounts,
@@ -62,7 +66,15 @@ export function useBillingSelection(enabled: () => boolean) {
 
   async function handleBillingChosen(choice: { id: string; makeDefault: boolean }) {
     selectedBillingAccountId.value = choice.id
-    if (choice.makeDefault) await setDefaultBillingAccount(choice.id)
+    pickProblem.value = null
+    if (choice.makeDefault) {
+      try {
+        await setDefaultBillingAccount(choice.id)
+      } catch (error) {
+        pickProblem.value = generalProblem(error)
+        return
+      }
+    }
     billingSheet.value = null
   }
 
@@ -96,6 +108,7 @@ export function useBillingSelection(enabled: () => boolean) {
     selectedBillingAccountId,
     invoiceConsentChecked,
     billingSheet,
+    pickProblem,
     billingPrefill,
     isBillingReady,
     isSettingDefault,
