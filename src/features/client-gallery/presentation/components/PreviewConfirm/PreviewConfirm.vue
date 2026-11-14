@@ -11,6 +11,7 @@ import BillingAccountPicker from '@/features/account/presentation/components/Bil
 import BillingCard from '@/features/account/presentation/components/BillingCard/BillingCard.vue'
 import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
 import CheckoutProblemAlert from '@/shared/components/CheckoutProblemAlert/CheckoutProblemAlert.vue'
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { useEventPaymentOptionsQuery } from '@/shared/composables/use-event-payment-options'
 import { quotePhotos } from '@/shared/pricing/quote'
 import { formatMoney } from '@/shared/pricing/tier-cards'
@@ -68,6 +69,9 @@ const money = (amount: number) => formatMoney(amount, pricing.value?.currency ??
 const totalLabel = computed(() => (quote.value ? ` · ${money(quote.value.total)}` : ''))
 
 const {
+  billingProblem,
+  isBillingRetrying,
+  retryBilling,
   billingAccounts,
   needsInvoiceConsent,
   selectedBillingAccountId,
@@ -199,7 +203,17 @@ async function confirm() {
       </div>
 
       <div class="preview-confirm__side">
+        <FormAlert
+          v-if="billingProblem"
+          data-test="billing-problem"
+          tone="bad"
+          title="No pudimos cargar tus datos de facturación"
+          text="Puede ser tu conexión."
+          :retrying="isBillingRetrying"
+          @retry="retryBilling()"
+        />
         <BillingCard
+          v-else
           v-model:consented="invoiceConsentChecked"
           :accounts="billingAccounts"
           :selected-id="selectedBillingAccountId"

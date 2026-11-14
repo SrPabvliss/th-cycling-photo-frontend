@@ -24,7 +24,7 @@ const DEFAULT_PREFIX = '+593'
 const SKELETON_ROWS = 2
 
 const message = useMessage()
-const { data: phones, status, isFetching, refetch } = useMyPhonesQuery()
+const { data: phones, status, isFetching, refetch } = useMyPhonesQuery({ silent: true })
 const addPhone = useAddPhone({ silent: true })
 const updatePhone = useUpdatePhone({ silent: true })
 const deletePhone = useDeletePhone({ silent: true })

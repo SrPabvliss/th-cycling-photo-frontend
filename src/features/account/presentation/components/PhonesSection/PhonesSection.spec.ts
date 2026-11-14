@@ -9,14 +9,18 @@ const phones = ref<IUserPhone[]>([])
 const remove = vi.fn()
 const add = vi.fn()
 const success = vi.fn()
+const phonesAskedWith = vi.fn()
 
 vi.mock('../../../composables/queries/use-my-phones', () => ({
-  useMyPhonesQuery: () => ({
-    data: computed(() => phones.value),
-    status: computed(() => 'success'),
-    isFetching: ref(false),
-    refetch: vi.fn(),
-  }),
+  useMyPhonesQuery: (options: unknown) => (
+    phonesAskedWith(options),
+    {
+      data: computed(() => phones.value),
+      status: computed(() => 'success'),
+      isFetching: ref(false),
+      refetch: vi.fn(),
+    }
+  ),
 }))
 vi.mock('../../../composables/mutations/use-add-phone', () => ({
   useAddPhone: () => ({ mutateAsync: add, isPending: ref(false) }),
@@ -81,6 +85,12 @@ describe('PhonesSection', () => {
   })
   afterEach(() => {
     while (mounted.length) mounted.pop()!.unmount()
+  })
+
+  it('reads the numbers without a toast: a failure has its own message here', async () => {
+    await mountSection()
+
+    expect(phonesAskedWith).toHaveBeenCalledWith({ silent: true })
   })
 
   it('lists each number with its label, the main one and WhatsApp', async () => {

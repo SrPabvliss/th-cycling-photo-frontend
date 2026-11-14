@@ -77,9 +77,20 @@ export function useBillingSelection(enabled: () => boolean) {
     if (needsInvoiceConsent.value) await recordInvoiceConsent()
   }
 
+  /** Asks for the billing data again after it failed to load. */
+  function retryBilling() {
+    return billingQuery.refetch()
+  }
+
   return {
     /** The billing data was read: from here on, no account means the buyer has none. */
     isBillingLoaded: computed(() => billingQuery.isSuccess.value),
+    /** It could not be read and nothing was before: say so instead of offering to add some. */
+    billingProblem: computed(
+      () => billingQuery.status.value === 'error' && billingQuery.data.value === undefined,
+    ),
+    isBillingRetrying: computed(() => billingQuery.isFetching.value),
+    retryBilling,
     billingAccounts,
     needsInvoiceConsent,
     selectedBillingAccountId,

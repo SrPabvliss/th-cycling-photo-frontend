@@ -39,7 +39,9 @@ const state = reactive({
   cardAvailable: false as boolean | undefined,
   accounts: [ACCOUNT] as (typeof ACCOUNT)[],
   needsConsent: false,
+  billingFailed: false,
 })
+const retryBilling = vi.fn()
 const consentChecked = ref(false)
 const problem = ref<CheckoutProblem | null>(null)
 const isPlacing = ref(false)
@@ -74,15 +76,21 @@ vi.mock('@/shared/composables/use-event-payment-options', () => ({
 }))
 vi.mock('@/features/account/composables/use-billing-selection', () => ({
   useBillingSelection: () => ({
-    isBillingLoaded: computed(() => true),
-    billingAccounts: computed(() => state.accounts),
+    isBillingLoaded: computed(() => !state.billingFailed),
+    billingProblem: computed(() => state.billingFailed),
+    isBillingRetrying: ref(false),
+    retryBilling,
+    billingAccounts: computed(() => (state.billingFailed ? [] : state.accounts)),
     needsInvoiceConsent: computed(() => state.needsConsent),
     selectedBillingAccountId: computed(() => state.accounts[0]?.id ?? null),
     invoiceConsentChecked: consentChecked,
     billingSheet: ref(null),
     billingPrefill: computed(() => ({ legalName: '', email: '' })),
     isBillingReady: computed(
-      () => state.accounts.length > 0 && (!state.needsConsent || consentChecked.value),
+      () =>
+        !state.billingFailed &&
+        state.accounts.length > 0 &&
+        (!state.needsConsent || consentChecked.value),
     ),
     isSettingDefault: ref(false),
     isRecordingConsent: ref(false),
@@ -171,7 +179,9 @@ describe('CheckoutView', () => {
       cardAvailable: false,
       accounts: [ACCOUNT],
       needsConsent: false,
+      billingFailed: false,
     })
+    retryBilling.mockClear()
     consentChecked.value = false
     problem.value = null
     isPlacing.value = false
@@ -295,6 +305,22 @@ describe('CheckoutView', () => {
     expect(primary(wrapper).text()).toBe('Confirmar pedido · $9,00')
     expect(primary(wrapper).attributes('disabled')).toBeDefined()
     expect(wrapper.text()).toContain('Agrega tus datos de facturación para confirmar.')
+  })
+
+  it('says the billing data could not load, in place of the card, instead of asking to add some', async () => {
+    signIn()
+    state.billingFailed = true
+    const { wrapper } = await mountView()
+
+    const alert = wrapper.get('[data-test="billing-problem"]')
+    expect(alert.classes()).toContain('form-alert')
+    expect(alert.text()).toContain('No pudimos cargar tus datos de facturación')
+    expect(wrapper.find('[data-test="billing-add"]').exists()).toBe(false)
+    expect(wrapper.text()).not.toContain('Agrega tus datos de facturación para confirmar.')
+    expect(primary(wrapper).attributes('disabled')).toBeDefined()
+
+    await alert.get('button').trigger('click')
+    expect(retryBilling).toHaveBeenCalledTimes(1)
   })
 
   it('asks for the invoice consent, and allows the order once it is ticked', async () => {

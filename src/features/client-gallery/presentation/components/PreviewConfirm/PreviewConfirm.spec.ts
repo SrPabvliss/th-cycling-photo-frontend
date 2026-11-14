@@ -9,15 +9,24 @@ import type { IPreviewData } from '../../../types/responses/preview-data.respons
 import type { PreviewProblem } from '../../../utils/preview-problem'
 import PreviewConfirm from './PreviewConfirm.vue'
 
-const state = reactive({ billingReady: true, hasAccount: true, cardAvailable: false })
+const state = reactive({
+  billingReady: true,
+  hasAccount: true,
+  cardAvailable: false,
+  billingFailed: false,
+})
+const retryBilling = vi.fn()
 const place = vi.fn()
 const problem = ref<PreviewProblem | null>(null)
 
 vi.mock('@/features/account/composables/use-billing-selection', () => ({
   useBillingSelection: () => ({
-    isBillingLoaded: computed(() => true),
+    isBillingLoaded: computed(() => !state.billingFailed),
+    billingProblem: computed(() => state.billingFailed),
+    isBillingRetrying: ref(false),
+    retryBilling,
     billingAccounts: computed(() =>
-      state.hasAccount
+      state.hasAccount && !state.billingFailed
         ? [
             {
               id: 'b1',
@@ -36,7 +45,7 @@ vi.mock('@/features/account/composables/use-billing-selection', () => ({
     invoiceConsentChecked: ref(false),
     billingSheet: ref(null),
     billingPrefill: computed(() => ({ legalName: '', email: '' })),
-    isBillingReady: computed(() => state.billingReady && state.hasAccount),
+    isBillingReady: computed(() => state.billingReady && state.hasAccount && !state.billingFailed),
     isSettingDefault: ref(false),
     handleBillingSaved: vi.fn(),
     handleBillingChosen: vi.fn(),
@@ -112,7 +121,13 @@ describe('PreviewConfirm', () => {
     document.body.innerHTML = ''
     sessionStorage.clear()
     setActivePinia(createPinia())
-    Object.assign(state, { billingReady: true, hasAccount: true, cardAvailable: false })
+    Object.assign(state, {
+      billingReady: true,
+      hasAccount: true,
+      cardAvailable: false,
+      billingFailed: false,
+    })
+    retryBilling.mockClear()
     place.mockReset()
     problem.value = null
   })
@@ -137,6 +152,19 @@ describe('PreviewConfirm', () => {
     const { wrapper } = await mountConfirm()
 
     expect(confirmButton(wrapper).attributes('disabled')).toBeDefined()
+  })
+
+  it('says the billing data could not load, in place of the card, and offers to retry', async () => {
+    state.billingFailed = true
+    const { wrapper } = await mountConfirm()
+
+    const alert = wrapper.get('[data-test="billing-problem"]')
+    expect(alert.text()).toContain('No pudimos cargar tus datos de facturación')
+    expect(wrapper.find('[data-test="billing-add"]').exists()).toBe(false)
+    expect(confirmButton(wrapper).attributes('disabled')).toBeDefined()
+
+    await alert.get('button').trigger('click')
+    expect(retryBilling).toHaveBeenCalledTimes(1)
   })
 
   it('keeps the button off until a method is chosen, when cards are taken', async () => {

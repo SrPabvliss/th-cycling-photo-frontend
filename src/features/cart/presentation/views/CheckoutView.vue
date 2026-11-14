@@ -23,6 +23,7 @@ import { usePricingTiersQuery } from '@/shared/pricing/use-pricing-tiers'
 import { useCheckoutDraftStore } from '../../stores/checkout-draft.store'
 import { usePlaceOrder } from '../../composables/use-place-order'
 import CheckoutProblemAlert from '@/shared/components/CheckoutProblemAlert/CheckoutProblemAlert.vue'
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import CheckoutSummary from '../components/CheckoutSummary/CheckoutSummary.vue'
 
 const SKELETON_THUMBS = 3
@@ -58,6 +59,9 @@ const totalLabel = computed(() => {
 // --- Billing and how the event is paid ---
 const {
   isBillingLoaded,
+  billingProblem,
+  isBillingRetrying,
+  retryBilling,
   billingAccounts,
   needsInvoiceConsent,
   selectedBillingAccountId,
@@ -202,6 +206,16 @@ async function confirm() {
               carrito.
             </p>
           </div>
+
+          <FormAlert
+            v-else-if="billingProblem"
+            data-test="billing-problem"
+            tone="bad"
+            title="No pudimos cargar tus datos de facturación"
+            text="Puede ser tu conexión."
+            :retrying="isBillingRetrying"
+            @retry="retryBilling()"
+          />
 
           <BillingCard
             v-else
