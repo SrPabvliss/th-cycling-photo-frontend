@@ -132,8 +132,16 @@ watch(
       </template>
     </EmptyState>
 
+    <!-- One problem at a time: a failed switch to transfer takes the place of the first one, and
+         the button below tries the transfer again. -->
     <template v-else-if="failure === 'failed'">
+      <CheckoutProblemAlert
+        v-if="transfer.problem.value"
+        :problem="transfer.problem.value"
+        :gallery-path="ROUTE_PATHS.PUBLIC_GALLERY"
+      />
       <ErrorState
+        v-else
         title="No pudimos abrir el pago"
         text="No se hizo ningún cargo."
         :retrying="isCreatingIntent"
@@ -149,11 +157,6 @@ watch(
       >
         Pagar por transferencia
       </NButton>
-      <CheckoutProblemAlert
-        v-if="transfer.problem.value"
-        :problem="transfer.problem.value"
-        :gallery-path="ROUTE_PATHS.PUBLIC_GALLERY"
-      />
     </template>
 
     <component

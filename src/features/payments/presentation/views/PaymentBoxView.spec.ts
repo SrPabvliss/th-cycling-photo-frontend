@@ -30,8 +30,9 @@ const CheckoutStub = defineComponent({
 })
 
 const payByTransfer = vi.fn()
+const transferProblem = ref<string | null>(null)
 vi.mock('@/features/payments/composables/use-declined-actions', () => ({
-  useDeclinedActions: () => ({ payByTransfer, isSwitching: ref(false), problem: ref(null) }),
+  useDeclinedActions: () => ({ payByTransfer, isSwitching: ref(false), problem: transferProblem }),
 }))
 
 const findPaymentGateway = vi.fn()
@@ -87,6 +88,7 @@ beforeEach(() => {
   findPaymentGateway.mockReset()
   routeQuery.value = { orders: 'o1,o2', evento: 'e1' }
   payByTransfer.mockReset()
+  transferProblem.value = null
   sessionStorage.clear()
   intentData.value = undefined
   intentError.value = undefined
@@ -141,6 +143,17 @@ describe('PaymentBoxView', () => {
     await buttonNamed(wrapper, 'Pagar por transferencia')!.trigger('click')
 
     expect(payByTransfer).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows one problem at a time: a failed switch to transfer takes the place of the first', async () => {
+    intentError.value = new AxiosError('Network Error', 'ERR_NETWORK')
+    transferProblem.value = 'network'
+    const { wrapper } = await mountView()
+
+    expect(wrapper.findAll('[role="alert"]')).toHaveLength(1)
+    expect(wrapper.text()).not.toContain('No pudimos abrir el pago')
+    expect(wrapper.get('[data-test="checkout-problem"]').text()).toContain('No se pudo completar')
+    expect(buttonNamed(wrapper, 'Pagar por transferencia')).toBeDefined()
   })
 
   it('remembers the event of the orders for the way back from the gateway', async () => {
