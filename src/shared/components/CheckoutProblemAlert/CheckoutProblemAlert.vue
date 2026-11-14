@@ -18,20 +18,12 @@ const text = computed(() => checkoutProblemText(props.problem))
 
 <template>
   <FormAlert tone="bad" :title="text.title" :text="text.text" data-test="checkout-problem">
-    <div v-if="problem === 'cart-missing'" class="checkout-problem__links">
+    <template v-if="problem === 'cart-missing'" #actions>
       <RouterLink :to="{ name: ROUTE_NAMES.ACCOUNT_ORDERS }">Ir a Mis fotos</RouterLink>
       <RouterLink :to="galleryPath">Volver a la galería</RouterLink>
-    </div>
-    <RouterLink v-else-if="problem === 'profile'" :to="{ name: ROUTE_NAMES.ACCOUNT_PROFILE }">
-      Completar mi perfil
-    </RouterLink>
+    </template>
+    <template v-else-if="problem === 'profile'" #actions>
+      <RouterLink :to="{ name: ROUTE_NAMES.ACCOUNT_PROFILE }">Completar mi perfil</RouterLink>
+    </template>
   </FormAlert>
 </template>
-
-<style scoped>
-.checkout-problem__links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--tt-space-4);
-}
-</style>

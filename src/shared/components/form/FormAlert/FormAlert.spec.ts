@@ -50,3 +50,53 @@ describe('FormAlert', () => {
     expect(wrapper.get('button').attributes('aria-busy')).toBe('true')
   })
 })
+
+describe('FormAlert layout', () => {
+  it('says the title and the detail as one sentence block, the title first', () => {
+    const wrapper = mount(FormAlert, {
+      props: {
+        tone: 'bad',
+        title: 'No pudimos cargar las carreras',
+        text: 'Puede ser tu conexión.',
+      },
+    })
+
+    const message = wrapper.get('.form-alert__message')
+    expect(message.element.tagName).toBe('P')
+    expect(message.text().replace(/\s+/g, ' ')).toBe(
+      'No pudimos cargar las carreras. Puede ser tu conexión.',
+    )
+    expect(message.get('strong').text()).toBe('No pudimos cargar las carreras.')
+  })
+
+  it('keeps the title as it is when there is no detail, or when it already ends a sentence', () => {
+    const alone = mount(FormAlert, { props: { tone: 'info', title: 'Factura anulada' } })
+    const asked = mount(FormAlert, {
+      props: { tone: 'bad', title: '¿Seguimos?', text: 'Puede ser tu conexión.' },
+    })
+
+    expect(alone.get('.form-alert__message').text()).toBe('Factura anulada')
+    expect(asked.get('strong').text()).toBe('¿Seguimos?')
+  })
+
+  it('puts the retry and any other way out beside the text, not under it', () => {
+    const wrapper = mount(FormAlert, {
+      props: { tone: 'bad', title: 'No pudimos cargar', onRetry: vi.fn() },
+      slots: { actions: '<a href="/x">Ir a Mis fotos</a>', default: '<p class="more">Más</p>' },
+    })
+
+    const body = wrapper.get('.form-alert__body')
+    const actions = wrapper.get('.form-alert__actions')
+    expect(body.find('button').exists()).toBe(false)
+    expect(body.find('.more').exists()).toBe(true)
+    expect(actions.find('a').text()).toBe('Ir a Mis fotos')
+    expect(actions.find('button').text()).toBe('Reintentar')
+    expect(body.element.nextElementSibling).toBe(actions.element)
+  })
+
+  it('leaves no action box when there is nothing to do', () => {
+    const wrapper = mount(FormAlert, { props: { tone: 'info', title: 'Factura anulada' } })
+
+    expect(wrapper.find('.form-alert__actions').exists()).toBe(false)
+  })
+})

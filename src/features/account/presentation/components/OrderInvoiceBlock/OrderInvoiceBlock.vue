@@ -65,14 +65,9 @@ const isBusy = (file: 'pdf' | 'xml') => props.busyKey === `${current.value?.id}:
     title="No se pudo emitir la factura"
     text="Los datos no pasaron la validación del SRI. Corrígelos y la emitimos de nuevo."
   >
-    <button
-      v-if="invoice.canCorrect"
-      type="button"
-      class="invoice-block__link"
-      @click="emit('correct')"
-    >
-      Corregir datos
-    </button>
+    <template v-if="invoice.canCorrect" #actions>
+      <button type="button" @click="emit('correct')">Corregir datos</button>
+    </template>
   </FormAlert>
 
   <FormAlert
@@ -129,17 +124,5 @@ const isBusy = (file: 'pdf' | 'xml') => props.busyKey === `${current.value?.id}:
   display: flex;
   gap: var(--tt-space-2);
   margin-block-start: var(--tt-space-2);
-}
-
-.invoice-block__link {
-  align-self: flex-start;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  font-weight: var(--tt-type-title-weight);
-  text-decoration: underline;
-  cursor: pointer;
 }
 </style>

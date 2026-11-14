@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { computed, useSlots } from 'vue'
+
 // A message about the whole form, above or next to its button, or about a group whose data did
-// not load. 'bad' is announced at once. Listening for `retry` adds the one inline "Reintentar".
-defineProps<{
+// not load. 'bad' is announced at once. Listening for `retry` adds the one inline "Reintentar";
+// the `actions` slot holds any other way out, beside it. The default slot adds to the text.
+const props = defineProps<{
   tone: 'bad' | 'info'
   title: string
   text?: string
@@ -9,6 +12,14 @@ defineProps<{
   retrying?: boolean
   onRetry?: () => void
 }>()
+
+const slots = useSlots()
+
+// Title and detail read as one sentence block, so the title ends as a sentence does.
+const heading = computed(() =>
+  props.text && !/[.!?…:]$/.test(props.title) ? `${props.title}.` : props.title,
+)
+const hasActions = computed(() => !!props.onRetry || !!slots.actions)
 </script>
 
 <template>
@@ -32,33 +43,42 @@ defineProps<{
         <path d="M12 16v-4M12 8h.01" />
       </template>
     </svg>
-    <div class="form-alert__body">
-      <strong class="form-alert__title">{{ title }}</strong>
-      <p v-if="text">{{ text }}</p>
-      <slot />
-      <button
-        v-if="onRetry"
-        type="button"
-        class="form-alert__retry"
-        :disabled="retrying"
-        :aria-busy="retrying ? 'true' : undefined"
-        @click="onRetry()"
-      >
-        Reintentar
-      </button>
+    <div class="form-alert__main">
+      <div class="form-alert__body">
+        <p class="form-alert__message">
+          <strong class="form-alert__title">{{ heading }}</strong>
+          <template v-if="text">{{ ' ' }}{{ text }}</template>
+        </p>
+        <slot />
+      </div>
+      <div v-if="hasActions" class="form-alert__actions">
+        <slot name="actions" />
+        <button
+          v-if="onRetry"
+          type="button"
+          class="form-alert__retry"
+          :disabled="retrying"
+          :aria-busy="retrying ? 'true' : undefined"
+          @click="onRetry()"
+        >
+          Reintentar
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* The demo's alert: sign, then title, text and the way out. */
+/* One row: sign, text, way out. The way out drops under the text only when it does not fit. */
 .form-alert {
   display: flex;
+  align-items: flex-start;
   gap: var(--tt-space-2);
-  padding: var(--tt-space-4);
+  padding: var(--tt-space-3) var(--tt-space-4);
   border-radius: var(--tt-radius-m);
   font-family: var(--tt-font-sans);
   font-size: var(--tt-type-body-s-size);
+  font-weight: var(--tt-type-body-s-weight);
   line-height: var(--tt-type-body-s-line);
 }
 
@@ -72,10 +92,12 @@ defineProps<{
   color: var(--tt-primary-ink);
 }
 
+/* Centred on the first line of text. */
 .form-alert__icon {
   flex: none;
   inline-size: var(--tt-icon-m);
   block-size: var(--tt-icon-m);
+  margin-block-start: calc((var(--tt-type-body-s-line) - var(--tt-icon-m)) / 2);
   fill: none;
   stroke: currentColor;
   stroke-width: 1.8;
@@ -83,15 +105,25 @@ defineProps<{
   stroke-linejoin: round;
 }
 
+.form-alert__main {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--tt-space-1) var(--tt-space-3);
+  min-inline-size: 0;
+}
+
+/* Below this width the text would read badly beside the way out: then the way out wraps. */
 .form-alert__body {
   display: flex;
+  flex: 1 1 calc(var(--tt-space-8) * 2);
   flex-direction: column;
   gap: var(--tt-space-1);
   min-inline-size: 0;
 }
 
 .form-alert__title {
-  font-size: var(--tt-type-body-size);
   font-weight: var(--tt-type-heading-m-weight);
 }
 
@@ -99,10 +131,22 @@ defineProps<{
   margin: 0;
 }
 
-/* The one inline retry of the client: a link in the alert's own ink, with a finger's room. */
-.form-alert__retry {
-  align-self: flex-start;
+.form-alert__actions {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--tt-space-1) var(--tt-space-3);
+}
+
+/* A finger's room for each way out, reaching into the padding instead of growing the box. */
+.form-alert__retry,
+.form-alert__actions :slotted(a),
+.form-alert__actions :slotted(button) {
+  display: inline-flex;
+  align-items: center;
   min-block-size: var(--tt-control-m);
+  margin-block: calc((var(--tt-type-body-s-line) - var(--tt-control-m)) / 2);
   padding: 0;
   border: 0;
   background: none;
