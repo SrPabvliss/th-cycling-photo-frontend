@@ -79,6 +79,35 @@ describe('ResetPasswordView', () => {
     expect(wrapper.get('h1').text()).toBe('Este enlace ya no sirve')
   })
 
+  it('says a dropped connection while checking the link, not that the link is useless', async () => {
+    validate.mockRejectedValueOnce(new AxiosError('Network Error', 'ERR_NETWORK'))
+    const wrapper = await mountView()
+
+    const problem = wrapper.get('[role="alert"]')
+    expect(problem.text()).toContain('No pudimos revisar tu enlace')
+    expect(wrapper.text()).not.toContain(USELESS)
+
+    validate.mockResolvedValue(true)
+    await problem
+      .findAll('button')
+      .find((each) => each.text() === 'Reintentar')!
+      .trigger('click')
+    await flushPromises()
+
+    expect(validate).toHaveBeenLastCalledWith('tok-1')
+    expect(wrapper.get('h1').text()).toBe('Crea una contraseña nueva')
+  })
+
+  it('still calls the link useless when the api refuses to check it', async () => {
+    const response = { status: 400, data: {}, headers: {}, config: {} } as AxiosResponse
+    validate.mockRejectedValue(
+      new AxiosError('x', 'ERR_BAD_REQUEST', undefined, undefined, response),
+    )
+    const wrapper = await mountView()
+
+    expect(wrapper.get('h1').text()).toBe('Este enlace ya no sirve')
+  })
+
   it('drops the token from the address', async () => {
     validate.mockResolvedValue(true)
     await mountView()

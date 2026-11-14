@@ -6,6 +6,7 @@ import { NButton } from 'naive-ui'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import PasswordRules from '@/shared/auth/PasswordRules.vue'
 import { EmptyState } from '@/shared/components/empty-state'
+import { ErrorState } from '@/shared/components/loading'
 import { BusyNote } from '@/shared/components/loading'
 import { fieldErrorText, focusFirstInvalid } from '@/shared/utils/form.utils'
 import AuthPage from '../components/AuthPage/AuthPage.vue'
@@ -27,7 +28,7 @@ const { mutateAsync: validateToken } = useValidateResetTokenMutation()
 const { mutateAsync: resetPassword, isPending: isSaving } = useResetPasswordMutation()
 
 const token = ref('')
-const screen = ref<'checking' | 'form' | 'useless' | 'done'>('checking')
+const screen = ref<'checking' | 'form' | 'useless' | 'unchecked' | 'done'>('checking')
 const formRef = ref<HTMLFormElement | null>(null)
 const submitted = ref(false)
 const problem = ref<IFormProblem | null>(null)
@@ -40,12 +41,19 @@ onMounted(async () => {
     screen.value = 'useless'
     return
   }
+  await checkLink()
+})
+
+// Only the api's answer makes the link useless; no answer, or its failure, is said as such.
+async function checkLink() {
+  screen.value = 'checking'
   try {
     screen.value = (await validateToken(token.value)) ? 'form' : 'useless'
-  } catch {
-    screen.value = 'useless'
+  } catch (error) {
+    const status = failedStatus(error)
+    screen.value = status === 0 || status >= 500 ? 'unchecked' : 'useless'
   }
-})
+}
 
 function validateRepeat({ value }: { value: string }) {
   if (!value) return 'Repite tu contraseña.'
@@ -100,6 +108,14 @@ async function save() {
         </RouterLink>
       </template>
     </EmptyState>
+  </div>
+
+  <div v-else-if="screen === 'unchecked'" class="reset-password__center">
+    <ErrorState
+      title="No pudimos revisar tu enlace"
+      text="Puede ser tu conexión. El enlace sigue guardado aquí."
+      @retry="checkLink"
+    />
   </div>
 
   <div v-else-if="screen === 'done'" class="reset-password__center">
