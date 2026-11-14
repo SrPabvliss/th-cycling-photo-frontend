@@ -9,7 +9,7 @@ import PasswordRules from '@/shared/auth/PasswordRules.vue'
 import { isAccountPassword, PASSWORD_RULE_MESSAGE } from '@/shared/auth/password-rule'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import FormField from '@/shared/components/form/FormField/FormField.vue'
-import { fieldErrorText, focusFirstInvalid } from '@/shared/utils/form.utils'
+import { fieldErrorText, focusFirstInvalid, sendClientForm } from '@/shared/utils/form.utils'
 import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
 import { useChangePassword } from '../../../composables/mutations/use-change-password'
 import { PASSWORD_FORM_DEFAULTS } from '../../../constants/profile-form.schema'
@@ -93,11 +93,7 @@ function edit(
 async function save() {
   if (changePassword.isPending.value) return
   submitted.value = true
-  await form.handleSubmit()
-  if (!form.state.isValid) {
-    await nextTick()
-    focusFirstInvalid(formRef.value)
-  }
+  await sendClientForm(form, formRef.value)
 }
 </script>
 

@@ -96,6 +96,29 @@ describe('AccountEmailSection', () => {
     expect(router.currentRoute.value.query.redirect).toBe('/account/profile?seccion=correo')
   })
 
+  it('says a field is wrong again after it was fixed and broken, while another is still wrong', async () => {
+    const { wrapper } = await mountSection(true)
+    const send = async () => {
+      await wrapper.get('form').trigger('submit')
+      await flushPromises()
+    }
+
+    await ask(wrapper, '', '')
+    expect(errorOf(wrapper, 'correo-nuevo')).toBe('Escribe un correo válido, como tu@correo.com.')
+    expect(errorOf(wrapper, 'correo-clave')).toBe('Escribe tu contraseña actual.')
+
+    await wrapper.get('#correo-nuevo').setValue('nuevo@correo.com')
+    await flushPromises()
+    expect(errorOf(wrapper, 'correo-nuevo')).toBeNull()
+
+    await wrapper.get('#correo-nuevo').setValue('')
+    await send()
+
+    expect(errorOf(wrapper, 'correo-nuevo')).toBe('Escribe un correo válido, como tu@correo.com.')
+    expect(document.activeElement).toBe(wrapper.get('#correo-nuevo').element)
+    expect(changeEmail).not.toHaveBeenCalled()
+  })
+
   it('says the new email is the current one', async () => {
     const { wrapper } = await mountSection(true)
 

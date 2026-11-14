@@ -100,6 +100,50 @@ describe('PersonalDataSection', () => {
     expect(update).not.toHaveBeenCalled()
   })
 
+  it('says the error again on a second send, drops it once fixed, and brings it back if broken', async () => {
+    const wrapper = await mountSection()
+    const send = async () => {
+      await wrapper.get('form').trigger('submit')
+      await flushPromises()
+    }
+
+    await wrapper.get('#perfil-first').setValue('')
+    await send()
+    await send()
+    expect(errorOf(wrapper, 'perfil-first')).toBe('Escribe tu nombre.')
+    expect(wrapper.get('#perfil-first').attributes('aria-invalid')).toBe('true')
+
+    await wrapper.get('#perfil-first').setValue('Ana')
+    await flushPromises()
+    expect(errorOf(wrapper, 'perfil-first')).toBeNull()
+
+    await wrapper.get('#perfil-first').setValue('')
+    await send()
+    expect(errorOf(wrapper, 'perfil-first')).toBe('Escribe tu nombre.')
+    expect(update).not.toHaveBeenCalled()
+  })
+
+  it('says the name is missing again while the date is still half done', async () => {
+    const wrapper = await mountSection()
+    const send = async () => {
+      await wrapper.get('form').trigger('submit')
+      await flushPromises()
+    }
+
+    await wrapper.get('#perfil-by').setValue('')
+    await wrapper.get('#perfil-first').setValue('')
+    await send()
+    expect(errorOf(wrapper, 'perfil-first')).toBe('Escribe tu nombre.')
+
+    await wrapper.get('#perfil-first').setValue('Ana')
+    await flushPromises()
+    await wrapper.get('#perfil-first').setValue('')
+    await send()
+
+    expect(errorOf(wrapper, 'perfil-first')).toBe('Escribe tu nombre.')
+    expect(update).not.toHaveBeenCalled()
+  })
+
   it('asks for the whole date when only part of it is there', async () => {
     const wrapper = await mountSection()
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useForm } from '@tanstack/vue-form'
 import { NButton, useMessage } from 'naive-ui'
@@ -8,7 +8,7 @@ import { isAxiosError } from 'axios'
 import { getHomePath } from '@/core/auth/nav-config'
 import { safeRedirect } from '@/core/navigation/safe-redirect'
 import { useCartState } from '@/shared/cart'
-import { fieldErrorText, focusFirstInvalid } from '@/shared/utils/form.utils'
+import { fieldErrorText, sendClientForm } from '@/shared/utils/form.utils'
 import AuthPage from '../components/AuthPage/AuthPage.vue'
 import AuthTabs from '../components/AuthTabs/AuthTabs.vue'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
@@ -78,11 +78,7 @@ const form = useForm({
 async function send() {
   if (isLoggingIn.value) return
   submitted.value = true
-  await form.handleSubmit()
-  if (!form.state.isValid) {
-    await nextTick()
-    focusFirstInvalid(formRef.value)
-  }
+  await sendClientForm(form, formRef.value)
 }
 </script>
 

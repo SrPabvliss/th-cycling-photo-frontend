@@ -9,7 +9,7 @@ import { z } from 'zod'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import FormField from '@/shared/components/form/FormField/FormField.vue'
-import { fieldErrorText, focusFirstInvalid } from '@/shared/utils/form.utils'
+import { fieldErrorText, focusFirstInvalid, sendClientForm } from '@/shared/utils/form.utils'
 import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
 import { useChangeEmail } from '../../../composables/mutations/use-change-email'
 import { useSendEmailVerification } from '../../../composables/mutations/use-send-email-verification'
@@ -118,11 +118,7 @@ function cancel() {
 async function save() {
   if (changeEmail.isPending.value) return
   submitted.value = true
-  await form.handleSubmit()
-  if (!form.state.isValid) {
-    await nextTick()
-    focusFirstInvalid(formRef.value)
-  }
+  await sendClientForm(form, formRef.value)
 }
 </script>
 

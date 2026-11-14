@@ -10,7 +10,7 @@ import { useLocationOptions } from '@/features/locations/composables/use-locatio
 import { LEGAL_PATHS } from '@/features/legal/routes'
 import PasswordRules from '@/shared/auth/PasswordRules.vue'
 import { DEFAULT_COUNTRY_ISO, PHONE_INPUT_OPTIONS } from '@/shared/constants/phone-input'
-import { fieldErrorText, focusFirstInvalid } from '@/shared/utils/form.utils'
+import { fieldErrorText, focusFirstInvalid, sendClientForm } from '@/shared/utils/form.utils'
 import { findCountryIsoCode } from '@/shared/utils/location.utils'
 import { useBirthDateFields } from '../../../composables/use-birth-date-fields'
 import { GENDER_OPTIONS, MONTH_OPTIONS } from '../../../constants/register-form.options'
@@ -165,11 +165,7 @@ function validateConfirm({ value }: { value: string }) {
 async function send() {
   if (props.isSubmitting) return
   submitted.value = true
-  await form.handleSubmit()
-  if (!form.state.isValid) {
-    await nextTick()
-    focusFirstInvalid(formRef.value)
-  }
+  await sendClientForm(form, formRef.value)
 }
 </script>
 

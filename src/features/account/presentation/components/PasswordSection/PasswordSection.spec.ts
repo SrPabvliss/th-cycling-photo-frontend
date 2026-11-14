@@ -82,6 +82,26 @@ describe('PasswordSection', () => {
     expect(success).not.toHaveBeenCalled()
   })
 
+  it('keeps the server error on its field through a second send, and drops it once changed', async () => {
+    const response = {
+      status: 422,
+      data: { error: { messageKey: 'auth.current_password_invalid' } },
+      headers: {},
+      config: {},
+    } as AxiosResponse
+    change.mockRejectedValue(new AxiosError('x', 'ERR_BAD_REQUEST', undefined, undefined, response))
+    const wrapper = await mountSection()
+
+    await fill(wrapper)
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+    expect(errorOf(wrapper, 'clave-actual')).toBe('La contraseña actual no coincide.')
+
+    await wrapper.get('#clave-actual').setValue('otra1234')
+    await flushPromises()
+    expect(errorOf(wrapper, 'clave-actual')).toBeNull()
+  })
+
   it('changes it, says so and empties the fields', async () => {
     change.mockResolvedValue(null)
     const wrapper = await mountSection()

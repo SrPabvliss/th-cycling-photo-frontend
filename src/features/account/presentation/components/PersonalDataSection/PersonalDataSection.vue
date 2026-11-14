@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch, type Ref } from 'vue'
+import { computed, ref, watch, type Ref } from 'vue'
 import { useForm } from '@tanstack/vue-form'
 import { NButton, useMessage } from 'naive-ui'
 
@@ -9,7 +9,7 @@ import { registerFieldValidators as v } from '@/features/auth/constants/register
 import { useLocationOptions } from '@/features/locations/composables/use-location-options'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import FormField from '@/shared/components/form/FormField/FormField.vue'
-import { fieldErrorText, focusFirstInvalid } from '@/shared/utils/form.utils'
+import { fieldErrorText, sendClientForm } from '@/shared/utils/form.utils'
 import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
 import { useUpdateProfile } from '../../../composables/mutations/use-update-profile'
 import type { IProfileFormData } from '../../../constants/profile-form.schema'
@@ -109,11 +109,7 @@ const numberOrNull = (event: Event) => {
 async function save() {
   if (updateProfile.isPending.value) return
   submitted.value = true
-  await form.handleSubmit()
-  if (!form.state.isValid) {
-    await nextTick()
-    focusFirstInvalid(formRef.value)
-  }
+  await sendClientForm(form, formRef.value)
 }
 </script>
 

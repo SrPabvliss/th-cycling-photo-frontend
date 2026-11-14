@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { nextTick, ref } from 'vue'
+import { ref } from 'vue'
 import { useForm } from '@tanstack/vue-form'
 import { NButton } from 'naive-ui'
 
 import { EmptyState } from '@/shared/components/empty-state'
-import { fieldErrorText, focusFirstInvalid } from '@/shared/utils/form.utils'
+import { fieldErrorText, sendClientForm } from '@/shared/utils/form.utils'
 import AuthPage from '../components/AuthPage/AuthPage.vue'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import FormField from '@/shared/components/form/FormField/FormField.vue'
@@ -41,11 +41,7 @@ const form = useForm({
 async function send() {
   if (isPending.value || form.state.isSubmitting) return
   submitted.value = true
-  await form.handleSubmit()
-  if (!form.state.isValid) {
-    await nextTick()
-    focusFirstInvalid(formRef.value)
-  }
+  await sendClientForm(form, formRef.value)
 }
 </script>
 

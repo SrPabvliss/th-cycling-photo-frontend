@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useForm } from '@tanstack/vue-form'
 import { NButton } from 'naive-ui'
 
@@ -8,7 +8,7 @@ import PasswordRules from '@/shared/auth/PasswordRules.vue'
 import { EmptyState } from '@/shared/components/empty-state'
 import { ErrorState } from '@/shared/components/loading'
 import { BusyNote } from '@/shared/components/loading'
-import { fieldErrorText, focusFirstInvalid } from '@/shared/utils/form.utils'
+import { fieldErrorText, sendClientForm } from '@/shared/utils/form.utils'
 import AuthPage from '../components/AuthPage/AuthPage.vue'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import FormField from '@/shared/components/form/FormField/FormField.vue'
@@ -80,11 +80,7 @@ const form = useForm({
 async function save() {
   if (isSaving.value) return
   submitted.value = true
-  await form.handleSubmit()
-  if (!form.state.isValid) {
-    await nextTick()
-    focusFirstInvalid(formRef.value)
-  }
+  await sendClientForm(form, formRef.value)
 }
 </script>
 
