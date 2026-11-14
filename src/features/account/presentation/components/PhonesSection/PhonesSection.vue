@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { NButton, useMessage } from 'naive-ui'
 import IntlTelInput from 'intl-tel-input/vueWithUtils'
 import 'intl-tel-input/styles'
@@ -44,6 +44,7 @@ const label = ref('')
 const isWhatsapp = ref(true)
 const makePrimary = ref(false)
 const numberError = ref<string | null>(null)
+const NUMBER_FIELD_ID = 'telefono-numero'
 const problem = ref<IFormProblem | null>(null)
 
 const isBusy = computed(
@@ -89,8 +90,16 @@ function checkNumber(): boolean {
   return numberError.value === null
 }
 
+// As in every client form: writing drops the error, and a failed send goes back to the field.
+watch(number, () => (numberError.value = null))
+
 async function save() {
-  if (isBusy.value || !checkNumber()) return
+  if (isBusy.value) return
+  if (!checkNumber()) {
+    await nextTick()
+    document.getElementById(NUMBER_FIELD_ID)?.focus()
+    return
+  }
   problem.value = null
   try {
     const phone = editing.value
@@ -192,7 +201,7 @@ async function remove() {
       @close="close"
     >
       <div class="phones-section__sheet">
-        <FormField id="telefono-numero" label="Número" :error="numberError">
+        <FormField :id="NUMBER_FIELD_ID" label="Número" :error="numberError">
           <template #default="{ id, describedby, invalid }">
             <div class="phones-section__phone tt-phone-input">
               <IntlTelInput

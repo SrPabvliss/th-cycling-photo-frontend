@@ -161,4 +161,30 @@ describe('PhonesSection', () => {
     expect(wrapper.text()).toContain('Escribe tu número.')
     expect(add).not.toHaveBeenCalled()
   })
+
+  it('puts the focus on the number, drops the error once it is written, and says it again if cleared', async () => {
+    const wrapper = await mountSection()
+    const errorText = () =>
+      document.getElementById('telefono-numero-error')?.textContent?.trim() ?? null
+
+    await buttonNamed(wrapper, 'Agregar teléfono')!.trigger('click')
+    await flushPromises()
+    // The sheet's focus trap needs a layout jsdom does not have: the call is what is checked here,
+    // the focus itself in the browser.
+    const focus = vi.spyOn(wrapper.get('#telefono-numero').element as HTMLElement, 'focus')
+    await buttonNamed(wrapper, 'Guardar teléfono')!.trigger('click')
+    await flushPromises()
+    expect(errorText()).toBe('Escribe tu número.')
+    expect(focus).toHaveBeenCalled()
+
+    await wrapper.get('#telefono-numero').setValue('991234567')
+    await flushPromises()
+    expect(errorText()).toBeNull()
+
+    await wrapper.get('#telefono-numero').setValue('')
+    await buttonNamed(wrapper, 'Guardar teléfono')!.trigger('click')
+    await flushPromises()
+    expect(errorText()).toBe('Escribe tu número.')
+    expect(add).not.toHaveBeenCalled()
+  })
 })
