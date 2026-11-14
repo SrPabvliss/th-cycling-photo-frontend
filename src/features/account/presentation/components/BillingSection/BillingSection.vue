@@ -54,7 +54,8 @@ const target = ref<IBillingAccount | null>(null)
 const serverError = ref<IBillingServerError | null>(null)
 const busyId = ref<string | null>(null)
 const deleting = ref<IBillingAccount | null>(null)
-const deleteProblem = ref<IFormProblem | null>(null)
+// What a failed action on the list (delete, make default) has to say, above it.
+const listProblem = ref<IFormProblem | null>(null)
 
 function open(kind: 'add' | 'edit', account: IBillingAccount | null = null) {
   target.value = account
@@ -67,7 +68,7 @@ function close() {
 }
 
 function askDelete(account: IBillingAccount) {
-  deleteProblem.value = null
+  listProblem.value = null
   deleting.value = account
 }
 
@@ -118,7 +119,7 @@ async function confirmDelete() {
     if (isGone(error)) return forgetGone()
     // The data stays: say why, next to the list.
     deleting.value = null
-    deleteProblem.value = generalProblem(error)
+    listProblem.value = generalProblem(error)
     return
   }
   deleting.value = null
@@ -128,14 +129,13 @@ async function confirmDelete() {
 async function makeDefault(account: IBillingAccount) {
   if (busyId.value) return
   busyId.value = account.id
+  listProblem.value = null
   try {
     await setDefault.mutateAsync(account.id)
   } catch (error) {
     if (isGone(error)) await forgetGone()
-    else {
-      const failed = generalProblem(error)
-      message.info(failed.text ?? failed.title)
-    }
+    // The default stays as it was: say why, next to the list, like a failed delete.
+    else listProblem.value = generalProblem(error)
   } finally {
     busyId.value = null
   }
@@ -184,10 +184,10 @@ const editInitial = computed<ICreateBillingAccountRequest | undefined>(() =>
 
     <template v-else>
       <FormAlert
-        v-if="deleteProblem"
+        v-if="listProblem"
         tone="bad"
-        :title="deleteProblem.title"
-        :text="deleteProblem.text"
+        :title="listProblem.title"
+        :text="listProblem.text"
       />
       <ul class="billing-section__list">
         <li v-for="account in accounts" :key="account.id" class="billing-section__card">

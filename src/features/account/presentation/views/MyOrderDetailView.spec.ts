@@ -281,7 +281,7 @@ describe('MyOrderDetailView', () => {
     expect(success).toHaveBeenCalledWith('Pedido cancelado.')
   })
 
-  it('says it can no longer be cancelled when the api refuses, and reads it again', async () => {
+  it('says in the dialog it can no longer be cancelled when the api refuses, and reads it again', async () => {
     state.order = order('in_process')
     const response = { status: 422, data: {}, headers: {}, config: {} } as AxiosResponse
     cancel.mockRejectedValue(new AxiosError('x', 'ERR_BAD_REQUEST', undefined, undefined, response))
@@ -291,8 +291,27 @@ describe('MyOrderDetailView', () => {
     await button(wrapper, 'Sí, cancelar pedido')!.trigger('click')
     await flushPromises()
 
-    expect(error).toHaveBeenCalledWith('Este pedido ya no se puede cancelar.')
+    const alert = wrapper.get('[role="alertdialog"] .form-alert')
+    expect(alert.text()).toContain('Este pedido ya no se puede cancelar.')
+    expect(error).not.toHaveBeenCalled()
     expect(refetch).toHaveBeenCalled()
+  })
+
+  it('says a lost connection in the dialog, not that the order cannot be cancelled', async () => {
+    state.order = order('in_process')
+    cancel.mockRejectedValue(new AxiosError('Network Error', 'ERR_NETWORK'))
+    const wrapper = await mountView()
+
+    await button(wrapper, 'Cancelar pedido')!.trigger('click')
+    await button(wrapper, 'Sí, cancelar pedido')!.trigger('click')
+    await flushPromises()
+
+    const alert = wrapper.get('[role="alertdialog"] .form-alert')
+    expect(alert.text()).toContain(
+      'Parece un problema de conexión. Nada se perdió: intenta de nuevo.',
+    )
+    expect(alert.text()).not.toContain('ya no se puede cancelar')
+    expect(error).not.toHaveBeenCalled()
   })
 
   it('closes a ready order with the house carousel, after its invoice', async () => {

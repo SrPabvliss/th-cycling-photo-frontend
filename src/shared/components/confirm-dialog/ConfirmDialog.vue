@@ -2,7 +2,9 @@
 import { nextTick, ref, useId, watch } from 'vue'
 import { NButton } from 'naive-ui'
 
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { useDialogFocus } from '@/shared/composables/use-dialog-focus'
+import type { IFormProblem } from '@/shared/utils/form-problem'
 
 // Asks before something that cannot be undone. The safe choice has the focus first; Escape and
 // the backdrop keep things as they are.
@@ -13,6 +15,8 @@ const props = defineProps<{
   confirmLabel: string
   keepLabel: string
   busy?: boolean
+  /** Why the last try failed: said here, above the buttons, and the action can be tried again. */
+  problem?: IFormProblem | null
 }>()
 
 const emit = defineEmits<{
@@ -45,6 +49,13 @@ watch(
   { immediate: true },
 )
 
+watch(
+  () => props.problem,
+  (problem) => {
+    if (problem) confirmed = false
+  },
+)
+
 function confirm() {
   if (confirmed || props.busy) return
   confirmed = true
@@ -66,6 +77,7 @@ function confirm() {
       >
         <h2 :id="titleId" class="confirm-dialog__title">{{ title }}</h2>
         <p :id="textId" class="confirm-dialog__text">{{ text }}</p>
+        <FormAlert v-if="problem" tone="bad" :title="problem.title" :text="problem.text" />
         <div class="confirm-dialog__actions">
           <NButton
             type="error"

@@ -13,6 +13,7 @@ import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { ErrorState, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
 import { useVisiblePolling } from '@/shared/composables/use-visible-polling'
 import { formatMoney } from '@/shared/pricing/tier-cards'
+import { failedStatus, generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
 import { useCartStore } from '@/shared/stores/cart.store'
 import { maskPhone } from '@/shared/utils/mask-phone'
 import { useCancelMyOrder } from '../../composables/mutations/use-cancel-my-order'
@@ -104,16 +105,27 @@ const eventGallery = computed(() =>
 
 // --- Cancelling ---
 const askingCancel = ref(false)
+const cancelProblem = ref<IFormProblem | null>(null)
+// A refusal means the order moved on; a lost connection or a server failure says only that.
+const CANNOT_CANCEL: IFormProblem = { title: 'Este pedido ya no se puede cancelar.' }
+
+function askCancel() {
+  cancelProblem.value = null
+  askingCancel.value = true
+}
+
 async function cancel() {
   if (cancelOrder.isPending.value) return
+  cancelProblem.value = null
   try {
     await cancelOrder.mutateAsync(orderId.value)
-    message.success('Pedido cancelado.')
-  } catch {
-    message.error('Este pedido ya no se puede cancelar.')
-    void refetch()
-  } finally {
     askingCancel.value = false
+    message.success('Pedido cancelado.')
+  } catch (error) {
+    const status = failedStatus(error)
+    cancelProblem.value =
+      status >= 400 && status < 500 && status !== 429 ? CANNOT_CANCEL : generalProblem(error)
+    void refetch()
   }
 }
 
@@ -270,7 +282,7 @@ function submitCorrection(request: Parameters<typeof correctBilling.mutate>[0]) 
         v-if="order.canCancel"
         class="order-detail__secondary"
         size="large"
-        @click="askingCancel = true"
+        @click="askCancel"
       >
         Cancelar pedido
       </NButton>
@@ -299,6 +311,7 @@ function submitCorrection(request: Parameters<typeof correctBilling.mutate>[0]) 
         confirm-label="Sí, cancelar pedido"
         keep-label="Conservar pedido"
         :busy="cancelOrder.isPending.value"
+        :problem="cancelProblem"
         @confirm="cancel"
         @keep="askingCancel = false"
       />

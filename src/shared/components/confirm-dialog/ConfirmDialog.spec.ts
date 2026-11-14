@@ -61,6 +61,21 @@ describe('ConfirmDialog', () => {
     expect(wrapper!.emitted('confirm')).toHaveLength(1)
   })
 
+  it('says in the dialog why the action failed, and lets it be tried again', async () => {
+    const body = await mountDialog()
+    await button(body, 'Sí, cancelar pedido').trigger('click')
+
+    await wrapper!.setProps({
+      problem: { title: 'No se pudo completar', text: 'Parece un problema de conexión.' },
+    })
+
+    const alert = body.get('[role="alertdialog"] .form-alert')
+    expect(alert.attributes('role')).toBe('alert')
+    expect(alert.text()).toContain('No se pudo completar')
+    await button(body, 'Sí, cancelar pedido').trigger('click')
+    expect(wrapper!.emitted('confirm')).toHaveLength(2)
+  })
+
   it('shows nothing while closed', async () => {
     const body = await mountDialog(false)
 

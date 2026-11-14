@@ -187,6 +187,21 @@ describe('BillingSection', () => {
     expect(remove).not.toHaveBeenCalled()
   })
 
+  it('says next to the list why the default did not change, without a toast', async () => {
+    setDefault.mockRejectedValue(apiError(500))
+    const wrapper = await mountSection()
+
+    await buttonIn(cards(wrapper)[1]!, 'Usar como predeterminada')!.trigger('click')
+    await flushPromises()
+
+    const alert = wrapper.get('.form-alert')
+    expect(alert.attributes('role')).toBe('alert')
+    expect(alert.text()).toContain('No se pudo completar')
+    expect(alert.text()).toContain('Parece un problema de conexión.')
+    expect(info).not.toHaveBeenCalled()
+    expect(cards(wrapper)[0]!.text()).toContain('Predeterminada')
+  })
+
   it('says what went wrong when deleting fails, keeping the data', async () => {
     remove.mockRejectedValue(apiError(500))
     const wrapper = await mountSection()
