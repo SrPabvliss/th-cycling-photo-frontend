@@ -29,6 +29,21 @@ const {
 } = useDeliveryQuery(token)
 const showSkeleton = useDelayedFlag(computed(() => status.value === 'pending'))
 
+// Only the link itself going bad (expired, out of accesses, unknown) changes the screen. A
+// refresh that fails for any other reason leaves the photos already read where they are and
+// says so above them, with a retry.
+const refreshProblem = computed(() => {
+  if (!delivery.value || !problem.value) return null
+  if (problem.value === 'rate-limited')
+    return { title: 'Demasiados intentos', text: 'Espera un minuto y vuelve a intentarlo.' }
+  if (problem.value === 'network' || problem.value === 'unknown')
+    return {
+      title: 'No pudimos actualizar tus fotos',
+      text: 'Puede ser tu conexión. Tus fotos siguen aquí.',
+    }
+  return null
+})
+
 const count = computed(() => delivery.value?.photos.length ?? 0)
 const dayOf = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
@@ -146,7 +161,7 @@ const allLabel = computed(() =>
     </EmptyState>
 
     <ErrorState
-      v-else-if="problem === 'rate-limited'"
+      v-else-if="problem === 'rate-limited' && !delivery"
       title="Demasiados intentos"
       text="Espera un minuto y vuelve a intentarlo."
       :retrying="isFetching"
@@ -154,7 +169,7 @@ const allLabel = computed(() =>
     />
 
     <ErrorState
-      v-else-if="problem || !delivery"
+      v-else-if="!delivery"
       title="No pudimos cargar tus fotos"
       text="Puede ser tu conexión."
       :retrying="isFetching"
@@ -163,7 +178,16 @@ const allLabel = computed(() =>
 
     <template v-else>
       <h1 class="delivery__title">Tus fotos de {{ delivery.eventName }}</h1>
-      <FormAlert tone="info" title="Listas para descargar" :text="readyText" />
+      <FormAlert
+        v-if="refreshProblem"
+        data-test="refresh-problem"
+        tone="bad"
+        :title="refreshProblem.title"
+        :text="refreshProblem.text"
+        :retrying="isFetching"
+        @retry="refetch()"
+      />
+      <FormAlert v-else tone="info" title="Listas para descargar" :text="readyText" />
 
       <div class="delivery__grid">
         <PurchasedPhotoTile

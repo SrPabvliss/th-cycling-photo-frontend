@@ -143,6 +143,49 @@ describe('DeliveryView', () => {
     )
   })
 
+  it.each(['network', 'unknown'] as const)(
+    'keeps the photos when a refresh fails (%s), says so with a retry',
+    async (problem) => {
+      Object.assign(state, { status: 'error', data: DATA(3), problem })
+      const wrapper = await mountView()
+
+      expect(wrapper.findAll('button[aria-label="Descargar foto"]')).toHaveLength(3)
+      expect(wrapper.text()).not.toContain('No pudimos cargar tus fotos')
+      const alert = wrapper.get('[data-test="refresh-problem"]')
+      expect(alert.classes()).toContain('form-alert')
+      expect(alert.text()).toContain('No pudimos actualizar tus fotos')
+
+      await alert.get('button').trigger('click')
+      expect(refetch).toHaveBeenCalledTimes(1)
+    },
+  )
+
+  it('keeps the photos when a refresh hits the rate limit, and says to wait', async () => {
+    Object.assign(state, { status: 'error', data: DATA(3), problem: 'rate-limited' })
+    const wrapper = await mountView()
+
+    expect(wrapper.findAll('button[aria-label="Descargar foto"]')).toHaveLength(3)
+    expect(wrapper.get('[data-test="refresh-problem"]').text()).toContain('Demasiados intentos')
+  })
+
+  it.each([
+    ['expired', 'Este enlace ya venció'],
+    ['access-limit', 'Este enlace llegó a su límite de descargas'],
+  ] as const)('changes the screen when a refresh finds the link %s', async (problem) => {
+    Object.assign(state, { status: 'error', data: DATA(3), problem })
+    const wrapper = await mountView()
+
+    expect(wrapper.findAll('button[aria-label="Descargar foto"]')).toHaveLength(0)
+    expect(wrapper.find('[data-test="refresh-problem"]').exists()).toBe(false)
+  })
+
+  it('says it could not load at all when nothing was ever read', async () => {
+    Object.assign(state, { status: 'error', data: undefined, problem: 'network' })
+    const wrapper = await mountView()
+
+    expect(wrapper.text()).toContain('No pudimos cargar tus fotos')
+  })
+
   it('ends with the house carousel, after the way to keep them at hand', async () => {
     const wrapper = await mountView()
 
