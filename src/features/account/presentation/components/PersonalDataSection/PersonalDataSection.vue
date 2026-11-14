@@ -6,9 +6,7 @@ import { NButton, useMessage } from 'naive-ui'
 import { useBirthDateFields } from '@/features/auth/composables/use-birth-date-fields'
 import { GENDER_OPTIONS, MONTH_OPTIONS } from '@/features/auth/constants/register-form.options'
 import { registerFieldValidators as v } from '@/features/auth/constants/register-form.schema'
-import { useCantonsQuery } from '@/features/locations/composables/queries/use-cantons'
-import { useCountriesQuery } from '@/features/locations/composables/queries/use-countries'
-import { useProvincesByCountryQuery } from '@/features/locations/composables/queries/use-provinces-by-country'
+import { useLocationOptions } from '@/features/locations/composables/use-location-options'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import FormField from '@/shared/components/form/FormField/FormField.vue'
 import { fieldErrorText, focusFirstInvalid } from '@/shared/utils/form.utils'
@@ -80,11 +78,16 @@ function validateDate() {
   return parts.length > 0 && parts.length < 3 ? 'Completa día, mes y año.' : undefined
 }
 
-const { data: countries } = useCountriesQuery()
 const countryId = form.useStore((state) => state.values.countryId)
 const provinceId = form.useStore((state) => state.values.provinceId)
-const { data: provinces } = useProvincesByCountryQuery(countryId as Ref<number | null>)
-const { data: cantons } = useCantonsQuery(provinceId as Ref<number | null>)
+const {
+  countries,
+  provinces,
+  cantons,
+  hasProblem: hasPlacesProblem,
+  isRetrying: isRetryingPlaces,
+  retry: retryPlaces,
+} = useLocationOptions(countryId as Ref<number | null>, provinceId as Ref<number | null>)
 const hasRegions = computed(() => (provinces.value?.length ?? 0) > 0)
 
 // A profile read again elsewhere replaces the form only when nothing is being edited.
@@ -222,6 +225,16 @@ async function save() {
         </template>
       </form.Field>
     </div>
+
+    <FormAlert
+      v-if="hasPlacesProblem"
+      data-test="places-problem"
+      tone="bad"
+      title="No pudimos cargar los países y ciudades"
+      text="Puede ser tu conexión."
+      :retrying="isRetryingPlaces"
+      @retry="retryPlaces()"
+    />
 
     <form.Field name="birthDay" :validators="{ onSubmit: validateDate }">
       <template #default="{ field: dayField }">

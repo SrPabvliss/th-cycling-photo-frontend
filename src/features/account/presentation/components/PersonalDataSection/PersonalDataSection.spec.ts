@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils'
 import { AxiosError } from 'axios'
-import { computed, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 
 import type { IMyProfile } from '../../../types/responses/my-profile.response'
 import PersonalDataSection from './PersonalDataSection.vue'
@@ -12,20 +12,21 @@ const success = vi.fn()
 vi.mock('../../../composables/mutations/use-update-profile', () => ({
   useUpdateProfile: () => ({ mutateAsync: update, isPending: ref(false) }),
 }))
-vi.mock('@/features/locations/composables/queries/use-countries', () => ({
-  useCountriesQuery: () => ({
-    data: computed(() => [
+vi.mock('@/features/locations/composables/use-location-options', () => ({
+  useLocationOptions: () => ({
+    countries: computed(() => [
       { id: 50, name: 'Ecuador', isoCode: 'EC' },
       { id: 47, name: 'Colombia', isoCode: 'CO' },
     ]),
+    provinces: computed(() => []),
+    cantons: computed(() => []),
+    hasProblem: computed(() => places.failed),
+    isRetrying: computed(() => false),
+    retry: retryPlaces,
   }),
 }))
-vi.mock('@/features/locations/composables/queries/use-provinces-by-country', () => ({
-  useProvincesByCountryQuery: () => ({ data: computed(() => []) }),
-}))
-vi.mock('@/features/locations/composables/queries/use-cantons', () => ({
-  useCantonsQuery: () => ({ data: computed(() => []) }),
-}))
+const places = reactive({ failed: false })
+const retryPlaces = vi.fn()
 vi.mock('naive-ui', async (original) => ({
   ...(await original<typeof import('naive-ui')>()),
   useMessage: () => ({ success }),
@@ -60,12 +61,25 @@ const errorOf = (wrapper: DOMWrapper<Element>, id: string) => {
 
 describe('PersonalDataSection', () => {
   beforeEach(() => {
+    places.failed = false
+    retryPlaces.mockReset()
     document.body.innerHTML = ''
     update.mockReset()
     success.mockReset()
   })
   afterEach(() => {
     while (mounted.length) mounted.pop()!.unmount()
+  })
+
+  it('says under the places when they could not load, once, and asks again', async () => {
+    places.failed = true
+    const wrapper = await mountSection()
+
+    const alert = wrapper.get('[data-test="places-problem"]')
+    expect(alert.classes()).toContain('form-alert')
+    expect(alert.text()).toContain('No pudimos cargar los países y ciudades')
+    await alert.get('button').trigger('click')
+    expect(retryPlaces).toHaveBeenCalledTimes(1)
   })
 
   it('starts with the saved data', async () => {

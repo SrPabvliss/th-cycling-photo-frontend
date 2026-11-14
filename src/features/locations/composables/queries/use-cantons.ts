@@ -7,12 +7,16 @@ import { LOCATION_QUERY_KEYS } from '../../constants/query-keys'
 import { toCantons } from '../../mappers/canton.mapper'
 import type { IApiCanton } from '../../types/responses/canton.response'
 
-export function useCantonsQuery(provinceId: Ref<number | null>) {
+export function useCantonsQuery(
+  provinceId: Ref<number | null>,
+  options: { silent?: boolean } = {},
+) {
   return useQuery({
     queryKey: computed(() => LOCATION_QUERY_KEYS.cantons(provinceId.value!)),
     queryFn: async () => {
       const response = await httpClient.get<IApiCanton[]>(
         API_ROUTES.LOCATIONS.CANTONS_BY_PROVINCE(provinceId.value!),
+        { silent: options.silent },
       )
       return toCantons(response.data)
     },

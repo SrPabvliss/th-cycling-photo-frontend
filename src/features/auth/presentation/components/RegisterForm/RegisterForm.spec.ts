@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils'
 import { AxiosError, type AxiosResponse } from 'axios'
 import { createPinia, setActivePinia } from 'pinia'
-import { computed, defineComponent, h, ref } from 'vue'
+import { computed, defineComponent, h, reactive, ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 import RegisterView from '../../views/RegisterView.vue'
@@ -18,20 +18,21 @@ vi.mock('../../../composables/use-auth', () => ({
 vi.mock('@/features/account/composables/mutations/use-send-email-verification', () => ({
   useSendEmailVerification: () => ({ mutateAsync: sendCode, isPending: ref(false) }),
 }))
-vi.mock('@/features/locations/composables/queries/use-countries', () => ({
-  useCountriesQuery: () => ({
-    data: computed(() => [
+vi.mock('@/features/locations/composables/use-location-options', () => ({
+  useLocationOptions: () => ({
+    countries: computed(() => [
       { id: 50, name: 'Ecuador', isoCode: 'EC' },
       { id: 47, name: 'Colombia', isoCode: 'CO' },
     ]),
+    provinces: computed(() => []),
+    cantons: computed(() => []),
+    hasProblem: computed(() => places.failed),
+    isRetrying: computed(() => false),
+    retry: retryPlaces,
   }),
 }))
-vi.mock('@/features/locations/composables/queries/use-provinces-by-country', () => ({
-  useProvincesByCountryQuery: () => ({ data: computed(() => []), isFetching: ref(false) }),
-}))
-vi.mock('@/features/locations/composables/queries/use-cantons', () => ({
-  useCantonsQuery: () => ({ data: computed(() => []), isFetching: ref(false) }),
-}))
+const places = reactive({ failed: false })
+const retryPlaces = vi.fn()
 vi.mock('intl-tel-input/styles', () => ({}))
 // The real phone input needs a browser; this one keeps its contract: it sends the full number
 // with "+" and says whether it is valid (nine digits after the code, like Ecuador's).
@@ -125,6 +126,8 @@ function httpError(status: number, data: unknown = {}) {
 
 describe('sign up', () => {
   beforeEach(() => {
+    places.failed = false
+    retryPlaces.mockReset()
     document.body.innerHTML = ''
     setActivePinia(createPinia())
     register.mockReset()
@@ -157,6 +160,16 @@ describe('sign up', () => {
     expect(errorOf(wrapper, 'reg-terms')).toBe('Acepta la política y los términos para continuar.')
     expect(document.activeElement).toBe(byId(wrapper, 'reg-first').element)
     expect(register).not.toHaveBeenCalled()
+  })
+
+  it('says under the places when they could not load, once, and asks again', async () => {
+    places.failed = true
+    const { wrapper } = await mountView()
+
+    const alert = wrapper.get('[data-test="places-problem"]')
+    expect(alert.text()).toContain('No pudimos cargar los países y ciudades')
+    await alert.get('button').trigger('click')
+    expect(retryPlaces).toHaveBeenCalledTimes(1)
   })
 
   it('says when the passwords differ', async () => {

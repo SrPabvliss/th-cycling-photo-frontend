@@ -6,9 +6,7 @@ import IntlTelInput from 'intl-tel-input/vueWithUtils'
 import 'intl-tel-input/styles'
 import type { RouteLocationRaw } from 'vue-router'
 
-import { useCountriesQuery } from '@/features/locations/composables/queries/use-countries'
-import { useProvincesByCountryQuery } from '@/features/locations/composables/queries/use-provinces-by-country'
-import { useCantonsQuery } from '@/features/locations/composables/queries/use-cantons'
+import { useLocationOptions } from '@/features/locations/composables/use-location-options'
 import { LEGAL_PATHS } from '@/features/legal/routes'
 import PasswordRules from '@/shared/auth/PasswordRules.vue'
 import { DEFAULT_COUNTRY_ISO, PHONE_INPUT_OPTIONS } from '@/shared/constants/phone-input'
@@ -106,11 +104,16 @@ const {
 })
 
 // --- Where the buyer lives ---
-const { data: countries } = useCountriesQuery()
 const countryId = form.useStore((state) => state.values.countryId)
 const provinceId = form.useStore((state) => state.values.provinceId)
-const { data: provinces } = useProvincesByCountryQuery(countryId as Ref<number | null>)
-const { data: cantons } = useCantonsQuery(provinceId as Ref<number | null>)
+const {
+  countries,
+  provinces,
+  cantons,
+  hasProblem: hasPlacesProblem,
+  isRetrying: isRetryingPlaces,
+  retry: retryPlaces,
+} = useLocationOptions(countryId as Ref<number | null>, provinceId as Ref<number | null>)
 const hasRegions = computed(() => (provinces.value?.length ?? 0) > 0)
 
 watch(
@@ -334,6 +337,16 @@ async function send() {
           </template>
         </form.Field>
       </div>
+
+      <FormAlert
+        v-if="hasPlacesProblem"
+        data-test="places-problem"
+        tone="bad"
+        title="No pudimos cargar los países y ciudades"
+        text="Puede ser tu conexión."
+        :retrying="isRetryingPlaces"
+        @retry="retryPlaces()"
+      />
     </fieldset>
 
     <fieldset class="register-form__group">
