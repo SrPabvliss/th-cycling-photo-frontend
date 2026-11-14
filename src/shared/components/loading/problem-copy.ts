@@ -1,0 +1,68 @@
+import type { ProblemKind } from '@/core/http/problem-kind'
+import type { IllustrationKey } from '@/shared/components/empty-state'
+
+/** neutral: nothing to do but wait; warn: it did not load; info: the session. */
+export type ProblemTone = 'neutral' | 'warn' | 'info'
+
+export interface IProblemCopy {
+  title: string
+  text: string
+  illustration: IllustrationKey | null
+  tone: ProblemTone
+  /** The way out is "Reintentar". The expired session's way out is signing in, not a retry. */
+  retry: boolean
+}
+
+function capitalize(text: string): string {
+  return text.charAt(0).toLocaleUpperCase('es') + text.slice(1)
+}
+
+/**
+ * Words, drawing and tone of a problem by its kind. `what` is the plural noun of what did not
+ * show, with its article: "los eventos", "tus compras".
+ */
+export function problemCopy(kind: ProblemKind, what: string): IProblemCopy {
+  switch (kind) {
+    case 'offline':
+      return {
+        title: 'Sin conexión a internet',
+        text: `${capitalize(what)} aparecerán cuando vuelvas a tener conexión.`,
+        illustration: 'sinConexion',
+        tone: 'neutral',
+        retry: false,
+      }
+    case 'timeout':
+      return {
+        title: 'Está tardando más de lo normal',
+        text: 'Puedes esperar un poco o volver a intentarlo.',
+        illustration: 'tardando',
+        tone: 'warn',
+        retry: true,
+      }
+    case 'expired':
+      return {
+        title: 'Tu sesión se cerró',
+        text: 'Inicia sesión de nuevo para continuar. Tu carrito sigue guardado.',
+        illustration: 'sesionVencida',
+        tone: 'info',
+        retry: false,
+      }
+    case 'rate':
+      return {
+        title: 'Demasiados intentos',
+        text: 'Espera un minuto antes de volver a intentarlo.',
+        illustration: null,
+        tone: 'warn',
+        retry: false,
+      }
+    case 'server':
+    case 'unknown':
+      return {
+        title: `No pudimos mostrar ${what}`,
+        text: 'Vuelve a intentarlo en un momento.',
+        illustration: kind === 'server' ? 'fallaMecanica' : 'errorCarga',
+        tone: 'warn',
+        retry: true,
+      }
+  }
+}
