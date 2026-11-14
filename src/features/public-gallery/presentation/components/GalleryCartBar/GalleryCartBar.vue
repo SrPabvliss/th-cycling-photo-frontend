@@ -56,7 +56,7 @@ const hasSomething = computed(
       v-if="cart.status.value === 'error'"
       class="gallery-cart-bar__problem"
       data-test="cart-problem"
-      tone="bad"
+      tone="warn"
       title="No pudimos cargar tu carrito"
       text="Puede ser tu conexión."
       :retrying="cart.isFetching.value"

@@ -211,7 +211,7 @@ async function confirm() {
           <FormAlert
             v-else-if="billingProblem"
             data-test="billing-problem"
-            tone="bad"
+            tone="warn"
             title="No pudimos cargar tus datos de facturación"
             text="Puede ser tu conexión."
             :retrying="isBillingRetrying"

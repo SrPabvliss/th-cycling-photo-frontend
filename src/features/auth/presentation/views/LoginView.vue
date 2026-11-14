@@ -89,7 +89,12 @@ async function send() {
     </template>
 
     <form ref="formRef" class="login-form" novalidate @submit.prevent="send">
-      <FormAlert v-if="problem" tone="bad" :title="problem.title" :text="problem.text" />
+      <FormAlert
+        v-if="problem"
+        :tone="problem.tone ?? 'bad'"
+        :title="problem.title"
+        :text="problem.text"
+      />
 
       <form.Field
         name="email"

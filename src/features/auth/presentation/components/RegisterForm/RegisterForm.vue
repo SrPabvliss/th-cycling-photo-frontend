@@ -337,7 +337,7 @@ async function send() {
       <FormAlert
         v-if="hasPlacesProblem"
         data-test="places-problem"
-        tone="bad"
+        tone="warn"
         title="No pudimos cargar los países y ciudades"
         text="Puede ser tu conexión."
         :retrying="isRetryingPlaces"

@@ -187,7 +187,7 @@ const editInitial = computed<ICreateBillingAccountRequest | undefined>(() =>
     <template v-else>
       <FormAlert
         v-if="listProblem"
-        tone="bad"
+        :tone="listProblem.tone ?? 'bad'"
         :title="listProblem.title"
         :text="listProblem.text"
       />

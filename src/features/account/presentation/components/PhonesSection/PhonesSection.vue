@@ -245,7 +245,12 @@ async function remove() {
           <span>Hacer principal</span>
         </label>
 
-        <FormAlert v-if="problem" tone="bad" :title="problem.title" :text="problem.text" />
+        <FormAlert
+          v-if="problem"
+          :tone="problem.tone ?? 'bad'"
+          :title="problem.title"
+          :text="problem.text"
+        />
 
         <NButton
           type="primary"

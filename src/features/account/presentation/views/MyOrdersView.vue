@@ -108,7 +108,7 @@ const spotAfter = computed(() => spotIndexAfter(orders.value.length, SPOT_AFTER)
         v-if="hasNextPage && isFetchNextPageError"
         class="my-orders__more"
         data-test="more-problem"
-        tone="bad"
+        tone="warn"
         title="No pudimos cargar más compras"
         text="Puede ser tu conexión. Lo que ya ves se queda."
         :retrying="isFetchingNextPage"

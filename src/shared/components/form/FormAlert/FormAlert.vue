@@ -2,10 +2,13 @@
 import { computed, useSlots } from 'vue'
 
 // A message about the whole form, above or next to its button, or about a group whose data did
-// not load. 'bad' is announced at once. Listening for `retry` adds the one inline "Reintentar";
-// the `actions` slot holds any other way out, beside it. The default slot adds to the text.
+// not load. Tones: 'warn' for what could not load or send (network, server, slowness), 'bad' for
+// what the server refused (credentials, an order that can no longer be cancelled), 'info' for
+// the rest. 'warn' and 'bad' are announced at once. Listening for `retry` adds the one inline
+// "Reintentar"; the `actions` slot holds any other way out, beside it, drawn the same. The
+// default slot adds to the text.
 const props = defineProps<{
-  tone: 'bad' | 'info'
+  tone: 'bad' | 'warn' | 'info'
   title: string
   text?: string
   /** A retry is on its way: the button takes no more presses. */
@@ -15,26 +18,19 @@ const props = defineProps<{
 
 const slots = useSlots()
 
-// Title and detail read as one sentence block, so the title ends as a sentence does.
-const heading = computed(() =>
-  props.text && !/[.!?…:]$/.test(props.title) ? `${props.title}.` : props.title,
-)
 const hasActions = computed(() => !!props.onRetry || !!slots.actions)
+const isWarning = computed(() => props.tone !== 'info')
 </script>
 
 <template>
-  <div
-    class="form-alert"
-    :class="`form-alert--${tone}`"
-    :role="tone === 'bad' ? 'alert' : undefined"
-  >
+  <div class="form-alert" :class="`form-alert--${tone}`" :role="isWarning ? 'alert' : undefined">
     <svg
       class="form-alert__icon"
       viewBox="0 0 24 24"
       aria-hidden="true"
-      :data-icon="tone === 'bad' ? 'warn' : 'info'"
+      :data-icon="isWarning ? 'warn' : 'info'"
     >
-      <template v-if="tone === 'bad'">
+      <template v-if="isWarning">
         <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
         <path d="M12 9v4M12 17h.01" />
       </template>
@@ -46,8 +42,8 @@ const hasActions = computed(() => !!props.onRetry || !!slots.actions)
     <div class="form-alert__main">
       <div class="form-alert__body">
         <p class="form-alert__message">
-          <strong class="form-alert__title">{{ heading }}</strong>
-          <template v-if="text">{{ ' ' }}{{ text }}</template>
+          <strong class="form-alert__title">{{ title }}</strong>
+          <span v-if="text" class="form-alert__text">{{ text }}</span>
         </p>
         <slot />
       </div>
@@ -56,7 +52,7 @@ const hasActions = computed(() => !!props.onRetry || !!slots.actions)
         <button
           v-if="onRetry"
           type="button"
-          class="form-alert__retry"
+          class="form-alert__out"
           :disabled="retrying"
           :aria-busy="retrying ? 'true' : undefined"
           @click="onRetry()"
@@ -69,12 +65,13 @@ const hasActions = computed(() => !!props.onRetry || !!slots.actions)
 </template>
 
 <style scoped>
-/* One row: sign, text, way out. The way out drops under the text only when it does not fit. */
+/* Sign, text in two lines, way out on the right. The way out drops under the text, lined up with
+   it, only when both do not fit side by side. */
 .form-alert {
   display: flex;
   align-items: flex-start;
   gap: var(--tt-space-2);
-  padding: var(--tt-space-3) var(--tt-space-4);
+  padding: var(--tt-space-3) var(--tt-space-3) var(--tt-space-3) var(--tt-space-4);
   border-radius: var(--tt-radius-m);
   font-family: var(--tt-font-sans);
   font-size: var(--tt-type-body-s-size);
@@ -85,6 +82,11 @@ const hasActions = computed(() => !!props.onRetry || !!slots.actions)
 .form-alert--bad {
   background: var(--tt-danger-soft);
   color: var(--tt-danger-ink);
+}
+
+.form-alert--warn {
+  background: var(--tt-warning-soft);
+  color: var(--tt-warning-ink);
 }
 
 .form-alert--info {
@@ -110,7 +112,7 @@ const hasActions = computed(() => !!props.onRetry || !!slots.actions)
   flex: 1;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--tt-space-1) var(--tt-space-3);
+  gap: var(--tt-space-2) var(--tt-space-3);
   min-inline-size: 0;
 }
 
@@ -123,12 +125,20 @@ const hasActions = computed(() => !!props.onRetry || !!slots.actions)
   min-inline-size: 0;
 }
 
+.form-alert p {
+  margin: 0;
+}
+
 .form-alert__title {
+  display: block;
   font-weight: var(--tt-type-heading-m-weight);
 }
 
-.form-alert p {
-  margin: 0;
+.form-alert__text {
+  display: block;
+  font-size: var(--tt-type-caption-size);
+  line-height: var(--tt-type-caption-line);
+  opacity: 0.86;
 }
 
 .form-alert__actions {
@@ -136,33 +146,50 @@ const hasActions = computed(() => !!props.onRetry || !!slots.actions)
   flex: none;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--tt-space-1) var(--tt-space-3);
+  gap: var(--tt-space-2);
 }
 
-/* A finger's room for each way out, reaching into the padding instead of growing the box. */
-.form-alert__retry,
+/* The way out is a pill on the surface, edged in the tone's own colour. */
+.form-alert__out,
 .form-alert__actions :slotted(a),
 .form-alert__actions :slotted(button) {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  min-block-size: var(--tt-control-m);
-  margin-block: calc((var(--tt-type-body-s-line) - var(--tt-control-m)) / 2);
-  padding: 0;
+  justify-content: center;
+  block-size: var(--tt-control-s);
+  padding: 0 var(--tt-space-3);
   border: 0;
-  background: none;
+  border-radius: var(--tt-radius-pill);
+  background: var(--tt-surface);
+  box-shadow: inset 0 0 0 thin color-mix(in srgb, currentColor 28%, transparent);
   color: inherit;
   font: inherit;
-  font-weight: var(--tt-type-title-weight);
-  text-decoration: underline;
+  font-size: var(--tt-type-caption-size);
+  font-weight: var(--tt-type-heading-m-weight);
+  line-height: var(--tt-type-caption-line);
+  text-decoration: none;
+  white-space: nowrap;
   cursor: pointer;
 }
 
-.form-alert__retry:disabled {
-  cursor: progress;
+/* A finger's room for each way out, reaching past the pill instead of growing the box. */
+.form-alert__out::after,
+.form-alert__actions :slotted(a)::after,
+.form-alert__actions :slotted(button)::after {
+  content: '';
+  position: absolute;
+  inset-block: calc((var(--tt-control-s) - var(--tt-control-m)) / 2);
+  inset-inline: 0;
 }
 
-.form-alert :deep(a) {
+.form-alert__out:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+.form-alert__body :deep(a) {
   color: inherit;
-  font-weight: var(--tt-type-title-weight);
+  font-weight: var(--tt-type-heading-m-weight);
 }
 </style>

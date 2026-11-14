@@ -61,7 +61,7 @@ const hasRecentSection = computed(() => status.value !== 'success' || recentEven
       <FormAlert
         v-if="hasFailed"
         data-test="recent-problem"
-        tone="bad"
+        tone="warn"
         title="No pudimos cargar los eventos"
         text="Puede ser tu conexión."
         :retrying="isFetching"

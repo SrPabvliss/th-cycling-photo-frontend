@@ -225,7 +225,7 @@ async function save() {
     <FormAlert
       v-if="hasPlacesProblem"
       data-test="places-problem"
-      tone="bad"
+      tone="warn"
       title="No pudimos cargar los países y ciudades"
       text="Puede ser tu conexión."
       :retrying="isRetryingPlaces"
@@ -317,7 +317,12 @@ async function save() {
       </template>
     </form.Field>
 
-    <FormAlert v-if="problem" tone="bad" :title="problem.title" :text="problem.text" />
+    <FormAlert
+      v-if="problem"
+      :tone="problem.tone ?? 'bad'"
+      :title="problem.title"
+      :text="problem.text"
+    />
 
     <NButton
       class="personal-data__save"

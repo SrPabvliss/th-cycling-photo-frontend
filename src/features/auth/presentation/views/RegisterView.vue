@@ -99,7 +99,12 @@ async function handleSubmit(formData: IRegisterFormData) {
       @submit="handleSubmit"
     >
       <template #problem>
-        <FormAlert v-if="problem" tone="bad" :title="problem.title" :text="problem.text" />
+        <FormAlert
+          v-if="problem"
+          :tone="problem.tone ?? 'bad'"
+          :title="problem.title"
+          :text="problem.text"
+        />
       </template>
     </RegisterForm>
   </AuthPage>

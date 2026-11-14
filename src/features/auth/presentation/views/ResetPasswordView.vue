@@ -133,7 +133,12 @@ async function save() {
 
   <AuthPage v-else title="Crea una contraseña nueva">
     <form ref="formRef" class="reset-password__form" novalidate @submit.prevent="save">
-      <FormAlert v-if="problem" tone="bad" :title="problem.title" :text="problem.text" />
+      <FormAlert
+        v-if="problem"
+        :tone="problem.tone ?? 'bad'"
+        :title="problem.title"
+        :text="problem.text"
+      />
 
       <form.Field name="password" :validators="{ onSubmit: resetPasswordFieldValidators.password }">
         <template #default="{ field }">

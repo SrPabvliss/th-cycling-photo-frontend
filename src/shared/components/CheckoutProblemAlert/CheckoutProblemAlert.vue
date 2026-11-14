@@ -14,10 +14,12 @@ const props = defineProps<{
 }>()
 
 const text = computed(() => checkoutProblemText(props.problem))
+// It did not get there (amber), or the server turned it down (red).
+const tone = computed(() => (props.problem === 'network' ? 'warn' : 'bad'))
 </script>
 
 <template>
-  <FormAlert tone="bad" :title="text.title" :text="text.text" data-test="checkout-problem">
+  <FormAlert :tone="tone" :title="text.title" :text="text.text" data-test="checkout-problem">
     <template v-if="problem === 'cart-missing'" #actions>
       <RouterLink :to="{ name: ROUTE_NAMES.ACCOUNT_ORDERS }">Ir a Mis fotos</RouterLink>
       <RouterLink :to="galleryPath">Volver a la galería</RouterLink>

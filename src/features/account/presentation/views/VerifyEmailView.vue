@@ -25,18 +25,18 @@ const CONTACT_EMAIL = 'info@titantv.com.ec'
 const SECOND = 1000
 
 interface IAlert {
-  tone: 'bad' | 'info'
+  tone: 'bad' | 'warn' | 'info'
   title: string
   text?: string
 }
 
 const NETWORK_ALERT: IAlert = {
-  tone: 'bad',
+  tone: 'warn',
   title: 'No se pudo completar',
   text: 'Parece un problema de conexión. Nada se perdió: intenta de nuevo.',
 }
 const TOO_MANY_ALERT: IAlert = {
-  tone: 'bad',
+  tone: 'warn',
   title: 'Demasiados intentos. Espera unos minutos antes de pedir otro código.',
 }
 const RESENT_ALERT: IAlert = {

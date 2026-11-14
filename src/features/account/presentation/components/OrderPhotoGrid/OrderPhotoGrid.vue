@@ -103,7 +103,7 @@ const downloadAll = useSequentialDownload({
         <FormAlert
           v-if="downloadFailed"
           data-test="download-problem"
-          tone="bad"
+          tone="warn"
           title="No pudimos descargar la foto. Intenta de nuevo."
         />
       </template>

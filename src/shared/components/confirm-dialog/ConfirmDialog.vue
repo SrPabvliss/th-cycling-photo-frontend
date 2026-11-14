@@ -77,7 +77,12 @@ function confirm() {
       >
         <h2 :id="titleId" class="confirm-dialog__title">{{ title }}</h2>
         <p :id="textId" class="confirm-dialog__text">{{ text }}</p>
-        <FormAlert v-if="problem" tone="bad" :title="problem.title" :text="problem.text" />
+        <FormAlert
+          v-if="problem"
+          :tone="problem.tone ?? 'bad'"
+          :title="problem.title"
+          :text="problem.text"
+        />
         <div class="confirm-dialog__actions">
           <NButton
             type="error"

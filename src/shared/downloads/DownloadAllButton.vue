@@ -56,7 +56,7 @@ const notice = computed(() => {
     </NButton>
 
     <!-- A cut download is a problem, painted like every other one; the button resumes it. -->
-    <FormAlert v-if="notice && state === 'failed'" tone="bad" :title="notice" />
+    <FormAlert v-if="notice && state === 'failed'" tone="warn" :title="notice" />
     <p v-else-if="notice" class="download-all__notice" role="status">
       {{ notice }}
     </p>

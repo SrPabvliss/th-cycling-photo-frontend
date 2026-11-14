@@ -181,7 +181,7 @@ const allLabel = computed(() =>
       <FormAlert
         v-if="refreshProblem"
         data-test="refresh-problem"
-        tone="bad"
+        tone="warn"
         :title="refreshProblem.title"
         :text="refreshProblem.text"
         :retrying="isFetching"
@@ -202,7 +202,7 @@ const allLabel = computed(() =>
       </div>
       <FormAlert
         v-if="singleFailed"
-        tone="bad"
+        tone="warn"
         title="No pudimos descargar la foto. Intenta de nuevo."
       />
 

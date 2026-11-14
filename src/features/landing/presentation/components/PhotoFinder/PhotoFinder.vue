@@ -126,7 +126,7 @@ function search() {
       v-if="hasFailed"
       class="photo-finder__problem"
       data-test="finder-problem"
-      tone="bad"
+      tone="warn"
       title="No pudimos cargar las carreras"
       text="Puede ser tu conexión."
       :retrying="isFetching"

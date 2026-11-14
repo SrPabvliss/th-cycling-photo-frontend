@@ -67,7 +67,12 @@ async function send() {
     subtitle="Escribe tu correo y te enviamos un enlace para crear una nueva."
   >
     <form ref="formRef" class="forgot-password__form" novalidate @submit.prevent="send">
-      <FormAlert v-if="problem" tone="bad" :title="problem.title" :text="problem.text" />
+      <FormAlert
+        v-if="problem"
+        :tone="problem.tone ?? 'bad'"
+        :title="problem.title"
+        :text="problem.text"
+      />
 
       <form.Field name="email" :validators="{ onSubmit: forgotPasswordFormSchema.shape.email }">
         <template #default="{ field }">

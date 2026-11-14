@@ -168,7 +168,12 @@ async function save() {
       </template>
     </form.Field>
 
-    <FormAlert v-if="problem" tone="bad" :title="problem.title" :text="problem.text" />
+    <FormAlert
+      v-if="problem"
+      :tone="problem.tone ?? 'bad'"
+      :title="problem.title"
+      :text="problem.text"
+    />
 
     <NButton
       class="password-section__save"

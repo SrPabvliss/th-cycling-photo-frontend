@@ -11,12 +11,21 @@ describe('FormAlert', () => {
     expect(wrapper.text()).toContain('No pudimos guardar')
   })
 
+  it('announces at once that something did not load, in the amber tone', () => {
+    const wrapper = mount(FormAlert, { props: { tone: 'warn', title: 'No pudimos cargar' } })
+
+    expect(wrapper.attributes('role')).toBe('alert')
+    expect(wrapper.classes()).toContain('form-alert--warn')
+  })
+
   it('leads with the warning sign when something went wrong, and the info sign otherwise', () => {
-    const bad = mount(FormAlert, { props: { tone: 'bad', title: 'No pudimos cargar' } })
+    const bad = mount(FormAlert, { props: { tone: 'bad', title: 'No pudimos guardar' } })
+    const warn = mount(FormAlert, { props: { tone: 'warn', title: 'No pudimos cargar' } })
     const info = mount(FormAlert, { props: { tone: 'info', title: 'Factura anulada' } })
 
     expect(bad.get('svg').attributes('aria-hidden')).toBe('true')
     expect(bad.get('svg').attributes('data-icon')).toBe('warn')
+    expect(warn.get('svg').attributes('data-icon')).toBe('warn')
     expect(info.get('svg').attributes('data-icon')).toBe('info')
     expect(info.attributes('role')).toBeUndefined()
   })
@@ -52,36 +61,32 @@ describe('FormAlert', () => {
 })
 
 describe('FormAlert layout', () => {
-  it('says the title and the detail as one sentence block, the title first', () => {
+  it('puts the title on one line and the detail under it, as written', () => {
     const wrapper = mount(FormAlert, {
       props: {
-        tone: 'bad',
-        title: 'No pudimos cargar las carreras',
-        text: 'Puede ser tu conexión.',
+        tone: 'warn',
+        title: 'No pudimos mostrar las carreras',
+        text: 'Vuelve a intentarlo en un momento.',
       },
     })
 
-    const message = wrapper.get('.form-alert__message')
-    expect(message.element.tagName).toBe('P')
-    expect(message.text().replace(/\s+/g, ' ')).toBe(
-      'No pudimos cargar las carreras. Puede ser tu conexión.',
+    expect(wrapper.get('.form-alert__title').text()).toBe('No pudimos mostrar las carreras')
+    expect(wrapper.get('.form-alert__text').text()).toBe('Vuelve a intentarlo en un momento.')
+    expect(wrapper.get('.form-alert__title').element.nextElementSibling).toBe(
+      wrapper.get('.form-alert__text').element,
     )
-    expect(message.get('strong').text()).toBe('No pudimos cargar las carreras.')
   })
 
-  it('keeps the title as it is when there is no detail, or when it already ends a sentence', () => {
-    const alone = mount(FormAlert, { props: { tone: 'info', title: 'Factura anulada' } })
-    const asked = mount(FormAlert, {
-      props: { tone: 'bad', title: '¿Seguimos?', text: 'Puede ser tu conexión.' },
-    })
+  it('leaves the detail line out when there is none', () => {
+    const wrapper = mount(FormAlert, { props: { tone: 'info', title: 'Factura anulada' } })
 
-    expect(alone.get('.form-alert__message').text()).toBe('Factura anulada')
-    expect(asked.get('strong').text()).toBe('¿Seguimos?')
+    expect(wrapper.get('.form-alert__title').text()).toBe('Factura anulada')
+    expect(wrapper.find('.form-alert__text').exists()).toBe(false)
   })
 
   it('puts the retry and any other way out beside the text, not under it', () => {
     const wrapper = mount(FormAlert, {
-      props: { tone: 'bad', title: 'No pudimos cargar', onRetry: vi.fn() },
+      props: { tone: 'warn', title: 'No pudimos cargar', onRetry: vi.fn() },
       slots: { actions: '<a href="/x">Ir a Mis fotos</a>', default: '<p class="more">Más</p>' },
     })
 
@@ -91,6 +96,7 @@ describe('FormAlert layout', () => {
     expect(body.find('.more').exists()).toBe(true)
     expect(actions.find('a').text()).toBe('Ir a Mis fotos')
     expect(actions.find('button').text()).toBe('Reintentar')
+    expect(actions.find('button').classes()).toContain('form-alert__out')
     expect(body.element.nextElementSibling).toBe(actions.element)
   })
 

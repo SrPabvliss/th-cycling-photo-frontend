@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-// The alert is one row: sign, text, way out. It stays short and the way out still takes a finger.
+// Sign, two lines of text, way out as a pill: variant A of the approved error states.
 const source = readFileSync(
   resolve(process.cwd(), 'src/shared/components/form/FormAlert/FormAlert.vue'),
   'utf8',
@@ -15,13 +15,17 @@ const ruleFor = (selector: string) => {
 }
 
 describe('form alert look', () => {
-  it('takes one token step less of room above and below than before', () => {
-    expect(ruleFor('.form-alert')).toMatch(/padding: var\(--tt-space-3\) var\(--tt-space-4\);/)
+  it('has a tone for what did not load, apart from what was refused', () => {
+    expect(ruleFor('.form-alert--warn')).toMatch(/background: var\(--tt-warning-soft\);/)
+    expect(ruleFor('.form-alert--warn')).toMatch(/color: var\(--tt-warning-ink\);/)
+    expect(ruleFor('.form-alert--bad')).toMatch(/background: var\(--tt-danger-soft\);/)
   })
 
-  it('writes the detail in body weight whatever the page around it uses, the title heavier', () => {
-    expect(ruleFor('.form-alert')).toMatch(/font-weight: var\(--tt-type-body-s-weight\);/)
+  it('writes the title heavier and the detail one size step smaller under it', () => {
+    expect(ruleFor('.form-alert__title')).toMatch(/display: block;/)
     expect(ruleFor('.form-alert__title')).toMatch(/font-weight: var\(--tt-type-heading-m-weight\);/)
+    expect(ruleFor('.form-alert__text')).toMatch(/display: block;/)
+    expect(ruleFor('.form-alert__text')).toMatch(/font-size: var\(--tt-type-caption-size\);/)
   })
 
   it('lets the way out drop to its own line only when it does not fit beside the text', () => {
@@ -32,11 +36,18 @@ describe('form alert look', () => {
     expect(ruleFor('.form-alert__actions')).toMatch(/flex: none;/)
   })
 
-  it('gives the way out a finger of room without growing the box', () => {
-    const action = ruleFor('.form-alert__retry')
-    expect(action).toMatch(/min-block-size: var\(--tt-control-m\);/)
-    expect(action).toMatch(
-      /margin-block: calc\(\(var\(--tt-type-body-s-line\) - var\(--tt-control-m\)\) \/ 2\);/,
+  it('draws the way out as a pill on the surface, edged in the tone', () => {
+    const out = ruleFor('.form-alert__out')
+    expect(out).toMatch(/block-size: var\(--tt-control-s\);/)
+    expect(out).toMatch(/border-radius: var\(--tt-radius-pill\);/)
+    expect(out).toMatch(/background: var\(--tt-surface\);/)
+    expect(out).toMatch(/currentColor/)
+    expect(out).not.toMatch(/text-decoration: underline/)
+  })
+
+  it('gives the pill a finger of room without growing the box', () => {
+    expect(ruleFor('.form-alert__out::after')).toMatch(
+      /inset-block: calc\(\(var\(--tt-control-s\) - var\(--tt-control-m\)\) \/ 2\);/,
     )
   })
 

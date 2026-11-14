@@ -334,7 +334,7 @@ const cartEvent = computed(() =>
                 v-if="hasNextPage && isFetchNextPageError"
                 class="gallery__more-problem"
                 data-test="more-problem"
-                tone="bad"
+                tone="warn"
                 title="No pudimos cargar más fotos"
                 text="Puede ser tu conexión. Las que ya ves se quedan."
                 :retrying="isFetchingNextPage"
@@ -360,7 +360,7 @@ const cartEvent = computed(() =>
               <FormAlert
                 v-if="hasNextNoPlatePage && isMoreNoPlateError"
                 class="gallery__more-problem"
-                tone="bad"
+                tone="warn"
                 title="No pudimos cargar más fotos"
                 text="Puede ser tu conexión. Las que ya ves se quedan."
                 :retrying="isFetchingMoreNoPlate"
