@@ -4,6 +4,7 @@ import { computed } from 'vue'
 import heroImage from '@/assets/landing/hero.webp'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { useDelayedFlag } from '@/shared/components/loading'
 import {
   PublicEventCard,
@@ -57,24 +58,15 @@ const hasRecentSection = computed(() => status.value !== 'success' || recentEven
         <RouterLink class="landing__link" :to="ROUTE_PATHS.PUBLIC_GALLERY">Ver todos</RouterLink>
       </div>
 
-      <div v-if="hasFailed" class="landing__alert" role="alert">
-        <svg class="landing__alert-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
-          <path d="M12 9v4M12 17h.01" />
-        </svg>
-        <div>
-          <strong class="landing__alert-title">No pudimos cargar los eventos</strong>
-          <p class="landing__alert-text">Puede ser tu conexión.</p>
-          <button
-            type="button"
-            class="landing__alert-retry"
-            :disabled="isFetching"
-            @click="refetch()"
-          >
-            Reintentar
-          </button>
-        </div>
-      </div>
+      <FormAlert
+        v-if="hasFailed"
+        data-test="recent-problem"
+        tone="bad"
+        title="No pudimos cargar los eventos"
+        text="Puede ser tu conexión."
+        :retrying="isFetching"
+        @retry="refetch()"
+      />
 
       <div
         v-else-if="isPending || showSkeletons"

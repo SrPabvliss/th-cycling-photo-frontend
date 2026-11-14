@@ -20,6 +20,7 @@ const refetchCart = vi.fn()
 vi.mock('@/shared/cart', () => ({
   useCartState: () => ({
     status: computed(() => cart.status),
+    isFetching: computed(() => false),
     countFor: (eventId: string) => (eventId === 'e1' ? cart.count : 0),
     refetch: refetchCart,
   }),
@@ -128,13 +129,13 @@ describe('GalleryCartBar', () => {
 
     expect(wrapper.find('.gallery-cart-bar__total').exists()).toBe(false)
     expect(wrapper.text()).not.toMatch(/\d+ fotos? ·/)
-    expect(wrapper.text()).toContain('No pudimos cargar tu carrito.')
+    const problem = wrapper.get('[data-test="cart-problem"]')
+    expect(problem.classes()).toContain('form-alert')
+    expect(problem.attributes('role')).toBe('alert')
+    expect(problem.text()).toContain('No pudimos cargar tu carrito')
     expect(confirm(wrapper)).toBeUndefined()
 
-    await wrapper
-      .findAll('button')
-      .find((button) => button.text() === 'Reintentar')!
-      .trigger('click')
+    await problem.get('button').trigger('click')
     expect(refetchCart).toHaveBeenCalledTimes(1)
   })
 

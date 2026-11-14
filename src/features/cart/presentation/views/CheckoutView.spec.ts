@@ -423,6 +423,7 @@ describe('CheckoutView', () => {
 
     expect(router.currentRoute.value.path).toBe('/checkout/e1')
     const alert = wrapper.get('[data-test="checkout-problem"]')
+    expect(alert.classes()).toContain('form-alert')
     expect(alert.attributes('role')).toBe('alert')
     expect(alert.text()).toContain('No se pudo completar')
     expect(alert.text()).toContain(

@@ -5,6 +5,7 @@ import { checkoutPath } from '@/core/navigation/route-paths'
 import { usePriceSheet } from '@/features/pricing/composables/use-price-sheet'
 import TierChips from '@/features/pricing/presentation/components/TierChips/TierChips.vue'
 import { useCartState } from '@/shared/cart'
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { quotePhotos } from '@/shared/pricing/quote'
 import { formatMoney } from '@/shared/pricing/tier-cards'
 import { nextTierText } from '@/shared/pricing/tier-text'
@@ -51,12 +52,16 @@ const hasSomething = computed(
       @open="priceSheet.open(count)"
     />
 
-    <p v-if="cart.status.value === 'error'" class="gallery-cart-bar__hint" role="alert">
-      No pudimos cargar tu carrito.
-      <button type="button" class="gallery-cart-bar__retry" @click="cart.refetch()">
-        Reintentar
-      </button>
-    </p>
+    <FormAlert
+      v-if="cart.status.value === 'error'"
+      class="gallery-cart-bar__problem"
+      data-test="cart-problem"
+      tone="bad"
+      title="No pudimos cargar tu carrito"
+      text="Puede ser tu conexión."
+      :retrying="cart.isFetching.value"
+      @retry="cart.refetch()"
+    />
 
     <div v-else-if="count > 0" class="gallery-cart-bar__row">
       <div class="gallery-cart-bar__summary">
@@ -123,15 +128,8 @@ const hasSomething = computed(
   text-align: center;
 }
 
-.gallery-cart-bar__retry {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--tt-primary-ink);
-  font: inherit;
-  font-weight: var(--tt-type-title-weight);
-  text-decoration: underline;
-  cursor: pointer;
+.gallery-cart-bar__problem {
+  flex: 1;
 }
 
 .gallery-cart-bar__confirm {

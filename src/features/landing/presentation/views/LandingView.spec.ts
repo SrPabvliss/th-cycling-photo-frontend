@@ -162,7 +162,8 @@ describe('LandingView', () => {
 
     expect(wrapper.get('h1').text()).toContain('Tu carrera')
     expect(wrapper.find('form.photo-finder').exists()).toBe(true)
-    const alert = wrapper.get('.landing__alert')
+    const alert = wrapper.get('[data-test="recent-problem"]')
+    expect(alert.classes()).toContain('form-alert')
     expect(alert.attributes('role')).toBe('alert')
     expect(alert.text()).toContain('No pudimos cargar los eventos')
     expect(alert.text()).toContain('Puede ser tu conexión.')
@@ -173,9 +174,9 @@ describe('LandingView', () => {
     Object.assign(recent, { status: 'error', events: [] })
     const wrapper = await mountView()
 
-    await wrapper.get('.landing__alert button').trigger('click')
+    await wrapper.get('[data-test="recent-problem"] button').trigger('click')
 
-    expect(wrapper.get('.landing__alert button').text()).toBe('Reintentar')
+    expect(wrapper.get('[data-test="recent-problem"] button').text()).toBe('Reintentar')
     expect(refetchRecent).toHaveBeenCalledTimes(1)
   })
 

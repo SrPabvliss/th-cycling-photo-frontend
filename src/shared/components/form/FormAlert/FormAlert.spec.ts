@@ -11,6 +11,16 @@ describe('FormAlert', () => {
     expect(wrapper.text()).toContain('No pudimos guardar')
   })
 
+  it('leads with the warning sign when something went wrong, and the info sign otherwise', () => {
+    const bad = mount(FormAlert, { props: { tone: 'bad', title: 'No pudimos cargar' } })
+    const info = mount(FormAlert, { props: { tone: 'info', title: 'Factura anulada' } })
+
+    expect(bad.get('svg').attributes('aria-hidden')).toBe('true')
+    expect(bad.get('svg').attributes('data-icon')).toBe('warn')
+    expect(info.get('svg').attributes('data-icon')).toBe('info')
+    expect(info.attributes('role')).toBeUndefined()
+  })
+
   it('offers no retry unless someone listens for it', () => {
     const wrapper = mount(FormAlert, { props: { tone: 'bad', title: 'No pudimos cargar' } })
 
