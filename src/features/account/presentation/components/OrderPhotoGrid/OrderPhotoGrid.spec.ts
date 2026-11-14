@@ -157,7 +157,7 @@ describe('OrderPhotoGrid', () => {
     await flushPromises()
 
     expect(wrapper.findAll('button[aria-label="Descargar foto"]')).toHaveLength(2)
-    expect(wrapper.text()).not.toContain('No pudimos cargar tus fotos')
+    expect(wrapper.text()).not.toContain('No pudimos mostrar tus fotos')
     expect(wrapper.get('[data-test="download-problem"]').text()).toContain(
       'No pudimos descargar la foto.',
     )
@@ -168,7 +168,7 @@ describe('OrderPhotoGrid', () => {
     hasFiles.value = false
     const wrapper = await mountGrid(order('ready', true))
 
-    expect(wrapper.text()).toContain('No pudimos cargar tus fotos')
+    expect(wrapper.text()).toContain('No pudimos mostrar tus fotos')
     await wrapper
       .findAll('button')
       .find((each) => each.text().includes('Reintentar'))!

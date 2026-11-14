@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton } from 'naive-ui'
 
+import { problemKind } from '@/core/http/problem-kind'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { safeRedirect } from '@/core/navigation/safe-redirect'
@@ -144,8 +145,9 @@ function proceed() {
 
     <ErrorState
       v-else-if="linkProblem || !preview"
-      title="No pudimos cargar tus fotos"
-      text="Puede ser tu conexión."
+      what="tus fotos"
+      :kind="problemKind(error)"
+      stacked
       :retrying="isFetching"
       @retry="refetch()"
     />

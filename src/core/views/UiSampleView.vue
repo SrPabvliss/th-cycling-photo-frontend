@@ -137,6 +137,7 @@ function advance() {
       </div>
       <LoadBoundary
         :status="status"
+        what="los eventos"
         :empty="isEmpty"
         :refreshing="isRefreshing"
         @retry="status = 'pending'"
@@ -168,8 +169,11 @@ function advance() {
 
     <section class="ui-sample__section">
       <h2 class="ui-sample__heading">ErrorState</h2>
-      <ErrorState />
-      <ErrorState title="No pudimos cargar los eventos" text="Inténtalo de nuevo." retrying />
+      <ErrorState what="los eventos" />
+      <ErrorState what="los eventos" kind="server" retrying />
+      <ErrorState what="los eventos" kind="timeout" />
+      <ErrorState what="los eventos" kind="offline" />
+      <ErrorState what="tus compras" text="Tus fotos están a salvo." stacked />
     </section>
 
     <section class="ui-sample__section">

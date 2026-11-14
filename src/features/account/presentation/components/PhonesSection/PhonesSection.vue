@@ -4,6 +4,7 @@ import { NButton, useMessage } from 'naive-ui'
 import IntlTelInput from 'intl-tel-input/vueWithUtils'
 import 'intl-tel-input/styles'
 
+import { problemKind } from '@/core/http/problem-kind'
 import { dialCodeOf } from '@/features/auth/utils/phone-prefix'
 import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
 import ConfirmDialog from '@/shared/components/confirm-dialog/ConfirmDialog.vue'
@@ -24,7 +25,7 @@ const DEFAULT_PREFIX = '+593'
 const SKELETON_ROWS = 2
 
 const message = useMessage()
-const { data: phones, status, isFetching, refetch } = useMyPhonesQuery({ silent: true })
+const { data: phones, status, error, isFetching, refetch } = useMyPhonesQuery({ silent: true })
 const addPhone = useAddPhone({ silent: true })
 const updatePhone = useUpdatePhone({ silent: true })
 const deletePhone = useDeletePhone({ silent: true })
@@ -157,7 +158,8 @@ async function remove() {
 
     <ErrorState
       v-else-if="status === 'error'"
-      title="No pudimos cargar tus teléfonos"
+      what="tus teléfonos"
+      :kind="problemKind(error)"
       :retrying="isFetching"
       @retry="refetch()"
     />

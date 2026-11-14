@@ -150,7 +150,7 @@ describe('DeliveryView', () => {
       const wrapper = await mountView()
 
       expect(wrapper.findAll('button[aria-label="Descargar foto"]')).toHaveLength(3)
-      expect(wrapper.text()).not.toContain('No pudimos cargar tus fotos')
+      expect(wrapper.text()).not.toContain('No pudimos mostrar tus fotos')
       const alert = wrapper.get('[data-test="refresh-problem"]')
       expect(alert.classes()).toContain('form-alert')
       expect(alert.text()).toContain('No pudimos actualizar tus fotos')
@@ -183,7 +183,7 @@ describe('DeliveryView', () => {
     Object.assign(state, { status: 'error', data: undefined, problem: 'network' })
     const wrapper = await mountView()
 
-    expect(wrapper.text()).toContain('No pudimos cargar tus fotos')
+    expect(wrapper.text()).toContain('No pudimos mostrar tus fotos')
   })
 
   it('ends with the house carousel, after the way to keep them at hand', async () => {
@@ -229,10 +229,18 @@ describe('DeliveryView', () => {
     expect(wrapper.text()).toContain(text)
   })
 
+  it('asks to wait after too many tries, with nothing to press', async () => {
+    Object.assign(state, { status: 'error', data: undefined, problem: 'rate-limited' })
+    const wrapper = await mountView()
+
+    expect(wrapper.text()).toContain('Demasiados intentos')
+    expect(wrapper.text()).toContain('Espera un minuto antes de volver a intentarlo.')
+    expect(button(wrapper, 'Reintentar')).toBeUndefined()
+  })
+
   it.each<[DeliveryProblem, string, string]>([
-    ['rate-limited', 'Demasiados intentos', 'Espera un minuto y vuelve a intentarlo.'],
-    ['network', 'No pudimos cargar tus fotos', 'Puede ser tu conexión.'],
-    ['unknown', 'No pudimos cargar tus fotos', 'Puede ser tu conexión.'],
+    ['network', 'No pudimos mostrar tus fotos', 'Vuelve a intentarlo en un momento.'],
+    ['unknown', 'No pudimos mostrar tus fotos', 'Vuelve a intentarlo en un momento.'],
   ])('never leaves the page blank: %s offers to retry', async (problem, title, text) => {
     Object.assign(state, { status: 'error', data: undefined, problem })
     const wrapper = await mountView()

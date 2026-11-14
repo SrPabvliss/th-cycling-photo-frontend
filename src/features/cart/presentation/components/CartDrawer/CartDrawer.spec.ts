@@ -36,6 +36,7 @@ vi.mock('@/shared/cart', () => ({
     status: computed(() => cart.status),
     groups: computed(() => cart.groups),
     isFetching: computed(() => cart.isFetching),
+    error: computed(() => null),
     refetch,
   }),
   useCartActions: () => ({ toggle: vi.fn(), remove, isBusy: () => false }),
@@ -147,8 +148,8 @@ describe('CartDrawer', () => {
     cart.status = 'error'
     const { wrapper } = await open()
 
-    expect(wrapper.text()).toContain('No pudimos cargar tu carrito')
-    expect(wrapper.text()).toContain('Puede ser tu conexión.')
+    expect(wrapper.text()).toContain('No pudimos mostrar tu carrito')
+    expect(wrapper.text()).toContain('Vuelve a intentarlo en un momento.')
     expect(wrapper.text()).not.toContain('Tu carrito está vacío')
 
     await buttonNamed(wrapper, 'Reintentar')!.trigger('click')

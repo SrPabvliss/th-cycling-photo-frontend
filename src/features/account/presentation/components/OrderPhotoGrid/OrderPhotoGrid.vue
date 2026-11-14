@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
+import { problemKind } from '@/core/http/problem-kind'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { ErrorState, TtSkeleton } from '@/shared/components/loading'
 import DownloadAllButton from '@/shared/downloads/DownloadAllButton.vue'
@@ -28,6 +29,7 @@ const {
   status,
   data: files,
   dataUpdatedAt,
+  error,
   isFetching,
   refetch,
 } = useMyOrderDownloadsQuery(orderId, released)
@@ -81,8 +83,8 @@ const downloadAll = useSequentialDownload({
 
       <ErrorState
         v-else-if="hasNothing"
-        title="No pudimos cargar tus fotos"
-        text="Puede ser tu conexión."
+        what="tus fotos"
+        :kind="problemKind(error)"
         :retrying="isFetching"
         @retry="refetch()"
       />

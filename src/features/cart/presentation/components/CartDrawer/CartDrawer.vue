@@ -97,8 +97,8 @@ function explainPrices() {
           :status="cart.status.value"
           :empty="cart.groups.value.length === 0"
           :refreshing="cart.status.value === 'error' && cart.isFetching.value"
-          error-title="No pudimos cargar tu carrito"
-          error-text="Puede ser tu conexión."
+          what="tu carrito"
+          :error="cart.error.value"
           @retry="cart.refetch()"
         >
           <template #skeleton>

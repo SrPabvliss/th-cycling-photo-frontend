@@ -142,6 +142,7 @@ watch(
       />
       <ErrorState
         v-else
+        what="el pago"
         title="No pudimos abrir el pago"
         text="No se hizo ningún cargo."
         :retrying="isCreatingIntent"

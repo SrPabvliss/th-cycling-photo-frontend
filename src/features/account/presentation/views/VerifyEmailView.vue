@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { NButton } from 'naive-ui'
 import { isAxiosError } from 'axios'
 
+import { problemKind } from '@/core/http/problem-kind'
 import { safeRedirect } from '@/core/navigation/safe-redirect'
 import AuthPage from '@/features/auth/presentation/components/AuthPage/AuthPage.vue'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
@@ -55,6 +56,7 @@ const {
   data: status,
   isPending: isStatusLoading,
   isError: isStatusError,
+  error: statusError,
   isFetching: isStatusFetching,
   refetch: refetchStatus,
 } = useEmailVerificationStatusQuery()
@@ -178,7 +180,13 @@ function continueAfter() {
   </div>
 
   <div v-else-if="screen === 'error'" class="verify-email__center">
-    <ErrorState :retrying="isStatusFetching" @retry="refetchStatus()" />
+    <ErrorState
+      what="el estado de tu correo"
+      :kind="problemKind(statusError)"
+      stacked
+      :retrying="isStatusFetching"
+      @retry="refetchStatus()"
+    />
   </div>
 
   <div v-else-if="screen === 'confirmed'" class="verify-email__center">

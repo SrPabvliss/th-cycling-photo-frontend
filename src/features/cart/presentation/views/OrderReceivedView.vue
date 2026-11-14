@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { NButton } from 'naive-ui'
 import { isAxiosError } from 'axios'
 
+import { problemKind } from '@/core/http/problem-kind'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import NotFoundView from '@/core/views/NotFoundView.vue'
 import { useMyOrderDetailQuery } from '@/features/account/composables/queries/use-my-order-detail'
@@ -69,8 +70,10 @@ const phone = computed(() => {
 
     <ErrorState
       v-else-if="!order"
-      title="No pudimos cargar tu pedido"
-      text="Puede ser tu conexión. Tu pedido está guardado."
+      what="tu pedido"
+      :kind="problemKind(error)"
+      stacked
+      text="Tu pedido está guardado."
       :retrying="isFetching"
       @retry="refetch()"
     />

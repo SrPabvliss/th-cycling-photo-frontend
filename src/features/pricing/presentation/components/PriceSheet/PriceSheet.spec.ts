@@ -166,7 +166,7 @@ describe('PriceSheet', () => {
     Object.assign(query, { tiers: undefined, status: 'error' })
     const wrapper = mountSheet()
 
-    expect(wrapper.text()).toContain('No pudimos cargar los precios')
+    expect(wrapper.text()).toContain('No pudimos mostrar los precios')
     expect(wrapper.text()).not.toContain('$')
     expect(rows(wrapper)).toHaveLength(0)
 

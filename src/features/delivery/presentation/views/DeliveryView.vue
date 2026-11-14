@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { NButton } from 'naive-ui'
 
+import { problemKind } from '@/core/http/problem-kind'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
 import { EmptyState } from '@/shared/components/empty-state'
@@ -22,6 +23,7 @@ const token = computed(() => route.params.token as string)
 const {
   status,
   data: delivery,
+  error,
   problem,
   isFetching,
   refetch,
@@ -161,17 +163,10 @@ const allLabel = computed(() =>
     </EmptyState>
 
     <ErrorState
-      v-else-if="problem === 'rate-limited' && !delivery"
-      title="Demasiados intentos"
-      text="Espera un minuto y vuelve a intentarlo."
-      :retrying="isFetching"
-      @retry="refetch()"
-    />
-
-    <ErrorState
       v-else-if="!delivery"
-      title="No pudimos cargar tus fotos"
-      text="Puede ser tu conexión."
+      what="tus fotos"
+      :kind="problem === 'rate-limited' ? 'rate' : problemKind(error)"
+      stacked
       :retrying="isFetching"
       @retry="refetch()"
     />

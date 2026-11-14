@@ -163,7 +163,7 @@ describe('OrderReceivedView', () => {
     Object.assign(state, { status: 'error', order: undefined, error: new Error('down') })
     const wrapper = await mountView()
 
-    expect(wrapper.text()).toContain('No pudimos cargar tu pedido')
+    expect(wrapper.text()).toContain('No pudimos mostrar tu pedido')
     await wrapper
       .findAll('button')
       .find((each) => each.text().includes('Reintentar'))!

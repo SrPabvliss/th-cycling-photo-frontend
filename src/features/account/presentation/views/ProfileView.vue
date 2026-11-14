@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton } from 'naive-ui'
 
+import { problemKind } from '@/core/http/problem-kind'
 import { canOperate } from '@/core/auth/capabilities'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import { useLogoutMutation } from '@/core/auth/use-logout'
@@ -30,7 +31,7 @@ const session = useSessionStore()
 // The organizer keeps the profile it had; this page is the buyer's.
 const isOperator = computed(() => canOperate(session.currentUser?.permissions ?? []))
 
-const { status, data: profile, isFetching, refetch } = useMyProfileQuery()
+const { status, data: profile, error, isFetching, refetch } = useMyProfileQuery()
 const { data: billing } = useMyBillingAccountsQuery({ enabled: () => !isOperator.value })
 const showSkeleton = useDelayedFlag(computed(() => status.value === 'pending'))
 const { mutateAsync: logout, isPending: isLoggingOut } = useLogoutMutation({
@@ -98,8 +99,9 @@ const plural = (count: number, one: string, many: string) => `${count} ${count =
 
     <ErrorState
       v-else-if="!profile"
-      title="No pudimos cargar tu perfil"
-      text="Puede ser tu conexión."
+      what="tu perfil"
+      :kind="problemKind(error)"
+      stacked
       :retrying="isFetching"
       @retry="refetch()"
     />

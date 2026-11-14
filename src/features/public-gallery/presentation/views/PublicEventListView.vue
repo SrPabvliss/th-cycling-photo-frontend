@@ -24,6 +24,7 @@ const { searchText, chip, filters, reset } = useEventListFilters()
 const {
   status,
   events,
+  error,
   isFetching,
   isPlaceholderData,
   isFetchingNextPage,
@@ -85,8 +86,9 @@ const spotAfter = computed(() => spotIndexAfter(events.value.length, SPOT_AFTER)
       :status="listStatus"
       :empty="isEmpty"
       :refreshing="isRefreshing"
-      error-title="No pudimos cargar los eventos"
-      error-text="Puede ser tu conexión."
+      what="los eventos"
+      :error="error"
+      stacked
       @retry="refetch()"
     >
       <template #skeleton>

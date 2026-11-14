@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useForm } from '@tanstack/vue-form'
 import { NButton } from 'naive-ui'
 
+import { problemKind, type ProblemKind } from '@/core/http/problem-kind'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import PasswordRules from '@/shared/auth/PasswordRules.vue'
 import { EmptyState } from '@/shared/components/empty-state'
@@ -44,6 +45,8 @@ onMounted(async () => {
   await checkLink()
 })
 
+const checkProblem = ref<ProblemKind>('unknown')
+
 // Only the api's answer makes the link useless; no answer, or its failure, is said as such.
 async function checkLink() {
   screen.value = 'checking'
@@ -51,6 +54,7 @@ async function checkLink() {
     screen.value = (await validateToken(token.value)) ? 'form' : 'useless'
   } catch (error) {
     const status = failedStatus(error)
+    checkProblem.value = problemKind(error)
     screen.value = status === 0 || status >= 500 ? 'unchecked' : 'useless'
   }
 }
@@ -108,8 +112,11 @@ async function save() {
 
   <div v-else-if="screen === 'unchecked'" class="reset-password__center">
     <ErrorState
+      what="tu enlace"
+      :kind="checkProblem"
+      stacked
       title="No pudimos revisar tu enlace"
-      text="Puede ser tu conexión. El enlace sigue guardado aquí."
+      text="El enlace sigue guardado aquí."
       @retry="checkLink"
     />
   </div>

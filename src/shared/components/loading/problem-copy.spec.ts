@@ -13,6 +13,12 @@ describe('problemCopy', () => {
     })
   })
 
+  it('offline: agrees with a singular noun', () => {
+    expect(problemCopy('offline', 'tu pedido').text).toBe(
+      'Tu pedido aparecerá cuando vuelvas a tener conexión.',
+    )
+  })
+
   it('server: names what did not show and offers a retry', () => {
     expect(problemCopy('server', 'los eventos')).toEqual({
       title: 'No pudimos mostrar los eventos',

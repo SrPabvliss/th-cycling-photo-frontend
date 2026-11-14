@@ -35,7 +35,7 @@ async function mountAt(path: string) {
           { path: 'detail', component: Screen('detalle'), meta: { shell: { footer: false } } },
           {
             path: 'season-error',
-            component: defineComponent({ render: () => h(ErrorState) }),
+            component: defineComponent({ render: () => h(ErrorState, { what: 'los eventos' }) }),
             meta: { shell: { seasonBar: true } },
           },
           {
@@ -148,7 +148,7 @@ describe('ClientLayout', () => {
     const { wrapper } = await mountAt('/season-error')
 
     expect(has(wrapper, 'season-bar')).toBe(false)
-    expect(wrapper.get('main').text()).toContain('No pudimos cargar esto')
+    expect(wrapper.get('main').text()).toContain('No pudimos mostrar los eventos')
   })
 
   it('applies the shell of the next route without mounting the layout again', async () => {

@@ -24,6 +24,7 @@ const CONFIRMING_POLL_MS = 15_000
 const {
   status,
   data,
+  error,
   isFetching,
   isFetchingNextPage,
   isFetchNextPageError,
@@ -61,8 +62,10 @@ const spotAfter = computed(() => spotIndexAfter(orders.value.length, SPOT_AFTER)
       :status="listStatus"
       :empty="orders.length === 0"
       :refreshing="status === 'error' && isFetching"
-      error-title="No pudimos cargar tus fotos"
-      error-text="Puede ser tu conexión."
+      what="tus compras"
+      :error="error"
+      stacked
+      error-text="Tus fotos están a salvo."
       @retry="refetch()"
     >
       <template #skeleton>

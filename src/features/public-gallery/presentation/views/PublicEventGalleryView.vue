@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { NButton } from 'naive-ui'
 import { isAxiosError } from 'axios'
 
+import { problemKind } from '@/core/http/problem-kind'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import NotFoundView from '@/core/views/NotFoundView.vue'
 import EventPresenterStrip from '@/features/house-spots/presentation/components/EventPresenterStrip/EventPresenterStrip.vue'
@@ -72,6 +73,7 @@ const categories = computed(() => event.value?.photoCategories ?? [])
 const {
   data: photoPages,
   status: photosStatus,
+  error: photosError,
   isPlaceholderData,
   hasNextPage,
   isFetchingNextPage,
@@ -204,8 +206,9 @@ const cartEvent = computed(() =>
     <ErrorState
       v-else-if="!event"
       class="gallery__error"
-      title="No pudimos cargar este evento"
-      text="Puede ser tu conexión."
+      what="el evento"
+      :kind="problemKind(eventError)"
+      stacked
       :retrying="isEventFetching"
       @retry="refetchEvent()"
     />
@@ -273,8 +276,9 @@ const cartEvent = computed(() =>
           <LoadBoundary
             :status="photosBoundaryStatus"
             :refreshing="isPlaceholderData"
-            error-title="No pudimos cargar las fotos"
-            error-text="Puede ser tu conexión."
+            what="las fotos"
+            :error="photosError"
+            stacked
             @retry="refetchPhotos()"
           >
             <template #skeleton>

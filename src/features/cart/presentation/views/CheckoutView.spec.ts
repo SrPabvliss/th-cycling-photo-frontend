@@ -55,6 +55,7 @@ vi.mock('@/shared/cart', () => ({
     status: computed(() => state.cartStatus),
     groups: computed(() => state.groups),
     isFetching: computed(() => false),
+    error: computed(() => null),
     refetch: refetchCart,
   }),
   useCartActions: () => ({ toggle: vi.fn(), remove, isBusy: () => false }),
@@ -219,7 +220,7 @@ describe('CheckoutView', () => {
     state.groups = []
     const { wrapper } = await mountView()
 
-    expect(wrapper.text()).toContain('No pudimos cargar tu carrito')
+    expect(wrapper.text()).toContain('No pudimos mostrar tu carrito')
     expect(wrapper.text()).not.toContain('No hay fotos en este pedido')
   })
 

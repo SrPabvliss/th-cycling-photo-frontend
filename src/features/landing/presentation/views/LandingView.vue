@@ -2,10 +2,10 @@
 import { computed } from 'vue'
 
 import heroImage from '@/assets/landing/hero.webp'
+import { problemKind } from '@/core/http/problem-kind'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
-import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
-import { useDelayedFlag } from '@/shared/components/loading'
+import { ErrorState, useDelayedFlag } from '@/shared/components/loading'
 import {
   PublicEventCard,
   PublicEventCardSkeleton,
@@ -21,12 +21,13 @@ const HERO_SIZE = { width: 1920, height: 1282 }
 
 // First page of the list every screen shares, newest first. A failure here is told in place: the
 // hero and the finder do not depend on it.
-const { status, isFetching, events, refetch } = usePublicEventsQuery()
+const { status, error, isFetching, events, refetch } = usePublicEventsQuery()
 
 const recentEvents = computed(() => events.value.slice(0, RECENT_EVENTS))
 const isPending = computed(() => status.value === 'pending')
 const showSkeletons = useDelayedFlag(isPending)
-const hasFailed = computed(() => status.value === 'error')
+// A failed refresh with events on screen keeps them: only a list that never came is an error.
+const hasFailed = computed(() => status.value === 'error' && events.value.length === 0)
 // Loaded and nothing to show: the whole section goes, title included.
 const hasRecentSection = computed(() => status.value !== 'success' || recentEvents.value.length > 0)
 </script>
@@ -58,12 +59,12 @@ const hasRecentSection = computed(() => status.value !== 'success' || recentEven
         <RouterLink class="landing__link" :to="ROUTE_PATHS.PUBLIC_GALLERY">Ver todos</RouterLink>
       </div>
 
-      <FormAlert
+      <ErrorState
         v-if="hasFailed"
+        class="landing__problem"
         data-test="recent-problem"
-        tone="warn"
-        title="No pudimos cargar los eventos"
-        text="Puede ser tu conexión."
+        what="los eventos"
+        :kind="problemKind(error)"
         :retrying="isFetching"
         @retry="refetch()"
       />

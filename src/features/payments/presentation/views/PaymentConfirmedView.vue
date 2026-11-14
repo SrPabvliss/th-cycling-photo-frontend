@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { NButton } from 'naive-ui'
 import { isAxiosError } from 'axios'
 
+import { problemKind } from '@/core/http/problem-kind'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import NotFoundView from '@/core/views/NotFoundView.vue'
 import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
@@ -63,8 +64,10 @@ const text = computed(() => {
 
     <ErrorState
       v-else-if="!order"
-      title="No pudimos cargar tu pedido"
-      text="Puede ser tu conexión. Tu pago está registrado."
+      what="tu pedido"
+      :kind="problemKind(error)"
+      stacked
+      text="Tu pago está registrado."
       :retrying="isFetching"
       @retry="refetch()"
     />

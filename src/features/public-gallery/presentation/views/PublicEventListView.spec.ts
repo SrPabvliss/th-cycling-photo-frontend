@@ -152,8 +152,8 @@ describe('PublicEventListView', () => {
     list.status = 'error'
     await flushPromises()
 
-    expect(wrapper.text()).toContain('No pudimos cargar los eventos')
-    expect(wrapper.text()).toContain('Puede ser tu conexión.')
+    expect(wrapper.text()).toContain('No pudimos mostrar los eventos')
+    expect(wrapper.text()).toContain('Vuelve a intentarlo en un momento.')
     expect(wrapper.text()).not.toContain('No hay eventos con ese filtro')
     expect((search(wrapper).element as HTMLInputElement).value).toBe('mama')
     expect(chip(wrapper, 'Downhill').attributes('aria-pressed')).toBe('true')
@@ -284,7 +284,7 @@ describe('PublicEventListView', () => {
       'Con fotos',
     ])
     expect(cards(wrapper)).toHaveLength(1)
-    expect(wrapper.text()).not.toContain('No pudimos cargar')
+    expect(wrapper.text()).not.toContain('No pudimos')
   })
 
   it('shows skeletons at the end while the next page arrives', async () => {
@@ -310,7 +310,7 @@ describe('PublicEventListView', () => {
     const { wrapper } = await mountView()
 
     expect(cards(wrapper)).toHaveLength(2)
-    expect(wrapper.text()).not.toContain('No pudimos cargar los eventos')
+    expect(wrapper.text()).not.toContain('No pudimos mostrar los eventos')
     const alert = wrapper.get('[data-test="more-problem"]')
     expect(alert.classes()).toContain('form-alert')
     expect(alert.text()).toContain('No pudimos cargar más eventos')

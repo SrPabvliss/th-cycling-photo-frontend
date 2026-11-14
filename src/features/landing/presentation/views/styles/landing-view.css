@@ -128,8 +128,10 @@ section.landing__band {
   display: none;
 }
 
-/* While the events load the row already takes the height of a card: nothing below it jumps. */
-.landing__row--loading {
+/* While the events load the row already takes the height of a card, and so does the problem that
+   may take its place: nothing below it jumps. */
+.landing__row--loading,
+.landing__problem {
   min-block-size: calc(
     (var(--tt-sidebar-width) + var(--tt-space-7) - var(--tt-space-2)) * 218 / 272 +
       var(--tt-space-5)

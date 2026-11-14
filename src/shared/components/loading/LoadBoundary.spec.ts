@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { AxiosError } from 'axios'
 
 import LoadBoundary from './LoadBoundary.vue'
 
@@ -11,8 +12,14 @@ const slots = {
   default: '<p data-test="content">contenido</p>',
 }
 
-function mountBoundary(props: { status: Status; empty?: boolean; refreshing?: boolean }) {
-  return mount(LoadBoundary, { props, slots })
+function mountBoundary(props: {
+  status: Status
+  empty?: boolean
+  refreshing?: boolean
+  error?: unknown
+  stacked?: boolean
+}) {
+  return mount(LoadBoundary, { props: { what: 'los eventos', ...props }, slots })
 }
 
 describe('LoadBoundary', () => {
@@ -52,7 +59,7 @@ describe('LoadBoundary', () => {
   it('paints the error with a way to retry', async () => {
     const wrapper = mountBoundary({ status: 'error' })
 
-    expect(wrapper.text()).toContain('No pudimos cargar esto')
+    expect(wrapper.text()).toContain('No pudimos mostrar los eventos')
     expect(wrapper.find('[data-test="empty"]').exists()).toBe(false)
 
     await wrapper.get('button').trigger('click')
@@ -64,6 +71,7 @@ describe('LoadBoundary', () => {
     const wrapper = mount(LoadBoundary, {
       props: {
         status: 'error',
+        what: 'los eventos',
         errorTitle: 'No pudimos cargar los eventos',
         errorText: 'Otra vez.',
       },
@@ -84,7 +92,7 @@ describe('LoadBoundary', () => {
     const wrapper = mountBoundary({ status: 'success', empty: true })
 
     expect(wrapper.find('[data-test="empty"]').exists()).toBe(true)
-    expect(wrapper.text()).not.toContain('No pudimos cargar esto')
+    expect(wrapper.text()).not.toContain('No pudimos mostrar')
     expect(wrapper.find('[data-test="content"]').exists()).toBe(false)
   })
 
@@ -115,5 +123,37 @@ describe('LoadBoundary', () => {
     await vi.advanceTimersByTimeAsync(200)
     expect(wrapper.find('[data-test="empty"]').exists()).toBe(false)
     expect(wrapper.find('[data-test="skeleton"]').exists()).toBe(true)
+  })
+
+  it('tells the cause of the error it was given', () => {
+    const wrapper = mountBoundary({
+      status: 'error',
+      error: new AxiosError('timeout', 'ECONNABORTED'),
+    })
+
+    expect(wrapper.text()).toContain('Está tardando más de lo normal')
+  })
+
+  it('passes the stacked look on', () => {
+    const wrapper = mountBoundary({ status: 'error', stacked: true })
+
+    expect(wrapper.find('.error-state--stacked').exists()).toBe(true)
+  })
+
+  it('keeps the height of the skeleton when the load fails, so nothing jumps', async () => {
+    const wrapper = mountBoundary({ status: 'pending' })
+    await vi.advanceTimersByTimeAsync(400)
+    Object.defineProperty(wrapper.element, 'offsetHeight', { configurable: true, value: 180 })
+
+    await wrapper.setProps({ status: 'error' })
+    await vi.advanceTimersByTimeAsync(400)
+
+    expect(wrapper.get('.error-state').attributes('style')).toContain('min-block-size: 180px')
+  })
+
+  it('sets no height when nothing was painted before the error', () => {
+    const wrapper = mountBoundary({ status: 'error' })
+
+    expect(wrapper.get('.error-state').attributes('style')).toBeUndefined()
   })
 })

@@ -16,6 +16,8 @@ export interface ICartState {
   groups: ComputedRef<ICartGroup[]>
   /** A read of the cart is on its way (the first one or a retry). */
   isFetching: ComputedRef<boolean>
+  /** Why the last read failed, for the words of the error. */
+  error: ComputedRef<unknown>
   totalCount: ComputedRef<number>
   countFor(eventId: string): number
   photoIdsFor(eventId: string): string[]
@@ -54,6 +56,7 @@ export function useCartState(): ICartState {
     status,
     groups,
     isFetching: computed(() => query.isFetching.value),
+    error: computed(() => query.error.value),
     totalCount,
     countFor: (eventId) => groupOf(eventId)?.photos.length ?? 0,
     photoIdsFor: (eventId) => groupOf(eventId)?.photos.map((photo) => photo.id) ?? [],

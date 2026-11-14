@@ -153,8 +153,9 @@ async function confirm() {
       :status="cart.status.value"
       :empty="!group"
       :refreshing="cart.status.value === 'error' && cart.isFetching.value"
-      error-title="No pudimos cargar tu carrito"
-      error-text="Puede ser tu conexión."
+      what="tu carrito"
+      :error="cart.error.value"
+      stacked
       @retry="cart.refetch()"
     >
       <template #skeleton>

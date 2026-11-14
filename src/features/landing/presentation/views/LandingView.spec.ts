@@ -162,11 +162,13 @@ describe('LandingView', () => {
 
     expect(wrapper.get('h1').text()).toContain('Tu carrera')
     expect(wrapper.find('form.photo-finder').exists()).toBe(true)
-    const alert = wrapper.get('[data-test="recent-problem"]')
-    expect(alert.classes()).toContain('form-alert')
-    expect(alert.attributes('role')).toBe('alert')
-    expect(alert.text()).toContain('No pudimos cargar los eventos')
-    expect(alert.text()).toContain('Puede ser tu conexión.')
+    const section = wrapper.get('[data-test="recent-problem"]')
+    expect(section.classes()).toContain('error-state')
+    expect(section.classes()).not.toContain('error-state--stacked')
+    expect(section.attributes('role')).toBe('alert')
+    expect(section.text()).toContain('No pudimos mostrar los eventos')
+    expect(section.text()).toContain('Vuelve a intentarlo en un momento.')
+    expect(wrapper.find('.form-alert').exists()).toBe(false)
     expect(cards(wrapper)).toHaveLength(0)
   })
 

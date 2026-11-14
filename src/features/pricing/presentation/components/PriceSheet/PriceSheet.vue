@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { NButton } from 'naive-ui'
 
+import { problemKind } from '@/core/http/problem-kind'
 import { ErrorState } from '@/shared/components/loading'
 import { useDialogFocus } from '@/shared/composables/use-dialog-focus'
 import { quotePhotos, sortTiers } from '@/shared/pricing/quote'
@@ -20,7 +21,7 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const { data, status, isFetching, refetch } = usePricingTiersQuery()
+const { data, status, error, isFetching, refetch } = usePricingTiersQuery()
 
 const panel = ref<HTMLElement | null>(null)
 useDialogFocus(
@@ -102,8 +103,8 @@ const thirdPhotoNote = computed(() => {
 
         <ErrorState
           v-if="status === 'error'"
-          title="No pudimos cargar los precios"
-          text="Puede ser tu conexión."
+          what="los precios"
+          :kind="problemKind(error)"
           :retrying="isFetching"
           @retry="refetch()"
         />

@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { NButton, useMessage } from 'naive-ui'
 import { isAxiosError } from 'axios'
 
+import { problemKind } from '@/core/http/problem-kind'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
 import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
@@ -216,8 +217,9 @@ function submitCorrection(request: Parameters<typeof correctBilling.mutate>[0]) 
 
     <ErrorState
       v-else-if="!order"
-      title="No pudimos cargar tu pedido"
-      text="Puede ser tu conexión."
+      what="tu pedido"
+      :kind="problemKind(error)"
+      stacked
       :retrying="isFetching"
       @retry="refetch()"
     />

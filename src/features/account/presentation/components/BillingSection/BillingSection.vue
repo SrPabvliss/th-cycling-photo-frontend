@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { NButton, useMessage } from 'naive-ui'
 import { isAxiosError } from 'axios'
 
+import { problemKind } from '@/core/http/problem-kind'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
 import ConfirmDialog from '@/shared/components/confirm-dialog/ConfirmDialog.vue'
@@ -32,7 +33,7 @@ const SKELETON_ROWS = 2
 
 const message = useMessage()
 const session = useSessionStore()
-const { data, status, isFetching, refetch } = useMyBillingAccountsQuery()
+const { data, status, error, isFetching, refetch } = useMyBillingAccountsQuery()
 const setDefault = useSetDefaultBillingAccount()
 const deleteAccount = useDeleteBillingAccount()
 const updateAccount = useUpdateBillingAccount()
@@ -169,7 +170,8 @@ const editInitial = computed<ICreateBillingAccountRequest | undefined>(() =>
 
     <ErrorState
       v-else-if="status === 'error'"
-      title="No pudimos cargar tus datos de facturación"
+      what="tus datos de facturación"
+      :kind="problemKind(error)"
       :retrying="isFetching"
       @retry="refetch()"
     />

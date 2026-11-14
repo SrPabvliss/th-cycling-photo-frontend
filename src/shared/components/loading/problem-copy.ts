@@ -17,16 +17,24 @@ function capitalize(text: string): string {
   return text.charAt(0).toLocaleUpperCase('es') + text.slice(1)
 }
 
+// "los eventos", "tus compras" read as many; "tu pedido", "el evento" as one.
+const PLURAL_LEAD = new Set(['los', 'las', 'tus', 'sus', 'mis', 'estos', 'estas'])
+
+function appears(what: string): string {
+  const lead = what.trim().split(/\s+/)[0]?.toLocaleLowerCase('es') ?? ''
+  return PLURAL_LEAD.has(lead) ? 'aparecerán' : 'aparecerá'
+}
+
 /**
- * Words, drawing and tone of a problem by its kind. `what` is the plural noun of what did not
- * show, with its article: "los eventos", "tus compras".
+ * Words, drawing and tone of a problem by its kind. `what` is the noun of what did not
+ * show, with its article: "los eventos", "tus compras", "tu pedido".
  */
 export function problemCopy(kind: ProblemKind, what: string): IProblemCopy {
   switch (kind) {
     case 'offline':
       return {
         title: 'Sin conexión a internet',
-        text: `${capitalize(what)} aparecerán cuando vuelvas a tener conexión.`,
+        text: `${capitalize(what)} ${appears(what)} cuando vuelvas a tener conexión.`,
         illustration: 'sinConexion',
         tone: 'neutral',
         retry: false,

@@ -220,8 +220,8 @@ describe('PublicEventGalleryView', () => {
       Object.assign(detail, { status: 'error', event: undefined, error: httpError(500) })
       const { wrapper } = await mountAt()
 
-      expect(wrapper.text()).toContain('No pudimos cargar este evento')
-      expect(wrapper.text()).toContain('Puede ser tu conexión.')
+      expect(wrapper.text()).toContain('No pudimos mostrar el evento')
+      expect(wrapper.text()).toContain('Vuelve a intentarlo en un momento.')
 
       await buttonNamed(wrapper, 'Reintentar')!.trigger('click')
       expect(refetchDetail).toHaveBeenCalledTimes(1)
@@ -232,7 +232,7 @@ describe('PublicEventGalleryView', () => {
       const { wrapper } = await mountAt()
 
       expect(wrapper.text()).toContain('Te saliste del camino')
-      expect(wrapper.text()).not.toContain('No pudimos cargar este evento')
+      expect(wrapper.text()).not.toContain('No pudimos mostrar el evento')
     })
 
     it('shows its name, date and place over the cover', async () => {
@@ -477,7 +477,7 @@ describe('PublicEventGalleryView', () => {
       const { wrapper } = await mountAt()
 
       expect(tiles(wrapper)).toHaveLength(2)
-      expect(wrapper.text()).not.toContain('No pudimos cargar las fotos')
+      expect(wrapper.text()).not.toContain('No pudimos mostrar las fotos')
       const alert = wrapper.get('[data-test="more-problem"]')
       expect(alert.text()).toContain('No pudimos cargar más fotos')
       await alert.get('button').trigger('click')
@@ -490,7 +490,7 @@ describe('PublicEventGalleryView', () => {
 
       expect(wrapper.get('h1').text()).toBe('Mama Rumi 2026')
       expect(wrapper.find('form').exists()).toBe(true)
-      expect(wrapper.text()).toContain('No pudimos cargar las fotos')
+      expect(wrapper.text()).toContain('No pudimos mostrar las fotos')
 
       await buttonNamed(wrapper, 'Reintentar')!.trigger('click')
       expect(refetchPhotos).toHaveBeenCalledTimes(1)

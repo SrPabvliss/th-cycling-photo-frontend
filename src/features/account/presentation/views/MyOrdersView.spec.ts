@@ -96,7 +96,7 @@ describe('MyOrdersView', () => {
     state.status = 'error'
     const wrapper = await mountView()
 
-    expect(wrapper.text()).toContain('No pudimos cargar tus fotos')
+    expect(wrapper.text()).toContain('No pudimos mostrar tus compras')
     expect(wrapper.text()).not.toContain('Todavía no tienes fotos')
     await wrapper
       .findAll('button')
@@ -157,7 +157,7 @@ describe('MyOrdersView', () => {
     const wrapper = await mountView()
 
     expect(wrapper.findAll('.order-row')).toHaveLength(2)
-    expect(wrapper.text()).not.toContain('No pudimos cargar tus fotos')
+    expect(wrapper.text()).not.toContain('No pudimos mostrar tus compras')
     const alert = wrapper.get('[data-test="more-problem"]')
     expect(alert.text()).toContain('No pudimos cargar más compras')
     await alert.get('button').trigger('click')
