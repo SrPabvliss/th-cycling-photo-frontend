@@ -202,7 +202,7 @@ describe('BillingSection', () => {
     expect(cards(wrapper)[0]!.text()).toContain('Predeterminada')
   })
 
-  it('says what went wrong when deleting fails, keeping the data', async () => {
+  it('says in the dialog what went wrong when deleting fails, keeping the data, and retries', async () => {
     remove.mockRejectedValue(apiError(500))
     const wrapper = await mountSection()
 
@@ -211,9 +211,15 @@ describe('BillingSection', () => {
     await buttonIn(wrapper.get('[role="alertdialog"]'), 'Eliminar')!.trigger('click')
     await flushPromises()
 
-    expect(wrapper.find('[role="alertdialog"]').exists()).toBe(false)
-    expect(wrapper.find('.form-alert').exists()).toBe(true)
+    const dialog = wrapper.get('[role="alertdialog"]')
+    expect(dialog.get('.form-alert').text()).toContain('No se pudo completar')
     expect(cards(wrapper)).toHaveLength(2)
+
+    remove.mockResolvedValueOnce(undefined)
+    await buttonIn(dialog, 'Eliminar')!.trigger('click')
+    await flushPromises()
+    expect(remove).toHaveBeenCalledTimes(2)
+    expect(wrapper.find('[role="alertdialog"]').exists()).toBe(false)
   })
 
   it('shows the empty state after deleting the only account', async () => {

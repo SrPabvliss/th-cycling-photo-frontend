@@ -54,8 +54,9 @@ const target = ref<IBillingAccount | null>(null)
 const serverError = ref<IBillingServerError | null>(null)
 const busyId = ref<string | null>(null)
 const deleting = ref<IBillingAccount | null>(null)
-// What a failed action on the list (delete, make default) has to say, above it.
+// What a failed "make default" has to say, above the list. A failed delete says it in its dialog.
 const listProblem = ref<IFormProblem | null>(null)
+const deleteProblem = ref<IFormProblem | null>(null)
 
 function open(kind: 'add' | 'edit', account: IBillingAccount | null = null) {
   target.value = account
@@ -69,6 +70,7 @@ function close() {
 
 function askDelete(account: IBillingAccount) {
   listProblem.value = null
+  deleteProblem.value = null
   deleting.value = account
 }
 
@@ -113,13 +115,13 @@ async function saveEdit(request: ICreateBillingAccountRequest) {
 async function confirmDelete() {
   const account = deleting.value
   if (!account || deleteAccount.isPending.value) return
+  deleteProblem.value = null
   try {
     await deleteAccount.mutateAsync(account.id)
   } catch (error) {
     if (isGone(error)) return forgetGone()
-    // The data stays: say why, next to the list.
-    deleting.value = null
-    listProblem.value = generalProblem(error)
+    // The data stays: the dialog says why and can try again.
+    deleteProblem.value = generalProblem(error)
     return
   }
   deleting.value = null
@@ -236,6 +238,7 @@ const editInitial = computed<ICreateBillingAccountRequest | undefined>(() =>
       confirm-label="Eliminar"
       keep-label="Conservar"
       :busy="deleteAccount.isPending.value"
+      :problem="deleteProblem"
       @confirm="confirmDelete"
       @keep="deleting = null"
     />
