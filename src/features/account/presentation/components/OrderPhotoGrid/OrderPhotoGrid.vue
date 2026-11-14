@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useMessage } from 'naive-ui'
 
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { ErrorState, TtSkeleton } from '@/shared/components/loading'
 import DownloadAllButton from '@/shared/downloads/DownloadAllButton.vue'
 import { downloadFile } from '@/shared/downloads/download-file'
@@ -20,7 +20,6 @@ const props = defineProps<{
   order: IMyOrderDetail
 }>()
 
-const message = useMessage()
 const orderId = computed(() => props.order.id)
 const released = computed(() => props.order.canDownload)
 
@@ -41,16 +40,21 @@ async function freshFiles(force: boolean): Promise<IApiMyOrderDownloadPhoto[]> {
   return data
 }
 
+// A failed refresh keeps the photos already shown: the download that needed it says it failed.
+const hasNothing = computed(() => status.value === 'error' && !files.value)
+
 const downloadingId = ref<string | null>(null)
+const downloadFailed = ref(false)
 async function downloadOne(photoId: string) {
   if (downloadingId.value) return
   downloadingId.value = photoId
+  downloadFailed.value = false
   try {
     const photo = (await freshFiles(false)).find((each) => each.id === photoId)
     if (!photo) throw new Error('Photo not found')
     await downloadFile(photo.downloadUrl, photo.filename)
   } catch {
-    message.error('No pudimos descargar la foto. Intenta de nuevo.')
+    downloadFailed.value = true
   } finally {
     downloadingId.value = null
   }
@@ -76,7 +80,7 @@ const downloadAll = useSequentialDownload({
       </div>
 
       <ErrorState
-        v-else-if="status === 'error'"
+        v-else-if="hasNothing"
         title="No pudimos cargar tus fotos"
         text="Puede ser tu conexión."
         :retrying="isFetching"
@@ -96,6 +100,12 @@ const downloadAll = useSequentialDownload({
             @download="downloadOne(photo.id)"
           />
         </div>
+        <FormAlert
+          v-if="downloadFailed"
+          data-test="download-problem"
+          tone="bad"
+          title="No pudimos descargar la foto. Intenta de nuevo."
+        />
       </template>
     </template>
 

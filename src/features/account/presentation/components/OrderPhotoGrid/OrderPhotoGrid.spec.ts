@@ -7,6 +7,7 @@ import OrderPhotoGrid from './OrderPhotoGrid.vue'
 
 const downloadsEnabled = vi.fn()
 const status = ref<'pending' | 'error' | 'success'>('success')
+const hasFiles = ref(true)
 const updatedAt = ref(Date.now())
 const refetch = vi.fn()
 const downloadFile = vi.fn()
@@ -34,7 +35,7 @@ vi.mock('../../../composables/queries/use-my-order-downloads', () => ({
     downloadsEnabled(enabled.value)
     return {
       status: computed(() => status.value),
-      data: computed(() => (status.value === 'success' ? FILES : undefined)),
+      data: computed(() => (status.value !== 'pending' && hasFiles.value ? FILES : undefined)),
       dataUpdatedAt: updatedAt,
       isFetching: ref(false),
       refetch,
@@ -78,6 +79,7 @@ describe('OrderPhotoGrid', () => {
   beforeEach(() => {
     document.body.innerHTML = ''
     status.value = 'success'
+    hasFiles.value = true
     updatedAt.value = Date.now()
     for (const mock of [downloadsEnabled, refetch, downloadFile, error]) mock.mockReset()
     refetch.mockResolvedValue({ data: FILES })
@@ -130,18 +132,40 @@ describe('OrderPhotoGrid', () => {
     )
   })
 
-  it('says a single download failed', async () => {
+  it('says a single download failed under the photos, once and without a toast', async () => {
     downloadFile.mockRejectedValue(new Error('offline'))
     const wrapper = await mountGrid(order('ready', true))
 
     await wrapper.findAll('button[aria-label="Descargar foto"]')[0]!.trigger('click')
     await flushPromises()
 
-    expect(error).toHaveBeenCalledWith('No pudimos descargar la foto. Intenta de nuevo.')
+    const alert = wrapper.get('[data-test="download-problem"]')
+    expect(alert.classes()).toContain('form-alert')
+    expect(alert.text()).toContain('No pudimos descargar la foto. Intenta de nuevo.')
+    expect(error).not.toHaveBeenCalled()
+  })
+
+  it('keeps the photos on screen when a refresh fails, and says the download failed', async () => {
+    updatedAt.value = Date.now() - 56 * 60_000
+    refetch.mockImplementation(async () => {
+      status.value = 'error'
+      return { data: undefined }
+    })
+    const wrapper = await mountGrid(order('ready', true))
+
+    await wrapper.findAll('button[aria-label="Descargar foto"]')[0]!.trigger('click')
+    await flushPromises()
+
+    expect(wrapper.findAll('button[aria-label="Descargar foto"]')).toHaveLength(2)
+    expect(wrapper.text()).not.toContain('No pudimos cargar tus fotos')
+    expect(wrapper.get('[data-test="download-problem"]').text()).toContain(
+      'No pudimos descargar la foto.',
+    )
   })
 
   it('says the photos could not be loaded, only in their area', async () => {
     status.value = 'error'
+    hasFiles.value = false
     const wrapper = await mountGrid(order('ready', true))
 
     expect(wrapper.text()).toContain('No pudimos cargar tus fotos')

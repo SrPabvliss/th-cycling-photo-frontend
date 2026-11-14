@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { NButton } from 'naive-ui'
 
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { ProgressCount } from '@/shared/components/loading'
 import type { ISequentialDownload } from './use-sequential-download'
 
@@ -54,7 +55,9 @@ const notice = computed(() => {
       {{ state === 'failed' ? 'Continuar descarga' : label }}
     </NButton>
 
-    <p v-if="notice" class="download-all__notice" :role="state === 'failed' ? 'alert' : 'status'">
+    <!-- A cut download is a problem, painted like every other one; the button resumes it. -->
+    <FormAlert v-if="notice && state === 'failed'" tone="bad" :title="notice" />
+    <p v-else-if="notice" class="download-all__notice" role="status">
       {{ notice }}
     </p>
   </div>

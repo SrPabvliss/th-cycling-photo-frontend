@@ -58,7 +58,9 @@ describe('DownloadAllButton', () => {
     const value = download('failed', 3, 8)
     const wrapper = mountButton(value)
 
-    expect(wrapper.text()).toContain('Se cortó la descarga en la foto 4 de 8. Intenta de nuevo.')
+    const alert = wrapper.get('.form-alert')
+    expect(alert.attributes('role')).toBe('alert')
+    expect(alert.text()).toContain('Se cortó la descarga en la foto 4 de 8. Intenta de nuevo.')
     const resume = wrapper.findAll('button').find((each) => each.text() === 'Continuar descarga')!
     await resume.trigger('click')
     expect(value.resume).toHaveBeenCalled()
