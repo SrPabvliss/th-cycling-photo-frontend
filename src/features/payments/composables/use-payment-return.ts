@@ -34,6 +34,8 @@ const RESOLVED_DECLINED = new Set(['declined', 'expired', 'reversed', 'cancelled
 
 export interface IPaymentReturn {
   outcome: Readonly<Ref<PaymentOutcome>>
+  /** Why the charge is given back, when the outcome is `refunded`. */
+  refundReason: Readonly<Ref<string | null>>
   orderIds: Readonly<Ref<string[]>>
   /** Still waiting for an answer. False once the two minutes of asking are over. */
   isAsking: Readonly<Ref<boolean>>
@@ -210,6 +212,10 @@ export function usePaymentReturn(): IPaymentReturn {
 
   return {
     outcome: readonly(outcome),
+    refundReason: computed(() => {
+      const current = answer.value
+      return current && 'refund' in current ? (current.refund?.reason ?? null) : null
+    }),
     orderIds: readonly(orderIds) as Readonly<Ref<string[]>>,
     isAsking: computed(
       () => outcome.value === 'confirming' || (outcome.value === 'late' && polling.value),

@@ -11,6 +11,7 @@ const outcome = ref<PaymentOutcome>('confirming')
 const orderIds = ref<string[]>([])
 const retry = vi.fn()
 const isAsking = ref(true)
+const refundReason = ref<string | null>(null)
 
 const payByTransfer = vi.fn()
 const isSwitching = ref(false)
@@ -20,7 +21,7 @@ vi.mock('../../composables/use-declined-actions', () => ({
 }))
 
 vi.mock('../../composables/use-payment-return', () => ({
-  usePaymentReturn: () => ({ outcome, orderIds, retry, isAsking }),
+  usePaymentReturn: () => ({ outcome, orderIds, retry, isAsking, refundReason }),
 }))
 
 const mounted: { unmount(): void }[] = []
@@ -47,6 +48,7 @@ describe('PaymentReturnView', () => {
     switchProblem.value = null
     sessionStorage.clear()
     retry.mockReset()
+    refundReason.value = null
   })
   afterEach(() => {
     while (mounted.length) mounted.pop()!.unmount()
@@ -224,4 +226,37 @@ describe('PaymentReturnView', () => {
       expect(wrapper.text()).not.toContain('Intentar pagar de nuevo')
     })
   })
+
+  it.each([
+    [
+      'order_paid',
+      'Cuando llegó el cobro, el pedido ya estaba pagado. Titan TV te devolverá ese dinero.',
+    ],
+    [
+      'order_cancelled',
+      'Cuando llegó el cobro, el pedido se había cancelado. Titan TV te devolverá ese dinero.',
+    ],
+    [
+      'order_gifted',
+      'Cuando llegó el cobro, el pedido ya era gratis. Titan TV te devolverá ese dinero.',
+    ],
+  ])(
+    'says a charge for an order that no longer took it (%s) is given back, and leads to Mis fotos',
+    async (reason, text) => {
+      outcome.value = 'refunded'
+      refundReason.value = reason
+      const wrapper = await mountView()
+
+      expect(wrapper.get('h1').text()).toBe('Recibimos tu pago, pero este pedido ya no lo admitía')
+      expect(wrapper.text()).toContain(text)
+      expect(wrapper.find('[data-illustration="transferencia"]').exists()).toBe(true)
+      expect(
+        wrapper
+          .findAll('a')
+          .find((link) => link.text() === 'Ir a Mis fotos')
+          ?.attributes('href'),
+      ).toBe('/account/orders')
+      expect(wrapper.find('.form-alert--bad, [role="alert"]').exists()).toBe(false)
+    },
+  )
 })

@@ -19,6 +19,13 @@ describe('paymentOutcome', () => {
     expect(paymentOutcome({ approved: true, settled: false }, 60_000, false)).toBe('late')
   })
 
+  // The charge went through for an order that no longer took it: Titan TV gives the money back.
+  it('says a charge approved for an order that no longer took it is to be refunded', () => {
+    const refund = { reason: 'order_cancelled' as const }
+    expect(paymentOutcome({ approved: true, settled: false, refund }, 0, false)).toBe('refunded')
+    expect(paymentOutcome({ approved: true, settled: false, refund: null }, 0, false)).toBe('late')
+  })
+
   it('declines a charge the gateway did not approve', () => {
     expect(paymentOutcome({ approved: false, settled: false }, 0, false)).toBe('declined')
   })

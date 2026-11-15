@@ -10,7 +10,7 @@ import { useDeclinedActions } from '../../composables/use-declined-actions'
 import { usePaymentReturn } from '../../composables/use-payment-return'
 import { cardPaymentEvent } from '../../utils/card-payment-event'
 
-const { outcome, orderIds, isAsking, retry } = usePaymentReturn()
+const { outcome, orderIds, isAsking, retry, refundReason } = usePaymentReturn()
 const transfer = useDeclinedActions(orderIds)
 
 // Declined: the same orders can take another card (a new intent) or a transfer.
@@ -27,6 +27,17 @@ const backToOrder = computed(() =>
 )
 
 const myPhotos = `${ROUTE_PATHS.ACCOUNT}/orders`
+
+// Charged for an order that no longer took it: said plainly, by what had happened to the order.
+const REFUND_TEXT: Record<string, string> = {
+  order_paid: 'Cuando llegó el cobro, el pedido ya estaba pagado.',
+  order_cancelled: 'Cuando llegó el cobro, el pedido se había cancelado.',
+  order_gifted: 'Cuando llegó el cobro, el pedido ya era gratis.',
+}
+const refundText = computed(
+  () =>
+    `${REFUND_TEXT[refundReason.value ?? ''] ?? 'Cuando llegó el cobro, el pedido ya no lo admitía.'} Titan TV te devolverá ese dinero.`,
+)
 
 const orderPath = computed(() =>
   orderIds.value[0]
@@ -101,6 +112,22 @@ const orderPath = computed(() =>
           :gallery-path="backToOrder"
         />
         <RouterLink class="payment-return__link" :to="backToOrder">Volver al pedido</RouterLink>
+      </template>
+    </EmptyState>
+
+    <EmptyState
+      v-else-if="outcome === 'refunded'"
+      illustration="transferencia"
+      title="Recibimos tu pago, pero este pedido ya no lo admitía"
+      :text="refundText"
+      :heading-level="1"
+    >
+      <template #actions>
+        <RouterLink v-slot="{ href, navigate }" :to="myPhotos" custom>
+          <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
+            Ir a Mis fotos
+          </NButton>
+        </RouterLink>
       </template>
     </EmptyState>
 

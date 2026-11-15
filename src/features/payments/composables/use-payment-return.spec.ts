@@ -164,6 +164,26 @@ describe('usePaymentReturn', () => {
     expect(state.outcome.value).toBe('late')
   })
 
+  it('says a charge for an order that no longer took it is refunded, and why, without asking again', async () => {
+    confirm.mockResolvedValue({
+      approved: true,
+      settled: false,
+      orderIds: ['o1'],
+      message: null,
+      deliveries: [],
+      refund: { reason: 'order_paid' },
+    })
+    serve({ [TX_URL]: transaction('approved') })
+    await start()
+
+    expect(state.outcome.value).toBe('refunded')
+    expect(state.refundReason.value).toBe('order_paid')
+    get.mockClear()
+    await advance(30_000)
+    expect(get).not.toHaveBeenCalled()
+    expect(replace).not.toHaveBeenCalled()
+  })
+
   it('keeps an approved charge that is not settled as late, never confirmed', async () => {
     confirm.mockResolvedValue({
       approved: true,

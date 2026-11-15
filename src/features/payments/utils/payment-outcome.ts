@@ -7,6 +7,7 @@ export const LATE_AFTER_MS = 10_000
  * - `late`: still no answer, or a charge approved but not settled yet. Never shown as paid.
  * - `confirmed`: charged and the photos handed over.
  * - `declined`: not charged.
+ * - `refunded`: charged for an order that no longer took it; the money is given back.
  * - `failed`: the answer could not be asked for; trying again is safe.
  */
 export type PaymentOutcome =
@@ -14,6 +15,7 @@ export type PaymentOutcome =
   | 'late'
   | 'confirmed'
   | 'declined'
+  | 'refunded'
   | 'cancelled'
   | 'failed'
 
@@ -21,6 +23,7 @@ export type PaymentOutcome =
 export interface IConfirmAnswer {
   approved: boolean
   settled: boolean
+  refund?: { reason: string } | null
 }
 
 /** The state of the transaction, read on its own. */
@@ -38,6 +41,7 @@ export function paymentOutcome(
 ): PaymentOutcome {
   if (answer && 'approved' in answer) {
     if (!answer.approved) return 'declined'
+    if (answer.refund) return 'refunded'
     return answer.settled ? 'confirmed' : 'late'
   }
   if (answer) {
