@@ -19,6 +19,8 @@ export interface IApiPreviewData {
   status: string
   expiresAt: string
   photos: IApiPreviewPhoto[]
+  /** The live order of this link, only when the one looking (signed in) placed it. */
+  myOrderId?: string | null
 }
 
 export interface IPreviewPhoto {
@@ -40,4 +42,6 @@ export interface IPreviewData {
   status: PreviewStatus
   expiresAt: Date
   photos: IPreviewPhoto[]
+  /** The live order of this link, only when the one looking placed it. */
+  myOrderId: string | null
 }

@@ -27,5 +27,6 @@ export function toPreviewData(api: IApiPreviewData): IPreviewData {
     status: api.status as PreviewStatus,
     expiresAt: new Date(api.expiresAt),
     photos: api.photos.map(toPreviewPhoto),
+    myOrderId: api.myOrderId ?? null,
   }
 }

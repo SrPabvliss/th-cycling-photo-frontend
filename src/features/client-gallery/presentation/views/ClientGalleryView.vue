@@ -45,6 +45,9 @@ const orderLinkProblem = ref<'already-ordered' | 'expired' | 'not-available' | n
 const photosChanged = ref(false)
 const photosBought = ref(false)
 
+// The live order of the link, only when the one looking placed it.
+const myOrderId = computed(() => preview.value?.myOrderId ?? null)
+
 // What the link itself says: gone, never there, no longer offered, or already ordered.
 const linkProblem = computed(() => {
   if (orderLinkProblem.value) return orderLinkProblem.value
@@ -137,21 +140,34 @@ function proceed() {
       </template>
     </EmptyState>
 
+    <!-- Ordered by the one looking: their order. By anyone else: only that it was ordered. -->
     <EmptyState
-      v-else-if="linkProblem === 'already-ordered'"
+      v-else-if="linkProblem === 'already-ordered' && myOrderId"
       illustration="fotosListas"
       title="Ya hiciste este pedido"
       text="Las fotos de esta vista previa ya están pedidas. Revisa el estado en Mis fotos."
       :heading-level="1"
     >
       <template #actions>
-        <RouterLink v-slot="{ href, navigate }" :to="`${ROUTE_PATHS.ACCOUNT}/orders`" custom>
+        <RouterLink
+          v-slot="{ href, navigate }"
+          :to="`${ROUTE_PATHS.ACCOUNT}/orders/${myOrderId}`"
+          custom
+        >
           <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
-            Ir a Mis fotos
+            Ver mi pedido
           </NButton>
         </RouterLink>
       </template>
     </EmptyState>
+
+    <EmptyState
+      v-else-if="linkProblem === 'already-ordered'"
+      illustration="fotosListas"
+      title="Las fotos de este enlace ya se pidieron"
+      text="Si crees que es un error, escríbele a quien te compartió el enlace."
+      :heading-level="1"
+    />
 
     <EmptyState
       v-else-if="linkProblem === 'not-available'"

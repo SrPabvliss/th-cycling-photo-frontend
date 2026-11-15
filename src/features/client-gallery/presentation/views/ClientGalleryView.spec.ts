@@ -75,6 +75,7 @@ const PREVIEW = (overrides: Partial<IPreviewData> = {}): IPreviewData => ({
   endDate: new Date(2026, 9, 5),
   status: 'active',
   expiresAt: new Date(2026, 11, 1),
+  myOrderId: null,
   photos: [
     { id: 'a', url: 'u/a' },
     { id: 'b', url: 'u/b' },
@@ -149,13 +150,35 @@ describe('ClientGalleryView', () => {
     expect(wrapper.get('h1').text()).toBe('Este enlace no es válido')
   })
 
-  it('says a preview already ordered was ordered', async () => {
-    state.data = PREVIEW({ status: 'converted' })
+  it('tells the buyer who ordered it that they did, with the way to that order', async () => {
+    state.data = PREVIEW({ status: 'converted', myOrderId: 'o9' })
     const { wrapper } = await mountView()
 
     expect(wrapper.get('h1').text()).toBe('Ya hiciste este pedido')
     expect(wrapper.text()).toContain(
       'Las fotos de esta vista previa ya están pedidas. Revisa el estado en Mis fotos.',
+    )
+    expect(
+      wrapper
+        .findAll('a')
+        .find((link) => link.text() === 'Ver mi pedido')
+        ?.attributes('href'),
+    ).toBe('/account/orders/o9')
+  })
+
+  // Anyone else (or without a session) learns only that the photos were ordered: nothing about
+  // someone else's order.
+  it('tells anyone else only that the photos of the link were ordered', async () => {
+    state.data = PREVIEW({ status: 'converted', myOrderId: null })
+    const { wrapper } = await mountView()
+
+    expect(wrapper.get('h1').text()).toBe('Las fotos de este enlace ya se pidieron')
+    expect(wrapper.text()).toContain(
+      'Si crees que es un error, escríbele a quien te compartió el enlace.',
+    )
+    expect(wrapper.text()).not.toContain('Ya hiciste')
+    expect(wrapper.findAll('a').map((link) => link.attributes('href'))).not.toContain(
+      '/account/orders',
     )
   })
 
@@ -222,7 +245,7 @@ describe('ClientGalleryView', () => {
 
     await wrapper.get('[data-test="ordered"]').trigger('click')
 
-    expect(wrapper.get('h1').text()).toBe('Ya hiciste este pedido')
+    expect(wrapper.get('h1').text()).toBe('Las fotos de este enlace ya se pidieron')
   })
 
   it('says the preview is no longer available', async () => {

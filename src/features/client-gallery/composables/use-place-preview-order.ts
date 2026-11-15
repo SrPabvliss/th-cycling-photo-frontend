@@ -61,7 +61,8 @@ export function usePlacePreviewOrder(token: Ref<string>): IPlacePreviewOrder {
       // The link is used now: coming back to it (the back button) says it was ordered.
       queryClient.setQueryData<IPreviewData>(
         CLIENT_GALLERY_QUERY_KEYS.preview(token.value),
-        (current) => (current ? { ...current, status: 'converted' } : current),
+        (current) =>
+          current ? { ...current, status: 'converted', myOrderId: response.data.id } : current,
       )
       return toPreviewOrderCreated(response.data)
     } catch (error) {

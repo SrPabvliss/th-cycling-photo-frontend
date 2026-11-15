@@ -16,6 +16,7 @@ const PREVIEW: IPreviewData = {
   endDate: new Date(2026, 9, 5),
   status: 'active',
   expiresAt: new Date(2026, 11, 1),
+  myOrderId: null,
   photos: [
     { id: 'a', url: 'u/a' },
     { id: 'b', url: 'u/b' },
