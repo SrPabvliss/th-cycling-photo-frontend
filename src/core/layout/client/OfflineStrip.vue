@@ -5,6 +5,7 @@ export const BACK_ONLINE_MS = 2000
 
 <script setup lang="ts">
 import { onBeforeUnmount, ref, watch } from 'vue'
+import { useEventListener } from '@vueuse/core'
 
 import { useOnline } from '@/core/network/use-online'
 
@@ -35,11 +36,43 @@ watch(online, (isOnline) => {
   }, BACK_ONLINE_MS)
 })
 
-onBeforeUnmount(() => clearTimeout(timer))
+// The toasts drop from the top of the page: while the strip is open they go under it, so the
+// strip always stays readable. It may scroll or grow (it opens by its height), so it says again
+// where it ends when either happens.
+const TOAST_TOP = '--tt-toast-top'
+const root = ref<HTMLElement | null>(null)
+
+function placeToasts() {
+  if (state.value === 'hidden' || !root.value) {
+    document.documentElement.style.removeProperty(TOAST_TOP)
+    return
+  }
+  const bottom = Math.round(root.value.getBoundingClientRect().bottom)
+  document.documentElement.style.setProperty(TOAST_TOP, `calc(${bottom}px + var(--tt-toast-gap))`)
+}
+
+watch([state, root], placeToasts, { immediate: true, flush: 'post' })
+useEventListener(window, 'scroll', placeToasts, { passive: true })
+useEventListener(window, 'resize', placeToasts, { passive: true })
+let resizes: ResizeObserver | undefined
+watch(root, (element) => {
+  resizes?.disconnect()
+  if (element && typeof ResizeObserver !== 'undefined') {
+    resizes = new ResizeObserver(placeToasts)
+    resizes.observe(element)
+  }
+})
+
+onBeforeUnmount(() => {
+  clearTimeout(timer)
+  resizes?.disconnect()
+  document.documentElement.style.removeProperty(TOAST_TOP)
+})
 </script>
 
 <template>
   <div
+    ref="root"
     class="offline-strip"
     :class="{
       'offline-strip--open': state !== 'hidden',

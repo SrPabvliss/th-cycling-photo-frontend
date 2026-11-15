@@ -65,4 +65,60 @@ describe('OfflineStrip', () => {
 
     expect(wrapper.text()).toBe('Sin conexión. Estás viendo lo último que se cargó.')
   })
+
+  describe('the toasts', () => {
+    const toastTop = () => document.documentElement.style.getPropertyValue('--tt-toast-top')
+    const stripAt = (bottom: number) =>
+      vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+        bottom,
+      } as DOMRect)
+    afterEach(() => {
+      vi.restoreAllMocks()
+      document.documentElement.style.removeProperty('--tt-toast-top')
+    })
+
+    it('go under it while it is open, so they never cover it', async () => {
+      stripAt(94)
+      const wrapper = mount(OfflineStrip)
+
+      online.value = false
+      await nextTick()
+      await nextTick()
+
+      expect(toastTop()).toBe('calc(94px + var(--tt-toast-gap))')
+      wrapper.unmount()
+    })
+
+    it('follow it when the page scrolls under it', async () => {
+      const spy = stripAt(94)
+      online.value = false
+      const wrapper = mount(OfflineStrip)
+      await nextTick()
+
+      spy.mockReturnValue({ bottom: 34 } as DOMRect)
+      window.dispatchEvent(new Event('scroll'))
+      await vi.advanceTimersByTimeAsync(20)
+
+      expect(toastTop()).toBe('calc(34px + var(--tt-toast-gap))')
+      wrapper.unmount()
+    })
+
+    it('go back to their place once it is gone, or when it leaves the page', async () => {
+      stripAt(94)
+      online.value = false
+      const wrapper = mount(OfflineStrip)
+      await nextTick()
+
+      online.value = true
+      await nextTick()
+      await vi.advanceTimersByTimeAsync(BACK_ONLINE_MS)
+      expect(toastTop()).toBe('')
+
+      online.value = false
+      await nextTick()
+      await nextTick()
+      wrapper.unmount()
+      expect(toastTop()).toBe('')
+    })
+  })
 })
