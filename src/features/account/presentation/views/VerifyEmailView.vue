@@ -241,10 +241,14 @@ function continueAfter() {
           size="large"
           block
           :loading="sendCode.isPending.value"
-          :disabled="sendCode.isPending.value"
+          :disabled="sendCode.isPending.value || !cooldown.canResend.value"
           @click="requestCode('send')"
         >
-          Pedir código nuevo
+          {{
+            cooldown.canResend.value
+              ? 'Pedir código nuevo'
+              : `Pedir código nuevo en ${cooldown.remaining.value} s`
+          }}
         </NButton>
         <FormAlert v-if="alert" :tone="alert.tone" :title="alert.title" :text="alert.text" />
       </template>

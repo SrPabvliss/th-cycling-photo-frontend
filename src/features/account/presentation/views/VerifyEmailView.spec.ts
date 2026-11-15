@@ -195,6 +195,24 @@ describe('VerifyEmailView', () => {
     expect(wrapper.get('[role="alert"]').text()).not.toContain('intento')
   })
 
+  it('keeps "Pedir código nuevo" off, with the seconds left, while the minute after the last code lasts', async () => {
+    status.value = pending({ expiresAt: new Date(Date.now() + 15 * MINUTE - 5_000).toISOString() })
+    confirm.mockRejectedValue(apiError(422, 'auth.email_verification_no_attempts_left'))
+    const { wrapper } = await mountView()
+
+    await typeCode(wrapper, '123456')
+    await buttonNamed(wrapper, 'Confirmar código')?.trigger('click')
+    await flushPromises()
+
+    const waiting = wrapper
+      .findAll('button')
+      .find((each) => /Pedir código nuevo en \d+ s/.test(each.text()))
+    expect(waiting?.attributes('disabled')).toBeDefined()
+
+    await vi.advanceTimersByTimeAsync(60_000)
+    expect(buttonNamed(wrapper, 'Pedir código nuevo')?.attributes('disabled')).toBeUndefined()
+  })
+
   it('says the tries ran out, and offers a new code', async () => {
     confirm.mockRejectedValue(apiError(422, 'auth.email_verification_no_attempts_left'))
     send.mockResolvedValue(undefined)
