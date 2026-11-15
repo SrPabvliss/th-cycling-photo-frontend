@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import { defineComponent, h, ref } from 'vue'
@@ -350,6 +352,19 @@ describe('EventFilterBar', () => {
 
       expect(focused()?.getAttribute('aria-label')).toBe('Año siguiente')
     })
+  })
+
+  it('keeps room for two lines of the date hint, so the menu does not shrink on choosing', () => {
+    const css = readFileSync(
+      resolve(
+        process.cwd(),
+        'src/features/public-gallery/presentation/components/EventFilterBar/MonthsPanel.vue',
+      ),
+      'utf8',
+    )
+    expect(css).toMatch(
+      /\.filter-months__hint \{[^}]*min-block-size: calc\(var\(--tt-type-caption-line\) \* 2\)/,
+    )
   })
 
   describe('Fecha', () => {

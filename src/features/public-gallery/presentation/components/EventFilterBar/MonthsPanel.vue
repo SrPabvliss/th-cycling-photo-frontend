@@ -303,7 +303,10 @@ const hint = computed(() =>
   border-end-end-radius: var(--tt-radius-m);
 }
 
+/* Room for its longest text (two lines on a narrow menu): choosing a month shortens it, and the
+ * menu must not shrink under the pointer. */
 .filter-months__hint {
+  min-block-size: calc(var(--tt-type-caption-line) * 2);
   margin: var(--tt-space-2) var(--tt-space-1) 0;
   color: var(--tt-ink-muted);
   font-size: var(--tt-type-caption-size);
