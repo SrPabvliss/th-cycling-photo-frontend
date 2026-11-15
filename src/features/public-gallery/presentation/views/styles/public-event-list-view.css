@@ -23,8 +23,11 @@
   text-wrap: balance;
 }
 
-/* The search and the filter buttons: stacked on a phone, one row from 768. */
+/* The search and the filter buttons: stacked on a phone, one row from 768 that breaks in two
+ * before the search gets narrower than it can be used. Candidate for an awana token. */
 .event-list__tools {
+  --event-list-search-min: calc(var(--tt-ilu-inline) * 1.5);
+
   display: flex;
   flex-direction: column;
   gap: var(--tt-space-3);
@@ -121,16 +124,19 @@
 @media (min-width: 768px) {
   .event-list__tools {
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
   }
 
   .event-list__search {
-    flex: 1;
-    min-inline-size: 0;
+    flex: 1 1 var(--event-list-search-min);
+    min-inline-size: var(--event-list-search-min);
   }
 
   .event-list__tools :deep(.event-filters) {
-    flex: none;
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    max-inline-size: 100%;
     overflow-x: visible;
   }
 }
