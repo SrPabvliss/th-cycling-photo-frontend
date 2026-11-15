@@ -16,6 +16,7 @@ import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
 import { EmptyState } from '@/shared/components/empty-state'
 import { LoadBoundary, TtSkeleton } from '@/shared/components/loading'
 import SessionExpiredNotice from '@/shared/components/SessionExpiredNotice/SessionExpiredNotice.vue'
+import { paymentOptionsProblem } from '@/shared/composables/payment-options-problem'
 import { useEventPaymentOptionsQuery } from '@/shared/composables/use-event-payment-options'
 import { quotePhotos } from '@/shared/pricing/quote'
 import { formatMoney } from '@/shared/pricing/tier-cards'
@@ -76,11 +77,22 @@ const {
   refreshBilling,
 } = useBillingSelection(() => isSignedIn.value)
 
-const { data: paymentOptions, isLoading: isLoadingOptions } = useEventPaymentOptionsQuery(
-  eventId,
-  isSignedIn,
-)
+const {
+  data: paymentOptions,
+  status: optionsStatus,
+  error: optionsError,
+  isFetching: isOptionsFetching,
+  refetch: refetchOptions,
+} = useEventPaymentOptionsQuery(eventId, isSignedIn)
 const takesCards = computed(() => paymentOptions.value?.cardAvailable === true)
+// Without the ways to pay nothing is confirmed: the screen says so and offers to read them again.
+const optionsProblem = computed(() =>
+  paymentOptionsProblem(optionsStatus.value, !!paymentOptions.value, optionsError.value),
+)
+const confirmLabel = computed(() => {
+  if (!paymentOptions.value) return 'Continuar'
+  return takesCards.value ? 'Continuar al pago' : 'Confirmar pedido'
+})
 
 // --- Placing the order ---
 const { place, isPlacing, problem } = usePlaceOrder()
@@ -96,7 +108,7 @@ watch(
 )
 
 const canContinue = computed(
-  () => isBillingReady.value && !isLoadingOptions.value && !isPlacing.value,
+  () => isBillingReady.value && !!paymentOptions.value && !isPlacing.value,
 )
 
 // The draft lives while the buyer moves between this screen and the method screen of the event.
@@ -226,6 +238,16 @@ async function confirm() {
             @change="billingSheet = 'picker'"
           />
 
+          <FormAlert
+            v-if="isSignedIn && optionsProblem"
+            data-test="payment-options-problem"
+            tone="warn"
+            :title="optionsProblem.title"
+            :text="optionsProblem.text"
+            :retrying="isOptionsFetching"
+            @retry="refetchOptions()"
+          />
+
           <CheckoutProblemAlert v-if="problem" :problem="problem" :gallery-path="galleryPath" />
 
           <div class="checkout__actions">
@@ -251,7 +273,7 @@ async function confirm() {
                 :aria-busy="isPlacing ? 'true' : undefined"
                 @click="confirm"
               >
-                {{ takesCards ? 'Continuar al pago' : 'Confirmar pedido' }}{{ totalLabel }}
+                {{ confirmLabel }}{{ totalLabel }}
               </NButton>
               <p v-if="isBillingLoaded && !selectedBillingAccountId" class="checkout__hint">
                 Agrega tus datos de facturación para confirmar.

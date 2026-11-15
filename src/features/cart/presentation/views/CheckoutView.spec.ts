@@ -37,6 +37,8 @@ const state = reactive({
   groups: [] as ICartGroup[],
   hasTiers: true,
   cardAvailable: false as boolean | undefined,
+  optionsFailed: false,
+  optionsRetrying: false,
   accounts: [ACCOUNT] as (typeof ACCOUNT)[],
   needsConsent: false,
   billingFailed: false,
@@ -49,6 +51,7 @@ const place = vi.fn()
 const remove = vi.fn()
 const refetchCart = vi.fn()
 const refreshBilling = vi.fn()
+const refetchOptions = vi.fn()
 
 vi.mock('@/shared/cart', () => ({
   useCartState: () => ({
@@ -70,9 +73,17 @@ vi.mock('@/shared/pricing/use-pricing-tiers', () => ({
 vi.mock('@/shared/composables/use-event-payment-options', () => ({
   useEventPaymentOptionsQuery: () => ({
     data: computed(() =>
-      state.cardAvailable === undefined ? undefined : { cardAvailable: state.cardAvailable },
+      state.optionsFailed || state.cardAvailable === undefined
+        ? undefined
+        : { cardAvailable: state.cardAvailable },
     ),
-    isLoading: computed(() => state.cardAvailable === undefined),
+    status: computed(() =>
+      state.optionsFailed ? 'error' : state.cardAvailable === undefined ? 'pending' : 'success',
+    ),
+    error: computed(() => (state.optionsFailed ? new Error('network') : null)),
+    isLoading: computed(() => !state.optionsFailed && state.cardAvailable === undefined),
+    isFetching: computed(() => state.optionsRetrying),
+    refetch: refetchOptions,
   }),
 }))
 vi.mock('@/features/account/composables/use-billing-selection', () => ({
@@ -181,8 +192,11 @@ describe('CheckoutView', () => {
       accounts: [ACCOUNT],
       needsConsent: false,
       billingFailed: false,
+      optionsFailed: false,
+      optionsRetrying: false,
     })
     retryBilling.mockClear()
+    refetchOptions.mockClear()
     consentChecked.value = false
     problem.value = null
     isPlacing.value = false
@@ -323,6 +337,52 @@ describe('CheckoutView', () => {
 
     await alert.get('button').trigger('click')
     expect(retryBilling).toHaveBeenCalledTimes(1)
+  })
+
+  describe('when the ways to pay could not be read', () => {
+    it('never confirms: it says so, with a retry, and keeps the button off', async () => {
+      signIn()
+      state.optionsFailed = true
+      const { wrapper } = await mountView()
+
+      const alert = wrapper.get('[data-test="payment-options-problem"]')
+      expect(alert.classes()).toContain('form-alert--warn')
+      expect(alert.text()).toContain('No pudimos mostrar las formas de pago')
+      expect(alert.text()).toContain('Las necesitamos para crear tu pedido.')
+      expect(primary(wrapper).attributes('disabled')).toBeDefined()
+      expect(primary(wrapper).text()).not.toContain('Confirmar pedido')
+      expect(wrapper.text()).not.toContain('Este evento se paga por transferencia.')
+
+      await primary(wrapper).trigger('click')
+      await flushPromises()
+      expect(place).not.toHaveBeenCalled()
+
+      await alert.get('button').trigger('click')
+      expect(refetchOptions).toHaveBeenCalledTimes(1)
+    })
+
+    it('goes on as usual once the retry brings them', async () => {
+      signIn()
+      state.optionsFailed = true
+      const { wrapper } = await mountView()
+
+      state.optionsFailed = false
+      state.cardAvailable = true
+      await flushPromises()
+
+      expect(wrapper.find('[data-test="payment-options-problem"]').exists()).toBe(false)
+      expect(primary(wrapper).text()).toBe('Continuar al pago · $9,00')
+      expect(primary(wrapper).attributes('disabled')).toBeUndefined()
+    })
+  })
+
+  it('does not say how the order is paid before knowing it', async () => {
+    signIn()
+    state.cardAvailable = undefined
+    const { wrapper } = await mountView()
+
+    expect(primary(wrapper).text()).toBe('Continuar · $9,00')
+    expect(primary(wrapper).attributes('disabled')).toBeDefined()
   })
 
   it('asks for the invoice consent, and allows the order once it is ticked', async () => {

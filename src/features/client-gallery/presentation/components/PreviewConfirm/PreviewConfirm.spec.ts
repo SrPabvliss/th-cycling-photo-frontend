@@ -14,6 +14,7 @@ const state = reactive({
   hasAccount: true,
   cardAvailable: false,
   billingFailed: false,
+  optionsFailed: false,
 })
 const retryBilling = vi.fn()
 const place = vi.fn()
@@ -52,10 +53,17 @@ vi.mock('@/features/account/composables/use-billing-selection', () => ({
     refreshBilling: vi.fn(),
   }),
 }))
+const refetchOptions = vi.fn()
 vi.mock('@/shared/composables/use-event-payment-options', () => ({
   useEventPaymentOptionsQuery: () => ({
-    data: computed(() => ({ cardAvailable: state.cardAvailable })),
+    data: computed(() =>
+      state.optionsFailed ? undefined : { cardAvailable: state.cardAvailable },
+    ),
+    status: computed(() => (state.optionsFailed ? 'error' : 'success')),
+    error: computed(() => (state.optionsFailed ? new Error('network') : null)),
     isLoading: computed(() => false),
+    isFetching: computed(() => false),
+    refetch: refetchOptions,
   }),
 }))
 vi.mock('../../../composables/use-place-preview-order', () => ({
@@ -126,8 +134,10 @@ describe('PreviewConfirm', () => {
       hasAccount: true,
       cardAvailable: false,
       billingFailed: false,
+      optionsFailed: false,
     })
     retryBilling.mockClear()
+    refetchOptions.mockClear()
     place.mockReset()
     problem.value = null
   })
@@ -165,6 +175,24 @@ describe('PreviewConfirm', () => {
 
     await alert.get('button').trigger('click')
     expect(retryBilling).toHaveBeenCalledTimes(1)
+  })
+
+  it('never confirms when the ways to pay could not be read: it says so, with a retry', async () => {
+    state.optionsFailed = true
+    const { wrapper } = await mountConfirm()
+
+    const alert = wrapper.get('[data-test="payment-options-problem"]')
+    expect(alert.classes()).toContain('form-alert--warn')
+    expect(alert.text()).toContain('No pudimos mostrar las formas de pago')
+    expect(confirmButton(wrapper).attributes('disabled')).toBeDefined()
+    expect(wrapper.text()).not.toContain('Se paga por transferencia.')
+
+    await confirmButton(wrapper).trigger('click')
+    await flushPromises()
+    expect(place).not.toHaveBeenCalled()
+
+    await alert.get('button').trigger('click')
+    expect(refetchOptions).toHaveBeenCalledTimes(1)
   })
 
   it('keeps the button off until a method is chosen, when cards are taken', async () => {

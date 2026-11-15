@@ -12,6 +12,7 @@ import BillingCard from '@/features/account/presentation/components/BillingCard/
 import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
 import CheckoutProblemAlert from '@/shared/components/CheckoutProblemAlert/CheckoutProblemAlert.vue'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
+import { paymentOptionsProblem } from '@/shared/composables/payment-options-problem'
 import { useEventPaymentOptionsQuery } from '@/shared/composables/use-event-payment-options'
 import { quotePhotos } from '@/shared/pricing/quote'
 import { formatMoney } from '@/shared/pricing/tier-cards'
@@ -86,7 +87,17 @@ const {
   refreshBilling,
 } = useBillingSelection(() => isSignedIn.value)
 
-const { data: paymentOptions } = useEventPaymentOptionsQuery(eventId, isSignedIn)
+const {
+  data: paymentOptions,
+  status: optionsStatus,
+  error: optionsError,
+  isFetching: isOptionsFetching,
+  refetch: refetchOptions,
+} = useEventPaymentOptionsQuery(eventId, isSignedIn)
+// Without the ways to pay nothing is confirmed: the screen says so and offers to read them again.
+const optionsProblem = computed(() =>
+  paymentOptionsProblem(optionsStatus.value, !!paymentOptions.value, optionsError.value),
+)
 const cardOff = ref(false)
 const takesCards = computed(() => paymentOptions.value?.cardAvailable === true && !cardOff.value)
 const offersCards = computed(() => paymentOptions.value?.cardAvailable === true)
@@ -121,6 +132,7 @@ const canConfirm = computed(
   () =>
     count.value > 0 &&
     isBillingReady.value &&
+    !!paymentOptions.value &&
     !isPlacing.value &&
     (!offersCards.value || method.value !== null),
 )
@@ -250,6 +262,16 @@ async function confirm() {
             </span>
           </button>
         </div>
+
+        <FormAlert
+          v-if="optionsProblem"
+          data-test="payment-options-problem"
+          tone="warn"
+          :title="optionsProblem.title"
+          :text="optionsProblem.text"
+          :retrying="isOptionsFetching"
+          @retry="refetchOptions()"
+        />
 
         <CheckoutProblemAlert
           v-if="shownProblem"
