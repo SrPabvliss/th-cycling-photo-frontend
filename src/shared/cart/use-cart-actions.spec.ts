@@ -447,7 +447,7 @@ describe('useCartActions', () => {
       expect(toasts('info')).toEqual([])
       expect(toasts('error')).toEqual([])
       expect(toasts('warning')).toEqual([
-        'Tu sesión venció. Inicia sesión de nuevo para seguir con tu carrito.',
+        'Tu sesión se cerró. Inicia sesión de nuevo para continuar.',
       ])
     })
 

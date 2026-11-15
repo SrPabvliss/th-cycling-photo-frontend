@@ -68,7 +68,7 @@ function engineOf(queryClient: QueryClient): ICartEngine {
  */
 type ChangeOutcome = 'done' | 'undone' | 'superseded' | 'expired'
 
-const SESSION_EXPIRED = 'Tu sesión venció. Inicia sesión de nuevo para seguir con tu carrito.'
+const SESSION_EXPIRED = 'Tu sesión se cerró. Inicia sesión de nuevo para continuar.'
 
 // The server answers this when there is no cart to take the photo from: it is not in the cart,
 // which is what the person asked for.

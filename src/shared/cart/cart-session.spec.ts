@@ -218,7 +218,7 @@ describe('the cart when the session has expired', () => {
       actions().toggle(photo('p1'))
       await vi.waitFor(() =>
         expect(message.warning).toHaveBeenCalledWith(
-          'Tu sesión venció. Inicia sesión de nuevo para seguir con tu carrito.',
+          'Tu sesión se cerró. Inicia sesión de nuevo para continuar.',
         ),
       )
       await flushPromises()
