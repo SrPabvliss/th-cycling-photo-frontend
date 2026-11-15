@@ -20,6 +20,14 @@ describe('buildClientTheme', () => {
     expect(buildClientTheme('light').common?.borderRadius).toBe(tokens.radius.radiusM)
   })
 
+  it('paints a disabled primary button as a filled line with muted text, not faded', () => {
+    const button = buildClientTheme('dark').Button
+
+    expect(button?.opacityDisabled).toBe('1')
+    expect(button?.colorDisabledPrimary).toBe(tokens.colors.dark.line)
+    expect(button?.textColorDisabledPrimary).toBe(tokens.colors.dark.inkMuted)
+  })
+
   it('writes no color by hand', () => {
     expect(source.length).toBeGreaterThan(0)
     expect(source).not.toMatch(/#[0-9a-fA-F]{3,8}\b/)

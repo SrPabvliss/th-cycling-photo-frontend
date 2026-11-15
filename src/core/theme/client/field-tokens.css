@@ -1,0 +1,10 @@
+/* Border of a form field in the client area. Local to this repo until awana has its own token: the
+ * awana line color is made for dividers (1.25:1 on white) and a field outline needs 3:1. When awana
+ * publishes one, this file goes and the token comes with pnpm tokens:sync. */
+[data-tt-area='client'] {
+  --tt-line-field: #8a8e99;
+}
+
+[data-tt-area='client'][data-tt-scheme='dark'] {
+  --tt-line-field: #737d8a;
+}

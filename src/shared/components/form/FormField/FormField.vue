@@ -54,7 +54,7 @@ const describedby = computed(
   min-inline-size: 0;
   block-size: var(--tt-control-l);
   padding: 0 var(--tt-space-3);
-  border: thin solid var(--tt-line);
+  border: thin solid var(--tt-line-field, var(--tt-line));
   border-radius: var(--tt-radius-m);
   background: var(--tt-surface-raised);
   color: var(--tt-ink);

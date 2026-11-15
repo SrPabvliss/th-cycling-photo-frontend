@@ -82,6 +82,13 @@ export function buildClientTheme(scheme: ColorScheme): GlobalThemeOverrides {
       textColorPressedError: colors.onDangerFill,
       textColorFocusError: colors.onDangerFill,
 
+      // Naive only fades a disabled button, which leaves primary on primary in dark. A filled line
+      // with muted text reads as off in both schemes.
+      opacityDisabled: '1',
+      colorDisabledPrimary: colors.line,
+      textColorDisabledPrimary: colors.inkMuted,
+      borderDisabledPrimary: `1px solid ${colors.line}`,
+
       borderRadiusSmall: radius.radiusM,
       borderRadiusMedium: radius.radiusM,
       borderRadiusLarge: radius.radiusM,
