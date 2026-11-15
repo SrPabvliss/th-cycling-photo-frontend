@@ -91,7 +91,9 @@ function handleSetupFailed(error: unknown) {
 }
 
 function goBack() {
-  router.push(eventId.value ? checkoutPath(eventId.value) : ROUTE_PATHS.PUBLIC_GALLERY)
+  // The event comes in the address only from the checkout; without it, the order itself.
+  if (eventId.value) return void router.push(checkoutPath(eventId.value))
+  router.push(orderIds.value[0] ? firstOrderPath.value : ROUTE_PATHS.PUBLIC_GALLERY)
 }
 
 const transfer = useDeclinedActions(orderIds)

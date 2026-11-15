@@ -136,13 +136,14 @@ describe('PaymentReturnView', () => {
     expect(payByTransfer).toHaveBeenCalledTimes(1)
   })
 
-  it('leads back to the gallery when the event is not known', async () => {
+  // Opened in another tab, the event is not known: the order itself is (H-TJ-05).
+  it('leads back to the order detail when the event is not known', async () => {
     outcome.value = 'declined'
     orderIds.value = ['o1']
     const wrapper = await mountView()
 
     const back = wrapper.findAll('a').find((each) => each.text().trim() === 'Volver al pedido')
-    expect(back?.attributes('href')).toBe('/gallery')
+    expect(back?.attributes('href')).toBe('/account/orders/o1')
     const again = wrapper
       .findAll('a')
       .find((each) => each.text().trim() === 'Intentar con otra tarjeta')

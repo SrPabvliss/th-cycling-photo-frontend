@@ -247,12 +247,13 @@ describe('PaymentBoxView', () => {
     expect(push).toHaveBeenCalledWith('/checkout/e1')
   })
 
-  it('goes back to the gallery when the event is not known', async () => {
+  // Opened in another tab, the event is not known: the order itself is (H-TJ-05).
+  it('goes back to the order detail when the event is not known', async () => {
     routeQuery.value = { orders: 'o1' }
     const { wrapper } = await mountView()
 
     await wrapper.get('[aria-label="Volver al pedido"]').trigger('click')
 
-    expect(push).toHaveBeenCalledWith('/gallery')
+    expect(push).toHaveBeenCalledWith('/account/orders/o1')
   })
 })

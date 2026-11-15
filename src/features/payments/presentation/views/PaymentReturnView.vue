@@ -22,9 +22,13 @@ const anotherCard = computed(() => ({
     ...(eventId.value ? { evento: eventId.value } : {}),
   },
 }))
-const backToOrder = computed(() =>
-  eventId.value ? checkoutPath(eventId.value) : ROUTE_PATHS.PUBLIC_GALLERY,
-)
+// The event is only known in the tab that opened the box; elsewhere the order itself is.
+const backToOrder = computed(() => {
+  if (eventId.value) return checkoutPath(eventId.value)
+  return orderIds.value[0]
+    ? `${ROUTE_PATHS.ACCOUNT}/orders/${orderIds.value[0]}`
+    : ROUTE_PATHS.PUBLIC_GALLERY
+})
 
 const myPhotos = `${ROUTE_PATHS.ACCOUNT}/orders`
 
