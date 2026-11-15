@@ -32,14 +32,14 @@ vi.mock('@/shared/public-events', async (importOriginal) => ({
   },
 }))
 
-function race(slug: string, name: string): IPublicEventListItem {
+function race(slug: string, name: string, photoCount = 10): IPublicEventListItem {
   return {
     slug,
     name,
     startDate: '2026-10-04',
     endDate: '2026-10-04',
     placeLabel: null,
-    photoCount: 10,
+    photoCount,
     ownerName: null,
     coverUrl: null,
     eventTypeId: 1,
@@ -85,10 +85,20 @@ describe('PhotoFinder', () => {
     askedWith.mockClear()
   })
 
-  it('asks for the races that already have photos, up to fifty', async () => {
+  it('asks for the fifty newest races, with no filter', async () => {
     await mountFinder()
 
-    expect(askedWith).toHaveBeenCalledWith({ hasPhotos: true }, { pageSize: 50 })
+    expect(askedWith).toHaveBeenCalledWith(undefined, { pageSize: 50 })
+  })
+
+  it('offers only the races that already have photos', async () => {
+    races.events = [race('sin-fotos', 'Carrera de mañana', 0), race('mama-rumi', 'Mama Rumi 2026')]
+    const { wrapper } = await mountFinder()
+
+    expect(wrapper.findAll('option').map((option) => option.attributes('value'))).toEqual([
+      '',
+      'mama-rumi',
+    ])
   })
 
   it('lists the races after the invitation to choose one', async () => {

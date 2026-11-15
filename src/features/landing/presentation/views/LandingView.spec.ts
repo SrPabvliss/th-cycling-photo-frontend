@@ -24,9 +24,9 @@ const refetchRecent = vi.fn()
 
 vi.mock('@/shared/public-events', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/shared/public-events')>()),
-  // The screen asks for the recent events (no filters); the finder asks for the races.
-  usePublicEventsQuery: (filters?: IPublicEventFilters) =>
-    filters?.hasPhotos
+  // The screen asks for the recent events; the finder asks for fifty races.
+  usePublicEventsQuery: (_filters?: IPublicEventFilters, options?: { pageSize?: number }) =>
+    options?.pageSize === 50
       ? {
           status: computed(() => 'success'),
           isFetching: computed(() => false),

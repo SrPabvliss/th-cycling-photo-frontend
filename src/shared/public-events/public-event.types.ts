@@ -29,21 +29,45 @@ export interface IPublicEventListItem {
   eventTypeName: string
 }
 
-/** What GET /public/events can be narrowed by. */
+/**
+ * What GET /public/events can be narrowed by. Within a list the choices add up (one discipline or
+ * another); between filters they cross. Months are `YYYY-MM`, both ends included.
+ */
 export interface IPublicEventFilters {
   /** Matches the event, canton or province name. The api takes 2 to 100 characters. */
   search?: string
-  eventTypeId?: number
-  /** Only events that already have photos. `false` filters nothing. */
-  hasPhotos?: boolean
+  eventTypeIds: number[]
+  provinceIds: number[]
+  from?: string
+  to?: string
 }
 
-export interface IPublicEventType {
+/** A choice of the menus with how many events it would bring, given the other filters. */
+export interface IPublicEventFilterOption {
   id: number
   name: string
+  count: number
 }
 
-/** GET /public/events/filters: the event types that have at least one listed event. */
-export interface IPublicEventFilterOptions {
-  eventTypes: IPublicEventType[]
+export interface IPublicProvinceOption extends IPublicEventFilterOption {
+  /** Has at least one public event, whatever the filters. Only these are offered. */
+  hasEvents: boolean
 }
+
+export interface IPublicMonthOption {
+  /** `YYYY-MM`. */
+  month: string
+  count: number
+}
+
+/**
+ * GET /public/events/filters. The lists do not depend on the filters, only each `count` does, and
+ * it can be 0. Disciplines and provinces come sorted by the api (collation `es`).
+ */
+export interface IApiPublicEventFilterOptions {
+  eventTypes: IPublicEventFilterOption[]
+  provinces: IPublicProvinceOption[]
+  months: IPublicMonthOption[]
+}
+
+export type IPublicEventFilterOptions = IApiPublicEventFilterOptions

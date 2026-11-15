@@ -20,17 +20,21 @@ const list = reactive({
   isFetchingNextPage: false,
   isFetchNextPageError: false,
   hasNextPage: false,
+  total: 0,
 })
-const types = reactive({
+const options = reactive({
   isError: false,
   eventTypes: [
-    { id: 3, name: 'Downhill' },
-    { id: 5, name: 'Enduro' },
+    { id: 3, name: 'Downhill', count: 4 },
+    { id: 5, name: 'Enduro', count: 2 },
   ],
+  provinces: [{ id: 7, name: 'Cotopaxi', count: 6, hasEvents: true }],
 })
 const refetch = vi.fn()
 const fetchNextPage = vi.fn()
-let askedWith: () => IPublicEventFilters = () => ({})
+const none = { eventTypeIds: [], provinceIds: [] }
+let askedWith: () => IPublicEventFilters = () => none
+let optionsAskedWith: () => IPublicEventFilters = () => none
 
 vi.mock('@/shared/public-events', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/shared/public-events')>()),
@@ -44,14 +48,22 @@ vi.mock('@/shared/public-events', async (importOriginal) => ({
       isFetchingNextPage: computed(() => list.isFetchingNextPage),
       isFetchNextPageError: computed(() => list.isFetchNextPageError),
       hasNextPage: computed(() => list.hasNextPage),
+      total: computed(() => list.total),
       refetch,
       fetchNextPage,
     }
   },
-  usePublicEventFiltersQuery: () => ({
-    data: computed(() => (types.isError ? undefined : { eventTypes: types.eventTypes })),
-    isError: computed(() => types.isError),
-  }),
+  usePublicEventFiltersQuery: (filters: { value: IPublicEventFilters }) => {
+    optionsAskedWith = () => filters.value
+    return {
+      data: computed(() =>
+        options.isError
+          ? undefined
+          : { eventTypes: options.eventTypes, provinces: options.provinces, months: [] },
+      ),
+      isError: computed(() => options.isError),
+    }
+  },
 }))
 
 function event(slug: string): IPublicEventListItem {
@@ -88,8 +100,8 @@ async function mountView(path = '/gallery') {
 type Wrapper = Awaited<ReturnType<typeof mountView>>['wrapper']
 const cards = (wrapper: Wrapper) => wrapper.findAll('a.event-card')
 const skeletons = (wrapper: Wrapper) => wrapper.findAll('div.event-card[aria-hidden="true"]')
-const chip = (wrapper: Wrapper, label: string) =>
-  wrapper.findAll('.event-chips button').find((button) => button.text() === label)!
+const filterButtons = (wrapper: Wrapper) =>
+  wrapper.findAll('.event-filter__open').map((button) => button.text())
 const search = (wrapper: Wrapper) => wrapper.get('input[aria-label="Buscar eventos"]')
 const buttonNamed = (wrapper: Wrapper, name: string) =>
   wrapper.findAll('button').find((button) => button.text() === name)
@@ -112,28 +124,25 @@ describe('PublicEventListView', () => {
       isFetchingNextPage: false,
       isFetchNextPageError: false,
       hasNextPage: false,
+      total: 0,
     })
-    types.isError = false
+    options.isError = false
     refetch.mockClear()
     fetchNextPage.mockClear()
   })
   afterEach(() => {
+    document.body.innerHTML = ''
     vi.useRealTimers()
     vi.unstubAllGlobals()
   })
 
-  it('has its title, the search field and the chips whatever the list is doing', async () => {
+  it('has its title, the search field and the three filters whatever the list is doing', async () => {
     list.status = 'pending'
     const { wrapper } = await mountView()
 
     expect(wrapper.get('h1').text()).toBe('Eventos')
-    expect(search(wrapper).attributes('placeholder')).toBe('Busca por nombre o ciudad')
-    expect(wrapper.findAll('.event-chips button').map((button) => button.text())).toEqual([
-      'Todos',
-      'Con fotos',
-      'Downhill',
-      'Enduro',
-    ])
+    expect(search(wrapper).attributes('placeholder')).toBe('Busca evento o ciudad')
+    expect(filterButtons(wrapper)).toEqual(['Disciplina', 'Provincia', 'Fecha'])
   })
 
   it('shows three skeletons once the load takes long, and nothing before', async () => {
@@ -154,9 +163,9 @@ describe('PublicEventListView', () => {
 
     expect(wrapper.text()).toContain('No pudimos mostrar los eventos')
     expect(wrapper.text()).toContain('Vuelve a intentarlo en un momento.')
-    expect(wrapper.text()).not.toContain('No hay eventos con ese filtro')
+    expect(wrapper.text()).not.toContain('Ningún evento con esos filtros')
     expect((search(wrapper).element as HTMLInputElement).value).toBe('mama')
-    expect(chip(wrapper, 'Downhill').attributes('aria-pressed')).toBe('true')
+    expect(filterButtons(wrapper)[0]).toBe('Downhill')
   })
 
   it('asks again with the same filters when retrying', async () => {
@@ -166,22 +175,57 @@ describe('PublicEventListView', () => {
     await buttonNamed(wrapper, 'Reintentar')!.trigger('click')
 
     expect(refetch).toHaveBeenCalledTimes(1)
-    expect(askedWith()).toEqual({ search: 'mama', eventTypeId: 3 })
+    expect(askedWith()).toEqual({ search: 'mama', eventTypeIds: [3], provinceIds: [] })
   })
 
-  it('says there are no events for the filter and offers to see them all', async () => {
-    const { wrapper, router } = await mountView('/gallery?q=zzz&fotos=1')
+  it('says no event matches the filters and offers to clear them all, search included', async () => {
+    const { wrapper, router } = await mountView('/gallery?q=zzz&tipo=3&prov=7')
 
-    expect(wrapper.text()).toContain('No hay eventos con ese filtro')
-    expect(wrapper.text()).toContain('Prueba con otro nombre o quita el filtro.')
+    expect(wrapper.text()).toContain('Ningún evento con esos filtros')
+    expect(wrapper.text()).toContain('Prueba quitando alguno o busca por otra ciudad.')
 
-    await buttonNamed(wrapper, 'Ver todos los eventos')!.trigger('click')
+    await buttonNamed(wrapper, 'Limpiar filtros')!.trigger('click')
     await flushPromises()
 
     expect((search(wrapper).element as HTMLInputElement).value).toBe('')
-    expect(chip(wrapper, 'Todos').attributes('aria-pressed')).toBe('true')
-    expect(askedWith()).toEqual({})
+    expect(filterButtons(wrapper)).toEqual(['Disciplina', 'Provincia', 'Fecha'])
+    expect(askedWith()).toEqual(none)
     expect(router.currentRoute.value.query).toEqual({})
+  })
+
+  it('opens a shared link already filtered: the list, the counts and the buttons', async () => {
+    const { wrapper } = await mountView('/gallery?tipo=3&prov=7&desde=2026-06&hasta=2026-08')
+
+    const expected = {
+      eventTypeIds: [3],
+      provinceIds: [7],
+      from: '2026-06',
+      to: '2026-08',
+    }
+    expect(askedWith()).toEqual(expected)
+    expect(optionsAskedWith()).toEqual(expected)
+    expect(filterButtons(wrapper)).toEqual(['Downhill', 'Cotopaxi', 'Jun – Ago 2026'])
+  })
+
+  it('forgets a discipline or province of the link that the api does not offer', async () => {
+    const { router } = await mountView('/gallery?tipo=3,99&prov=98')
+
+    expect(askedWith()).toEqual({ eventTypeIds: [3], provinceIds: [] })
+    expect(router.currentRoute.value.query).toEqual({ tipo: '3' })
+  })
+
+  it('says how many events the filters bring, as it changes', async () => {
+    list.events = [event('a')]
+    list.total = 520
+    const { wrapper } = await mountView()
+
+    const count = wrapper.get('.event-list__count')
+    expect(count.attributes('aria-live')).toBe('polite')
+    expect(count.text()).toBe('520 eventos')
+
+    list.total = 1
+    await flushPromises()
+    expect(count.text()).toBe('1 evento')
   })
 
   describe('the house carousel', () => {
@@ -240,7 +284,7 @@ describe('PublicEventListView', () => {
       '/gallery/a',
       '/gallery/b',
     ])
-    expect(wrapper.text()).not.toContain('No hay eventos con ese filtro')
+    expect(wrapper.text()).not.toContain('Ningún evento con esos filtros')
   })
 
   it('keeps the previous list on screen, marked busy, while new filters load', async () => {
@@ -261,20 +305,7 @@ describe('PublicEventListView', () => {
     list.isPlaceholderData = true
     await flushPromises()
 
-    expect(wrapper.text()).not.toContain('No hay eventos con ese filtro')
-  })
-
-  it('applies a chip when it is tapped', async () => {
-    list.events = [event('a')]
-    const { wrapper, router } = await mountView()
-
-    await chip(wrapper, 'Con fotos').trigger('click')
-    await flushPromises()
-
-    expect(chip(wrapper, 'Con fotos').attributes('aria-pressed')).toBe('true')
-    expect(chip(wrapper, 'Todos').attributes('aria-pressed')).toBe('false')
-    expect(askedWith()).toEqual({ hasPhotos: true })
-    expect(router.currentRoute.value.query).toEqual({ fotos: '1' })
+    expect(wrapper.text()).not.toContain('Ningún evento con esos filtros')
   })
 
   it('searches once the typing stops', async () => {
@@ -282,21 +313,18 @@ describe('PublicEventListView', () => {
     const { wrapper } = await mountView()
 
     await search(wrapper).setValue('mama')
-    expect(askedWith()).toEqual({})
+    expect(askedWith()).toEqual(none)
 
     await vi.advanceTimersByTimeAsync(250)
-    expect(askedWith()).toEqual({ search: 'mama' })
+    expect(askedWith()).toEqual({ ...none, search: 'mama' })
   })
 
-  it('has exactly the two fixed chips, and no error, when the event types fail to load', async () => {
-    types.isError = true
+  it('keeps the three filters, and no error, when the options fail to load', async () => {
+    options.isError = true
     list.events = [event('a')]
     const { wrapper } = await mountView()
 
-    expect(wrapper.findAll('.event-chips button').map((button) => button.text())).toEqual([
-      'Todos',
-      'Con fotos',
-    ])
+    expect(filterButtons(wrapper)).toEqual(['Disciplina', 'Provincia', 'Fecha'])
     expect(cards(wrapper)).toHaveLength(1)
     expect(wrapper.text()).not.toContain('No pudimos')
   })

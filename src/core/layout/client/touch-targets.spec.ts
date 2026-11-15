@@ -9,8 +9,16 @@ const read = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf8'
 const SMALL_CONTROLS: [file: string, marker: RegExp][] = [
   ['src/core/layout/client/ClientLogo.vue', /class="client-logo tt-hit-area"/],
   [
-    'src/features/public-gallery/presentation/components/EventFilterChips/EventFilterChips.vue',
-    /class="event-chips__chip tt-hit-area"/,
+    'src/features/public-gallery/presentation/components/EventFilterBar/EventFilterBar.vue',
+    /class="event-filter__open tt-hit-area"/,
+  ],
+  [
+    'src/features/public-gallery/presentation/components/EventFilterBar/EventFilterBar.vue',
+    /class="event-filter__clear tt-hit-area"/,
+  ],
+  [
+    'src/features/public-gallery/presentation/components/EventFilterBar/EventFilterBar.vue',
+    /class="event-filters__clear-all tt-hit-area"/,
   ],
   [
     'src/features/public-gallery/presentation/components/PublicGalleryFilterBar/PublicGalleryFilterBar.vue',

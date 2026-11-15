@@ -29,6 +29,7 @@ async function setup(path = '/gallery') {
     },
   })
   mount(Host, { global: { plugins: [router] } })
+  await flushPromises()
 
   return { state, router, replace, push }
 }
@@ -39,6 +40,8 @@ async function settle(ms = 250) {
   await flushPromises()
 }
 
+const none = { eventTypeIds: [], provinceIds: [] }
+
 describe('useEventListFilters', () => {
   beforeEach(() => {
     vi.useFakeTimers()
@@ -48,37 +51,67 @@ describe('useEventListFilters', () => {
   })
 
   it('starts with no filters on a clean url', async () => {
-    const { state } = await setup()
+    const { state, replace } = await setup()
 
     expect(state.searchText.value).toBe('')
-    expect(state.chip.value).toBe('all')
-    expect(state.filters.value).toEqual({})
+    expect(state.eventTypeIds.value).toEqual([])
+    expect(state.months.value).toBeNull()
+    expect(state.filters.value).toEqual(none)
+    expect(state.hasChoices.value).toBe(false)
+    expect(replace).not.toHaveBeenCalled()
   })
 
-  it('takes its state from a url that already carries filters', async () => {
-    const { state } = await setup('/gallery?q=mama&tipo=3')
+  it('takes its whole state from a shared link, before anything is asked', async () => {
+    const { state, replace } = await setup(
+      '/gallery?q=mama&tipo=2,1&prov=7,3&desde=2026-06&hasta=2026-08',
+    )
 
     expect(state.searchText.value).toBe('mama')
-    expect(state.chip.value).toBe(3)
-    expect(state.filters.value).toEqual({ search: 'mama', eventTypeId: 3 })
+    expect(state.eventTypeIds.value).toEqual([2, 1])
+    expect(state.provinceIds.value).toEqual([7, 3])
+    expect(state.months.value).toEqual({ from: '2026-06', to: '2026-08' })
+    expect(state.filters.value).toEqual({
+      search: 'mama',
+      eventTypeIds: [1, 2],
+      provinceIds: [3, 7],
+      from: '2026-06',
+      to: '2026-08',
+    })
+    expect(state.hasChoices.value).toBe(true)
+    expect(replace).not.toHaveBeenCalled()
   })
 
-  it('reads "with photos" from the url', async () => {
-    const { state } = await setup('/gallery?fotos=1')
+  it('still reads an old link with one discipline', async () => {
+    const { state } = await setup('/gallery?tipo=4')
 
-    expect(state.chip.value).toBe('photos')
-    expect(state.filters.value).toEqual({ hasPhotos: true })
+    expect(state.filters.value).toEqual({ eventTypeIds: [4], provinceIds: [] })
   })
 
-  it.each(['/gallery?tipo=abc', '/gallery?tipo=0', '/gallery?tipo=1.5', '/gallery?fotos=si'])(
-    'ignores a filter it cannot read (%s)',
-    async (path) => {
-      const { state } = await setup(path)
+  it('ignores "with photos" from an old link and takes it out of the url', async () => {
+    const { state, router } = await setup('/gallery?fotos=1&tipo=4&utm=ig')
 
-      expect(state.chip.value).toBe('all')
-      expect(state.filters.value).toEqual({})
-    },
-  )
+    expect(state.filters.value).toEqual({ eventTypeIds: [4], provinceIds: [] })
+    expect(router.currentRoute.value.query).toEqual({ tipo: '4', utm: 'ig' })
+  })
+
+  it.each([
+    ['/gallery?tipo=abc', {}],
+    ['/gallery?tipo=0,-2,1.5,,3', { tipo: '3' }],
+    ['/gallery?prov=3,3,x', { prov: '3' }],
+    ['/gallery?desde=2026-13', {}],
+    ['/gallery?desde=2026-08&hasta=2026-06', {}],
+  ])('drops what it cannot read from %s, without a word', async (path, cleaned) => {
+    const { router } = await setup(path)
+
+    expect(router.currentRoute.value.query).toEqual(cleaned)
+  })
+
+  it('takes one month as both ends', async () => {
+    const { state, router } = await setup('/gallery?desde=2026-08')
+
+    expect(state.months.value).toEqual({ from: '2026-08', to: '2026-08' })
+    expect(router.currentRoute.value.query).toEqual({ desde: '2026-08', hasta: '2026-08' })
+  })
 
   it('shows the text at once and searches once the typing stops', async () => {
     const { state, router } = await setup()
@@ -117,16 +150,6 @@ describe('useEventListFilters', () => {
     expect(router.currentRoute.value.query).toEqual({})
   })
 
-  it('goes back to the whole list when the text is erased down to one character', async () => {
-    const { state, router } = await setup('/gallery?q=mama')
-
-    state.searchText.value = 'm'
-    await settle()
-
-    expect(state.filters.value).toEqual({})
-    expect(router.currentRoute.value.query).toEqual({})
-  })
-
   it('trims the text it searches for', async () => {
     const { state, router } = await setup()
 
@@ -137,46 +160,61 @@ describe('useEventListFilters', () => {
     expect(router.currentRoute.value.query).toEqual({ q: 'baños' })
   })
 
-  it('applies a chip at once: "with photos" replaces the event type', async () => {
-    const { state, router } = await setup('/gallery?tipo=3')
-
-    state.chip.value = 'photos'
-    await flushPromises()
-
-    expect(state.filters.value).toEqual({ hasPhotos: true })
-    expect(router.currentRoute.value.query).toEqual({ fotos: '1' })
-  })
-
-  it('writes the event type in the url', async () => {
-    const { state, router } = await setup()
-
-    state.chip.value = 7
-    await flushPromises()
-
-    expect(state.filters.value).toEqual({ eventTypeId: 7 })
-    expect(router.currentRoute.value.query).toEqual({ tipo: '7' })
-  })
-
-  it('keeps the search when the chip changes', async () => {
+  it('applies a choice at once and writes it in the order it was made', async () => {
     const { state, router } = await setup('/gallery?q=mama')
 
-    state.chip.value = 'photos'
+    state.provinceIds.value = [7]
+    state.provinceIds.value = [7, 3]
+    state.months.value = { from: '2026-06', to: '2026-08' }
     await flushPromises()
 
-    expect(state.filters.value).toEqual({ search: 'mama', hasPhotos: true })
-    expect(router.currentRoute.value.query).toEqual({ q: 'mama', fotos: '1' })
+    expect(state.filters.value).toEqual({
+      search: 'mama',
+      eventTypeIds: [],
+      provinceIds: [3, 7],
+      from: '2026-06',
+      to: '2026-08',
+    })
+    expect(router.currentRoute.value.query).toEqual({
+      q: 'mama',
+      prov: '7,3',
+      desde: '2026-06',
+      hasta: '2026-08',
+    })
+  })
+
+  it('clears the three menus and keeps the search', async () => {
+    const { state, router } = await setup(
+      '/gallery?q=mama&tipo=3&prov=7&desde=2026-08&hasta=2026-08',
+    )
+
+    state.clearChoices()
+    await flushPromises()
+
+    expect(state.searchText.value).toBe('mama')
+    expect(state.filters.value).toEqual({ ...none, search: 'mama' })
+    expect(router.currentRoute.value.query).toEqual({ q: 'mama' })
   })
 
   it('clears everything on reset, without waiting', async () => {
-    const { state, router } = await setup('/gallery?q=mama&tipo=3')
+    const { state, router } = await setup('/gallery?q=mama&tipo=3&prov=7')
 
     state.reset()
     await flushPromises()
 
     expect(state.searchText.value).toBe('')
-    expect(state.chip.value).toBe('all')
-    expect(state.filters.value).toEqual({})
+    expect(state.filters.value).toEqual(none)
     expect(router.currentRoute.value.query).toEqual({})
+  })
+
+  it('forgets ids the api does not offer', async () => {
+    const { state, router } = await setup('/gallery?tipo=3,99&prov=7,98')
+
+    state.keepOnly([3, 5], [7])
+    await flushPromises()
+
+    expect(state.filters.value).toEqual({ eventTypeIds: [3], provinceIds: [7] })
+    expect(router.currentRoute.value.query).toEqual({ tipo: '3', prov: '7' })
   })
 
   it('replaces the url instead of adding history entries', async () => {
@@ -184,7 +222,7 @@ describe('useEventListFilters', () => {
 
     state.searchText.value = 'mama'
     await settle()
-    state.chip.value = 'photos'
+    state.eventTypeIds.value = [3]
     await flushPromises()
 
     expect(replace).toHaveBeenCalledTimes(2)
@@ -194,21 +232,22 @@ describe('useEventListFilters', () => {
   it('leaves other query parameters alone', async () => {
     const { state, router } = await setup('/gallery?utm=ig')
 
-    state.chip.value = 'photos'
+    state.eventTypeIds.value = [3]
     await flushPromises()
 
-    expect(router.currentRoute.value.query).toEqual({ utm: 'ig', fotos: '1' })
+    expect(router.currentRoute.value.query).toEqual({ utm: 'ig', tipo: '3' })
   })
 
-  it('follows the url when the person goes back to an earlier search', async () => {
+  it('follows the url when the person goes back to an earlier choice', async () => {
     const { state, router } = await setup('/gallery?q=mama')
 
-    await router.push('/gallery?q=canar&tipo=2')
+    await router.push('/gallery?q=canar&tipo=2&prov=5&desde=2026-01&hasta=2026-03')
     await flushPromises()
 
     expect(state.searchText.value).toBe('canar')
-    expect(state.chip.value).toBe(2)
-    expect(state.filters.value).toEqual({ search: 'canar', eventTypeId: 2 })
+    expect(state.eventTypeIds.value).toEqual([2])
+    expect(state.provinceIds.value).toEqual([5])
+    expect(state.months.value).toEqual({ from: '2026-01', to: '2026-03' })
   })
 
   it('drops a search still waiting when the screen is left', async () => {

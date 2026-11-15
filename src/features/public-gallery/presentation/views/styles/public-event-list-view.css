@@ -23,6 +23,22 @@
   text-wrap: balance;
 }
 
+/* The search and the filter buttons: stacked on a phone, one row from 768. */
+.event-list__tools {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tt-space-3);
+}
+
+.event-list__count {
+  min-block-size: var(--tt-type-body-s-line);
+  margin: 0 0 calc(var(--tt-space-2) * -1);
+  color: var(--tt-ink-muted);
+  font-size: var(--tt-type-body-s-size);
+  line-height: var(--tt-type-body-s-line);
+  font-variant-numeric: tabular-nums;
+}
+
 .event-list__search {
   display: flex;
   align-items: center;
@@ -100,4 +116,21 @@
 /* The house ad takes the whole width of the grid. */
 .event-list__spot {
   grid-column: 1 / -1;
+}
+
+@media (min-width: 768px) {
+  .event-list__tools {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .event-list__search {
+    flex: 1;
+    min-inline-size: 0;
+  }
+
+  .event-list__tools :deep(.event-filters) {
+    flex: none;
+    overflow-x: visible;
+  }
 }

@@ -86,22 +86,32 @@ describe('usePublicEventsQuery', () => {
   it('sends the filters normalized', async () => {
     get.mockResolvedValue(page([], 1, 0))
 
-    withQuery(() => usePublicEventsQuery({ search: '  mama ', eventTypeId: 3, hasPhotos: true }))
+    withQuery(() =>
+      usePublicEventsQuery({
+        search: '  mama ',
+        eventTypeIds: [3, 1],
+        provinceIds: [7],
+        from: '2026-06',
+        to: '2026-08',
+      }),
+    )
     await flushPromises()
 
     expect(lastCall()[1].params).toEqual({
       page: 1,
       limit: 20,
       search: 'mama',
-      eventTypeId: 3,
-      hasPhotos: true,
+      eventTypeIds: '1,3',
+      provinceIds: '7',
+      from: '2026-06',
+      to: '2026-08',
     })
   })
 
   it('leaves out the filters that filter nothing', async () => {
     get.mockResolvedValue(page([], 1, 0))
 
-    withQuery(() => usePublicEventsQuery({ search: 'm', eventTypeId: 0, hasPhotos: false }))
+    withQuery(() => usePublicEventsQuery({ search: 'm', eventTypeIds: [0], provinceIds: [] }))
     await flushPromises()
 
     expect(lastCall()[1].params).toEqual({ page: 1, limit: 20 })
@@ -110,16 +120,16 @@ describe('usePublicEventsQuery', () => {
   it('takes its page size', async () => {
     get.mockResolvedValue(page([], 1, 0, 50))
 
-    withQuery(() => usePublicEventsQuery({ hasPhotos: true }, { pageSize: 50 }))
+    withQuery(() => usePublicEventsQuery(undefined, { pageSize: 50 }))
     await flushPromises()
 
-    expect(lastCall()[1].params).toEqual({ page: 1, limit: 50, hasPhotos: true })
+    expect(lastCall()[1].params).toEqual({ page: 1, limit: 50 })
   })
 
   it('asks for page two next, and stops once everything is loaded', async () => {
     get.mockResolvedValueOnce(page(['a', 'b'], 1, 3, 2)).mockResolvedValueOnce(page(['c'], 2, 3, 2))
 
-    const query = withQuery(() => usePublicEventsQuery({}, { pageSize: 2 }))
+    const query = withQuery(() => usePublicEventsQuery(undefined, { pageSize: 2 }))
     await flushPromises()
     expect(query.hasNextPage.value).toBe(true)
 
@@ -134,13 +144,13 @@ describe('usePublicEventsQuery', () => {
 
   it('asks again when the filters change, keeping the previous list meanwhile', async () => {
     get.mockResolvedValueOnce(page(['a'], 1, 1))
-    const filters: Ref<IPublicEventFilters> = ref({})
+    const filters: Ref<IPublicEventFilters> = ref({ eventTypeIds: [], provinceIds: [] })
     const query = withQuery(() => usePublicEventsQuery(filters))
     await flushPromises()
 
     let release: (value: unknown) => void = () => {}
     get.mockReturnValueOnce(new Promise((resolve) => (release = resolve)))
-    filters.value = { search: 'mama' }
+    filters.value = { search: 'mama', eventTypeIds: [], provinceIds: [] }
     await flushPromises()
 
     expect(lastCall()[1].params).toMatchObject({ search: 'mama' })
@@ -170,13 +180,45 @@ describe('usePublicEventFiltersQuery', () => {
     get.mockReset()
   })
 
-  it('reads the event types that have events, quietly', async () => {
-    get.mockResolvedValue({ data: { eventTypes: [{ id: 3, name: 'Downhill' }] }, meta: {} })
+  const options = (count: number) => ({
+    data: {
+      eventTypes: [{ id: 3, name: 'Downhill', count }],
+      provinces: [{ id: 7, name: 'Cotopaxi', count, hasEvents: true }],
+      months: [{ month: '2026-08', count }],
+    },
+    meta: {},
+  })
 
-    const query = withQuery(() => usePublicEventFiltersQuery())
+  it('reads the options with their counts for the current filters, quietly', async () => {
+    get.mockResolvedValue(options(4))
+
+    const query = withQuery(() =>
+      usePublicEventFiltersQuery({ eventTypeIds: [3], provinceIds: [], search: 'quito' }),
+    )
     await flushPromises()
 
-    expect(get).toHaveBeenCalledWith('/public/events/filters', { silent: true })
-    expect(query.data.value).toEqual({ eventTypes: [{ id: 3, name: 'Downhill' }] })
+    expect(get).toHaveBeenCalledWith('/public/events/filters', {
+      params: { search: 'quito', eventTypeIds: '3' },
+      silent: true,
+    })
+    expect(query.data.value).toEqual(options(4).data)
+  })
+
+  it('keeps the previous counts while the new ones arrive', async () => {
+    get.mockResolvedValueOnce(options(4))
+    const filters: Ref<IPublicEventFilters> = ref({ eventTypeIds: [], provinceIds: [] })
+    const query = withQuery(() => usePublicEventFiltersQuery(filters))
+    await flushPromises()
+
+    let release: (value: unknown) => void = () => {}
+    get.mockReturnValueOnce(new Promise((resolve) => (release = resolve)))
+    filters.value = { eventTypeIds: [3], provinceIds: [] }
+    await flushPromises()
+
+    expect(query.data.value?.eventTypes[0]?.count).toBe(4)
+
+    release(options(1))
+    await flushPromises()
+    expect(query.data.value?.eventTypes[0]?.count).toBe(1)
   })
 })

@@ -17,9 +17,11 @@ const router = useRouter()
 const {
   status,
   isFetching,
-  events: races,
+  events: newest,
   refetch,
-} = usePublicEventsQuery({ hasPhotos: true }, { pageSize: RACES_PAGE_SIZE })
+} = usePublicEventsQuery(undefined, { pageSize: RACES_PAGE_SIZE })
+// Photos are usually uploaded the day the event is created: few of the newest have none yet.
+const races = computed(() => newest.value.filter((race) => race.photoCount > 0))
 
 const raceSlug = ref('')
 const plateText = ref('')

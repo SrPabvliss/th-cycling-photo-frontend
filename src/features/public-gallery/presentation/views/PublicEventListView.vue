@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { NButton } from 'naive-ui'
 
 import { useOnline } from '@/core/network/use-online'
@@ -16,11 +16,13 @@ import {
   usePublicEventsQuery,
 } from '@/shared/public-events'
 import { useEventListFilters } from '../../composables/use-event-list-filters'
-import EventFilterChips from '../components/EventFilterChips/EventFilterChips.vue'
+import { eventsCountText } from '../../utils/event-filters'
+import EventFilterBar from '../components/EventFilterBar/EventFilterBar.vue'
 
 const SKELETON_COUNT = 3
 
-const { searchText, chip, filters, reset } = useEventListFilters()
+const { searchText, eventTypeIds, provinceIds, months, filters, keepOnly, reset } =
+  useEventListFilters()
 
 const {
   status,
@@ -33,11 +35,28 @@ const {
   hasNextPage,
   refetch,
   fetchNextPage,
+  total,
 } = usePublicEventsQuery(filters)
 
-// Without the event types the list still filters by everything else: not an error of the screen.
-const { data: filterOptions } = usePublicEventFiltersQuery()
-const eventTypes = computed(() => filterOptions.value?.eventTypes ?? [])
+// The counts follow the filters. Without them the menus keep what they had and the list still
+// works: not an error of the screen.
+const { data: filterOptions } = usePublicEventFiltersQuery(filters)
+
+// An old or edited link may name a discipline or province the api does not offer: it goes.
+watch(
+  () => filterOptions.value,
+  (options) => {
+    if (!options) return
+    keepOnly(
+      options.eventTypes.map((option) => option.id),
+      options.provinces.filter((option) => option.hasEvents).map((option) => option.id),
+    )
+  },
+  { immediate: true },
+)
+
+// How many events the filters bring, once the list knows; while new filters load, the last one.
+const knownTotal = computed(() => (status.value === 'success' ? total.value : null))
 
 // New filters are loading over the previous list: it stays on screen, dimmed. Loading one more
 // page of the same list is not that.
@@ -72,23 +91,35 @@ const online = useOnline()
   <div class="event-list">
     <h1 class="event-list__title">Eventos</h1>
 
-    <label class="event-list__search">
-      <svg class="event-list__search-icon" viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="11" cy="11" r="7" />
-        <path d="M20 20l-3.5-3.5" />
-      </svg>
-      <input
-        v-model="searchText"
-        class="event-list__search-input"
-        type="search"
-        placeholder="Busca por nombre o ciudad"
-        aria-label="Buscar eventos"
-        autocomplete="off"
-        enterkeyhint="search"
-      />
-    </label>
+    <div class="event-list__tools">
+      <label class="event-list__search">
+        <svg class="event-list__search-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="M20 20l-3.5-3.5" />
+        </svg>
+        <input
+          v-model="searchText"
+          class="event-list__search-input"
+          type="search"
+          placeholder="Busca evento o ciudad"
+          aria-label="Buscar eventos"
+          autocomplete="off"
+          enterkeyhint="search"
+        />
+      </label>
 
-    <EventFilterChips v-model="chip" :event-types="eventTypes" />
+      <EventFilterBar
+        v-model:event-type-ids="eventTypeIds"
+        v-model:province-ids="provinceIds"
+        v-model:months="months"
+        :options="filterOptions"
+        :total="knownTotal"
+      />
+    </div>
+
+    <p class="event-list__count" aria-live="polite">
+      <template v-if="knownTotal !== null">{{ eventsCountText(knownTotal) }}</template>
+    </p>
 
     <LoadBoundary
       :status="listStatus"
@@ -108,11 +139,11 @@ const online = useOnline()
       <template #empty>
         <EmptyState
           illustration="sinEventos"
-          title="No hay eventos con ese filtro"
-          text="Prueba con otro nombre o quita el filtro."
+          title="Ningún evento con esos filtros"
+          text="Prueba quitando alguno o busca por otra ciudad."
         >
           <template #actions>
-            <NButton text type="primary" size="large" @click="reset">Ver todos los eventos</NButton>
+            <NButton type="primary" size="large" @click="reset">Limpiar filtros</NButton>
           </template>
         </EmptyState>
       </template>

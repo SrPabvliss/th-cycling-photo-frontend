@@ -14,6 +14,7 @@ import {
   normalizePublicEventFilters,
   PUBLIC_EVENTS_PAGE_SIZE,
   PUBLIC_EVENTS_QUERY_KEYS,
+  toPublicEventParams,
 } from './query-keys'
 
 interface IPublicEventsPage {
@@ -31,7 +32,7 @@ export interface IPublicEventsQueryOptions {
  * load, the previous list stays.
  */
 export function usePublicEventsQuery(
-  filters: MaybeRefOrGetter<IPublicEventFilters> = {},
+  filters: MaybeRefOrGetter<IPublicEventFilters | undefined> = undefined,
   options: IPublicEventsQueryOptions = {},
 ) {
   const pageSize = options.pageSize ?? PUBLIC_EVENTS_PAGE_SIZE
@@ -43,7 +44,10 @@ export function usePublicEventsQuery(
     queryFn: async ({ pageParam }): Promise<IPublicEventsPage> => {
       const response = await httpClient.get<IApiPublicEventListItem[]>(
         API_ROUTES.PUBLIC_EVENTS.GET_ALL,
-        { params: { page: pageParam, limit: pageSize, ...normalized.value }, silent: true },
+        {
+          params: { page: pageParam, limit: pageSize, ...toPublicEventParams(normalized.value) },
+          silent: true,
+        },
       )
 
       const items = response.data.map(toPublicEventListItem)
