@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { NModal } from 'naive-ui'
-import { useMediaQuery, useScrollLock } from '@vueuse/core'
+import { useMediaQuery } from '@vueuse/core'
 import ModalCloseButton from '@/shared/components/ModalCloseButton/ModalCloseButton.vue'
+import { useDialogFocus } from '@/shared/composables/use-dialog-focus'
 
 const DRAG_CLOSE_THRESHOLD = 110
 
@@ -15,10 +16,14 @@ const emit = defineEmits<{
 }>()
 
 const isMobile = useMediaQuery('(max-width: 767px)')
-const pageScrollLocked = useScrollLock(document.documentElement)
-
-watch(isMobile, (mobile) => (pageScrollLocked.value = mobile), { immediate: true })
-onBeforeUnmount(() => (pageScrollLocked.value = false))
+// On a phone it is a modal layer: the focus goes in and stays, Escape closes, the page behind does
+// not scroll, and the focus goes back to what opened it. From 768 NModal does all of that.
+const sheet = ref<HTMLElement | null>(null)
+useDialogFocus(
+  sheet,
+  () => isMobile.value,
+  () => emit('close'),
+)
 
 const dragOffset = ref(0)
 const dragStartY = ref<number | null>(null)
@@ -44,7 +49,15 @@ function onGrabPointerUp() {
 <template>
   <template v-if="isMobile">
     <div class="billing-sheet__scrim" @click="emit('close')" />
-    <section class="billing-sheet" role="dialog" :aria-label="title" :style="sheetStyle">
+    <section
+      ref="sheet"
+      class="billing-sheet"
+      role="dialog"
+      aria-modal="true"
+      :aria-label="title"
+      tabindex="-1"
+      :style="sheetStyle"
+    >
       <div
         class="billing-sheet__grab"
         @pointerdown="onGrabPointerDown"

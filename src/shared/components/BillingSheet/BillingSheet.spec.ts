@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
 
 import BillingSheet from './BillingSheet.vue'
 
@@ -16,6 +16,31 @@ afterEach(() => {
 })
 
 describe('BillingSheet', () => {
+  // On a phone it is a modal sheet: the focus goes in, Escape closes, the focus comes back.
+  it('takes the focus on a phone, closes on Escape and gives the focus back', async () => {
+    const opener = document.createElement('button')
+    document.body.append(opener)
+    opener.focus()
+    const wrapper = mount(BillingSheet, {
+      props: { title: 'Datos de facturación' },
+      attachTo: document.body,
+    })
+    await nextTick()
+    await nextTick()
+
+    const sheet = document.querySelector('.billing-sheet')!
+    expect(sheet.getAttribute('aria-modal')).toBe('true')
+    expect(sheet.contains(document.activeElement)).toBe(true)
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    expect(wrapper.emitted('close')).toHaveLength(1)
+
+    wrapper.unmount()
+    expect(document.activeElement).toBe(opener)
+    expect(document.documentElement.style.overflow).toBe('')
+    opener.remove()
+  })
+
   it('closes from a button named "Cerrar" on a phone', () => {
     const wrapper = mount(BillingSheet, { props: { title: 'Datos de facturación' } })
 
