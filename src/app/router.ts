@@ -4,6 +4,7 @@ import AppLayout from '@/core/layout/AppLayout.vue'
 import ClientLayout from '@/core/layout/client/ClientLayout.vue'
 import { registerAuthGuard } from '@/core/guards/auth.guard'
 import { registerRouteProgress } from '@/core/navigation/route-progress'
+import { registerRouteLoadProblems } from '@/core/navigation/route-load-problem'
 import { registerStaleChunkReload } from '@/core/navigation/stale-chunk-reload'
 import { inPanelArea, registerUiArea } from '@/core/theme/area'
 import { standaloneRoutes } from '@/core/views/standalone-routes'
@@ -83,5 +84,6 @@ registerUiArea(router)
 registerRouteProgress(router)
 registerAuthGuard(router)
 registerStaleChunkReload(router)
+registerRouteLoadProblems(router)
 
 export default router

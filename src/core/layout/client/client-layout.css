@@ -29,6 +29,13 @@ html[data-tt-area='client'][data-tt-scheme='dark'] {
   flex-direction: column;
 }
 
+/* The next page could not open: said above the screen still up, as wide as the content. */
+.client-layout__route-problem {
+  inline-size: calc(100% - var(--tt-space-4) * 2);
+  max-inline-size: var(--tt-container-max);
+  margin: var(--tt-space-3) auto 0;
+}
+
 .client-layout__brand {
   display: flex;
   align-items: center;

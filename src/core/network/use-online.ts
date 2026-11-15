@@ -26,3 +26,10 @@ export function useOnline(): Readonly<Ref<boolean>> {
   startOnlineState()
   return readonly(online)
 }
+
+/** No network right now, read outside a component (router hooks, window events). */
+export function isOffline(): boolean {
+  return (
+    !onlineManager.isOnline() || (typeof navigator !== 'undefined' && navigator.onLine === false)
+  )
+}

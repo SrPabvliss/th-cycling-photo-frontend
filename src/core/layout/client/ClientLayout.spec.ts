@@ -6,6 +6,7 @@ import { createPinia, setActivePinia } from 'pinia'
 
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import { LAYOUT_SLOTS, registerLayoutSlot } from '@/core/layout/slot-registry'
+import { routeLoadProblem } from '@/core/navigation/route-load-problem'
 import { ErrorState } from '@/shared/components/loading'
 import ClientLayout from './ClientLayout.vue'
 
@@ -98,6 +99,19 @@ describe('ClientLayout', () => {
     expect(link.text()).toBe('Iniciar sesión')
     expect(link.attributes('href')).toBe('/login?redirect=/plain?page=2')
     wrapper.unmount()
+  })
+
+  it('says above the screen that the next page could not open, with a retry', async () => {
+    routeLoadProblem.value = { target: '/detail' }
+    const { wrapper } = await mountAt('/plain')
+
+    const alert = wrapper.get('main .form-alert')
+    expect(alert.classes()).toContain('form-alert--warn')
+    expect(alert.text()).toContain('No pudimos mostrar esta página')
+    expect(alert.text()).toContain('Vuelve a intentarlo en un momento.')
+    expect(alert.get('button').text()).toBe('Reintentar')
+    expect(wrapper.get('main').text()).toContain('pantalla simple')
+    routeLoadProblem.value = null
   })
 
   it('keeps a public screen when the session closes', async () => {
