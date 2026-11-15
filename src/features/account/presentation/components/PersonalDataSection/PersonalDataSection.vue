@@ -9,6 +9,7 @@ import { GENDER_OPTIONS, MONTH_OPTIONS } from '@/features/auth/constants/registe
 import { registerFieldValidators as v } from '@/features/auth/constants/register-form.schema'
 import { useLocationOptions } from '@/features/locations/composables/use-location-options'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
+import { loadAlertCopy } from '@/shared/components/loading'
 import FormField from '@/shared/components/form/FormField/FormField.vue'
 import { fieldErrorText, sendClientForm } from '@/shared/utils/form.utils'
 import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
@@ -86,9 +87,11 @@ const {
   provinces,
   cantons,
   hasProblem: hasPlacesProblem,
+  error: placesError,
   isRetrying: isRetryingPlaces,
   retry: retryPlaces,
 } = useLocationOptions(countryId as Ref<number | null>, provinceId as Ref<number | null>)
+const placesProblem = computed(() => loadAlertCopy(placesError.value, 'los países y ciudades'))
 const hasRegions = computed(() => (provinces.value?.length ?? 0) > 0)
 
 // A profile read again elsewhere replaces the form only when nothing is being edited.
@@ -230,8 +233,8 @@ const online = useOnline()
       v-if="hasPlacesProblem && online"
       data-test="places-problem"
       tone="warn"
-      title="No pudimos mostrar los países y ciudades"
-      text="Vuelve a intentarlo en un momento."
+      :title="placesProblem.title"
+      :text="placesProblem.text"
       :retrying="isRetryingPlaces"
       @retry="retryPlaces()"
     />

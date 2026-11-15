@@ -90,6 +90,7 @@ vi.mock('../../composables/queries/use-public-event-photos', () => ({
         : undefined
     }),
     status: computed(() => matched.status),
+    error: computed(() => null),
     isFetchNextPageError: computed(() => matched.isFetchNextPageError),
     isPlaceholderData: computed(() => matched.isPlaceholderData),
     isFetching: computed(() => matched.isFetching),
@@ -103,6 +104,7 @@ vi.mock('../../composables/queries/use-public-event-photos', () => ({
     hasNextPage: computed(() => false),
     isFetchingNextPage: computed(() => false),
     isFetchNextPageError: computed(() => false),
+    error: computed(() => null),
     fetchNextPage: vi.fn(),
   }),
 }))

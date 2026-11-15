@@ -12,7 +12,13 @@ import EventPresenterStrip from '@/features/house-spots/presentation/components/
 import { useCartActions, useCartState } from '@/shared/cart'
 import { EmptyState } from '@/shared/components/empty-state'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
-import { ErrorState, LoadBoundary, TtSkeleton, useLoadPhase } from '@/shared/components/loading'
+import {
+  ErrorState,
+  loadAlertCopy,
+  LoadBoundary,
+  TtSkeleton,
+  useLoadPhase,
+} from '@/shared/components/loading'
 import { eventDateLabel } from '@/shared/public-events'
 import { useGalleryPlate } from '../../composables/use-gallery-plate'
 import { useGalleryViewer } from '../../composables/use-gallery-viewer'
@@ -97,6 +103,7 @@ const {
   isFetchingNextPage: isFetchingMoreNoPlate,
   isFetchNextPageError: isMoreNoPlateError,
   fetchNextPage: fetchMoreNoPlate,
+  error: noPlateError,
 } = usePublicEventNoBibPhotosInfinite(slug, categoryId, plate)
 const hasMoreNoPlate = computed(() => hasNextNoPlatePage.value && !isMoreNoPlateError.value)
 
@@ -191,6 +198,12 @@ const cartEvent = computed(() =>
 
 // Without network the offline strip says it once: the "more photos" alerts do not repeat it.
 const online = useOnline()
+// Same cause, same words: the next page that did not come says why.
+const MORE_PHOTOS = { text: 'Las que ya ves siguen aquí.' }
+const morePhotosProblem = computed(() => loadAlertCopy(photosError.value, 'más fotos', MORE_PHOTOS))
+const moreNoPlateProblem = computed(() =>
+  loadAlertCopy(noPlateError.value, 'más fotos', MORE_PHOTOS),
+)
 </script>
 
 <template>
@@ -343,8 +356,8 @@ const online = useOnline()
                 class="gallery__more-problem"
                 data-test="more-problem"
                 tone="warn"
-                title="No pudimos mostrar más fotos"
-                text="Las que ya ves siguen aquí."
+                :title="morePhotosProblem.title"
+                :text="morePhotosProblem.text"
                 :retrying="isFetchingNextPage"
                 @retry="fetchNextPage()"
               />
@@ -369,8 +382,8 @@ const online = useOnline()
                 v-if="hasNextNoPlatePage && isMoreNoPlateError && online"
                 class="gallery__more-problem"
                 tone="warn"
-                title="No pudimos mostrar más fotos"
-                text="Las que ya ves siguen aquí."
+                :title="moreNoPlateProblem.title"
+                :text="moreNoPlateProblem.text"
                 :retrying="isFetchingMoreNoPlate"
                 @retry="fetchMoreNoPlate()"
               />

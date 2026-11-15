@@ -7,6 +7,7 @@ import { usePriceSheet } from '@/features/pricing/composables/use-price-sheet'
 import TierChips from '@/features/pricing/presentation/components/TierChips/TierChips.vue'
 import { useCartState } from '@/shared/cart'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
+import { loadAlertCopy } from '@/shared/components/loading'
 import { quotePhotos } from '@/shared/pricing/quote'
 import { formatMoney } from '@/shared/pricing/tier-cards'
 import { nextTierText } from '@/shared/pricing/tier-text'
@@ -43,6 +44,7 @@ const hasSomething = computed(
 
 // Without network the offline strip says it once: this alert does not repeat it.
 const online = useOnline()
+const cartProblem = computed(() => loadAlertCopy(cart.error.value, 'tu carrito'))
 </script>
 
 <template>
@@ -61,8 +63,8 @@ const online = useOnline()
       class="gallery-cart-bar__problem"
       data-test="cart-problem"
       tone="warn"
-      title="No pudimos mostrar tu carrito"
-      text="Vuelve a intentarlo en un momento."
+      :title="cartProblem.title"
+      :text="cartProblem.text"
       :retrying="cart.isFetching.value"
       @retry="cart.refetch()"
     />

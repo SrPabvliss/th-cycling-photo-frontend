@@ -5,6 +5,7 @@ import { NButton } from 'naive-ui'
 
 import { useOnline } from '@/core/network/use-online'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
+import { loadAlertCopy } from '@/shared/components/loading'
 import { usePublicEventsQuery } from '@/shared/public-events'
 import { parsePlate } from '@/shared/utils/plate.utils'
 import { finderTarget } from '../../../utils/finder-target'
@@ -16,6 +17,7 @@ const RACES_PAGE_SIZE = 50
 const router = useRouter()
 const {
   status,
+  error,
   isFetching,
   events: newest,
   refetch,
@@ -29,6 +31,8 @@ const raceError = ref<string | null>(null)
 const plateError = ref<string | null>(null)
 const raceField = ref<HTMLSelectElement | null>(null)
 
+// Same cause, same words as the rest of the screen ("Está tardando más de lo normal" when slow).
+const problem = computed(() => loadAlertCopy(error.value, 'las carreras'))
 const isLoading = computed(() => status.value === 'pending')
 const hasFailed = computed(() => status.value === 'error')
 
@@ -133,8 +137,8 @@ const online = useOnline()
       class="photo-finder__problem"
       data-test="finder-problem"
       tone="warn"
-      title="No pudimos mostrar las carreras"
-      text="Vuelve a intentarlo en un momento."
+      :title="problem.title"
+      :text="problem.text"
       :retrying="isFetching"
       @retry="refetch()"
     />

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { loadProblemCopy, problemCopy } from './problem-copy'
+import { AxiosError } from 'axios'
+
+import { loadAlertCopy, loadProblemCopy, problemCopy } from './problem-copy'
 
 describe('problemCopy', () => {
   it('offline: waits for the network, with no way out', () => {
@@ -87,5 +89,24 @@ describe('loadProblemCopy', () => {
       text: 'Puedes esperar un poco o volver a intentarlo.',
     })
     expect(loadProblemCopy('offline', 'las fotos', better).title).toBe('Sin conexión a internet')
+  })
+})
+
+describe('loadAlertCopy', () => {
+  it('words an alert by the cause of its error', () => {
+    expect(loadAlertCopy(new AxiosError('timeout', 'ECONNABORTED'), 'las carreras')).toEqual({
+      title: 'Está tardando más de lo normal',
+      text: 'Puedes esperar un poco o volver a intentarlo.',
+    })
+    const down = new AxiosError('down', 'ERR_BAD_RESPONSE', undefined, undefined, {
+      status: 503,
+      data: {},
+      headers: {},
+      config: {},
+    } as never)
+    expect(loadAlertCopy(down, 'más fotos', { text: 'Las que ya ves siguen aquí.' })).toEqual({
+      title: 'No pudimos mostrar más fotos',
+      text: 'Las que ya ves siguen aquí.',
+    })
   })
 })

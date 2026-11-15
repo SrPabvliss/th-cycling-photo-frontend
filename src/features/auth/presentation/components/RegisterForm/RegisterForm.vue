@@ -23,6 +23,7 @@ import {
 import { isMinor } from '../../../utils/age.utils'
 import { dialCodeOf, usePhonePrefix } from '../../../utils/phone-prefix'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
+import { loadAlertCopy } from '@/shared/components/loading'
 import FormField from '@/shared/components/form/FormField/FormField.vue'
 
 export type RegisterField = keyof IRegisterFormData
@@ -112,9 +113,11 @@ const {
   provinces,
   cantons,
   hasProblem: hasPlacesProblem,
+  error: placesError,
   isRetrying: isRetryingPlaces,
   retry: retryPlaces,
 } = useLocationOptions(countryId as Ref<number | null>, provinceId as Ref<number | null>)
+const placesProblem = computed(() => loadAlertCopy(placesError.value, 'los países y ciudades'))
 const hasRegions = computed(() => (provinces.value?.length ?? 0) > 0)
 
 watch(
@@ -342,8 +345,8 @@ const online = useOnline()
         v-if="hasPlacesProblem && online"
         data-test="places-problem"
         tone="warn"
-        title="No pudimos mostrar los países y ciudades"
-        text="Vuelve a intentarlo en un momento."
+        :title="placesProblem.title"
+        :text="placesProblem.text"
         :retrying="isRetryingPlaces"
         @retry="retryPlaces()"
       />

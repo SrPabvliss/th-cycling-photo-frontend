@@ -1,4 +1,4 @@
-import type { ProblemKind } from '@/core/http/problem-kind'
+import { problemKind, type ProblemKind } from '@/core/http/problem-kind'
 import type { IllustrationKey } from '@/shared/components/empty-state'
 
 /** neutral: nothing to do but wait; warn: it did not load; info: the session. */
@@ -92,4 +92,16 @@ export function loadProblemCopy(
     title: (canSayBetter && better.title) || copy.title,
     text: (canSayBetter && better.text) || copy.text,
   }
+}
+
+/**
+ * The words of an alert about something that did not load, from the error itself: the same
+ * cause says the same thing everywhere ("Está tardando más de lo normal" for a slow load).
+ */
+export function loadAlertCopy(
+  error: unknown,
+  what: string,
+  better: { title?: string; text?: string } = {},
+): { title: string; text: string } {
+  return loadProblemCopy(problemKind(error), what, better)
 }

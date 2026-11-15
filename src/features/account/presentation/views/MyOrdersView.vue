@@ -8,7 +8,7 @@ import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/
 import { spotIndexAfter } from '@/features/house-spots/utils/spot-placement'
 import { EmptyState } from '@/shared/components/empty-state'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
-import { LoadBoundary } from '@/shared/components/loading'
+import { loadAlertCopy, LoadBoundary } from '@/shared/components/loading'
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import { useVisiblePolling } from '@/shared/composables/use-visible-polling'
 import { useMyOrdersQuery } from '../../composables/queries/use-my-orders'
@@ -56,6 +56,10 @@ const spotAfter = computed(() => spotIndexAfter(orders.value.length, SPOT_AFTER)
 
 // Without network the offline strip says it once: this alert does not repeat it.
 const online = useOnline()
+// Same cause, same words: the next page that did not come says why.
+const moreProblem = computed(() =>
+  loadAlertCopy(error.value, 'más compras', { text: 'Las que ya ves siguen aquí.' }),
+)
 </script>
 
 <template>
@@ -116,8 +120,8 @@ const online = useOnline()
         class="my-orders__more"
         data-test="more-problem"
         tone="warn"
-        title="No pudimos mostrar más compras"
-        text="Las que ya ves siguen aquí."
+        :title="moreProblem.title"
+        :text="moreProblem.text"
         :retrying="isFetchingNextPage"
         @retry="fetchNextPage()"
       />

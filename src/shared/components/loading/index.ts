@@ -1,5 +1,11 @@
 export { default as BusyNote } from './BusyNote.vue'
-export { loadProblemCopy, problemCopy, type IProblemCopy, type ProblemTone } from './problem-copy'
+export {
+  loadAlertCopy,
+  loadProblemCopy,
+  problemCopy,
+  type IProblemCopy,
+  type ProblemTone,
+} from './problem-copy'
 export { default as ErrorState } from './ErrorState.vue'
 export { default as LoadBoundary } from './LoadBoundary.vue'
 export { default as ProgressCount } from './ProgressCount.vue'

@@ -24,6 +24,8 @@ export function useLocationOptions(countryId: Ref<number | null>, provinceId: Re
     provinces: provinces.data,
     cantons: cantons.data,
     hasProblem: computed(() => failed.value.length > 0),
+    /** Why the first list that failed did, for the words of the alert. */
+    error: computed(() => failed.value[0]?.error.value ?? null),
     isRetrying: computed(() => lists.some((list) => list.isFetching.value)),
     retry: () => Promise.all(failed.value.map((list) => list.refetch())),
   }

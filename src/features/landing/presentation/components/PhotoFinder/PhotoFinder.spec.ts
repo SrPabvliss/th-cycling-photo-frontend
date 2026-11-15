@@ -25,6 +25,7 @@ vi.mock('@/shared/public-events', async (importOriginal) => ({
     askedWith(filters, options)
     return {
       status: computed(() => races.status),
+      error: computed(() => null),
       isFetching: computed(() => races.isFetching),
       events: computed(() => races.events),
       refetch,

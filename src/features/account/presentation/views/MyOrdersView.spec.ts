@@ -23,6 +23,7 @@ const fetchNextPage = vi.fn()
 vi.mock('../../composables/queries/use-my-orders', () => ({
   useMyOrdersQuery: () => ({
     status: computed(() => state.status),
+    error: computed(() => null),
     data: computed(() =>
       state.status === 'success' || state.orders.length
         ? { pages: [{ items: state.orders }] }

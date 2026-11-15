@@ -7,7 +7,7 @@ import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/
 import { spotSlots } from '@/features/house-spots/utils/spot-placement'
 import { EmptyState } from '@/shared/components/empty-state'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
-import { LoadBoundary } from '@/shared/components/loading'
+import { loadAlertCopy, LoadBoundary } from '@/shared/components/loading'
 import { useInfiniteScrollTrigger } from '@/shared/composables/use-infinite-scroll-trigger'
 import {
   PublicEventCard,
@@ -85,6 +85,10 @@ const spotAfter = computed(
 
 // Without network the offline strip says it once: this alert does not repeat it.
 const online = useOnline()
+// Same cause, same words: the next page that did not come says why.
+const moreProblem = computed(() =>
+  loadAlertCopy(error.value, 'más eventos', { text: 'Los que ya ves siguen aquí.' }),
+)
 </script>
 
 <template>
@@ -170,8 +174,8 @@ const online = useOnline()
         class="event-list__more"
         data-test="more-problem"
         tone="warn"
-        title="No pudimos mostrar más eventos"
-        text="Los que ya ves siguen aquí."
+        :title="moreProblem.title"
+        :text="moreProblem.text"
         :retrying="isFetchingNextPage"
         @retry="fetchNextPage()"
       />

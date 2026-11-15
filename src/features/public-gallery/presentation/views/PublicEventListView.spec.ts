@@ -42,6 +42,7 @@ vi.mock('@/shared/public-events', async (importOriginal) => ({
     askedWith = () => filters.value
     return {
       status: computed(() => list.status),
+      error: computed(() => null),
       events: computed(() => list.events),
       isFetching: computed(() => list.isFetching),
       isPlaceholderData: computed(() => list.isPlaceholderData),

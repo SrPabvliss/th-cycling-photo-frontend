@@ -20,6 +20,7 @@ const refetchCart = vi.fn()
 vi.mock('@/shared/cart', () => ({
   useCartState: () => ({
     status: computed(() => cart.status),
+    error: computed(() => null),
     isFetching: computed(() => false),
     countFor: (eventId: string) => (eventId === 'e1' ? cart.count : 0),
     refetch: refetchCart,

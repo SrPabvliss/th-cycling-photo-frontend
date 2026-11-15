@@ -21,6 +21,7 @@ vi.mock('@/features/locations/composables/use-location-options', () => ({
     provinces: computed(() => []),
     cantons: computed(() => []),
     hasProblem: computed(() => places.failed),
+    error: computed(() => null),
     isRetrying: computed(() => false),
     retry: retryPlaces,
   }),
