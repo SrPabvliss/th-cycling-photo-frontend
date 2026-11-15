@@ -40,6 +40,13 @@ export function formatRelativeTime(date: Date): string {
  * Checks if a date is within the last N hours (default 24).
  */
 /**
+ * Formats a date with its year and time: "16 oct 2026, 11:00"
+ */
+export function formatDateWithTime(date: Date): string {
+  return format(date, 'd MMM yyyy, HH:mm', { locale: es })
+}
+
+/**
  * Formats a date with time: "16 oct, 11:00"
  */
 export function formatDateTime(date: Date): string {

@@ -1,7 +1,14 @@
-import type { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios'
+import {
+  isAxiosError,
+  type AxiosError,
+  type AxiosInstance,
+  type InternalAxiosRequestConfig,
+} from 'axios'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { useSessionStore } from '@/core/auth/stores/session.store'
+import { areaOfRoute } from '@/core/theme/area'
+import { SessionExpiredError } from '../session-expired'
 
 let _isRefreshing = false
 let _failedQueue: Array<{
@@ -20,6 +27,15 @@ function processQueue(error: unknown, token: string | null) {
   _failedQueue = []
 }
 
+// The refresh refused: no valid refresh cookie, a deactivated account (422)... Any answer of the
+// client family but "too many tries" (429) and a timeout (408) ends the session.
+const NOT_REFUSALS = new Set([408, 429])
+
+function isRefusal(error: unknown): boolean {
+  const status = isAxiosError(error) ? error.response?.status : undefined
+  return status !== undefined && status >= 400 && status < 500 && !NOT_REFUSALS.has(status)
+}
+
 export function registerAuthInterceptor(axios: AxiosInstance): void {
   // --- Request interceptor: attach Bearer token ---
   axios.interceptors.request.use((config) => {
@@ -35,10 +51,15 @@ export function registerAuthInterceptor(axios: AxiosInstance): void {
   // --- Response interceptor: silent refresh on 401 ---
   axios.interceptors.response.use(undefined, async (error: AxiosError) => {
     const originalRequest = error.config as
-      | (InternalAxiosRequestConfig & { _skipAuthRetry?: boolean })
+      | (InternalAxiosRequestConfig & { _skipAuthRetry?: boolean; skipAuthRetry?: boolean })
       | undefined
 
-    if (!originalRequest || error.response?.status !== 401 || originalRequest._skipAuthRetry) {
+    if (
+      !originalRequest ||
+      error.response?.status !== 401 ||
+      originalRequest._skipAuthRetry ||
+      originalRequest.skipAuthRetry
+    ) {
       return Promise.reject(error)
     }
 
@@ -55,40 +76,57 @@ export function registerAuthInterceptor(axios: AxiosInstance): void {
 
     _isRefreshing = true
 
+    let newToken: string
     try {
       const response = await axios.post(API_ROUTES.AUTH.REFRESH, undefined, {
         _skipAuthRetry: true,
         silent: true,
       } as InternalAxiosRequestConfig & { _skipAuthRetry?: boolean; silent?: boolean })
 
-      const newToken: string = response.data.data.accessToken
+      newToken = response.data.data.accessToken
 
       const authStore = useSessionStore()
       authStore.setAccessToken(newToken)
 
       processQueue(null, newToken)
-
-      originalRequest.headers.Authorization = `Bearer ${newToken}`
-      return axios(originalRequest)
     } catch (refreshError) {
-      processQueue(refreshError, null)
+      // Only a "no" to the refresh ends the session. Too many tries (429), a server failure or no
+      // answer at all say nothing about it: the session stays, and the requests fail with that
+      // reason, which each screen words as such ("Demasiados intentos", no connection...).
+      if (!isRefusal(refreshError)) {
+        processQueue(refreshError, null)
+        return Promise.reject(refreshError)
+      }
+
+      // Every request waiting on this refresh failed for the same reason: the session expired.
+      const expired = new SessionExpiredError(refreshError)
+      processQueue(expired, null)
 
       const authStore = useSessionStore()
-      authStore.clearSession()
+      authStore.expireSession()
 
+      // A client screen already up stays: the client layout puts "Tu sesión se cerró" in its
+      // place, with a way to sign in and come back. The panel, and a first navigation with no
+      // screen yet, go to sign in as before.
       const { default: router } = await import('@/app/router')
       const current = router.currentRoute.value
-      const target =
-        current.matched.length > 0
-          ? current
-          : router.resolve(window.location.pathname + window.location.search)
-      if (target.meta.public !== true) {
+      const isScreenUp = current.matched.length > 0
+      const target = isScreenUp
+        ? current
+        : router.resolve(window.location.pathname + window.location.search)
+      const staysOnScreen = isScreenUp && areaOfRoute(current) === 'client'
+      if (target.meta.public !== true && !staysOnScreen) {
         router.push({ path: '/login', query: { redirect: target.fullPath } })
       }
 
-      return Promise.reject(refreshError)
+      return Promise.reject(expired)
     } finally {
       _isRefreshing = false
     }
+
+    // Outside the refresh: a failure of the retried request is its own answer, not an expired
+    // session.
+    originalRequest.headers.Authorization = `Bearer ${newToken}`
+    return axios(originalRequest)
   })
 }

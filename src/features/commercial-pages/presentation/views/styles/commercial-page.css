@@ -1,0 +1,65 @@
+/* Bands between the opening and the closing of a commercial page. */
+.commercial-page {
+  font-family: var(--tt-font-sans);
+  color: var(--tt-ink);
+}
+
+.commercial-page__band {
+  max-inline-size: var(--tt-container-max);
+  margin-inline: auto;
+  padding: calc(var(--tt-space-6) + var(--tt-space-1)) var(--tt-space-4);
+}
+
+.commercial-page__section--sunken {
+  background: var(--tt-surface-sunken);
+}
+
+.commercial-page__heading {
+  margin: 0 0 calc(var(--tt-space-1) + var(--tt-space-1) / 2);
+  font-family: var(--tt-font-display);
+  font-stretch: var(--tt-display-stretch);
+  font-size: clamp(
+    var(--tt-type-display-s-size),
+    3.6vw,
+    calc(var(--tt-type-display-m-size) + var(--tt-space-2) - 2px)
+  );
+  font-weight: var(--tt-type-display-m-weight);
+  line-height: 1.06;
+  text-transform: uppercase;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+
+.commercial-page__sub {
+  max-inline-size: 60ch;
+  margin: 0 0 calc(var(--tt-space-6) - var(--tt-space-1));
+  color: var(--tt-ink-muted);
+  font-size: var(--tt-type-body-size);
+  line-height: var(--tt-type-body-line);
+}
+
+.commercial-page__item-title {
+  margin: 0;
+  font-size: calc(var(--tt-type-title-size) + 1px);
+  line-height: var(--tt-type-title-line);
+  font-weight: var(--tt-type-eyebrow-weight);
+}
+
+.commercial-page__item-text {
+  margin: 0;
+  color: var(--tt-ink-muted);
+  font-size: var(--tt-type-body-size);
+  line-height: var(--tt-type-body-line);
+}
+
+@media (min-width: 641px) {
+  .commercial-page__band {
+    padding-block: var(--tt-space-7);
+  }
+}
+
+@media (min-width: 768px) {
+  .commercial-page__band {
+    padding-inline: var(--tt-space-6);
+  }
+}

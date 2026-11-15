@@ -1,89 +1,132 @@
+/* Sign up form. Three groups, one column; pairs side by side from the first width. */
 .register-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--tt-space-5);
+  color: var(--tt-ink);
+  font-family: var(--tt-font-sans);
 }
 
-.register-form :deep(.n-form-item-feedback-wrapper) {
-  min-height: 0;
-}
-
-.register-form__row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.register-form__row--3 {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 12px;
-}
-
-.register-form__phone-error {
-  font-size: 12px;
-  color: #d03050;
-  margin: 4px 0 0;
-}
-
-.register-form__submit {
-  margin-top: 8px;
-}
-
-.register-form__login-link {
-  text-align: center;
-  font-size: 13px;
-  color: #6b7280;
-  margin: 8px 0 0;
-}
-
-.register-form__login-link a {
-  color: #105080;
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.register-form__login-link a:hover {
-  text-decoration: underline;
-}
-
-@media (max-width: 480px) {
-  .register-form__row {
-    grid-template-columns: 1fr;
-  }
-
-  .register-form__row--3 {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.register-form__consent {
+.register-form__group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-bottom: 18px;
+  gap: var(--tt-space-4);
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
-.register-form__minor-alert {
-  font-size: 13px;
-  line-height: 1.6;
+.register-form__group legend {
+  margin-block-end: var(--tt-space-3);
+  padding: 0;
+  color: var(--tt-primary-ink);
+  font-size: var(--tt-type-eyebrow-size);
+  line-height: var(--tt-type-eyebrow-line);
+  font-weight: var(--tt-type-eyebrow-weight);
+  letter-spacing: var(--tt-type-eyebrow-tracking);
+  text-transform: uppercase;
 }
 
-.register-form__consent :deep(.n-checkbox__label) {
-  font-size: 13px;
-  line-height: 1.6;
-  white-space: normal;
+.register-form__row2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--tt-space-3);
 }
 
-.register-form__consent :deep(.n-form-item-feedback__line) {
-  font-size: 12px;
+.register-form__date {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tt-space-1);
 }
 
-.register-form__consent a {
-  color: #2563eb;
-  text-decoration: none;
+.register-form__label {
+  font-size: var(--tt-type-caption-size);
+  line-height: var(--tt-type-caption-line);
+  font-weight: var(--tt-type-title-weight);
 }
 
-.register-form__consent a:hover {
-  text-decoration: underline;
+.register-form__row3 {
+  display: grid;
+  grid-template-columns: 0.8fr 1.3fr 1fr;
+  gap: var(--tt-space-2);
+}
+
+.register-form__row3 select {
+  inline-size: 100%;
+  min-inline-size: 0;
+  block-size: var(--tt-control-l);
+  padding: 0 var(--tt-space-2);
+  border: thin solid var(--tt-line);
+  border-radius: var(--tt-radius-m);
+  background: var(--tt-surface-raised);
+  color: var(--tt-ink);
+  font-family: inherit;
+  font-size: var(--tt-type-title-size);
+  outline: none;
+}
+
+.register-form__row3 select:focus {
+  border-color: var(--tt-primary);
+  box-shadow: 0 0 0 var(--tt-space-1) var(--tt-primary-soft);
+}
+
+.register-form__date--error select {
+  border-color: var(--tt-danger-ink);
+}
+
+.register-form__error {
+  color: var(--tt-danger-ink);
+  font-style: normal;
+  font-size: var(--tt-type-caption-size);
+  line-height: var(--tt-type-caption-line);
+}
+
+.register-form__minor,
+.register-form__password,
+.register-form__check-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tt-space-2);
+}
+
+.register-form__check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--tt-space-3);
+  font-size: var(--tt-type-body-s-size);
+  line-height: var(--tt-type-body-s-line);
+  cursor: pointer;
+}
+
+.register-form__check input {
+  flex: none;
+  inline-size: var(--tt-icon-m);
+  block-size: var(--tt-icon-m);
+  margin: 0;
+  accent-color: var(--tt-primary);
+}
+
+.register-form__check a {
+  color: var(--tt-primary-ink);
+  font-weight: var(--tt-type-title-weight);
+}
+
+/* The phone input keeps its own widget; only its field takes the client look. */
+.register-form__phone :deep(.iti input) {
+  block-size: var(--tt-control-l);
+  border: thin solid var(--tt-line);
+  border-radius: var(--tt-radius-m);
+  background: var(--tt-surface-raised);
+  color: var(--tt-ink);
+  font-size: var(--tt-type-title-size);
+}
+
+.register-form__phone :deep(.iti input:focus) {
+  border-color: var(--tt-primary);
+  box-shadow: 0 0 0 var(--tt-space-1) var(--tt-primary-soft);
+}
+
+.register-form__phone :deep(.iti input[aria-invalid='true']) {
+  border-color: var(--tt-danger-ink);
 }

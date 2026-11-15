@@ -1,88 +1,67 @@
-.my-orders-view {
-  padding: 24px 32px 96px;
+/* My photos: one column of orders, two from 768px. */
+.my-orders {
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--tt-space-4);
+  inline-size: 100%;
+  max-inline-size: calc(var(--tt-space-8) * 14);
+  margin-inline: auto;
+  padding: var(--tt-space-4) var(--tt-space-4) var(--tt-space-7);
+  color: var(--tt-ink);
+  font-family: var(--tt-font-sans);
 }
 
-.my-orders-view__title {
-  font-size: 24px;
-  font-weight: 700;
+.my-orders__title {
   margin: 0;
+  font-family: var(--tt-type-display-s-family);
+  font-stretch: var(--tt-display-stretch);
+  font-size: var(--tt-type-display-s-size);
+  line-height: var(--tt-type-display-s-line);
+  font-weight: var(--tt-type-display-s-weight);
+  text-transform: uppercase;
 }
 
-.my-orders-view__summary {
-  margin-bottom: 4px;
+.my-orders__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tt-space-3);
 }
 
-.my-orders-view__grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
+.my-orders__sentinel {
+  block-size: var(--tt-space-1);
+}
+
+.my-orders__more {
+  margin-block-start: var(--tt-space-4);
+}
+
+.my-orders__end {
+  margin: 0;
+  color: var(--tt-ink-muted);
+  text-align: center;
+  font-size: var(--tt-type-caption-size);
+  line-height: var(--tt-type-caption-line);
 }
 
 @media (min-width: 768px) {
-  .my-orders-view__grid {
-    grid-template-columns: repeat(2, 1fr);
+  .my-orders {
+    padding: var(--tt-space-5) var(--tt-space-6) var(--tt-space-7);
+  }
+
+  .my-orders__title {
+    font-size: var(--tt-type-display-m-size);
+    line-height: var(--tt-type-display-m-line);
+  }
+
+  .my-orders__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--tt-space-4);
   }
 }
 
-@media (min-width: 1200px) {
-  .my-orders-view__grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 1600px) {
-  .my-orders-view__grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.my-orders-view__load-more {
-  align-self: center;
-  min-height: 44px;
-  min-width: 160px;
-}
-
-.my-orders-view__empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 8px;
-  margin-top: 48px;
-  padding: 32px 16px;
-}
-
-.my-orders-view__empty-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: #f3f4f6;
-  color: #9ca3af;
-  margin-bottom: 8px;
-}
-
-.my-orders-view__empty-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1a1f2c;
-  margin: 0;
-}
-
-.my-orders-view__empty-text {
-  font-size: 14px;
-  color: #6b7280;
-  max-width: 360px;
-  margin: 0 0 12px;
-}
-
-@media (max-width: 767px) {
-  .my-orders-view {
-    padding: 16px 16px 96px;
-  }
+/* The house ad takes the whole width of the grid. */
+.my-orders__spot {
+  grid-column: 1 / -1;
 }

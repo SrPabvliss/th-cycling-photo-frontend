@@ -1,4 +1,15 @@
-import type { IApiPublicEventAsset, IPublicEventAsset } from './public-event-list.response'
+/** Asset of the public event detail, with everything needed to resolve its url. */
+export interface IApiPublicEventAsset {
+  assetType: string
+  url: string
+  publicSlug: string
+}
+
+export interface IPublicEventAsset {
+  assetType: string
+  url: string
+  publicSlug: string
+}
 
 /** API projection from GET /public/events/:slug */
 export interface IApiPublicEventDetail {

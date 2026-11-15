@@ -30,10 +30,32 @@ describe('my-order.mapper', () => {
       photos: [{ id: 'p1', galleryUrl: 'https://cdn/gallery/p1.jpg' }],
       invoice: null,
       billing: null,
+      confirmingTransactionId: null,
     })
     expect(detail.canDownload).toBe(false)
     expect(detail.canCancel).toBe(true)
     expect(detail.currency).toBeNull()
+    expect(detail.confirmingTransactionId).toBeNull()
+  })
+
+  it('keeps the transaction of a card payment being confirmed', () => {
+    const detail = toMyOrderDetail({
+      id: 'order-1',
+      state: 'confirming',
+      eventName: 'Vuelta',
+      createdAt: '2026-08-01T10:00:00.000Z',
+      subtotal: '9.00',
+      snapCurrency: 'USD',
+      canDownload: false,
+      canCancel: false,
+      photos: [],
+      invoice: null,
+      billing: null,
+      confirmingTransactionId: 'tx-1',
+    })
+
+    expect(detail.state).toBe('confirming')
+    expect(detail.confirmingTransactionId).toBe('tx-1')
   })
 
   it('maps the invoice of my order', () => {
@@ -47,6 +69,7 @@ describe('my-order.mapper', () => {
       canDownload: true,
       canCancel: false,
       photos: [],
+      confirmingTransactionId: null,
     }
     const billing = {
       idType: 'national_id' as const,
@@ -83,5 +106,28 @@ describe('my-order.mapper', () => {
     const without = toMyOrderDetail({ ...base, billing: null, invoice: null })
     expect(without.invoice).toBeNull()
     expect(without.billing).toBeNull()
+  })
+
+  it('maps the payment method and the event gallery when the api sends them, null otherwise', () => {
+    const base = {
+      id: 'order-1',
+      state: 'ready' as const,
+      eventName: 'Vuelta',
+      createdAt: '2026-08-01T10:00:00.000Z',
+      subtotal: '9.00',
+      snapCurrency: 'USD',
+      canDownload: true,
+      canCancel: false,
+      photos: [],
+      invoice: null,
+      billing: null,
+      confirmingTransactionId: null,
+    }
+
+    const sent = toMyOrderDetail({ ...base, paymentMethod: 'card', eventSlug: 'vuelta-2026' })
+    const absent = toMyOrderDetail(base)
+
+    expect([sent.paymentMethod, sent.eventSlug]).toEqual(['card', 'vuelta-2026'])
+    expect([absent.paymentMethod, absent.eventSlug]).toEqual([null, null])
   })
 })

@@ -11,6 +11,7 @@ function toPreviewPhoto(api: IApiPreviewPhoto): IPreviewPhoto {
   return {
     id: api.id,
     url: api.url,
+    alreadyPurchased: api.alreadyPurchased === true,
   }
 }
 
@@ -26,5 +27,6 @@ export function toPreviewData(api: IApiPreviewData): IPreviewData {
     status: api.status as PreviewStatus,
     expiresAt: new Date(api.expiresAt),
     photos: api.photos.map(toPreviewPhoto),
+    myOrderId: api.myOrderId ?? null,
   }
 }

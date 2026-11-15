@@ -1,190 +1,191 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { NButton, NResult, NSpin } from 'naive-ui'
+import { computed } from 'vue'
+import { NButton } from 'naive-ui'
 
-import PublicLayout from '@/core/layout/public/PublicLayout.vue'
-import { ROUTE_NAMES } from '@/core/navigation/route-names'
-import { useConfirmPayment } from '../../composables/mutations/use-confirm-payment'
-import { usePaymentTransactionQuery } from '../../composables/queries/use-payment-transaction'
-import { DEFAULT_PAYMENT_PROVIDER, findPaymentGateway } from '../../gateways/registry'
-import { PAYMENT_METHOD, type PaymentMethod } from '@/shared/types/payment-method.types'
-import type { IPaymentDelivery } from '../../types/responses/payment-intent.response'
-import PaymentMethodModal from '@/shared/components/PaymentMethodModal/PaymentMethodModal.vue'
+import { checkoutPath, ROUTE_PATHS } from '@/core/navigation/route-paths'
+import { EmptyState } from '@/shared/components/empty-state'
+import { BusyNote, ErrorState } from '@/shared/components/loading'
+import CheckoutProblemAlert from '@/shared/components/CheckoutProblemAlert/CheckoutProblemAlert.vue'
+import { useDeclinedActions } from '../../composables/use-declined-actions'
+import { usePaymentReturn } from '../../composables/use-payment-return'
+import { cardPaymentEvent } from '../../utils/card-payment-event'
 
-const route = useRoute()
-const router = useRouter()
-const { mutateAsync: confirmPayment } = useConfirmPayment()
+const { outcome, orderIds, isAsking, retry, refundReason } = usePaymentReturn()
+const transfer = useDeclinedActions(orderIds)
 
-const state = ref<'confirming' | 'approved' | 'unsettled' | 'declined' | 'error'>('confirming')
-const message = ref<string | null>(null)
-const clientTransactionId = ref<string | null>(null)
-const showMethodModal = ref(false)
-const transferChosen = ref(false)
-const confirmedDeliveries = ref<IPaymentDelivery[]>([])
-
-const deliveries = computed<IPaymentDelivery[]>(() =>
-  confirmedDeliveries.value.length > 0
-    ? confirmedDeliveries.value
-    : (transaction.value?.deliveries ?? []),
-)
-
-const {
-  data: transaction,
-  isPending: isTransactionPending,
-  error: transactionError,
-} = usePaymentTransactionQuery(clientTransactionId)
-
-const isLeavingForDelivery = computed(
-  () =>
-    state.value === 'approved' &&
-    (deliveries.value.length === 1 ||
-      (confirmedDeliveries.value.length === 0 && isTransactionPending.value)),
-)
-
-function handleMethodChosen(method: PaymentMethod) {
-  if (method !== PAYMENT_METHOD.TRANSFER) return
-  transferChosen.value = true
-}
-
-onMounted(async () => {
-  const provider = String(route.meta.provider ?? DEFAULT_PAYMENT_PROVIDER)
-  const confirmation = findPaymentGateway(provider)?.parseReturn(route.query) ?? null
-
-  if (!confirmation) {
-    state.value = 'error'
-    message.value = 'No pudimos identificar tu pago.'
-    return
-  }
-
-  clientTransactionId.value = confirmation.clientTransactionId
-
-  try {
-    const result = await confirmPayment(confirmation)
-    // An approved charge that could not become a paid order is not a confirmation: the money left
-    // the buyer's card and there is nothing to download. It needs its own answer, and the
-    // transaction id so support can trace the charge.
-    state.value = result.approved ? (result.settled ? 'approved' : 'unsettled') : 'declined'
-    message.value = result.message
-    confirmedDeliveries.value = result.deliveries ?? []
-  } catch {
-    state.value = 'error'
-    message.value = 'Tu pago se está procesando. Te contactaremos para confirmarlo.'
-  }
+// Declined: the same orders can take another card (a new intent) or a transfer.
+const eventId = computed(() => cardPaymentEvent(orderIds.value))
+const anotherCard = computed(() => ({
+  path: ROUTE_PATHS.PAYMENT_BOX,
+  query: {
+    orders: orderIds.value.join(','),
+    ...(eventId.value ? { evento: eventId.value } : {}),
+  },
+}))
+// The event is only known in the tab that opened the box; elsewhere the order itself is.
+const backToOrder = computed(() => {
+  if (eventId.value) return checkoutPath(eventId.value)
+  return orderIds.value[0]
+    ? `${ROUTE_PATHS.ACCOUNT}/orders/${orderIds.value[0]}`
+    : ROUTE_PATHS.PUBLIC_GALLERY
 })
 
-watch(
-  [state, deliveries],
-  ([currentState, currentDeliveries]) => {
-    if (currentState !== 'approved' || currentDeliveries.length !== 1) return
-    router.replace({
-      name: ROUTE_NAMES.DELIVERY,
-      params: { token: currentDeliveries[0]!.token },
-    })
-  },
-  { immediate: true },
+const myPhotos = `${ROUTE_PATHS.ACCOUNT}/orders`
+
+// Charged for an order that no longer took it: said plainly, by what had happened to the order.
+const REFUND_TEXT: Record<string, string> = {
+  order_paid: 'Cuando llegó el cobro, el pedido ya estaba pagado.',
+  order_cancelled: 'Cuando llegó el cobro, el pedido se había cancelado.',
+  order_gifted: 'Cuando llegó el cobro, el pedido ya era gratis.',
+}
+const refundText = computed(
+  () =>
+    `${REFUND_TEXT[refundReason.value ?? ''] ?? 'Cuando llegó el cobro, el pedido ya no lo admitía.'} Titan TV te devolverá ese dinero.`,
+)
+
+const orderPath = computed(() =>
+  orderIds.value[0]
+    ? `${ROUTE_PATHS.ACCOUNT}/orders/${orderIds.value[0]}`
+    : `${ROUTE_PATHS.ACCOUNT}/orders`,
 )
 </script>
 
 <template>
-  <PublicLayout>
-    <div class="payment-return">
-      <NSpin v-if="state === 'confirming' || isLeavingForDelivery" size="large" />
-
-      <NResult
-        v-else-if="state === 'approved'"
-        status="success"
-        title="¡Pago confirmado!"
-        :description="
-          deliveries.length > 0
-            ? 'Tus fotos están listas para descargar.'
-            : 'Tu compra quedó registrada. Encuentras tus fotos en Mis compras.'
-        "
-      >
-        <template #footer>
-          <div v-if="deliveries.length > 0" class="payment-return__deliveries">
-            <NButton
-              v-for="delivery in deliveries"
-              :key="delivery.orderId"
-              type="primary"
-              @click="
-                router.push({
-                  name: ROUTE_NAMES.DELIVERY,
-                  params: { token: delivery.token },
-                })
-              "
-            >
-              Descargar fotos de {{ delivery.eventName }}
-            </NButton>
-          </div>
-          <NButton v-else type="primary" @click="router.push({ name: ROUTE_NAMES.ACCOUNT_ORDERS })">
-            Ver mis compras
-          </NButton>
-        </template>
-      </NResult>
-
-      <NResult
-        v-else-if="state === 'unsettled'"
-        status="warning"
-        title="Cobramos tu pago, pero falta entregarte las fotos"
-        description="El cobro salió bien y quedó registrado. Algo falló de nuestro lado al preparar la entrega, así que lo estamos resolviendo y te avisamos apenas esté listo."
-      >
-        <template #footer>
-          <div class="payment-return__reference" data-test="payment-reference">
-            <span>Referencia de tu pago</span>
-            <code>{{ clientTransactionId }}</code>
-          </div>
-          <p class="payment-return__notice">
-            Guarda esta referencia: con ella podemos encontrar tu cobro si necesitas escribirnos.
-          </p>
-          <NButton type="primary" @click="router.push({ name: ROUTE_NAMES.ACCOUNT_ORDERS })">
-            Ver mis compras
-          </NButton>
-        </template>
-      </NResult>
-
-      <NResult
-        v-else-if="state === 'declined'"
-        status="warning"
-        title="El pago fue rechazado"
-        :description="message ?? 'Intenta nuevamente con otra tarjeta.'"
-      >
-        <template v-if="transactionError" #footer>
-          <p class="payment-return__notice">No pudimos cargar tu pago.</p>
-          <NButton type="primary" @click="router.push('/gallery')">Volver a la galería</NButton>
-        </template>
-        <template v-else #footer>
-          <NButton
-            v-if="!transferChosen"
-            type="primary"
-            :loading="isTransactionPending"
-            :disabled="isTransactionPending || !transaction"
-            @click="showMethodModal = true"
-          >
-            Elegir otro método
-          </NButton>
-          <p v-else class="payment-return__notice">
-            Te enviaremos los datos para la transferencia.
-          </p>
-        </template>
-      </NResult>
-
-      <NResult v-else status="info" title="Estamos procesando tu pago" :description="message ?? ''">
-        <template #footer>
-          <NButton @click="router.push('/gallery')">Volver a la galería</NButton>
-        </template>
-      </NResult>
+  <div class="payment-return">
+    <!-- Confirmed leaves for its own screen; until then it reads like the wait. -->
+    <!-- The spinner's own live region says it; the heading is the same words, seen. -->
+    <div
+      v-if="outcome === 'confirming' || outcome === 'confirmed'"
+      class="payment-return__wait"
+      aria-busy="true"
+    >
+      <BusyNote text="Confirmando tu pago" class="payment-return__spinner" />
+      <h1 class="payment-return__title">Confirmando tu pago</h1>
+      <p class="payment-return__text">No cierres esta página. Tarda unos segundos.</p>
     </div>
 
-    <PaymentMethodModal
-      v-if="transaction"
-      v-model:show="showMethodModal"
-      :order-ids="transaction.orderIds"
-      :total="transaction.amountCents / 100"
-      currency="USD"
-      @method-chosen="handleMethodChosen"
-    />
-  </PublicLayout>
+    <!-- After two minutes it stops asking: the spinner goes, the words and the way out stay. -->
+    <div
+      v-else-if="outcome === 'late'"
+      class="payment-return__wait"
+      :aria-busy="isAsking ? 'true' : undefined"
+    >
+      <BusyNote
+        v-if="isAsking"
+        text="Seguimos confirmando tu pago"
+        class="payment-return__spinner"
+      />
+      <h1 class="payment-return__title">Seguimos confirmando tu pago</h1>
+      <p class="payment-return__text">
+        Está tardando más de lo normal. No se cobra dos veces. Puedes salir de esta página: el
+        pedido queda en Mis fotos y te avisamos por correo.
+      </p>
+      <RouterLink v-slot="{ href, navigate }" :to="orderPath" custom>
+        <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
+          Ver mi pedido
+        </NButton>
+      </RouterLink>
+    </div>
+
+    <EmptyState
+      v-else-if="outcome === 'declined'"
+      illustration="pagoRechazado"
+      title="No se pudo cobrar tu tarjeta"
+      text="No se hizo ningún cargo. Tus fotos siguen en el carrito."
+      :heading-level="1"
+    >
+      <template #actions>
+        <RouterLink v-slot="{ href, navigate }" :to="anotherCard" custom>
+          <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
+            Intentar con otra tarjeta
+          </NButton>
+        </RouterLink>
+        <NButton
+          size="large"
+          block
+          :loading="transfer.isSwitching.value"
+          :disabled="transfer.isSwitching.value"
+          :aria-busy="transfer.isSwitching.value ? 'true' : undefined"
+          @click="transfer.payByTransfer()"
+        >
+          Pagar por transferencia
+        </NButton>
+        <CheckoutProblemAlert
+          v-if="transfer.problem.value"
+          :problem="transfer.problem.value"
+          :gallery-path="backToOrder"
+        />
+        <RouterLink class="payment-return__link" :to="backToOrder">Volver al pedido</RouterLink>
+      </template>
+    </EmptyState>
+
+    <EmptyState
+      v-else-if="outcome === 'refunded'"
+      illustration="transferencia"
+      title="Recibimos tu pago, pero este pedido ya no lo admitía"
+      :text="refundText"
+      :heading-level="1"
+    >
+      <template #actions>
+        <RouterLink v-slot="{ href, navigate }" :to="myPhotos" custom>
+          <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
+            Ir a Mis fotos
+          </NButton>
+        </RouterLink>
+      </template>
+    </EmptyState>
+
+    <!-- Cancelled at the gateway: nothing was charged; the same ways on as a declined card. -->
+    <EmptyState
+      v-else-if="outcome === 'cancelled'"
+      illustration="fueraDelCamino"
+      title="Cancelaste el pago"
+      text="No se hizo ningún cargo. Puedes intentarlo de nuevo o pagar por transferencia."
+      :heading-level="1"
+    >
+      <template #actions>
+        <template v-if="orderIds.length > 0">
+          <RouterLink v-slot="{ href, navigate }" :to="anotherCard" custom>
+            <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
+              Intentar pagar de nuevo
+            </NButton>
+          </RouterLink>
+          <NButton
+            size="large"
+            block
+            :loading="transfer.isSwitching.value"
+            :disabled="transfer.isSwitching.value"
+            :aria-busy="transfer.isSwitching.value ? 'true' : undefined"
+            @click="transfer.payByTransfer()"
+          >
+            Pagar por transferencia
+          </NButton>
+          <CheckoutProblemAlert
+            v-if="transfer.problem.value"
+            :problem="transfer.problem.value"
+            :gallery-path="backToOrder"
+          />
+          <RouterLink class="payment-return__link" :to="backToOrder">Volver al pedido</RouterLink>
+        </template>
+        <RouterLink v-else v-slot="{ href, navigate }" :to="myPhotos" custom>
+          <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
+            Ir a Mis fotos
+          </NButton>
+        </RouterLink>
+      </template>
+    </EmptyState>
+
+    <template v-else>
+      <ErrorState
+        what="la confirmación de tu pago"
+        stacked
+        title="No pudimos confirmar tu pago"
+        text="No se cobra dos veces."
+        @retry="retry"
+      />
+      <RouterLink class="payment-return__link" :to="myPhotos">Ir a Mis fotos</RouterLink>
+    </template>
+  </div>
 </template>
 
 <style scoped src="./payment-return-view.css" />

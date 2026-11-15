@@ -20,6 +20,8 @@ export const ROUTE_PATHS = {
   PRIVACY: '/privacy',
   TERMS: '/terms',
   TENANT_TERMS: '/tenant-terms',
+  BRANDS_PAGE: '/anunciate',
+  ORGANIZERS_PAGE: '/organizadores',
 } as const
 
 export function checkoutPath(eventId: string): string {
@@ -29,4 +31,3 @@ export function checkoutPath(eventId: string): string {
 export function segmentOf(path: string): string {
   return path.replace(/^\//, '')
 }
-

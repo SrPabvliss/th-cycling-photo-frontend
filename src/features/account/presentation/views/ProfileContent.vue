@@ -10,8 +10,6 @@ import { useTenantProfile } from '@/features/tenant-profile/composables/queries/
 import PageHeader from '@/shared/components/PageHeader/PageHeader.vue'
 import ProfileOrganizerDesktop from '../components/ProfileOrganizerDesktop/ProfileOrganizerDesktop.vue'
 import ProfileOrganizerMobile from '../components/ProfileOrganizerMobile/ProfileOrganizerMobile.vue'
-import ProfileBuyerDesktop from '../components/ProfileBuyerDesktop/ProfileBuyerDesktop.vue'
-import ProfileBuyerMobile from '../components/ProfileBuyerMobile/ProfileBuyerMobile.vue'
 
 const { currentUser } = useAuth()
 const permissions = computed(() => currentUser.value?.permissions ?? [])
@@ -49,12 +47,7 @@ const pageSubtitle = computed(() =>
       </template>
     </NResult>
 
-    <template v-else-if="!isOperator">
-      <NSpin v-if="!myProfile" size="large" />
-      <ProfileBuyerMobile v-else-if="isMobile" :my-profile="myProfile" />
-      <ProfileBuyerDesktop v-else :my-profile="myProfile" />
-    </template>
-
+    <!-- Only organizers get here: the buyer profile is ProfileView's own page. -->
     <NSpin v-else-if="isTenantProfilePending || !myProfile || !tenantProfile" size="large" />
 
     <ProfileOrganizerMobile

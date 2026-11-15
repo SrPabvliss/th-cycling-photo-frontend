@@ -1,0 +1,71 @@
+/* Frame shared by the event card and its skeleton, so the skeleton takes exactly the room the
+ * card will. Sizes come from the redesign demo, written with the spacing scale. */
+.event-card {
+  --event-card-overlap: calc(var(--tt-space-8) + var(--tt-space-1) / 2);
+
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  inline-size: calc(var(--tt-sidebar-width) + var(--tt-space-7) - var(--tt-space-2));
+  color: var(--tt-ink);
+  text-decoration: none;
+  font-family: var(--tt-font-sans);
+}
+
+/* Fixed proportion: the cover reserves its room before the image arrives. */
+.event-card__cover {
+  display: block;
+  inline-size: 100%;
+  aspect-ratio: 272 / 218;
+  overflow: hidden;
+  border-radius: var(--tt-radius-l);
+  background: var(--tt-navy);
+}
+
+.event-card__cover img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.event-card__tag {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: calc(var(--event-card-overlap) * -1) calc(var(--tt-space-2) + var(--tt-space-1) / 2) 0;
+  filter: var(--tt-shadow-silhouette);
+}
+
+.event-card__info {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--tt-space-2) + var(--tt-space-1) / 2);
+  min-block-size: calc(var(--tt-space-8) + var(--tt-space-1) * 3 / 2);
+  padding: calc(var(--tt-space-2) + var(--tt-space-1) / 2);
+  padding-inline-start: var(--tt-space-3);
+  border-radius: var(--tt-radius-m);
+  background: var(--tt-surface-raised);
+}
+
+.event-card__date {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  inline-size: var(--tt-space-7);
+  padding-block: calc(var(--tt-space-1) * 3 / 2);
+  border-radius: var(--tt-radius-s);
+  background: var(--tt-primary-soft);
+  color: var(--tt-primary-ink);
+}
+
+.event-card__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--tt-space-1) / 2);
+  min-inline-size: 0;
+}

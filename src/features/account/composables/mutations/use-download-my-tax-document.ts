@@ -7,9 +7,11 @@ import { message } from '@/core/ui/discrete-api'
 import { openSignedUrl } from '@/shared/utils/download.utils'
 import type { IApiErrorResponse } from '@/core/http/http-response.interface'
 import type { IMyOrderTaxDocumentFiles } from '../../types/responses/my-order-tax-document-files.response'
+import { CLIENT_MUTATION } from '@/shared/constants/client-mutation'
 
 export function useDownloadMyTaxDocument(orderId: Ref<string>) {
   return useMutation({
+    ...CLIENT_MUTATION,
     mutationFn: async ({ docId, file }: { docId: string; file: 'pdf' | 'xml' }) => {
       const response = await httpClient.get<IMyOrderTaxDocumentFiles>(
         API_ROUTES.MY_ORDERS.TAX_DOCUMENT_FILES(orderId.value, docId),

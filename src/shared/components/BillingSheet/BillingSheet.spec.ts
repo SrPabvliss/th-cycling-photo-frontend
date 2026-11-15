@@ -1,19 +1,93 @@
 import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
 
 import BillingSheet from './BillingSheet.vue'
 
+const isMobile = vi.hoisted(() => ({ value: true }))
 vi.mock('@vueuse/core', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@vueuse/core')>()),
-  useMediaQuery: () => ref(true),
+  useMediaQuery: () => ref(isMobile.value),
 }))
 
 afterEach(() => {
   document.documentElement.style.overflow = ''
+  isMobile.value = true
 })
 
 describe('BillingSheet', () => {
+  // On a phone it is a modal sheet: the focus goes in, Escape closes, the focus comes back.
+  it('takes the focus on a phone, closes on Escape and gives the focus back', async () => {
+    const opener = document.createElement('button')
+    document.body.append(opener)
+    opener.focus()
+    const wrapper = mount(BillingSheet, {
+      props: { title: 'Datos de facturación' },
+      attachTo: document.body,
+    })
+    await nextTick()
+    await nextTick()
+
+    const sheet = document.querySelector('.billing-sheet')!
+    expect(sheet.getAttribute('aria-modal')).toBe('true')
+    expect(sheet.contains(document.activeElement)).toBe(true)
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    expect(wrapper.emitted('close')).toHaveLength(1)
+
+    wrapper.unmount()
+    expect(document.activeElement).toBe(opener)
+    expect(document.documentElement.style.overflow).toBe('')
+    opener.remove()
+  })
+
+  it('closes from a button named "Cerrar" on a phone', () => {
+    const wrapper = mount(BillingSheet, { props: { title: 'Datos de facturación' } })
+
+    expect(wrapper.get('.billing-sheet__close').attributes('aria-label')).toBe('Cerrar')
+  })
+
+  it('closes from a button named "Cerrar" from 768 px too', async () => {
+    isMobile.value = false
+    const modal = {
+      name: 'Modal',
+      props: ['show', 'closable', 'title'],
+      template: '<div><slot name="header-extra" /><slot /></div>',
+    }
+    const wrapper = mount(BillingSheet, {
+      props: { title: 'Datos de facturación' },
+      global: { stubs: { Modal: modal } },
+    })
+
+    expect(wrapper.findComponent({ name: 'Modal' }).props('closable')).toBe(false)
+    await wrapper.get('button[aria-label="Cerrar"]').trigger('click')
+    expect(wrapper.emitted('close')).toHaveLength(1)
+  })
+
+  it('names its dialog after its title, on a phone and from 768 px', async () => {
+    const nameOf = (dialog: Element | null) =>
+      dialog?.getAttribute('aria-label') ??
+      document.getElementById(dialog?.getAttribute('aria-labelledby') ?? '')?.textContent?.trim()
+
+    const phone = mount(BillingSheet, {
+      props: { title: 'Datos de facturación' },
+      attachTo: document.body,
+    })
+    expect(nameOf(document.querySelector('[role="dialog"]'))).toBe('Datos de facturación')
+    phone.unmount()
+
+    isMobile.value = false
+    const desktop = mount(BillingSheet, {
+      props: { title: 'Datos de facturación' },
+      attachTo: document.body,
+    })
+    await new Promise((resolve) => setTimeout(resolve))
+    const dialogs = document.querySelectorAll('[role="dialog"]')
+    expect(dialogs).toHaveLength(1)
+    expect(nameOf(dialogs[0]!)).toBe('Datos de facturación')
+    desktop.unmount()
+  })
+
   it('locks the page scroll while the mobile sheet is open and releases it on close', async () => {
     const wrapper = mount(BillingSheet, { props: { title: '¿A nombre de quién?' } })
     await wrapper.vm.$nextTick()

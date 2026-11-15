@@ -17,6 +17,8 @@ export const ROUTE_NAMES = {
 
   // Cart
   CART_CHECKOUT: 'cart-checkout',
+  CART_PAYMENT_METHOD: 'cart-payment-method',
+  CART_ORDER_RECEIVED: 'cart-order-received',
 
   // Client gallery
   CLIENT_GALLERY: 'client-gallery',
@@ -41,6 +43,8 @@ export const ROUTE_NAMES = {
   LEGAL_PRIVACY: 'legal-privacy',
   LEGAL_TERMS: 'legal-terms',
   LEGAL_TENANT_TERMS: 'legal-tenant-terms',
+  BRANDS_PAGE: 'brands-page',
+  ORGANIZERS_PAGE: 'organizers-page',
 
   // Orders
   ORDERS_LIST: 'orders-list',
@@ -51,6 +55,7 @@ export const ROUTE_NAMES = {
 
   // Payments
   PAYMENT_RETURN: 'payment-return',
+  PAYMENT_CONFIRMED: 'payment-confirmed',
   PAYMENT_BOX: 'payment-box',
 
   // Photos

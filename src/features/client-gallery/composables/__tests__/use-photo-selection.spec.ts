@@ -1,53 +1,91 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick, ref } from 'vue'
 
-import type { IPreviewPhoto } from '../../types/responses/preview-data.response'
 import { usePhotoSelection } from '../use-photo-selection'
 
-const photos = (...ids: string[]): IPreviewPhoto[] => ids.map((id) => ({ id, url: `u/${id}` }))
+const TOKEN = 'tok-secreto-123456'
 
-describe('usePhotoSelection with a preview token', () => {
+describe('usePhotoSelection', () => {
   beforeEach(() => sessionStorage.clear())
+  afterEach(() => vi.restoreAllMocks())
 
-  it('brings the selection back after leaving the page (e.g. to sign up)', async () => {
-    const first = usePhotoSelection(ref(photos('a', 'b', 'c')), ref('tok-1'))
-    first.toggleSelect('a')
-    first.toggleSelect('c')
-    await nextTick()
+  it('adds and removes photos', () => {
+    const selection = usePhotoSelection(ref(TOKEN), ref(['a', 'b', 'c']))
 
-    const back = usePhotoSelection(ref(photos('a', 'b', 'c')), ref('tok-1'))
-    expect([...back.selectedIds.value]).toEqual(['a', 'c'])
+    selection.toggle('a')
+    selection.toggle('c')
+    expect(selection.selected.value).toEqual(['a', 'c'])
+    expect(selection.isSelected('a')).toBe(true)
+
+    selection.toggle('a')
+    expect(selection.selected.value).toEqual(['c'])
   })
 
-  it('keeps each preview link separate', async () => {
-    const one = usePhotoSelection(ref(photos('a')), ref('tok-1'))
-    one.toggleSelect('a')
-    await nextTick()
+  it('selects all and clears', () => {
+    const selection = usePhotoSelection(ref(TOKEN), ref(['a', 'b']))
 
-    const other = usePhotoSelection(ref(photos('a')), ref('tok-2'))
-    expect(other.selectedCount.value).toBe(0)
+    selection.selectAll()
+    expect(selection.allSelected.value).toBe(true)
+    expect(selection.selected.value).toEqual(['a', 'b'])
+
+    selection.clear()
+    expect(selection.selected.value).toEqual([])
+    expect(selection.allSelected.value).toBe(false)
   })
 
-  it('drops stored photos that are not part of the preview', async () => {
-    sessionStorage.setItem('preview-selection:tok-1', JSON.stringify(['a', 'gone']))
-    const photosRef = ref<IPreviewPhoto[] | undefined>(undefined)
-    const selection = usePhotoSelection(photosRef, ref('tok-1'))
-
-    photosRef.value = photos('a', 'b')
+  it('brings the selection back for the same link (after signing in)', async () => {
+    const first = usePhotoSelection(ref(TOKEN), ref(['a', 'b', 'c']))
+    first.toggle('a')
+    first.toggle('c')
     await nextTick()
 
-    expect([...selection.selectedIds.value]).toEqual(['a'])
+    const back = usePhotoSelection(ref(TOKEN), ref(['a', 'b', 'c']))
+    expect(back.selected.value).toEqual(['a', 'c'])
   })
 
-  it('forgets the stored selection once the order is placed', async () => {
-    const selection = usePhotoSelection(ref(photos('a')), ref('tok-1'))
-    selection.toggleSelect('a')
+  it('keeps each link separate', async () => {
+    usePhotoSelection(ref(TOKEN), ref(['a'])).toggle('a')
     await nextTick()
 
-    selection.forgetSelection()
+    expect(usePhotoSelection(ref('otro-token'), ref(['a'])).selected.value).toEqual([])
+  })
+
+  it('drops restored photos that are no longer in the preview', async () => {
+    const first = usePhotoSelection(ref(TOKEN), ref(['a', 'gone']))
+    first.toggle('a')
+    first.toggle('gone')
     await nextTick()
 
-    expect(sessionStorage.getItem('preview-selection:tok-1')).toBeNull()
-    expect(usePhotoSelection(ref(photos('a')), ref('tok-1')).selectedCount.value).toBe(0)
+    const photoIds = ref<string[]>([])
+    const back = usePhotoSelection(ref(TOKEN), photoIds)
+    photoIds.value = ['a', 'b']
+    await nextTick()
+
+    expect(back.selected.value).toEqual(['a'])
+  })
+
+  it('never stores the token in the clear', async () => {
+    usePhotoSelection(ref(TOKEN), ref(['a'])).toggle('a')
+    await nextTick()
+
+    const keys = Object.keys(sessionStorage)
+    expect(keys).toHaveLength(1)
+    expect(keys[0]).not.toContain(TOKEN)
+    expect(sessionStorage.getItem(keys[0]!)).not.toContain(TOKEN)
+  })
+
+  it('works in memory when storage throws', async () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('blocked')
+    })
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('blocked')
+    })
+
+    const selection = usePhotoSelection(ref(TOKEN), ref(['a']))
+    selection.toggle('a')
+    await nextTick()
+
+    expect(selection.selected.value).toEqual(['a'])
   })
 })

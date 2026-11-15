@@ -1,14 +1,22 @@
-import { computed, type Ref } from 'vue'
+import { computed, watch, type Ref } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
+import { useDocumentVisibility } from '@vueuse/core'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
 import { DELIVERY_QUERY_KEYS } from '../../constants/query-keys'
 import { toDeliveryData } from '../../mappers/delivery-data.mapper'
 import type { IApiDeliveryData } from '../../types/responses/delivery-data.response'
+import { deliveryProblem } from '../../utils/delivery-problem'
 
-const DOWNLOAD_URLS_FRESH_MS = 45 * 60 * 1000
+/** The download addresses last an hour; past this they are asked for again before using them. */
+const FRESH_FOR_MS = 55 * 60_000
 
+/**
+ * The photos of a delivery link. Every read spends one of the link's 50 accesses, so it is read
+ * once, and again only when its addresses are about to expire and the buyer comes back to the tab
+ * or goes to download, or presses "Reintentar". Never on focus, on reconnecting or by itself.
+ */
 export function useDeliveryQuery(token: Ref<string>) {
   const query = useQuery({
     queryKey: computed(() => DELIVERY_QUERY_KEYS.delivery(token.value)),
@@ -21,33 +29,30 @@ export function useDeliveryQuery(token: Ref<string>) {
     },
     enabled: computed(() => !!token.value),
     retry: false,
-    staleTime: DOWNLOAD_URLS_FRESH_MS,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
+    staleTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   })
 
-  async function ensureFreshUrls() {
-    if (Date.now() - query.dataUpdatedAt.value < DOWNLOAD_URLS_FRESH_MS) return query.data.value
-    const refreshed = await query.refetch()
-    return refreshed.isError ? undefined : refreshed.data
+  const fetchedAt = computed(() => query.dataUpdatedAt.value)
+
+  async function ensureFresh(): Promise<void> {
+    if (!query.data.value || Date.now() - fetchedAt.value <= FRESH_FOR_MS) return
+    await query.refetch()
   }
 
-  const isExpired = computed(() => {
-    if (!query.error.value) return false
-    const err = query.error.value as { response?: { status?: number } }
-    return err.response?.status === 410
+  // Opened again in the same visit (back and forward, or from Mis fotos): the cached link may
+  // hold expired addresses. Without data the normal load runs, so this asks nothing more.
+  void ensureFresh()
+
+  // Back to the tab after a while: only addresses about to expire are worth an access.
+  const visibility = useDocumentVisibility()
+  watch(visibility, (current) => {
+    if (current === 'visible') void ensureFresh()
   })
 
-  const isNotFound = computed(() => {
-    if (!query.error.value) return false
-    const err = query.error.value as { response?: { status?: number } }
-    return err.response?.status === 404
-  })
+  const problem = computed(() => (query.error.value ? deliveryProblem(query.error.value) : null))
 
-  return {
-    ...query,
-    isExpired,
-    isNotFound,
-    ensureFreshUrls,
-  }
+  return { ...query, fetchedAt, ensureFresh, problem }
 }

@@ -8,6 +8,7 @@ import type { IApiSuccessResponse } from './http-response.interface'
 import { registerAuthInterceptor } from './interceptors/auth.interceptor'
 import { registerErrorInterceptor } from './interceptors/error.interceptor'
 import { registerSuccessInterceptor } from './interceptors/success.interceptor'
+import { registerTimeoutInterceptor } from './interceptors/timeout.interceptor'
 
 class AxiosClient implements IHttpHandler {
   private static instance: AxiosClient
@@ -19,6 +20,7 @@ class AxiosClient implements IHttpHandler {
       withCredentials: true,
     })
 
+    registerTimeoutInterceptor(this.axios)
     registerAuthInterceptor(this.axios)
     registerSuccessInterceptor(this.axios)
     registerErrorInterceptor(this.axios)

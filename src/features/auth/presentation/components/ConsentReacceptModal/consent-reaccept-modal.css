@@ -7,7 +7,7 @@
   margin: 0 0 16px;
   font-size: 14px;
   line-height: 1.65;
-  color: #4b5563;
+  color: var(--tt-ink-muted, #4b5563);
 }
 
 .consent-modal__links {
@@ -20,7 +20,7 @@
 .consent-modal__links a {
   font-size: 14px;
   font-weight: 500;
-  color: #2563eb;
+  color: var(--tt-primary-ink, #2563eb);
   text-decoration: none;
 }
 
@@ -31,9 +31,9 @@
 .consent-modal__checkbox {
   align-items: flex-start;
   padding: 12px 14px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--tt-line, #e5e7eb);
   border-radius: 8px;
-  background: #f9fafb;
+  background: var(--tt-surface-sunken, #f9fafb);
 }
 
 .consent-modal__checkbox .n-checkbox-box-wrapper {
@@ -44,7 +44,11 @@
   font-size: 13px;
   line-height: 1.6;
   white-space: normal;
-  color: #374151;
+  color: var(--tt-ink, #374151);
+}
+
+.consent-modal__problem {
+  margin-block-start: 16px;
 }
 
 .consent-modal__actions {

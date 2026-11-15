@@ -1,26 +1,51 @@
-import { mount } from '@vue/test-utils'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { DOMWrapper, flushPromises, mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { computed, reactive } from 'vue'
+import { createMemoryHistory, createRouter } from 'vue-router'
 
+import { toCurrentUser } from '@/core/auth/current-user.mapper'
+import { useSessionStore } from '@/core/auth/stores/session.store'
+import { usePriceSheet } from '@/features/pricing/composables/use-price-sheet'
 import { useCartStore } from '@/shared/stores/cart.store'
 import type { ICartGroup } from '@/shared/types/cart.types'
+vi.mock('@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue', async () => ({
+  default: (await import('@/features/house-spots/testing/spot-stubs')).HouseSpotStub,
+}))
+
 import CartDrawer from './CartDrawer.vue'
 
-const push = vi.fn()
+const REAL_TIERS = [
+  { minQty: 1, maxQty: 2, pricePerPhoto: 4 },
+  { minQty: 3, maxQty: 6, pricePerPhoto: 3 },
+  { minQty: 7, maxQty: 9, pricePerPhoto: 2.5 },
+  { minQty: 10, maxQty: null, pricePerPhoto: 2 },
+]
 
-vi.mock('vue-router', () => ({ useRouter: () => ({ push }) }))
-vi.mock('@/features/auth/composables/use-auth', () => ({
-  useAuth: () => ({ isAuthenticated: { value: true } }),
+const cart = reactive({
+  status: 'success' as 'pending' | 'error' | 'success',
+  groups: [] as ICartGroup[],
+  isFetching: false,
+})
+const pricing = reactive({ hasTiers: true })
+const remove = vi.fn()
+const refetch = vi.fn()
+
+vi.mock('@/shared/cart', () => ({
+  useCartState: () => ({
+    status: computed(() => cart.status),
+    groups: computed(() => cart.groups),
+    isFetching: computed(() => cart.isFetching),
+    error: computed(() => null),
+    refetch,
+  }),
+  useCartActions: () => ({ toggle: vi.fn(), remove, isBusy: () => false }),
 }))
-vi.mock('../../../composables/mutations/use-remove-from-cart', () => ({
-  useRemoveFromCart: () => ({ mutate: vi.fn() }),
-}))
-vi.mock('@/features/cart/composables/use-cart-pricing', () => ({
-  useCartPricing: () => ({
-    preview: { value: { quantity: 2, subtotal: 8, unitPrice: 4 } },
-    basePrice: { value: 4 },
-    currency: { value: 'USD' },
-    isLoading: { value: false },
+vi.mock('@/shared/pricing/use-pricing-tiers', () => ({
+  usePricingTiersQuery: () => ({
+    data: computed(() =>
+      pricing.hasTiers ? { currency: 'USD', source: 'default', tiers: REAL_TIERS } : undefined,
+    ),
   }),
 }))
 
@@ -29,69 +54,328 @@ function group(id: string, photos: number): ICartGroup {
     eventId: id,
     eventName: `Evento ${id}`,
     eventSlug: `evento-${id}`,
-    startDate: new Date(),
-    endDate: new Date(),
-    photos: Array.from({ length: photos }, (_, i) => ({
-      id: `${id}-${i}`,
-      publicSlug: `s${id}${i}`,
+    startDate: new Date(2026, 9, 4),
+    endDate: new Date(2026, 9, 4),
+    photos: Array.from({ length: photos }, (_, index) => ({
+      id: `${id}-${index}`,
+      publicSlug: `s${id}${index}`,
     })),
   }
 }
 
-function render() {
-  return mount(CartDrawer, {
-    global: {
-      stubs: {
-        teleport: true,
-        PricingTotalBlock: true,
-        PhotoPriceStrip: true,
-        PhotoLightbox: true,
-      },
-    },
+const Stub = { render: () => null }
+
+async function mountDrawer(path = '/') {
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/', component: Stub, meta: { public: true } },
+      { path: '/account/orders', component: Stub },
+      { path: '/gallery', component: Stub },
+      { path: '/login', component: Stub },
+      { path: '/checkout/:eventId', component: Stub },
+    ],
   })
+  await router.push(path)
+  useCartStore().setDrawerOpen(true)
+  // The real teleport: a stubbed one rebuilds its content on every render and would hide whether
+  // the drawer keeps its elements. The drawer is read from the page it was teleported to.
+  const component = mount(CartDrawer, { attachTo: document.body, global: { plugins: [router] } })
+  await flushPromises()
+  return { wrapper: new DOMWrapper(document.body), component, router }
 }
 
+function signIn() {
+  useSessionStore().setSession(
+    'token',
+    toCurrentUser({ id: 'u1', email: 'a@b.c', firstName: 'Ana', lastName: null, role: 'customer' }),
+  )
+}
+
+type Wrapper = Awaited<ReturnType<typeof mountDrawer>>['wrapper']
+const sections = (wrapper: Wrapper) => wrapper.findAll('.cart-drawer__event')
+const linkNamed = (wrapper: Wrapper, name: string) =>
+  wrapper.findAll('a').filter((link) => link.text() === name)
+const buttonNamed = (wrapper: Wrapper, name: string) =>
+  wrapper.findAll('button').find((button) => button.text() === name)
+
 describe('CartDrawer', () => {
+  const mounted: { unmount(): void }[] = []
+
   beforeEach(() => {
+    document.body.innerHTML = ''
+    localStorage.clear()
     setActivePinia(createPinia())
-    push.mockClear()
+    Object.assign(cart, { status: 'success', groups: [], isFetching: false })
+    pricing.hasTiers = true
+    remove.mockClear()
+    refetch.mockClear()
+    usePriceSheet().close()
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+    while (mounted.length) mounted.pop()!.unmount()
   })
 
-  it('offers only shortcuts when no event is being browsed', () => {
-    const store = useCartStore()
-    store.setGroups([group('a', 5), group('b', 3)])
-    store.setDrawerOpen(true)
+  async function open() {
+    const result = await mountDrawer()
+    mounted.push(result.component)
+    return result
+  }
 
-    const wrapper = render()
+  it('is not there while closed', async () => {
+    useCartStore().setDrawerOpen(false)
+    const { wrapper } = await open()
+    useCartStore().setDrawerOpen(false)
+    await flushPromises()
 
-    expect(wrapper.findAll('[data-test="cart-shortcut"]')).toHaveLength(2)
-    expect(wrapper.find('[data-test="cart-checkout"]').exists()).toBe(false)
-    expect(wrapper.find('[data-test="cart-pricing"]').exists()).toBe(false)
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(false)
   })
 
-  it('prices and checks out only the event being browsed', () => {
-    const store = useCartStore()
-    store.setGroups([group('a', 5), group('b', 3)])
-    store.setActiveEvent('a')
-    store.setDrawerOpen(true)
+  it('is a modal dialog with its title and a way to close it', async () => {
+    const { wrapper } = await open()
+    const dialog = wrapper.get('[role="dialog"]')
 
-    const wrapper = render()
+    expect(dialog.attributes('aria-modal')).toBe('true')
+    expect(document.getElementById(dialog.attributes('aria-labelledby')!)?.textContent).toBe(
+      'Tu carrito',
+    )
 
-    expect(wrapper.find('[data-test="cart-checkout"]').exists()).toBe(true)
-    expect(wrapper.find('[data-test="cart-pricing"]').exists()).toBe(true)
-    expect(wrapper.findAll('[data-test="cart-thumb"]')).toHaveLength(5)
-    expect(wrapper.findAll('[data-test="cart-shortcut"]')).toHaveLength(1)
+    await wrapper.get('button[aria-label="Cerrar"]').trigger('click')
+    expect(useCartStore().isDrawerOpen).toBe(false)
   })
 
-  it('keeps the drawer open when a shortcut sends you to that gallery', async () => {
-    const store = useCartStore()
-    store.setGroups([group('a', 5), group('b', 3)])
-    store.setDrawerOpen(true)
+  it('says the cart could not be loaded, never that it is empty, and retries', async () => {
+    cart.status = 'error'
+    const { wrapper } = await open()
 
-    const wrapper = render()
-    await wrapper.get('[data-test="cart-shortcut"]').trigger('click')
+    expect(wrapper.text()).toContain('No pudimos mostrar tu carrito')
+    expect(wrapper.text()).toContain('Vuelve a intentarlo en un momento.')
+    expect(wrapper.text()).not.toContain('Tu carrito está vacío')
 
-    expect(push).toHaveBeenCalledWith('/gallery/evento-a')
-    expect(store.isDrawerOpen).toBe(true)
+    await buttonNamed(wrapper, 'Reintentar')!.trigger('click')
+    expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows skeletons, not "empty", while the cart loads', async () => {
+    vi.useFakeTimers()
+    cart.status = 'pending'
+    const { wrapper } = await open()
+
+    expect(wrapper.text()).not.toContain('Tu carrito está vacío')
+    await vi.advanceTimersByTimeAsync(400)
+    expect(wrapper.find('.cart-drawer__skeleton').exists()).toBe(true)
+  })
+
+  it('closes when the session closes on a screen that needs it: that screen says it once', async () => {
+    signIn()
+    await mountDrawer('/account/orders')
+
+    useSessionStore().expireSession()
+    await flushPromises()
+
+    expect(useCartStore().isDrawerOpen).toBe(false)
+  })
+
+  it('says the session expired, not that the cart is empty, and leads back here after signing in', async () => {
+    useSessionStore().expireSession()
+    const { wrapper } = await open()
+
+    expect(wrapper.text()).toContain('Tu sesión se cerró')
+    expect(wrapper.text()).not.toContain('Tu carrito está vacío')
+    const signIn = wrapper.findAll('a').find((link) => link.text() === 'Iniciar sesión')!
+    expect(signIn.attributes('href')).toBe('/login?redirect=/')
+
+    await signIn.trigger('click')
+    await flushPromises()
+    expect(useCartStore().isDrawerOpen).toBe(false)
+  })
+
+  it('after the session expired, shows the photos chosen without an account, under a short notice', async () => {
+    useSessionStore().expireSession()
+    cart.groups = [group('e1', 2)]
+    const { wrapper } = await open()
+
+    expect(sections(wrapper)).toHaveLength(1)
+    const notice = wrapper.get('[data-test="cart-session-closed"]')
+    expect(notice.classes()).toContain('form-alert--info')
+    expect(notice.text()).toContain('Tu sesión se cerró')
+    const signIn = notice.findAll('a').find((link) => link.text() === 'Iniciar sesión')!
+    expect(signIn.attributes('href')).toBe('/login?redirect=/')
+    expect(wrapper.find('.empty-state').exists()).toBe(false)
+
+    await signIn.trigger('click')
+    await flushPromises()
+    expect(useCartStore().isDrawerOpen).toBe(false)
+  })
+
+  it('keeps saying the session expired while the cart without an account is still being read', async () => {
+    useSessionStore().expireSession()
+    cart.status = 'pending'
+    const { wrapper } = await open()
+
+    expect(wrapper.text()).toContain('Tu sesión se cerró')
+    expect(wrapper.find('[data-test="cart-session-closed"]').exists()).toBe(false)
+  })
+
+  it('marks photos already bought and keeps their event from being confirmed until they are out', async () => {
+    signIn()
+    const bought = group('e1', 2)
+    bought.photos[0] = { ...bought.photos[0]!, alreadyPurchased: true }
+    cart.groups = [bought, group('e2', 1)]
+    const { wrapper } = await open()
+
+    const [first, second] = sections(wrapper)
+    expect(first!.findAll('.cart-drawer__bought').map((mark) => mark.text())).toEqual([
+      'Ya la compraste',
+    ])
+    expect(first!.get('[data-test="drawer-already-bought"]').text()).toContain(
+      'Ya compraste alguna de estas fotos',
+    )
+    const confirmFirst = first!.findAll('a').find((link) => link.text() === 'Confirmar pedido')!
+    expect(confirmFirst.attributes('aria-disabled')).toBe('true')
+    await confirmFirst.trigger('click')
+    expect(useCartStore().isDrawerOpen).toBe(true)
+
+    expect(second!.find('[data-test="drawer-already-bought"]').exists()).toBe(false)
+    const confirmSecond = second!.findAll('a').find((link) => link.text() === 'Confirmar pedido')!
+    expect(confirmSecond.attributes('aria-disabled')).toBeUndefined()
+  })
+
+  it('says the cart is empty and sends to the events', async () => {
+    const { wrapper, router } = await open()
+
+    expect(wrapper.text()).toContain('Tu carrito está vacío')
+    expect(wrapper.text()).toContain('Busca tu placa en un evento y agrega las fotos que quieras.')
+
+    await linkNamed(wrapper, 'Ver eventos')[0]!.trigger('click')
+    await flushPromises()
+
+    expect(router.currentRoute.value.path).toBe('/gallery')
+    expect(useCartStore().isDrawerOpen).toBe(false)
+  })
+
+  it('ends with the 320×50 house strip when it has photos', async () => {
+    cart.groups = [group('a', 3)]
+    const { wrapper } = await open()
+
+    const ad = wrapper.get('[data-test="house-spot"]')
+    expect(ad.attributes('data-format')).toBe('D')
+    expect(ad.attributes('data-seed')).toBe('23')
+    expect(ad.element.previousElementSibling?.textContent?.trim()).toBe(
+      'Cómo funcionan los precios',
+    )
+  })
+
+  it('has no house strip while empty, loading or failed', async () => {
+    for (const status of ['success', 'pending', 'error'] as const) {
+      while (mounted.length) mounted.pop()!.unmount()
+      document.body.innerHTML = ''
+      Object.assign(cart, { status, groups: [] })
+      const { wrapper } = await open()
+      expect(wrapper.find('[data-test="house-spot"]').exists(), status).toBe(false)
+    }
+  })
+
+  it('has one section per event, with a note that each is its own order', async () => {
+    cart.groups = [group('a', 3), group('b', 1)]
+    const { wrapper } = await open()
+
+    expect(sections(wrapper)).toHaveLength(2)
+    expect(sections(wrapper)[0]!.get('.cart-drawer__event-name').text()).toBe('Evento a')
+    expect(sections(wrapper)[0]!.get('.cart-drawer__event-count').text()).toBe('3 fotos')
+    expect(sections(wrapper)[1]!.get('.cart-drawer__event-count').text()).toBe('1 foto')
+    expect(wrapper.text()).toContain('Cada evento se confirma como un pedido aparte.')
+  })
+
+  it('has no note about separate orders with a single event', async () => {
+    cart.groups = [group('a', 3)]
+    const { wrapper } = await open()
+
+    expect(wrapper.text()).not.toContain('pedido aparte')
+  })
+
+  it('prices each event on its own', async () => {
+    cart.groups = [group('a', 3), group('b', 1)]
+    const { wrapper } = await open()
+
+    expect(sections(wrapper)[0]!.get('.cart-drawer__unit').text()).toBe('$3,00 c/u')
+    expect(sections(wrapper)[0]!.get('.cart-drawer__total').text()).toBe('$9,00')
+    expect(sections(wrapper)[1]!.get('.cart-drawer__unit').text()).toBe('$4,00 c/u')
+    expect(sections(wrapper)[1]!.get('.cart-drawer__total').text()).toBe('$4,00')
+  })
+
+  it('takes a photo out, and keeps the price block while the total changes', async () => {
+    cart.groups = [group('a', 3)]
+    const { wrapper } = await open()
+    const priceBlock = sections(wrapper)[0]!.get('.cart-drawer__price').element
+    console.log('--- before change', document.querySelectorAll('.cart-drawer').length)
+
+    await sections(wrapper)[0]!.findAll('button[aria-label="Quitar foto"]')[2]!.trigger('click')
+    expect(remove).toHaveBeenCalledWith('a-2')
+
+    cart.groups = [group('a', 2)]
+    await flushPromises()
+    console.log(
+      '--- after change',
+      document.querySelectorAll('.cart-drawer').length,
+      wrapper.findAll('.cart-drawer').length,
+    )
+
+    expect(sections(wrapper)[0]!.get('.cart-drawer__price').element).toBe(priceBlock)
+    expect(sections(wrapper)[0]!.get('.cart-drawer__total').text()).toBe('$8,00')
+    expect(wrapper.text()).not.toContain('Calculando precio')
+  })
+
+  it('shows no price, but still lets the order go on, without tiers', async () => {
+    pricing.hasTiers = false
+    signIn()
+    cart.groups = [group('a', 3)]
+    const { wrapper } = await open()
+
+    expect(wrapper.text()).not.toContain('$')
+    expect(linkNamed(wrapper, 'Confirmar pedido')[0]!.attributes('href')).toBe('/checkout/a')
+  })
+
+  it('confirms each event on its own checkout and closes', async () => {
+    signIn()
+    cart.groups = [group('a', 3), group('b', 1)]
+    const { wrapper, router } = await open()
+
+    const confirms = linkNamed(wrapper, 'Confirmar pedido')
+    expect(confirms.map((link) => link.attributes('href'))).toEqual(['/checkout/a', '/checkout/b'])
+
+    await confirms[1]!.trigger('click')
+    await flushPromises()
+
+    expect(router.currentRoute.value.path).toBe('/checkout/b')
+    expect(useCartStore().isDrawerOpen).toBe(false)
+  })
+
+  it('asks to sign in first, and comes back to the checkout, without a session', async () => {
+    cart.groups = [group('a', 3)]
+    const { wrapper } = await open()
+
+    const confirm = linkNamed(wrapper, 'Confirmar pedido')[0]!
+    expect(confirm.attributes('href')).toBe('/login?redirect=/checkout/a')
+  })
+
+  it('explains the prices with the quantity of the only event', async () => {
+    cart.groups = [group('a', 4)]
+    const { wrapper } = await open()
+
+    await buttonNamed(wrapper, 'Cómo funcionan los precios')!.trigger('click')
+
+    expect(usePriceSheet().isOpen.value).toBe(true)
+    expect(usePriceSheet().quantity.value).toBe(4)
+  })
+
+  it('explains the prices with no quantity when there are several events', async () => {
+    cart.groups = [group('a', 4), group('b', 1)]
+    const { wrapper } = await open()
+
+    await buttonNamed(wrapper, 'Cómo funcionan los precios')!.trigger('click')
+
+    expect(usePriceSheet().quantity.value).toBe(0)
   })
 })

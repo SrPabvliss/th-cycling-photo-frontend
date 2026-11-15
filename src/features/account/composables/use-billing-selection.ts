@@ -1,6 +1,11 @@
 import { computed, ref, watch } from 'vue'
 
 import { useSessionStore } from '@/core/auth/stores/session.store'
+import { problemKind } from '@/core/http/problem-kind'
+import { useOnline } from '@/core/network/use-online'
+import { useFormProblem } from '@/shared/composables/use-form-problem'
+import { loadProblemCopy } from '@/shared/components/loading'
+import { generalProblem } from '@/shared/utils/form-problem'
 import { useSetDefaultBillingAccount } from './mutations/use-set-default-billing-account'
 import { useRecordInvoiceConsent } from './mutations/use-record-invoice-consent'
 import { useMyBillingAccountsQuery } from './queries/use-my-billing-accounts'
@@ -29,6 +34,9 @@ export function useBillingSelection(enabled: () => boolean) {
   const selectedBillingAccountId = ref<string | null>(null)
   const invoiceConsentChecked = ref(false)
   const billingSheet = ref<BillingSheet>(null)
+  /** Why the last pick did not go through, said in the picker above its button. */
+  const pickProblem = useFormProblem()
+  watch(billingSheet, () => (pickProblem.value = null))
 
   watch(
     billingAccounts,
@@ -62,7 +70,15 @@ export function useBillingSelection(enabled: () => boolean) {
 
   async function handleBillingChosen(choice: { id: string; makeDefault: boolean }) {
     selectedBillingAccountId.value = choice.id
-    if (choice.makeDefault) await setDefaultBillingAccount(choice.id)
+    pickProblem.value = null
+    if (choice.makeDefault) {
+      try {
+        await setDefaultBillingAccount(choice.id)
+      } catch (error) {
+        pickProblem.value = generalProblem(error)
+        return
+      }
+    }
     billingSheet.value = null
   }
 
@@ -77,12 +93,45 @@ export function useBillingSelection(enabled: () => boolean) {
     if (needsInvoiceConsent.value) await recordInvoiceConsent()
   }
 
+  /** Asks for the billing data again after it failed to load. */
+  function retryBilling() {
+    return billingQuery.refetch()
+  }
+
+  // Without network the read waits (pending, paused) instead of failing: not "no data" either.
+  const online = useOnline()
+  const isWaitingForNetwork = computed(
+    () => !online.value && billingQuery.status.value === 'pending',
+  )
+
   return {
+    /** The billing data was read: from here on, no account means the buyer has none. */
+    isBillingLoaded: computed(() => billingQuery.isSuccess.value),
+    /** It could not be read and nothing was before: say so instead of offering to add some. */
+    billingProblem: computed(
+      () =>
+        (billingQuery.status.value === 'error' || isWaitingForNetwork.value) &&
+        billingQuery.data.value === undefined,
+    ),
+    /** The words of that problem, by its cause: no connection, slowness, or a failure. */
+    billingProblemCopy: computed(() =>
+      loadProblemCopy(
+        isWaitingForNetwork.value ? 'offline' : problemKind(billingQuery.error.value),
+        'tus datos de factura',
+        {
+          title: 'No pudimos mostrar tus datos de factura',
+          text: 'Los necesitamos para crear tu pedido.',
+        },
+      ),
+    ),
+    isBillingRetrying: computed(() => billingQuery.isFetching.value),
+    retryBilling,
     billingAccounts,
     needsInvoiceConsent,
     selectedBillingAccountId,
     invoiceConsentChecked,
     billingSheet,
+    pickProblem,
     billingPrefill,
     isBillingReady,
     isSettingDefault,

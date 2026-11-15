@@ -6,12 +6,16 @@ import { httpClient } from '@/core/http/axios-client'
 import { toProvinces } from '../../mappers/province.mapper'
 import type { IApiProvince } from '../../types/responses/province.response'
 
-export function useProvincesByCountryQuery(countryId: Ref<number | null>) {
+export function useProvincesByCountryQuery(
+  countryId: Ref<number | null>,
+  options: { silent?: boolean } = {},
+) {
   return useQuery({
     queryKey: computed(() => ['countries', countryId.value, 'provinces']),
     queryFn: async () => {
       const response = await httpClient.get<IApiProvince[]>(
         API_ROUTES.COUNTRIES.PROVINCES(countryId.value!),
+        { silent: options.silent },
       )
       return toProvinces(response.data)
     },

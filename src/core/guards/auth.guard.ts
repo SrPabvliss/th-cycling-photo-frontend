@@ -3,9 +3,11 @@ import type { Router } from 'vue-router'
 import { API_ROUTES } from '@/core/api/api-routes'
 import { getHomePath } from '@/core/auth/role-config'
 import { httpClient } from '@/core/http/axios-client'
+import { isSessionExpired } from '@/core/http/session-expired'
 import { toCurrentUser } from '@/core/auth/current-user.mapper'
 import { STANDALONE_PATHS } from '@/core/views/standalone-routes'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+import { safeRedirect } from '@/core/navigation/safe-redirect'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import type { IApiCurrentUser } from '@/core/auth/current-user'
 import { holdsPermission } from '@/core/auth/permissions'
@@ -25,10 +27,16 @@ async function hydrateSession(authStore: ReturnType<typeof useSessionStore>): Pr
     })
     const user = toCurrentUser(response.data)
     authStore.setSession(authStore.accessToken!, user)
-  } catch {
-    // Token invalid or expired — clear it
-    authStore.clearSession()
+  } catch (error) {
+    // Ended for good (the refresh said no): clear it. Too many tries, a server failure or no
+    // answer say nothing about the session: keep it, and read it again on the next screen.
+    if (isSessionExpired(error)) authStore.clearSession()
+    else isHydrated = false
   }
+}
+
+function isSignInPage(path: string): boolean {
+  return path === ROUTE_PATHS.LOGIN || path === ROUTE_PATHS.REGISTER
 }
 
 export function registerAuthGuard(router: Router): void {
@@ -40,10 +48,10 @@ export function registerAuthGuard(router: Router): void {
 
     // Public routes — no auth required
     if (to.meta.public) {
-      if (
-        authStore.isAuthenticated &&
-        (to.path === ROUTE_PATHS.LOGIN || to.path === ROUTE_PATHS.REGISTER)
-      ) {
+      if (authStore.isAuthenticated && isSignInPage(to.path)) {
+        // Already signed in: on to where the link meant to go, if it is on this site.
+        const target = safeRedirect(to.query.redirect)
+        if (target && !isSignInPage(target.split(/[?#]/)[0]!)) return target
         return getHomePath(authStore.currentUser?.permissions ?? [])
       }
       return true

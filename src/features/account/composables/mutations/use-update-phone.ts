@@ -5,11 +5,13 @@ import { httpClient } from '@/core/http/axios-client'
 import { ACCOUNT_QUERY_KEYS } from '../../constants/query-keys'
 import type { IUserPhone } from '../../types/responses/user-phone.response'
 import type { IUpdatePhoneRequest } from '../../types/requests/phone.request'
+import { CLIENT_MUTATION } from '@/shared/constants/client-mutation'
 
-export function useUpdatePhone() {
+export function useUpdatePhone(options: { silent?: boolean } = {}) {
   const queryClient = useQueryClient()
 
   return useMutation({
+    ...CLIENT_MUTATION,
     mutationFn: async ({
       phoneId,
       payload,
@@ -20,7 +22,7 @@ export function useUpdatePhone() {
       const response = await httpClient.patch<{ id: string }>(
         API_ROUTES.USER_PHONES.BY_ID(phoneId),
         payload,
-        { silentSuccess: true },
+        { silentSuccess: true, silent: options.silent },
       )
       return response.data
     },

@@ -107,6 +107,18 @@ describe('registerStaleChunkReload', () => {
     expect(assign).toHaveBeenCalledWith('/gallery/vuelta-2026')
   })
 
+  it('does not reload without network: the page could not load, and the strip says why', async () => {
+    const router = makeRouter()
+    await router.push('/')
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+
+    firePreloadError()
+
+    expect(reload).not.toHaveBeenCalled()
+    expect(assign).not.toHaveBeenCalled()
+    vi.restoreAllMocks()
+  })
+
   it('reloads the current page when a chunk fails outside a navigation', async () => {
     const router = makeRouter()
     await router.push('/')

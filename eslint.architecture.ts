@@ -14,6 +14,8 @@ const BASE_FEATURES = [
   'organizers',
   'contracts',
   'review',
+  // House ads: a leaf the client screens place directly; it imports no other feature.
+  'house-spots',
 ] as const
 
 const DOMAIN_FEATURES = [

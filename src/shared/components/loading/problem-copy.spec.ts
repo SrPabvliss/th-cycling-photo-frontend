@@ -1,0 +1,112 @@
+import { describe, expect, it } from 'vitest'
+
+import { AxiosError } from 'axios'
+
+import { loadAlertCopy, loadProblemCopy, problemCopy } from './problem-copy'
+
+describe('problemCopy', () => {
+  it('offline: waits for the network, with no way out', () => {
+    expect(problemCopy('offline', 'los eventos')).toEqual({
+      title: 'Sin conexión a internet',
+      text: 'Los eventos aparecerán cuando vuelvas a tener conexión.',
+      illustration: 'sinConexion',
+      tone: 'neutral',
+      retry: false,
+    })
+  })
+
+  it('offline: agrees with a singular noun', () => {
+    expect(problemCopy('offline', 'tu pedido').text).toBe(
+      'Tu pedido aparecerá cuando vuelvas a tener conexión.',
+    )
+  })
+
+  it('server: names what did not show and offers a retry', () => {
+    expect(problemCopy('server', 'los eventos')).toEqual({
+      title: 'No pudimos mostrar los eventos',
+      text: 'Vuelve a intentarlo en un momento.',
+      illustration: 'fallaMecanica',
+      tone: 'warn',
+      retry: true,
+    })
+  })
+
+  it('timeout: lets the person wait or retry', () => {
+    expect(problemCopy('timeout', 'tus compras')).toEqual({
+      title: 'Está tardando más de lo normal',
+      text: 'Puedes esperar un poco o volver a intentarlo.',
+      illustration: 'tardando',
+      tone: 'warn',
+      retry: true,
+    })
+  })
+
+  it('unknown: same words as the server, its own drawing', () => {
+    expect(problemCopy('unknown', 'tus compras')).toEqual({
+      title: 'No pudimos mostrar tus compras',
+      text: 'Vuelve a intentarlo en un momento.',
+      illustration: 'errorCarga',
+      tone: 'warn',
+      retry: true,
+    })
+  })
+
+  it('expired: the way out is signing in, not a retry', () => {
+    expect(problemCopy('expired', 'tus compras')).toEqual({
+      title: 'Tu sesión se cerró',
+      text: 'Inicia sesión de nuevo para continuar. Tu carrito sigue guardado.',
+      illustration: 'sesionVencida',
+      tone: 'info',
+      retry: false,
+    })
+  })
+
+  it('rate: asks to wait, with no drawing and no way out', () => {
+    expect(problemCopy('rate', 'los eventos')).toEqual({
+      title: 'Demasiados intentos',
+      text: 'Espera un minuto antes de volver a intentarlo.',
+      illustration: null,
+      tone: 'warn',
+      retry: false,
+    })
+  })
+})
+
+describe('loadProblemCopy', () => {
+  const better = { title: 'No pudimos mostrar más fotos', text: 'Las que ya ves siguen aquí.' }
+
+  it('takes the words the screen says better when the server failed or the cause is unknown', () => {
+    expect(loadProblemCopy('server', 'las fotos', better)).toEqual(better)
+    expect(loadProblemCopy('unknown', 'las fotos', { text: 'Tus fotos están a salvo.' })).toEqual({
+      title: 'No pudimos mostrar las fotos',
+      text: 'Tus fotos están a salvo.',
+    })
+  })
+
+  it('keeps the words of a cause the screen cannot say better', () => {
+    expect(loadProblemCopy('timeout', 'las fotos', better)).toEqual({
+      title: 'Está tardando más de lo normal',
+      text: 'Puedes esperar un poco o volver a intentarlo.',
+    })
+    expect(loadProblemCopy('offline', 'las fotos', better).title).toBe('Sin conexión a internet')
+  })
+})
+
+describe('loadAlertCopy', () => {
+  it('words an alert by the cause of its error', () => {
+    expect(loadAlertCopy(new AxiosError('timeout', 'ECONNABORTED'), 'las carreras')).toEqual({
+      title: 'Está tardando más de lo normal',
+      text: 'Puedes esperar un poco o volver a intentarlo.',
+    })
+    const down = new AxiosError('down', 'ERR_BAD_RESPONSE', undefined, undefined, {
+      status: 503,
+      data: {},
+      headers: {},
+      config: {},
+    } as never)
+    expect(loadAlertCopy(down, 'más fotos', { text: 'Las que ya ves siguen aquí.' })).toEqual({
+      title: 'No pudimos mostrar más fotos',
+      text: 'Las que ya ves siguen aquí.',
+    })
+  })
+})

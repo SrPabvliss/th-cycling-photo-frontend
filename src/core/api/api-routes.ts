@@ -50,6 +50,7 @@ export const API_ROUTES = {
   BILLING_ACCOUNTS: {
     BASE: '/users/me/billing-accounts',
     DEFAULT: (billingAccountId: string) => `/users/me/billing-accounts/${billingAccountId}/default`,
+    BY_ID: (billingAccountId: string) => `/users/me/billing-accounts/${billingAccountId}`,
   },
   MY_PROFILE: {
     BASE: '/users/me',
@@ -126,9 +127,6 @@ export const API_ROUTES = {
     UNASSIGN: (eventId: string, categoryId: string) =>
       `${EVENTS_BASE}/${eventId}/photo-categories/${categoryId}`,
   },
-  PARTICIPANT_CATEGORIES: {
-    GET_ALL: '/participant-categories',
-  },
   EVENT_TYPES: {
     GET_ALL: '/event-types',
   },
@@ -140,6 +138,7 @@ export const API_ROUTES = {
   PUBLIC_EVENTS: {
     BASE: PUBLIC_EVENTS_BASE,
     GET_ALL: PUBLIC_EVENTS_BASE,
+    FILTERS: `${PUBLIC_EVENTS_BASE}/filters`,
     GET_BY_SLUG: (slug: string) => `${PUBLIC_EVENTS_BASE}/${slug}`,
     PHOTOS: (slug: string) => `${PUBLIC_EVENTS_BASE}/${slug}/photos`,
   },
@@ -174,7 +173,6 @@ export const API_ROUTES = {
     GET_BY_ID: (id: string) => `${ORDERS_BASE}/me/${id}`,
     DOWNLOADS: (id: string) => `${ORDERS_BASE}/me/${id}/downloads`,
     CANCEL: (id: string) => `${ORDERS_BASE}/me/${id}/cancel`,
-    SUMMARY: `${ORDERS_BASE}/me/summary`,
     TAX_DOCUMENT_FILES: (id: string, taxDocumentId: string) =>
       `${ORDERS_BASE}/me/${id}/tax-documents/${taxDocumentId}/files`,
     BILLING: (id: string) => `${ORDERS_BASE}/me/${id}/billing`,
@@ -251,7 +249,6 @@ export const API_ROUTES = {
   },
   PRICING: {
     BASE: PRICING_BASE,
-    PREVIEW: `${PRICING_BASE}/preview`,
     TIERS: `${PRICING_BASE}/tiers`,
   },
   PAYMENTS: {

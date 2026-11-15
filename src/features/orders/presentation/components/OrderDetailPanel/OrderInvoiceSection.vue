@@ -4,11 +4,11 @@ import { computed, ref, toRef } from 'vue'
 import { usePermissions } from '@/core/auth/use-permissions'
 import { PERMISSIONS } from '@/core/auth/permissions'
 import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
-import BillingAccountForm from '@/features/account/presentation/components/BillingAccountForm/BillingAccountForm.vue'
 import InvoiceCard from '@/features/account/presentation/components/InvoiceCard/InvoiceCard.vue'
 import type { ICreateBillingAccountRequest } from '@/features/account/types/requests/billing-account.request'
 import type { IOrderInvoice } from '@/features/account/types/responses/order-invoice.response'
 import { readBillingServerError } from '@/features/account/utils/billing-server-error'
+import BillingCorrectionForm from './BillingCorrectionForm.vue'
 import { useDownloadOrderTaxDocument } from '../../../composables/mutations/use-download-order-tax-document'
 import { useResendOrderTaxDocument } from '../../../composables/mutations/use-resend-order-tax-document'
 import { useRetryOrderAnnulment } from '../../../composables/mutations/use-retry-order-annulment'
@@ -87,10 +87,7 @@ function submitCorrection(request: ICreateBillingAccountRequest) {
       title="Corregir datos de facturación"
       @close="isCorrecting = false"
     >
-      <BillingAccountForm
-        mode="correct"
-        :needs-consent="false"
-        :prefill="{ legalName: billing.legalName, email: billing.email }"
+      <BillingCorrectionForm
         :initial="billing"
         submit-label="Enviar corrección"
         :submitting="correctBilling.isPending.value"

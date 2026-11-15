@@ -1,5 +1,7 @@
 import type { Router } from 'vue-router'
 
+import { isOffline } from '@/core/network/use-online'
+
 /** Session key holding when we last reloaded because a chunk was missing. */
 export const STALE_CHUNK_RELOAD_KEY = 'titan:stale-chunk-reload-at'
 
@@ -48,7 +50,8 @@ export function reloadOnceForStaleChunk(target: string | null): boolean {
 /**
  * After a deploy, a tab still running the previous build asks for chunks whose
  * hashed names no longer exist. Vite reports that as `vite:preloadError`; we
- * reload once so the tab picks up the new build, on the page it was going to.
+ * reload once so the tab picks up the new build, on the page it was going to. If that does not
+ * help, the router says it could not open the page (see route-load-problem.ts).
  */
 export function registerStaleChunkReload(router: Router): void {
   let pendingTarget: string | null = null
@@ -60,7 +63,10 @@ export function registerStaleChunkReload(router: Router): void {
     pendingTarget = null
   })
 
+  // Without network a reload would land on the browser's offline page: the chunk is not stale,
+  // it just could not travel. The navigation fails instead and the offline strip says why.
   window.addEventListener('vite:preloadError', () => {
+    if (isOffline()) return
     reloadOnceForStaleChunk(pendingTarget)
   })
 }

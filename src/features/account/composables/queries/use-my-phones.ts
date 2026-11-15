@@ -6,11 +6,13 @@ import { ACCOUNT_QUERY_KEYS } from '../../constants/query-keys'
 import { toUserPhones } from '../../mappers/user-phone.mapper'
 import type { IApiUserPhone } from '../../types/responses/user-phone.response'
 
-export function useMyPhonesQuery() {
+export function useMyPhonesQuery(options: { silent?: boolean } = {}) {
   return useQuery({
     queryKey: ACCOUNT_QUERY_KEYS.phones(),
     queryFn: async () => {
-      const response = await httpClient.get<IApiUserPhone[]>(API_ROUTES.USER_PHONES.BASE)
+      const response = await httpClient.get<IApiUserPhone[]>(API_ROUTES.USER_PHONES.BASE, {
+        silent: options.silent,
+      })
       return toUserPhones(response.data)
     },
   })

@@ -1,0 +1,344 @@
+{
+  "colors": {
+    "light": {
+      "primary": "#0e5a9c",
+      "primaryHover": "#0a4677",
+      "onPrimary": "#ffffff",
+      "primaryInk": "#0e5a9c",
+      "primarySoft": "#e8f1fa",
+      "primarySoftBorder": "#b9d3ec",
+      "navy": "#0a1e34",
+      "onNavy": "#ffffff",
+      "onNavyMuted": "#d6e4f2",
+      "onNavyEyebrow": "#8ec3ee",
+      "ink": "#15171a",
+      "inkMuted": "#5b6170",
+      "surface": "#ffffff",
+      "surfaceRaised": "#ffffff",
+      "surfaceSunken": "#f5f6f8",
+      "line": "#e4e6ea",
+      "lineSubtle": "#eef0f3",
+      "scrim": "rgba(21, 23, 26, 0.48)",
+      "photoOverlay": "rgba(8, 22, 40, 0.42)",
+      "successSoft": "#e6f4ea",
+      "successInk": "#1c6b35",
+      "warningSoft": "#fdf1dc",
+      "warningInk": "#8a5300",
+      "dangerSoft": "#fce8e8",
+      "dangerInk": "#a12a2a",
+      "dangerFill": "#a12a2a",
+      "onDangerFill": "#ffffff",
+      "dangerFillHover": "#8e2525",
+      "iluSnow": "#ffffff",
+      "iluInk": "#0a1e34",
+      "iluPaper": "#ffffff",
+      "iluOnAccent": "#ffffff",
+      "iluRing": "#ffffff",
+      "iluOnBadge": "#ffffff",
+      "helmetDarkRim": "#78b6f0",
+      "helmetDarkTrim": "#eceff3",
+      "helmetDarkCrest": "#2a78c4"
+    },
+    "dark": {
+      "primary": "#2a78c4",
+      "primaryHover": "#2470b8",
+      "onPrimary": "#ffffff",
+      "primaryInk": "#78b6f0",
+      "primarySoft": "#21395a",
+      "primarySoftBorder": "#335a86",
+      "navy": "#0a1e34",
+      "onNavy": "#ffffff",
+      "onNavyMuted": "#d6e4f2",
+      "onNavyEyebrow": "#8ec3ee",
+      "ink": "#eceff3",
+      "inkMuted": "#a6afbc",
+      "surface": "#1f2733",
+      "surfaceRaised": "#29323f",
+      "surfaceSunken": "#1a212b",
+      "line": "#38424f",
+      "lineSubtle": "#2e3744",
+      "scrim": "rgba(10, 14, 20, 0.6)",
+      "photoOverlay": "rgba(8, 22, 40, 0.5)",
+      "successSoft": "#1b3b2c",
+      "successInk": "#8adba4",
+      "warningSoft": "#41321a",
+      "warningInk": "#f3ca7b",
+      "dangerSoft": "#462127",
+      "dangerInk": "#f4a3a3",
+      "dangerFill": "#a12a2a",
+      "onDangerFill": "#ffffff",
+      "dangerFillHover": "#8e2525",
+      "iluSnow": "#d6e4f2",
+      "iluInk": "#d6e4f2",
+      "iluPaper": "#29323f",
+      "iluOnAccent": "#ffffff",
+      "iluRing": "#29323f",
+      "iluOnBadge": "#29323f",
+      "helmetDarkRim": "#78b6f0",
+      "helmetDarkTrim": "#eceff3",
+      "helmetDarkCrest": "#2a78c4"
+    }
+  },
+  "shadow": {
+    "light": {
+      "shadowSearch": "0 8px 24px rgba(21, 23, 26, 0.10)",
+      "shadowField": "0 4px 14px rgba(21, 23, 26, 0.07)",
+      "shadowPop": "0 16px 40px rgba(21, 23, 26, 0.16)",
+      "shadow1": "0 1px 2px rgba(10, 30, 52, 0.06)",
+      "shadow2": "0 1px 2px rgba(10, 30, 52, 0.04), 0 4px 12px -4px rgba(10, 30, 52, 0.10)",
+      "shadow3": "0 1px 3px rgba(10, 30, 52, 0.05), 0 10px 24px -8px rgba(10, 30, 52, 0.14)",
+      "shadow4": "0 2px 6px rgba(10, 30, 52, 0.05), 0 20px 40px -14px rgba(10, 30, 52, 0.20)",
+      "shadowCardHover": "0 1px 2px rgba(10, 30, 52, 0.05), 0 6px 16px -6px rgba(10, 30, 52, 0.13)",
+      "shadowSheet": "0 -1px 3px rgba(10, 30, 52, 0.04), 0 -10px 28px -10px rgba(10, 30, 52, 0.14)",
+      "shadowFab": "0 1px 2px rgba(10, 30, 52, 0.10), 0 4px 10px -2px rgba(10, 30, 52, 0.22)",
+      "shadowSilhouette": "drop-shadow(0 1px 1px rgba(10, 30, 52, 0.05)) drop-shadow(0 6px 12px rgba(10, 30, 52, 0.10))",
+      "cardEdge": "0 0 0 0 transparent"
+    },
+    "dark": {
+      "shadowSearch": "0 8px 24px rgba(0, 0, 0, 0.5)",
+      "shadowField": "0 4px 14px rgba(0, 0, 0, 0.4)",
+      "shadowPop": "0 16px 40px rgba(0, 0, 0, 0.6)",
+      "shadow1": "0 1px 2px rgba(6, 10, 16, 0.3)",
+      "shadow2": "0 1px 2px rgba(6, 10, 16, 0.25), 0 4px 12px -4px rgba(6, 10, 16, 0.4)",
+      "shadow3": "0 1px 2px rgba(6, 10, 16, 0.3), 0 10px 24px -8px rgba(6, 10, 16, 0.5)",
+      "shadow4": "0 2px 4px rgba(6, 10, 16, 0.3), 0 20px 40px -14px rgba(6, 10, 16, 0.6)",
+      "shadowCardHover": "0 1px 2px rgba(6, 10, 16, 0.28), 0 6px 16px -6px rgba(6, 10, 16, 0.48)",
+      "shadowSheet": "0 -1px 3px rgba(6, 10, 16, 0.25), 0 -8px 22px -10px rgba(6, 10, 16, 0.55)",
+      "shadowFab": "0 1px 2px rgba(6, 10, 16, 0.4), 0 4px 10px -2px rgba(6, 10, 16, 0.6)",
+      "shadowSilhouette": "drop-shadow(0 1px 1px rgba(6, 10, 16, 0.25)) drop-shadow(0 6px 12px rgba(6, 10, 16, 0.3))",
+      "cardEdge": "inset 0 0 0 1px rgba(255, 255, 255, 0.05)"
+    }
+  },
+  "spacing": {
+    "space1": "4px",
+    "space2": "8px",
+    "space3": "12px",
+    "space4": "16px",
+    "space5": "24px",
+    "space6": "32px",
+    "space7": "48px",
+    "space8": "64px",
+    "gutterDesktop": "120px",
+    "toastGap": "10px",
+    "gutterTablet": "32px"
+  },
+  "radius": {
+    "radiusS": "8px",
+    "radiusM": "12px",
+    "radiusL": "16px",
+    "radiusXl": "24px",
+    "radiusPill": "999px"
+  },
+  "size": {
+    "controlS": "36px",
+    "controlM": "44px",
+    "controlL": "52px",
+    "drawerWidth": "min(85vw, 400px)",
+    "breakpointTwoMonths": "900px",
+    "iconXs": "12px",
+    "iconS": "16px",
+    "iconM": "18px",
+    "iconL": "20px",
+    "iconXl": "24px",
+    "iconThinStrokeFrom": "48px",
+    "sheetMaxHeight": "90dvh",
+    "sheetDragClose": "96px",
+    "sheetFlickDistance": "32px",
+    "sheetDragSlop": "4px",
+    "sheetHandleWidth": "40px",
+    "sheetHandleHeight": "4px",
+    "chipCheckWidth": "9px",
+    "chipCheckHeight": "5px",
+    "iluInline": "160px",
+    "iluPage": "200px",
+    "iluDrop": "96px",
+    "iluPlateText": "21px",
+    "loaderXs": "16px",
+    "loaderSm": "20px",
+    "loaderMd": "24px",
+    "loaderLg": "32px",
+    "loaderXl": "40px",
+    "topProgressHeight": "3px",
+    "pageLoaderMark": "56px",
+    "splashBadge": "132px",
+    "splashLogo": "92px",
+    "splashMountainW": "72px",
+    "splashMountainH": "44px",
+    "splashDot": "9px",
+    "skeletonRadiusText": "6px",
+    "uploadBarHeight": "6px",
+    "mediaTileRing": "3px",
+    "mediaTileToggle": "36px",
+    "headerMobile": "60px",
+    "headerDesktop": "72px",
+    "headerPanel": "64px",
+    "tabbarHeight": "64px",
+    "tabIndicatorW": "28px",
+    "tabIndicatorH": "3px",
+    "sidebarWidth": "232px",
+    "containerMax": "1200px",
+    "breakpointPanelSidebar": "1024px",
+    "breakpointDesktop": "1280px",
+    "avatarDesktop": "38px",
+    "logoMark": "30px",
+    "logoMarkDesktop": "34px"
+  },
+  "motion": {
+    "motionFast": "120ms",
+    "motionBase": "200ms",
+    "motionEnter": "180ms",
+    "motionEmphasis": "220ms",
+    "motionSheet": "260ms",
+    "motionToastShift": "8px",
+    "motionTooltipIn": "180ms",
+    "motionTooltipOut": "120ms",
+    "motionTooltipDelay": "150ms",
+    "toastDuration": "5000ms",
+    "searchDebounce": "250ms",
+    "easingStandard": "cubic-bezier(0.2, 0.7, 0.2, 1)",
+    "easingExit": "cubic-bezier(0.4, 0, 1, 1)",
+    "loaderCycle": "1800ms",
+    "loaderSpin": "1000ms",
+    "loaderPulse": "2400ms",
+    "splashRide": "2400ms",
+    "easingLoaderSpin": "cubic-bezier(0.5, 0.15, 0.5, 0.85)",
+    "easingLoaderBar": "cubic-bezier(0.45, 0.05, 0.3, 1)",
+    "easingLoaderFill": "cubic-bezier(0.6, 0, 0.4, 1)"
+  },
+  "fontFamily": {
+    "display": "\"Archivo\", \"Arial Narrow\", system-ui, sans-serif",
+    "sans": "\"DM Sans\", system-ui, -apple-system, \"Segoe UI\", sans-serif"
+  },
+  "typeStyles": {
+    "displayXl": {
+      "fontSize": "60px",
+      "lineHeight": 1,
+      "fontWeight": 800,
+      "fontFamily": "display"
+    },
+    "displayL": {
+      "fontSize": "40px",
+      "lineHeight": 1.04,
+      "fontWeight": 800,
+      "fontFamily": "display"
+    },
+    "displayM": {
+      "fontSize": "28px",
+      "lineHeight": 1.05,
+      "fontWeight": 800,
+      "fontFamily": "display"
+    },
+    "displayS": {
+      "fontSize": "24px",
+      "lineHeight": 1.08,
+      "fontWeight": 800,
+      "fontFamily": "display"
+    },
+    "number": {
+      "fontSize": "26px",
+      "lineHeight": 1.1,
+      "fontWeight": 800,
+      "fontFamily": "display"
+    },
+    "wordmark": {
+      "fontSize": "16px",
+      "lineHeight": 1,
+      "fontWeight": 800,
+      "letterSpacing": "0.02em",
+      "fontFamily": "display"
+    },
+    "headingL": {
+      "fontSize": "26px",
+      "lineHeight": "32px",
+      "fontWeight": 700,
+      "fontFamily": "sans"
+    },
+    "headingM": {
+      "fontSize": "20px",
+      "lineHeight": "26px",
+      "fontWeight": 700,
+      "fontFamily": "sans"
+    },
+    "title": {
+      "fontSize": "16px",
+      "lineHeight": "22px",
+      "fontWeight": 600,
+      "fontFamily": "sans"
+    },
+    "body": {
+      "fontSize": "15px",
+      "lineHeight": "22px",
+      "fontWeight": 400,
+      "fontFamily": "sans"
+    },
+    "bodyS": {
+      "fontSize": "14px",
+      "lineHeight": "20px",
+      "fontWeight": 400,
+      "fontFamily": "sans"
+    },
+    "caption": {
+      "fontSize": "13px",
+      "lineHeight": "18px",
+      "fontWeight": 400,
+      "fontFamily": "sans"
+    },
+    "label": {
+      "fontSize": "12px",
+      "lineHeight": "16px",
+      "fontWeight": 600,
+      "fontFamily": "sans"
+    },
+    "eyebrow": {
+      "fontSize": "12px",
+      "lineHeight": "16px",
+      "fontWeight": 700,
+      "letterSpacing": "0.16em",
+      "fontFamily": "sans"
+    },
+    "bodyMedium": {
+      "fontSize": "15px",
+      "lineHeight": "22px",
+      "fontWeight": 500,
+      "fontFamily": "sans"
+    },
+    "bodySMedium": {
+      "fontSize": "14px",
+      "lineHeight": "20px",
+      "fontWeight": 500,
+      "fontFamily": "sans"
+    },
+    "captionMedium": {
+      "fontSize": "13px",
+      "lineHeight": "18px",
+      "fontWeight": 500,
+      "fontFamily": "sans"
+    },
+    "count": {
+      "fontSize": "11px",
+      "lineHeight": "14px",
+      "fontWeight": 700,
+      "fontFamily": "sans"
+    },
+    "wordmarkL": {
+      "fontSize": "22px",
+      "lineHeight": 1,
+      "fontWeight": 800,
+      "letterSpacing": "0.02em",
+      "fontFamily": "display"
+    },
+    "wordmarkDesktop": {
+      "fontSize": "18px",
+      "lineHeight": 1,
+      "fontWeight": 800,
+      "letterSpacing": "0.02em",
+      "fontFamily": "display"
+    }
+  },
+  "displayStretch": "118%",
+  "numberStretch": "112%",
+  "fontsHref": [
+    "https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap",
+    "https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap"
+  ]
+}

@@ -11,7 +11,7 @@ import { canShop } from '@/core/auth/capabilities'
 import { useHatStore } from '@/core/auth/stores/hat.store'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { LAYOUT_SLOTS, useLayoutSlot } from '@/core/layout/slot-registry'
-import TitanLogo from './public/TitanLogo.vue'
+import TitanLogo from './TitanLogo.vue'
 
 const router = useRouter()
 const { currentUser, logout, isLoggingOut } = useSession()

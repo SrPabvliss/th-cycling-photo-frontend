@@ -1,0 +1,22 @@
+/* The organizer profile keeps its look until Pablo decides the panel theme (E10, decision 2). On
+ * a client route it is painted inside this container, which points its old variables at the
+ * client tokens so it still follows light and dark. Nothing outside this container uses them.
+ * The RGB triplets repeat --tt-primary and --tt-primary-hover of awana-tokens.css. */
+.profile-view-organizer {
+  --tt-neutral-dark: var(--tt-ink);
+  --tt-neutral-mid: var(--tt-ink-muted);
+  --tt-neutral-light: var(--tt-line);
+  --tt-background: var(--tt-surface-sunken);
+  --tt-primary-dark: var(--tt-primary-hover);
+  --tt-primary-light: var(--tt-primary-soft-border);
+  --tt-success: var(--tt-success-ink);
+  --tt-warning: var(--tt-warning-ink);
+  --tt-error: var(--tt-danger-ink);
+  --tt-primary-rgb: 14, 90, 156;
+  --tt-primary-dark-rgb: 10, 70, 119;
+}
+
+[data-tt-scheme='dark'] .profile-view-organizer {
+  --tt-primary-rgb: 42, 120, 196;
+  --tt-primary-dark-rgb: 36, 112, 184;
+}

@@ -61,6 +61,7 @@ export const EMAIL_FORM_DEFAULTS: IEmailFormData = {
 }
 
 export const emailFieldValidators = {
-  newEmail: registerFieldValidators.email,
+  // Kept as it was: the organizer profile shares this form and keeps its wording.
+  newEmail: z.string().trim().min(1, 'El correo es requerido').email('Correo inválido'),
   currentPassword: passwordFieldValidators.currentPassword,
 }

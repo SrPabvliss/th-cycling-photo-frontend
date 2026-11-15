@@ -1,0 +1,79 @@
+/* The panel locks the document and scrolls inside its own panes (base.css). The client area is a
+ * plain scrolling document. The area lives on the root element, see core/theme/area.ts. */
+html[data-tt-area='client'],
+html[data-tt-area='client'] body,
+html[data-tt-area='client'] #app {
+  overflow: visible;
+  height: auto;
+}
+
+html[data-tt-area='client'] body {
+  background: var(--tt-surface);
+  color: var(--tt-ink);
+  font-family: var(--tt-font-sans);
+}
+
+html[data-tt-area='client'][data-tt-scheme='dark'] {
+  color-scheme: dark;
+}
+
+.client-layout {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100dvh;
+}
+
+.client-layout__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The next page could not open: said above the screen still up, as wide as the content. */
+.client-layout__route-problem {
+  inline-size: calc(100% - var(--tt-space-4) * 2);
+  max-inline-size: var(--tt-container-max);
+  margin: var(--tt-space-3) auto 0;
+}
+
+.client-layout__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  block-size: var(--tt-header-mobile);
+}
+
+/* The tab bar is fixed to the bottom and only exists on mobile: whatever comes last in the page,
+ * footer included, has to end above it. Media queries cannot read custom properties, so the
+ * breakpoint is written out: desktop starts at 768px, as in the rest of the app. */
+@media (max-width: 767px) {
+  .client-layout[data-tab-bar='true'] {
+    padding-block-end: calc(var(--tt-tabbar-height) + env(safe-area-inset-bottom));
+  }
+}
+
+@media (min-width: 768px) {
+  .client-layout__brand {
+    block-size: var(--tt-header-desktop);
+  }
+}
+
+/* The keyboard always shows where it is. Text fields mark their own focus on their frame. */
+html[data-tt-area='client'] :focus-visible:not(input, textarea, select) {
+  /* Dark surfaces set --tt-focus-ring to a light color so the ring still stands out. */
+  outline: medium solid var(--tt-focus-ring, var(--tt-primary));
+  outline-offset: calc(var(--tt-space-1) / 2);
+}
+
+/* A control drawn smaller than a thumb still answers on the full control size, without moving
+ * anything around it. */
+.tt-hit-area {
+  position: relative;
+}
+
+.tt-hit-area::after {
+  content: '';
+  position: absolute;
+  inset-block: min(0%, calc((100% - var(--tt-control-m)) / 2));
+  inset-inline: min(0%, calc((100% - var(--tt-control-m)) / 2));
+}

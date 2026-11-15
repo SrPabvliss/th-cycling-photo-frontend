@@ -1,127 +1,177 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useVirtualizer } from '@tanstack/vue-virtual'
-import { useElementSize } from '@vueuse/core'
-import { NIcon } from 'naive-ui'
-import { CheckmarkCircle, AddCircleOutline } from '@vicons/ionicons5'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useWindowVirtualizer } from '@tanstack/vue-virtual'
+import { useElementSize, useMediaQuery } from '@vueuse/core'
 
-import { getGalleryUrl } from '@/shared/utils/cdn.utils'
+import tokens from '@/core/theme/client/awana-tokens.json'
+import { SPOTS_ENABLED } from '@/features/house-spots/spots-config'
+import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
+import {
+  isSpotTile,
+  spotSlotsInside,
+  withSpotTiles,
+  type ISpotTile,
+} from '@/features/house-spots/utils/spot-placement'
+import { TtSkeleton } from '@/shared/components/loading'
 import type { IPublicPhoto } from '../../../types/responses/public-photo.response'
+import PhotoTile from '../PhotoTile/PhotoTile.vue'
 
-const GAP = 6
-const ASPECT_RATIO = 4 / 3
+// The whole gallery of an event can be thousands of photos: only the rows near the viewport are
+// in the page. It scrolls with the document, like the rest of the client area.
+const COLUMNS_MOBILE = 3
+const COLUMNS_DESKTOP = 5
+const TILE_RATIO = 4 / 3
+const LOADING_MORE_PLACEHOLDERS = 3
+// Rows from the end at which the next page is asked for, before the person gets there.
+const LOAD_MORE_MARGIN_ROWS = 2
+// House ad tiles: before the 8th photo, 18 photos further down, then one every 30. Neither 18
+// nor 30 is a multiple of 3 or 5: each next tile lands in another column. One never closes the
+// gallery, so the first needs at least 8 photos. Each one starts on its own piece.
+const SPOT_PLAN = { first: 7, second: 18, every: 30 }
+const SPOT_SEED = 59
 
-const props = defineProps<{
-  photos: IPublicPhoto[]
-  selectedIds: Set<string>
-}>()
+const props = withDefaults(
+  defineProps<{
+    photos: IPublicPhoto[]
+    selectedIds: Set<string>
+    busyIds: Set<string>
+    hasMore?: boolean
+    isLoadingMore?: boolean
+    /** A house ad tile among the photos. Never in a plate search. */
+    withSpot?: boolean
+  }>(),
+  { hasMore: false, isLoadingMore: false, withSpot: false },
+)
 
 const emit = defineEmits<{
+  open: [photoId: string]
   toggle: [photoId: string]
-  preview: [index: number]
   loadMore: []
 }>()
 
-const parentRef = ref<HTMLElement | null>(null)
-const { width: parentWidth } = useElementSize(parentRef)
+const container = ref<HTMLElement | null>(null)
+const { width } = useElementSize(container)
+// Same breakpoint and gaps as photo-grid.css.
+const isDesktop = useMediaQuery('(min-width: 768px)')
 
-const cols = computed(() => {
-  if (parentWidth.value < 480) return 2
-  if (parentWidth.value < 900) return 3
-  if (parentWidth.value < 1280) return 4
-  return 5
+const columns = computed(() => (isDesktop.value ? COLUMNS_DESKTOP : COLUMNS_MOBILE))
+const gap = computed(() =>
+  Number.parseInt(isDesktop.value ? tokens.spacing.space3 : tokens.spacing.space2, 10),
+)
+const rowHeight = computed(() => {
+  const tileWidth = (width.value - gap.value * (columns.value - 1)) / columns.value
+  return Math.max(0, tileWidth) * TILE_RATIO + gap.value
 })
 
-const cellWidth = computed(() => {
-  if (parentWidth.value === 0) return 240
-  const totalGap = GAP * (cols.value - 1)
-  return Math.floor((parentWidth.value - totalGap) / cols.value)
+// The tile is a cell like a photo, 3:4 too, so every row keeps the same height. It is not a
+// photo: the viewer moves through `photos`, never through these cells. Their places depend only
+// on the photos before them, so a new page never moves the cells already placed.
+const spotGone = ref(false)
+const cells = computed<(IPublicPhoto | ISpotTile)[]>(() =>
+  props.withSpot && SPOTS_ENABLED && !spotGone.value
+    ? withSpotTiles(props.photos, spotSlotsInside(props.photos.length, SPOT_PLAN))
+    : props.photos,
+)
+
+const rows = computed(() => {
+  const result: (IPublicPhoto | ISpotTile)[][] = []
+  for (let start = 0; start < cells.value.length; start += columns.value) {
+    result.push(cells.value.slice(start, start + columns.value))
+  }
+  return result
 })
 
-const rowHeight = computed(() => Math.floor(cellWidth.value * ASPECT_RATIO))
-
-function handleScroll() {
-  const el = parentRef.value
-  if (!el) return
-  const { scrollTop, scrollHeight, clientHeight } = el
-  if (scrollHeight - scrollTop - clientHeight < 300) {
-    emit('loadMore')
+const scrollMargin = ref(0)
+function measureOffset() {
+  if (container.value) {
+    scrollMargin.value = container.value.getBoundingClientRect().top + window.scrollY
   }
 }
+onMounted(measureOffset)
 
-const rowCount = computed(() => Math.ceil(props.photos.length / cols.value))
-
-const rowVirtualizer = useVirtualizer(
+const virtualizer = useWindowVirtualizer(
   computed(() => ({
-    count: rowCount.value,
-    getScrollElement: () => parentRef.value,
-    estimateSize: () => rowHeight.value + GAP,
-    overscan: 3,
+    count: rows.value.length,
+    estimateSize: () => rowHeight.value,
+    overscan: 4,
+    scrollMargin: scrollMargin.value,
   })),
 )
 
-const virtualRows = computed(() => rowVirtualizer.value.getVirtualItems())
-const totalSize = computed(() => rowVirtualizer.value.getTotalSize())
+const virtualRows = computed(() => virtualizer.value.getVirtualItems())
 
-watch([rowHeight, cols], () => {
-  rowVirtualizer.value.measure()
+watch([rowHeight, columns], () => {
+  measureOffset()
+  virtualizer.value.measure()
 })
 
-function getRowPhotos(rowIndex: number): IPublicPhoto[] {
-  const start = rowIndex * cols.value
-  return props.photos.slice(start, start + cols.value)
-}
-
-function getPhotoIndex(rowIndex: number, colIndex: number): number {
-  return rowIndex * cols.value + colIndex
-}
+// Reaching the last rows asks for the next page.
+watch(
+  () => virtualRows.value[virtualRows.value.length - 1]?.index,
+  (lastVisible) => {
+    if (lastVisible === undefined || !props.hasMore || props.isLoadingMore) return
+    if (lastVisible >= rows.value.length - 1 - LOAD_MORE_MARGIN_ROWS) emit('loadMore')
+  },
+)
 </script>
 
 <template>
-  <div ref="parentRef" class="virtual-grid" @scroll="handleScroll">
-    <div :style="{ height: `${totalSize}px`, position: 'relative' }">
+  <div ref="container" class="photo-grid-virtual">
+    <div class="photo-grid-virtual__rows" :style="{ height: `${virtualizer.getTotalSize()}px` }">
       <div
-        v-for="virtualRow in virtualRows"
-        :key="String(virtualRow.key)"
-        :style="{
-          position: 'absolute',
-          top: `${virtualRow.start}px`,
-          left: 0,
-          right: 0,
-          height: `${rowHeight}px`,
-          display: 'grid',
-          gridTemplateColumns: `repeat(${cols}, 1fr)`,
-          gap: `${GAP}px`,
-        }"
+        v-for="row in virtualRows"
+        :key="String(row.key)"
+        class="photo-grid photo-grid-virtual__row"
+        :style="{ transform: `translateY(${row.start - scrollMargin}px)` }"
       >
-        <div
-          v-for="(photo, colIdx) in getRowPhotos(virtualRow.index)"
-          :key="photo.id"
-          class="grid-cell"
-          :class="{ 'grid-cell--selected': selectedIds.has(photo.id) }"
+        <template
+          v-for="cell in rows[row.index]"
+          :key="isSpotTile(cell) ? `ad-${cell.n}` : cell.id"
         >
-          <img
-            :src="getGalleryUrl(photo.publicSlug)"
-            alt=""
-            loading="lazy"
-            class="grid-cell__img"
-            @click="emit('preview', getPhotoIndex(virtualRow.index, colIdx))"
+          <HouseSpot
+            v-if="isSpotTile(cell)"
+            format="C"
+            :seed="SPOT_SEED + cell.n"
+            @unavailable="spotGone = true"
           />
-
-          <button
-            class="grid-cell__select"
-            :class="{ 'grid-cell__select--active': selectedIds.has(photo.id) }"
-            @click.stop="emit('toggle', photo.id)"
-          >
-            <NIcon
-              :component="selectedIds.has(photo.id) ? CheckmarkCircle : AddCircleOutline"
-              :size="22"
-            />
-          </button>
-        </div>
+          <PhotoTile
+            v-else
+            :photo="cell"
+            :selected="selectedIds.has(cell.id)"
+            :busy="busyIds.has(cell.id)"
+            @open="emit('open', $event)"
+            @toggle="emit('toggle', $event)"
+          />
+        </template>
       </div>
+    </div>
+
+    <div v-if="isLoadingMore" class="photo-grid photo-grid-virtual__more">
+      <TtSkeleton
+        v-for="n in LOADING_MORE_PLACEHOLDERS"
+        :key="n"
+        class="photo-grid__placeholder"
+        height="auto"
+        radius="m"
+      />
     </div>
   </div>
 </template>
 
-<style scoped src="./public-photo-grid.css" />
+<style scoped src="../photo-grid.css" />
+
+<style scoped>
+.photo-grid-virtual__rows {
+  position: relative;
+}
+
+.photo-grid-virtual__row {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+}
+
+.photo-grid-virtual__more {
+  padding-block-start: var(--tt-space-2);
+}
+</style>

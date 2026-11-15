@@ -1,46 +1,90 @@
-.payment-box-view {
+/* Card payment. One narrow column; the gateway box keeps its own look inside it. Not named
+ * "payment-box": Payphone's global stylesheet paints that class white. */
+.card-payment {
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  width: 100%;
-  max-width: 560px;
-  margin: 0 auto;
-  padding: 24px 20px 40px;
+  gap: var(--tt-space-4);
+  inline-size: 100%;
+  max-inline-size: calc(var(--tt-space-8) * 7);
+  margin-inline: auto;
+  padding: var(--tt-space-1) var(--tt-space-4) var(--tt-space-6);
+  color: var(--tt-ink);
+  font-family: var(--tt-font-sans);
 }
 
-.payment-box-view__header {
+.card-payment__title-row {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
+  align-items: center;
+  gap: var(--tt-space-2);
+  min-block-size: var(--tt-control-m);
 }
 
-.payment-box-view__heading {
+.card-payment__back {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--tt-control-m);
+  block-size: var(--tt-control-m);
+  margin-inline-start: calc(var(--tt-space-2) * -1);
+  padding: 0;
+  border: 0;
+  border-radius: var(--tt-radius-pill);
+  background: transparent;
+  color: var(--tt-ink);
+  cursor: pointer;
+}
+
+.card-payment__back svg {
+  inline-size: var(--tt-icon-l);
+  block-size: var(--tt-icon-l);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.card-payment__title {
+  margin: 0;
+  font-family: var(--tt-type-display-s-family);
+  font-stretch: var(--tt-display-stretch);
+  font-size: var(--tt-type-display-s-size);
+  line-height: var(--tt-type-display-s-line);
+  font-weight: var(--tt-type-display-s-weight);
+  text-transform: uppercase;
+}
+
+.card-payment__total {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-  margin-top: 4px;
+  gap: var(--tt-space-3);
+  font-size: var(--tt-type-body-size);
+  line-height: var(--tt-type-body-line);
 }
 
-.payment-box-view__title {
-  margin: 0;
-  font-size: 1.25rem;
+.card-payment__muted {
+  color: var(--tt-ink-muted);
 }
 
-.payment-box-view__amount {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  white-space: nowrap;
+.card-payment__amount {
+  font-family: var(--tt-type-number-family);
+  font-stretch: var(--tt-number-stretch);
+  font-size: var(--tt-type-number-size);
+  line-height: var(--tt-type-number-line);
+  font-weight: var(--tt-type-number-weight);
+  font-variant-numeric: tabular-nums;
 }
 
-.payment-box-view__error {
-  margin: 0;
-}
-
-.payment-box-view__loading {
+.card-payment__busy {
   align-self: center;
-  margin-top: 24px;
+  padding-block: var(--tt-space-6);
+}
+
+@media (min-width: 768px) {
+  .card-payment {
+    padding: var(--tt-space-5) var(--tt-space-6) var(--tt-space-7);
+  }
 }

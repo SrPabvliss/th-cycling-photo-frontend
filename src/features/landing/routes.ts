@@ -13,6 +13,6 @@ export const landingRoutes: RouteRecordRaw[] = [
     path: LANDING_PATH,
     name: LANDING_ROUTE_NAMES.HOME,
     component: () => import('./presentation/views/LandingView.vue'),
-    meta: { public: true },
+    meta: { public: true, shell: { tab: 'home', tabBar: true, seasonBar: true } },
   },
 ]
