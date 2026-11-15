@@ -196,6 +196,20 @@ describe('useCartActions', () => {
       expect(message.success).not.toHaveBeenCalled()
     })
 
+    it('says there is no connection, in the warning tone, when the device is offline', async () => {
+      vi.stubGlobal('navigator', { onLine: false })
+      const { state, actions } = await setup()
+      http.post.mockRejectedValue(new AxiosError('Network Error', 'ERR_NETWORK'))
+
+      actions.toggle(photo('p1'))
+      await flushPromises()
+
+      expect(state.isInCart('p1')).toBe(false)
+      expect(toasts('warning')).toEqual(['Sin conexión a internet. La foto no se agregó.'])
+      expect(message.error).not.toHaveBeenCalled()
+      vi.unstubAllGlobals()
+    })
+
     it('says a photo already bought is in Mis fotos, with the way there, and leaves it out', async () => {
       const { state, actions } = await setup()
       http.post.mockRejectedValue(refusal('cart.photo_already_purchased'))

@@ -5,6 +5,7 @@ import { h, reactive } from 'vue'
 import { API_ROUTES } from '@/core/api/api-routes'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import { httpClient } from '@/core/http/axios-client'
+import { problemKind } from '@/core/http/problem-kind'
 import { isSessionExpired, SessionExpiredError } from '@/core/http/session-expired'
 import { ROUTE_NAMES } from '@/core/navigation/route-names'
 import { message } from '@/core/ui/discrete-api'
@@ -235,6 +236,10 @@ export function useCartActions(): ICartActions {
               openMyPhotos,
             ),
           )
+        }
+        // No network: amber, with the cause; the photo was not added and the strip says why.
+        if (problemKind(failure) === 'offline') {
+          return void message.warning('Sin conexión a internet. La foto no se agregó.')
         }
         if (refusal === EVENT_OUT_OF_SALE) {
           return void message.error('Las fotos de este evento no están disponibles para la compra.')
