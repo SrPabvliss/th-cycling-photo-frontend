@@ -29,7 +29,11 @@ const { status, data: preview, error, isFetching, refetch } = usePreviewGallery(
 // Without network a load that did not finish waits for it: the error state says so.
 const { isPending, showSkeleton } = useLoadPhase(status)
 
-const photoIds = computed(() => preview.value?.photos.map((photo) => photo.id) ?? [])
+// The photos on offer: one the buyer already bought is shown, marked, but cannot be chosen.
+const photoIds = computed(
+  () =>
+    preview.value?.photos.filter((photo) => !photo.alreadyPurchased).map((photo) => photo.id) ?? [],
+)
 const selection = usePhotoSelection(token, photoIds)
 
 // One address, two steps: pick the photos, then confirm the order.
@@ -39,6 +43,7 @@ const viewing = ref<string | null>(null)
 // What the order found out about the link while confirming.
 const orderLinkProblem = ref<'already-ordered' | 'expired' | 'not-available' | null>(null)
 const photosChanged = ref(false)
+const photosBought = ref(false)
 
 // What the link itself says: gone, never there, no longer offered, or already ordered.
 const linkProblem = computed(() => {
@@ -71,8 +76,16 @@ async function onPhotosChanged() {
   await refetch()
 }
 
+// Some chosen photos were bought already: read it again, which marks them and drops them.
+async function onPhotosBought() {
+  photosBought.value = true
+  step.value = 'pick'
+  await refetch()
+}
+
 function proceed() {
   photosChanged.value = false
+  photosBought.value = false
   if (selection.selected.value.length === 0) return
   if (!session.isAuthenticated) {
     const back = safeRedirect(`/preview/${encodeURIComponent(token.value)}`)
@@ -171,6 +184,7 @@ function proceed() {
       @back="step = 'pick'"
       @link-problem="orderLinkProblem = $event"
       @photos-changed="onPhotosChanged"
+      @photos-bought="onPhotosBought"
     />
 
     <template v-else>
@@ -179,6 +193,13 @@ function proceed() {
         tone="bad"
         title="Algunas fotos ya no están en esta vista previa"
         text="Revisa tu selección y confirma de nuevo."
+      />
+      <FormAlert
+        v-if="photosBought"
+        data-test="preview-bought"
+        tone="bad"
+        title="Ya compraste alguna de las fotos que elegiste"
+        text="Las quitamos de tu selección. Las encuentras en Mis fotos."
       />
       <PreviewPicker :preview="preview" :selection="selection" @open="viewing = $event" />
       <PreviewBar :count="selection.selected.value.length" @continue="proceed" />

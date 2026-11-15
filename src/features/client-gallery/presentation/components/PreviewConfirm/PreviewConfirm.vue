@@ -52,6 +52,8 @@ const emit = defineEmits<{
   back: []
   linkProblem: [problem: LinkProblem]
   photosChanged: []
+  /** Some chosen photos were already bought: the page reads the preview again. */
+  photosBought: []
 }>()
 
 const router = useRouter()
@@ -148,6 +150,7 @@ watch(problem, (current) => {
   if (!current) return
   if (LINK_PROBLEMS.includes(current)) emit('linkProblem', current as LinkProblem)
   else if (current === 'photos-changed') emit('photosChanged')
+  else if (current === 'already-purchased') emit('photosBought')
   else if (current === 'card-unavailable') {
     cardOff.value = true
     method.value = 'transfer'

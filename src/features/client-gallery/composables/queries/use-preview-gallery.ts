@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
+import { isSessionExpired } from '@/core/http/session-expired'
 import { CLIENT_GALLERY_QUERY_KEYS } from '../../constants/query-keys'
 import { toPreviewData } from '../../mappers/preview-data.mapper'
 import type { IApiPreviewData } from '../../types/responses/preview-data.response'
@@ -11,11 +12,18 @@ export function usePreviewGallery(token: Ref<string>) {
   const query = useQuery({
     queryKey: computed(() => CLIENT_GALLERY_QUERY_KEYS.preview(token.value)),
     queryFn: async () => {
-      const response = await httpClient.get<IApiPreviewData>(
-        API_ROUTES.PREVIEW_PUBLIC.GET_BY_TOKEN(token.value),
-        { silent: true },
-      )
-      return toPreviewData(response.data)
+      const read = () =>
+        httpClient.get<IApiPreviewData>(API_ROUTES.PREVIEW_PUBLIC.GET_BY_TOKEN(token.value), {
+          silent: true,
+        })
+      try {
+        return toPreviewData((await read()).data)
+      } catch (error) {
+        // The link is public. An old session the api turned down and that could not be renewed
+        // is gone now: read it again as a visitor (without "already bought" marks).
+        if (!isSessionExpired(error)) throw error
+        return toPreviewData((await read()).data)
+      }
     },
     enabled: computed(() => !!token.value),
     // Each read counts against the link's limit of 10 per minute: no retries, no reading again

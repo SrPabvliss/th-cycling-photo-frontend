@@ -44,7 +44,7 @@ vi.mock('../components/PreviewConfirm/PreviewConfirm.vue', async () => {
   return {
     default: defineComponent({
       name: 'PreviewConfirm',
-      emits: ['back', 'linkProblem', 'photosChanged'],
+      emits: ['back', 'linkProblem', 'photosChanged', 'photosBought'],
       setup(_, { emit }) {
         return () =>
           h('div', { 'data-test': 'confirm-step' }, [
@@ -57,6 +57,7 @@ vi.mock('../components/PreviewConfirm/PreviewConfirm.vue', async () => {
               onClick: () => emit('linkProblem', 'not-available'),
             }),
             h('button', { 'data-test': 'changed', onClick: () => emit('photosChanged') }),
+            h('button', { 'data-test': 'bought', onClick: () => emit('photosBought') }),
             h('button', { 'data-test': 'back', onClick: () => emit('back') }),
           ])
       },
@@ -252,6 +253,7 @@ describe('ClientGalleryView', () => {
 
     expect(wrapper.findAll('button[aria-pressed="true"]')).toHaveLength(1)
   })
+
   function signIn() {
     useSessionStore().setSession(
       'token',
@@ -278,5 +280,52 @@ describe('ClientGalleryView', () => {
     const { wrapper } = await mountView()
 
     expect(wrapper.find('[data-test="confirm-step"]').exists()).toBe(true)
+  })
+
+  describe('photos already bought', () => {
+    beforeEach(() => {
+      state.data = PREVIEW({
+        photos: [
+          { id: 'a', url: 'u/a' },
+          { id: 'b', url: 'u/b', alreadyPurchased: true },
+          { id: 'c', url: 'u/c' },
+        ],
+      })
+    })
+
+    it('marks them and does not let them be chosen, not even all at once', async () => {
+      const { wrapper } = await mountView()
+
+      const tiles = wrapper.findAll('.preview-tile')
+      expect(tiles[1]!.text()).toContain('Ya la compraste')
+      expect(tiles[1]!.find('button[aria-pressed]').exists()).toBe(false)
+
+      await wrapper
+        .findAll('button')
+        .find((each) => each.text() === 'Elegir todas')!
+        .trigger('click')
+      expect(wrapper.findAll('button[aria-pressed="true"]')).toHaveLength(2)
+      expect(wrapper.text()).toContain('2 fotos elegidas')
+    })
+
+    it('reads the preview again and goes back to picking when the order turns one down', async () => {
+      signIn()
+      const { wrapper } = await mountView()
+      await wrapper.findAll('button[aria-pressed]')[0]!.trigger('click')
+      await wrapper
+        .findAll('button')
+        .find((each) => each.text() === 'Continuar')!
+        .trigger('click')
+      await flushPromises()
+
+      await wrapper.get('[data-test="bought"]').trigger('click')
+      await flushPromises()
+
+      expect(refetch).toHaveBeenCalled()
+      expect(wrapper.find('[data-test="confirm-step"]').exists()).toBe(false)
+      const alert = wrapper.get('[data-test="preview-bought"]')
+      expect(alert.classes()).toContain('form-alert--bad')
+      expect(alert.text()).toContain('Ya compraste alguna de las fotos que elegiste')
+    })
   })
 })

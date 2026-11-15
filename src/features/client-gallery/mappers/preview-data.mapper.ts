@@ -11,6 +11,7 @@ function toPreviewPhoto(api: IApiPreviewPhoto): IPreviewPhoto {
   return {
     id: api.id,
     url: api.url,
+    alreadyPurchased: api.alreadyPurchased === true,
   }
 }
 

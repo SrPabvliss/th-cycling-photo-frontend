@@ -21,6 +21,9 @@ const framePhotos = computed(() =>
   props.photos.map((photo) => ({ id: photo.id, src: photo.url, alt: 'Foto con marca de agua' })),
 )
 const isChosen = computed(() => props.selection.isSelected(props.photoId))
+const isBought = computed(
+  () => props.photos.find((photo) => photo.id === props.photoId)?.alreadyPurchased === true,
+)
 </script>
 
 <template>
@@ -32,8 +35,12 @@ const isChosen = computed(() => props.selection.isSelected(props.photoId))
     @update:photo-id="emit('update:photoId', $event)"
   >
     <template #footer>
-      <span class="preview-viewer__note">La marca de agua desaparece al comprar.</span>
+      <span v-if="isBought" class="preview-viewer__note">
+        Ya la compraste. La encuentras en Mis fotos.
+      </span>
+      <span v-else class="preview-viewer__note">La marca de agua desaparece al comprar.</span>
       <button
+        v-if="!isBought"
         type="button"
         class="preview-viewer__toggle"
         :class="{ 'preview-viewer__toggle--remove': isChosen }"

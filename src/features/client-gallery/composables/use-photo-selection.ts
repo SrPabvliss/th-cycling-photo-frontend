@@ -78,10 +78,10 @@ export function usePhotoSelection(token: Ref<string>, photoIds: Ref<string[]>): 
   return {
     selected,
     isSelected: (id) => chosen.value.has(id),
+    // Only photos on offer can be chosen (one already bought is shown, not offered).
     toggle: (id) => {
-      selected.value = chosen.value.has(id)
-        ? selected.value.filter((each) => each !== id)
-        : [...selected.value, id]
+      if (chosen.value.has(id)) selected.value = selected.value.filter((each) => each !== id)
+      else if (photoIds.value.includes(id)) selected.value = [...selected.value, id]
     },
     selectAll: () => {
       selected.value = [...photoIds.value]

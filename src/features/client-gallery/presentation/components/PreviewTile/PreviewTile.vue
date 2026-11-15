@@ -23,7 +23,9 @@ const emit = defineEmits<{
     >
       <img :src="photo.url" alt="Foto con marca de agua" loading="lazy" decoding="async" />
     </button>
+    <span v-if="photo.alreadyPurchased" class="preview-tile__bought">Ya la compraste</span>
     <button
+      v-else
       type="button"
       class="preview-tile__toggle"
       :aria-pressed="selected ? 'true' : 'false'"
@@ -46,6 +48,22 @@ const emit = defineEmits<{
   aspect-ratio: 3 / 4;
   border-radius: var(--tt-radius-m);
   background: var(--tt-surface-sunken);
+}
+
+/* Bought already: a label along its foot, in place of the box that picks it. */
+.preview-tile__bought {
+  position: absolute;
+  inset-inline: var(--tt-space-1);
+  inset-block-end: var(--tt-space-1);
+  padding: calc(var(--tt-space-1) / 2) var(--tt-space-1);
+  border-radius: var(--tt-radius-s);
+  background: var(--tt-danger-soft);
+  color: var(--tt-danger-ink);
+  font-size: var(--tt-type-label-size);
+  line-height: var(--tt-type-label-line);
+  font-weight: var(--tt-type-label-weight);
+  text-align: center;
+  pointer-events: none;
 }
 
 .preview-tile--selected {
