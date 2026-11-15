@@ -79,11 +79,19 @@ const { data: paymentOptions } = useEventPaymentOptionsQuery(
   computed(() => true),
 )
 
+const { place, isPlacing, problem } = usePlaceOrder()
+
+// The order failed and the cart, read again, no longer has the photos: the order may have been
+// created after all (a lost answer, another tab). The notice stays, with nothing left to pay.
+const photosGone = computed(
+  () => problem.value !== null && cart.status.value === 'success' && !group.value,
+)
+
 // Nothing to choose here without photos, billing data or cards: back to the confirm screen,
 // which says what is missing. Decided only once each answer is in.
 const sendBack = computed(() => {
   if (!billingAccountId.value) return true
-  if (cart.status.value === 'success' && !group.value) return true
+  if (cart.status.value === 'success' && !group.value && !photosGone.value) return true
   if (isBillingLoaded.value) {
     const known = billingAccounts.value.some((account) => account.id === billingAccountId.value)
     if (!known || (needsInvoiceConsent.value && !consentTicked.value)) return true
@@ -101,7 +109,6 @@ watch(
 )
 
 // --- The choice: a radio group, nothing chosen until the buyer picks ---
-const { place, isPlacing, problem } = usePlaceOrder()
 const choice = ref<PaymentMethod | null>(null)
 const cardOff = ref(false)
 const optionRefs = ref<HTMLButtonElement[]>([])
@@ -174,14 +181,19 @@ async function proceed() {
       <h1 class="payment-method__title">Método de pago</h1>
     </div>
 
-    <div class="payment-method__total">
+    <div v-if="!photosGone" class="payment-method__total">
       <span class="payment-method__muted">
         Total · {{ count }} {{ count === 1 ? 'foto' : 'fotos' }}
       </span>
       <span v-if="total" class="payment-method__amount">{{ total }}</span>
     </div>
 
-    <div class="payment-method__options" role="radiogroup" aria-label="Método de pago">
+    <div
+      v-if="!photosGone"
+      class="payment-method__options"
+      role="radiogroup"
+      aria-label="Método de pago"
+    >
       <button
         v-for="option in OPTIONS"
         :key="option.value"
@@ -205,7 +217,7 @@ async function proceed() {
 
     <CheckoutProblemAlert v-if="problem" :problem="problem" :gallery-path="galleryPath" />
 
-    <div class="payment-method__actions">
+    <div v-if="!photosGone" class="payment-method__actions">
       <NButton
         type="primary"
         size="large"

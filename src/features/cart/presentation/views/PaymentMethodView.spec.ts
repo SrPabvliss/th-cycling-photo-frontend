@@ -239,6 +239,24 @@ describe('PaymentMethodView', () => {
     expect(router.currentRoute.value.path).toBe('/checkout/e1')
   })
 
+  it('stays with the notice when the answer was lost and the cart came back without the photos', async () => {
+    const { wrapper, router } = await mountView()
+    await transfer(wrapper).trigger('click')
+
+    // The order was created anyway: its photos left the cart that is read again.
+    problem.value = 'unconfirmed'
+    state.photos = 0
+    await flushPromises()
+
+    expect(router.currentRoute.value.path).toBe('/checkout/e1/method')
+    expect(wrapper.text()).toContain('No sabemos si tu pedido se creó')
+    expect(wrapper.find('a[href="/account/orders"]').exists()).toBe(true)
+    // Nothing left to pay here: no zero total, no method, no second try.
+    expect(wrapper.find('[role="radiogroup"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="method-continue"]').exists()).toBe(false)
+    expect(wrapper.text()).not.toContain('0 fotos')
+  })
+
   it('sends back to the checkout without a draft from the confirm screen', async () => {
     useCheckoutDraftStore().forget('e1')
     const { router } = await mountView()
