@@ -73,6 +73,9 @@ const formRef = ref<HTMLFormElement | null>(null)
 const submitted = ref(false)
 const showConsentDetails = ref(false)
 
+// No field validates on leaving it: the validators run on sending, and leaving would only clear
+// what the send found. The error going away would shrink the sheet, which sits on the bottom edge,
+// and drop the type buttons under the finger tapping one of them.
 const inputValue = (event: Event) => (event.target as HTMLInputElement).value
 
 async function save() {
@@ -129,7 +132,6 @@ async function save() {
               :aria-invalid="invalid"
               :value="field.state.value"
               @input="field.handleChange(inputValue($event))"
-              @blur="field.handleBlur"
             />
           </template>
         </FormField>
@@ -152,7 +154,6 @@ async function save() {
               :aria-invalid="invalid"
               :value="field.state.value"
               @input="field.handleChange(inputValue($event))"
-              @blur="field.handleBlur"
             />
           </template>
         </FormField>
@@ -177,7 +178,6 @@ async function save() {
               :aria-invalid="invalid"
               :value="field.state.value"
               @input="field.handleChange(inputValue($event))"
-              @blur="field.handleBlur"
             />
           </template>
         </FormField>
@@ -200,7 +200,6 @@ async function save() {
               :aria-invalid="invalid"
               :value="field.state.value"
               @input="field.handleChange(inputValue($event))"
-              @blur="field.handleBlur"
             />
           </template>
         </FormField>

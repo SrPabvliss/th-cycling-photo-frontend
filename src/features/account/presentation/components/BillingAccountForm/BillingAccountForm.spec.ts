@@ -144,6 +144,23 @@ describe('BillingAccountForm', () => {
     expect(errorOf(wrapper, 'billing-email')).toBeNull()
   })
 
+  // The sheet sits on the bottom edge: an error that went away on leaving the field would shrink
+  // it, and everything above would drop under the finger that is tapping "RUC".
+  it('keeps the error of a send until the field changes, not until the person leaves it', async () => {
+    const wrapper = mountForm(false)
+    await fillIdNumber(wrapper, '12345')
+    await submit(wrapper)
+    expect(errorOf(wrapper, 'billing-id-number')).not.toBeNull()
+
+    await wrapper.get('[data-test="billing-id-number"]').trigger('blur')
+    await flushPromises()
+    expect(errorOf(wrapper, 'billing-id-number')).not.toBeNull()
+
+    const radios = wrapper.findAll('[data-test="billing-id-type"] input')
+    await radios[1]!.setValue(true)
+    expect(input(wrapper, 'billing-id-number').placeholder).toBe('13 dígitos')
+  })
+
   it('keeps a malformed number from the server and takes the focus to it', async () => {
     const wrapper = mountForm(false)
     await fillIdNumber(wrapper, '171003406')
