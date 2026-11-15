@@ -107,6 +107,11 @@ const {
 } = usePublicEventNoBibPhotosInfinite(slug, categoryId, plate)
 const hasMoreNoPlate = computed(() => hasNextNoPlatePage.value && !isMoreNoPlateError.value)
 
+// Seeds of the ad tiles of a plate search and of the photos with no plate: apart from the full
+// gallery's (59) and from each other, so the carousels do not move together.
+const PLATE_SPOT_SEED = 62
+const NO_PLATE_SPOT_SEED = 81
+
 const photos = computed(() => photoPages.value?.pages.flatMap((page) => page.items) ?? [])
 const photosTotal = computed(() => photoPages.value?.pages[0]?.pagination.total ?? 0)
 const noPlatePhotos = computed(() =>
@@ -324,9 +329,13 @@ const moreNoPlateProblem = computed(() =>
                 </button>
               </div>
 
-              <!-- A plate search is a short list: a plain grid, with the plate on every tile. -->
+              <!-- A plate search is a short list: a plain grid, with the plate on every tile. Its ad
+                   tiles may close it: a rider who only searches still meets one. -->
               <PhotoGridSection
                 v-if="shownPlate"
+                with-spot
+                spot-at-end
+                :spot-seed="PLATE_SPOT_SEED"
                 :photos="photos"
                 :selected-ids="selectedIds"
                 :busy-ids="busyIds"
@@ -369,6 +378,8 @@ const moreNoPlateProblem = computed(() =>
                 <p class="gallery__no-plate-text">Mostramos fotos donde no detectamos placa.</p>
               </div>
               <PhotoGridSection
+                with-spot
+                :spot-seed="NO_PLATE_SPOT_SEED"
                 :photos="noPlatePhotos"
                 :selected-ids="selectedIds"
                 :busy-ids="busyIds"

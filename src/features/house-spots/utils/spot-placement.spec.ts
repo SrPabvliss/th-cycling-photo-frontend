@@ -103,3 +103,21 @@ describe('withSpotTiles', () => {
     expect(after.slice(0, before.length)).toEqual(before)
   })
 })
+
+describe('withSpotTiles at the end', () => {
+  it('puts a tile after the last item when a slot is the length of the list', () => {
+    expect(withSpotTiles(['a', 'b', 'c', 'd'], [4])).toEqual([
+      'a',
+      'b',
+      'c',
+      'd',
+      { kind: 'spot', n: 0 },
+    ])
+    expect(withSpotTiles(['a', 'b'], [1, 2])).toEqual([
+      'a',
+      { kind: 'spot', n: 0 },
+      'b',
+      { kind: 'spot', n: 1 },
+    ])
+  })
+})

@@ -5,6 +5,9 @@ import { createPinia, setActivePinia } from 'pinia'
 import { computed, reactive } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
+vi.mock('@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue', async () => ({
+  default: (await import('@/features/house-spots/testing/spot-stubs')).HouseSpotStub,
+}))
 vi.mock(
   '@/features/house-spots/presentation/components/EventPresenterStrip/EventPresenterStrip.vue',
   async () => ({
@@ -542,12 +545,47 @@ describe('PublicEventGalleryView', () => {
       expect(wrapper.get('.plain-grid').attributes('data-with-spot')).toBe('true')
     })
 
-    it('has no ad tile among the results of a plate search', async () => {
-      Object.assign(matched, { photos: many(), total: 20 })
-      const { wrapper } = await mountAt('/gallery/mama-rumi?placa=127')
+    const adSeeds = (wrapper: Wrapper, section: string) =>
+      wrapper
+        .get(section)
+        .findAll('[data-test="house-spot"]')
+        .map((ad) => ad.attributes('data-seed'))
+    const lastCellIsAd = (wrapper: Wrapper, section: string) =>
+      wrapper.get(`${section} .photo-grid`).element.lastElementChild?.getAttribute('data-test') ===
+      'house-spot'
 
-      expect(wrapper.find('.plain-grid').exists()).toBe(false)
+    it('closes short plate results with one ad tile, after the last photo', async () => {
+      Object.assign(matched, { photos: many().slice(0, 4), total: 4 })
+      const { wrapper } = await mountAt('/gallery/mama-rumi?placa=45')
+
+      expect(adSeeds(wrapper, '.photo-grid-section')).toEqual(['62'])
+      expect(lastCellIsAd(wrapper, '.photo-grid-section')).toBe(true)
+    })
+
+    it('places the plate results ads at the gallery rhythm from 8 photos on', async () => {
+      Object.assign(matched, { photos: many(), total: 20 })
+      const { wrapper } = await mountAt('/gallery/mama-rumi?placa=45')
+
+      const grid = wrapper.get('.photo-grid-section .photo-grid').element
+      const order = [...grid.children].map((cell) => cell.getAttribute('data-test'))
+      expect(order.indexOf('house-spot')).toBe(7)
+      expect(order.filter((cell) => cell === 'house-spot')).toHaveLength(1)
+    })
+
+    it('shows no ad tile when a plate has no photos', async () => {
+      Object.assign(matched, { photos: [], total: 0 })
+      const { wrapper } = await mountAt('/gallery/mama-rumi?placa=45')
+
       expect(wrapper.find('[data-test="house-spot"]').exists()).toBe(false)
+    })
+
+    it('puts ads among the photos with no plate too, with their own seed, never closing them', async () => {
+      Object.assign(matched, { photos: many().slice(0, 2), total: 2 })
+      noBib.photos = Array.from({ length: 30 }, (_, index) => photo(`n${index + 1}`))
+      const { wrapper } = await mountAt('/gallery/mama-rumi?placa=45')
+
+      expect(adSeeds(wrapper, '.gallery__no-plate')).toEqual(['81', '82'])
+      expect(lastCellIsAd(wrapper, '.gallery__no-plate')).toBe(false)
     })
 
     it('moves the viewer from the 12th photo to the real 13th, past the ad tile', async () => {

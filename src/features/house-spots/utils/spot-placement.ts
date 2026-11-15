@@ -51,7 +51,10 @@ export function spotSlotsInside(length: number, plan: ISpotPlan): number[] {
   return spotSlots(length, plan).filter((before) => before < length)
 }
 
-/** A copy of `items` with one ad tile before each slot of `spotSlots`, numbered from 0. */
+/**
+ * A copy of `items` with one ad tile before each slot of `spotSlots`, numbered from 0. A slot equal
+ * to the length closes the list with a tile.
+ */
 export function withSpotTiles<T>(items: T[], slots: number[]): (T | ISpotTile)[] {
   const result: (T | ISpotTile)[] = []
   let next = 0
@@ -62,5 +65,6 @@ export function withSpotTiles<T>(items: T[], slots: number[]): (T | ISpotTile)[]
     }
     result.push(item)
   })
+  if (items.length > 0 && slots[next] === items.length) result.push({ kind: 'spot', n: next })
   return result
 }
