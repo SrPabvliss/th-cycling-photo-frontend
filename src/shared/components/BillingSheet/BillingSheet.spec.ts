@@ -39,6 +39,30 @@ describe('BillingSheet', () => {
     expect(wrapper.emitted('close')).toHaveLength(1)
   })
 
+  it('names its dialog after its title, on a phone and from 768 px', async () => {
+    const nameOf = (dialog: Element | null) =>
+      dialog?.getAttribute('aria-label') ??
+      document.getElementById(dialog?.getAttribute('aria-labelledby') ?? '')?.textContent?.trim()
+
+    const phone = mount(BillingSheet, {
+      props: { title: 'Datos de facturación' },
+      attachTo: document.body,
+    })
+    expect(nameOf(document.querySelector('[role="dialog"]'))).toBe('Datos de facturación')
+    phone.unmount()
+
+    isMobile.value = false
+    const desktop = mount(BillingSheet, {
+      props: { title: 'Datos de facturación' },
+      attachTo: document.body,
+    })
+    await new Promise((resolve) => setTimeout(resolve))
+    const dialogs = document.querySelectorAll('[role="dialog"]')
+    expect(dialogs).toHaveLength(1)
+    expect(nameOf(dialogs[0]!)).toBe('Datos de facturación')
+    desktop.unmount()
+  })
+
   it('locks the page scroll while the mobile sheet is open and releases it on close', async () => {
     const wrapper = mount(BillingSheet, { props: { title: '¿A nombre de quién?' } })
     await wrapper.vm.$nextTick()

@@ -76,6 +76,7 @@ function onGrabPointerUp() {
     :show="true"
     preset="card"
     :title="title"
+    :aria-label="title"
     :style="{ width: '480px', maxWidth: 'calc(100vw - 32px)' }"
     :closable="false"
     @update:show="(visible: boolean) => !visible && emit('close')"
