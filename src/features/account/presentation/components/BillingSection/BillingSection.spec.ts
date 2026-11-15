@@ -237,6 +237,38 @@ describe('BillingSection', () => {
     expect(wrapper.text()).toContain('Todavía no tienes datos de facturación')
   })
 
+  // The card that held the focus is gone: the focus goes on to the list, not to the page body.
+  it('puts the focus on the first remaining card after deleting', async () => {
+    remove.mockImplementation(async () => {
+      accounts.value = [account('b1', true)]
+    })
+    const wrapper = await mountSection()
+
+    await buttonIn(cards(wrapper)[1]!, 'Eliminar')!.trigger('click')
+    await flushPromises()
+    await buttonIn(wrapper.get('[role="alertdialog"]'), 'Eliminar')!.trigger('click')
+    await flushPromises()
+
+    expect(document.activeElement).toBe(cards(wrapper)[0]!.find('.billing-section__action').element)
+  })
+
+  it('puts the focus on "Agregar datos de facturación" after deleting the only account', async () => {
+    accounts.value = [account('b1', true)]
+    remove.mockImplementation(async () => {
+      accounts.value = []
+    })
+    const wrapper = await mountSection()
+
+    await buttonIn(cards(wrapper)[0]!, 'Eliminar')!.trigger('click')
+    await flushPromises()
+    await buttonIn(wrapper.get('[role="alertdialog"]'), 'Eliminar')!.trigger('click')
+    await flushPromises()
+
+    expect((document.activeElement as HTMLElement).textContent?.trim()).toBe(
+      'Agregar datos de facturación',
+    )
+  })
+
   it('takes off an account that no longer exists, saying so', async () => {
     remove.mockRejectedValue(apiError(404))
     const wrapper = await mountSection()

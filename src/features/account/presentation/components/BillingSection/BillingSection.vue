@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { NButton, useMessage } from 'naive-ui'
 import { isAxiosError } from 'axios'
 
@@ -61,6 +61,7 @@ const deleting = ref<IBillingAccount | null>(null)
 // What a failed "make default" has to say, above the list. A failed delete says it in its dialog.
 const listProblem = useFormProblem()
 const deleteProblem = useFormProblem()
+const root = ref<HTMLElement | null>(null)
 
 function open(kind: 'add' | 'edit', account: IBillingAccount | null = null) {
   target.value = account
@@ -130,6 +131,12 @@ async function confirmDelete() {
   }
   deleting.value = null
   message.success('Datos de facturación eliminados.')
+  // The card that held the focus is gone: on to the first remaining one, or to adding new data.
+  await nextTick()
+  const next =
+    root.value?.querySelector<HTMLElement>('.billing-section__action') ??
+    root.value?.querySelector<HTMLElement>('button')
+  next?.focus()
 }
 
 async function makeDefault(account: IBillingAccount) {
@@ -161,7 +168,7 @@ const editInitial = computed<ICreateBillingAccountRequest | undefined>(() =>
 </script>
 
 <template>
-  <div class="billing-section">
+  <div ref="root" class="billing-section">
     <div v-if="isPending" class="billing-section__list">
       <TtSkeleton
         v-for="row in SKELETON_ROWS"
