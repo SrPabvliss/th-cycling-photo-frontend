@@ -1,6 +1,9 @@
 import { computed, ref, watch } from 'vue'
 
 import { useSessionStore } from '@/core/auth/stores/session.store'
+import { problemKind } from '@/core/http/problem-kind'
+import { useOnline } from '@/core/network/use-online'
+import { loadProblemCopy } from '@/shared/components/loading'
 import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
 import { useSetDefaultBillingAccount } from './mutations/use-set-default-billing-account'
 import { useRecordInvoiceConsent } from './mutations/use-record-invoice-consent'
@@ -94,12 +97,31 @@ export function useBillingSelection(enabled: () => boolean) {
     return billingQuery.refetch()
   }
 
+  // Without network the read waits (pending, paused) instead of failing: not "no data" either.
+  const online = useOnline()
+  const isWaitingForNetwork = computed(
+    () => !online.value && billingQuery.status.value === 'pending',
+  )
+
   return {
     /** The billing data was read: from here on, no account means the buyer has none. */
     isBillingLoaded: computed(() => billingQuery.isSuccess.value),
     /** It could not be read and nothing was before: say so instead of offering to add some. */
     billingProblem: computed(
-      () => billingQuery.status.value === 'error' && billingQuery.data.value === undefined,
+      () =>
+        (billingQuery.status.value === 'error' || isWaitingForNetwork.value) &&
+        billingQuery.data.value === undefined,
+    ),
+    /** The words of that problem, by its cause: no connection, slowness, or a failure. */
+    billingProblemCopy: computed(() =>
+      loadProblemCopy(
+        isWaitingForNetwork.value ? 'offline' : problemKind(billingQuery.error.value),
+        'tus datos de factura',
+        {
+          title: 'No pudimos mostrar tus datos de factura',
+          text: 'Los necesitamos para crear tu pedido.',
+        },
+      ),
     ),
     isBillingRetrying: computed(() => billingQuery.isFetching.value),
     retryBilling,

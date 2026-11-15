@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { AxiosError } from 'axios'
 import { createPinia, setActivePinia } from 'pinia'
-import { computed, reactive } from 'vue'
+import { computed, reactive, ref } from 'vue'
 
 import { useBillingSelection } from './use-billing-selection'
 
@@ -9,8 +9,11 @@ const query = reactive({
   status: 'pending' as 'pending' | 'error' | 'success',
   data: undefined as { accounts: []; invoiceConsentGiven: boolean } | undefined,
   isFetching: false,
+  error: null as unknown,
 })
 const refetch = vi.fn()
+const online = ref(true)
+vi.mock('@/core/network/use-online', () => ({ useOnline: () => online }))
 
 vi.mock('./queries/use-my-billing-accounts', () => ({
   useMyBillingAccountsQuery: () => ({
@@ -18,6 +21,7 @@ vi.mock('./queries/use-my-billing-accounts', () => ({
     data: computed(() => query.data),
     isSuccess: computed(() => query.status === 'success'),
     isFetching: computed(() => query.isFetching),
+    error: computed(() => query.error),
     refetch,
   }),
 }))
@@ -45,6 +49,44 @@ describe('useBillingSelection', () => {
 
     Object.assign(query, { status: 'success' })
     expect(selection.billingProblem.value).toBe(false)
+  })
+
+  // Without network the read waits (pending, paused): that is not "no billing data" either.
+  it('has a problem, worded as no connection, while the read waits for the network', () => {
+    setActivePinia(createPinia())
+    online.value = false
+    const selection = useBillingSelection(() => true)
+
+    Object.assign(query, { status: 'pending', data: undefined, error: null })
+    expect(selection.billingProblem.value).toBe(true)
+    expect(selection.billingProblemCopy.value.title).toBe('Sin conexión a internet')
+    online.value = true
+  })
+
+  it.each([
+    [
+      new AxiosError('down', 'ERR_BAD_RESPONSE', undefined, undefined, {
+        status: 500,
+        data: {},
+        headers: {},
+        config: {},
+      } as never),
+      'No pudimos mostrar tus datos de factura',
+      'Los necesitamos para crear tu pedido.',
+    ],
+    [
+      new AxiosError('timeout', 'ECONNABORTED'),
+      'Está tardando más de lo normal',
+      'Puedes esperar un poco o volver a intentarlo.',
+    ],
+  ])('words the problem by its cause', (error, title, text) => {
+    setActivePinia(createPinia())
+    vi.stubGlobal('navigator', { onLine: true })
+    const selection = useBillingSelection(() => true)
+
+    Object.assign(query, { status: 'error', data: undefined, error })
+    expect(selection.billingProblemCopy.value).toEqual({ title, text })
+    vi.unstubAllGlobals()
   })
 
   it('asks for the billing data again, and says so while it does', () => {

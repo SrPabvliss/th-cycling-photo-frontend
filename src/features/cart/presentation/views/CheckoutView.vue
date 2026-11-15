@@ -68,6 +68,7 @@ const totalLabel = computed(() => {
 const {
   isBillingLoaded,
   billingProblem,
+  billingProblemCopy,
   isBillingRetrying,
   retryBilling,
   billingAccounts,
@@ -234,8 +235,8 @@ async function confirm() {
             v-else-if="billingProblem"
             data-test="billing-problem"
             tone="warn"
-            title="No pudimos mostrar tus datos de factura"
-            text="Los necesitamos para crear tu pedido."
+            :title="billingProblemCopy.title"
+            :text="billingProblemCopy.text"
             :retrying="isBillingRetrying"
             @retry="retryBilling()"
           />

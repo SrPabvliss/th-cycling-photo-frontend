@@ -90,6 +90,10 @@ vi.mock('@/features/account/composables/use-billing-selection', () => ({
   useBillingSelection: () => ({
     isBillingLoaded: computed(() => !state.billingFailed),
     billingProblem: computed(() => state.billingFailed),
+    billingProblemCopy: computed(() => ({
+      title: 'No pudimos mostrar tus datos de factura',
+      text: 'Los necesitamos para crear tu pedido.',
+    })),
     isBillingRetrying: ref(false),
     retryBilling,
     billingAccounts: computed(() => (state.billingFailed ? [] : state.accounts)),
