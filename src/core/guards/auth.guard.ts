@@ -6,6 +6,7 @@ import { httpClient } from '@/core/http/axios-client'
 import { toCurrentUser } from '@/core/auth/current-user.mapper'
 import { STANDALONE_PATHS } from '@/core/views/standalone-routes'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
+import { safeRedirect } from '@/core/navigation/safe-redirect'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import type { IApiCurrentUser } from '@/core/auth/current-user'
 import { holdsPermission } from '@/core/auth/permissions'
@@ -31,6 +32,10 @@ async function hydrateSession(authStore: ReturnType<typeof useSessionStore>): Pr
   }
 }
 
+function isSignInPage(path: string): boolean {
+  return path === ROUTE_PATHS.LOGIN || path === ROUTE_PATHS.REGISTER
+}
+
 export function registerAuthGuard(router: Router): void {
   router.beforeEach(async (to) => {
     const authStore = useSessionStore()
@@ -40,10 +45,10 @@ export function registerAuthGuard(router: Router): void {
 
     // Public routes — no auth required
     if (to.meta.public) {
-      if (
-        authStore.isAuthenticated &&
-        (to.path === ROUTE_PATHS.LOGIN || to.path === ROUTE_PATHS.REGISTER)
-      ) {
+      if (authStore.isAuthenticated && isSignInPage(to.path)) {
+        // Already signed in: on to where the link meant to go, if it is on this site.
+        const target = safeRedirect(to.query.redirect)
+        if (target && !isSignInPage(target.split(/[?#]/)[0]!)) return target
         return getHomePath(authStore.currentUser?.permissions ?? [])
       }
       return true
