@@ -43,6 +43,8 @@ export const ROUTE_NAMES = {
   LEGAL_PRIVACY: 'legal-privacy',
   LEGAL_TERMS: 'legal-terms',
   LEGAL_TENANT_TERMS: 'legal-tenant-terms',
+  BRANDS_PAGE: 'brands-page',
+  ORGANIZERS_PAGE: 'organizers-page',
 
   // Orders
   ORDERS_LIST: 'orders-list',

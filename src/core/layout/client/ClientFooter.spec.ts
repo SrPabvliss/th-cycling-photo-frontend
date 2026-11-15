@@ -16,6 +16,8 @@ async function mountFooter() {
       { path: '/account/orders', name: ROUTE_NAMES.ACCOUNT_ORDERS, component: Stub },
       { path: '/terms', component: Stub },
       { path: '/privacy', component: Stub },
+      { path: '/anunciate', component: Stub },
+      { path: '/organizadores', component: Stub },
     ],
   })
   await router.push('/')
@@ -45,6 +47,18 @@ describe('ClientFooter', () => {
         ['Mis fotos', '/account/orders'],
         ['Términos', '/terms'],
         ['Privacidad', '/privacy'],
+      ]),
+    )
+  })
+
+  it('links to the brands and organizers pages, which no blocked ad can take away', async () => {
+    const wrapper = await mountFooter()
+    const links = wrapper.findAll('a').map((link) => [link.text(), link.attributes('href')])
+
+    expect(links).toEqual(
+      expect.arrayContaining([
+        ['Anuncia tu marca', '/anunciate'],
+        ['Publica tu evento', '/organizadores'],
       ]),
     )
   })

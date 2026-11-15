@@ -1,0 +1,14 @@
+/* Colors of the two commercial pages (brands, organizers) that awana does not have: the WhatsApp
+ * button and the highlighted piece of the phone mockups. Client area only. */
+[data-tt-area='client'] {
+  --tt-wa: #0f7d41;
+  --tt-on-wa: #ffffff;
+  --tt-spot: #f2b632;
+  --tt-on-spot: #2b1d00;
+  --tt-navy-line: color-mix(in srgb, var(--tt-on-navy) 22%, transparent);
+}
+
+[data-tt-area='client'][data-tt-scheme='dark'] {
+  --tt-wa: #17a058;
+  --tt-on-wa: #04140b;
+}

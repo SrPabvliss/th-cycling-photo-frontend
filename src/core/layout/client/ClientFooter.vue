@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ROUTE_NAMES } from '@/core/navigation/route-names'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
-
-const CONTACT_EMAIL = 'info@titantv.com.ec'
+import { CONTACT_EMAIL } from '@/shared/constants/commercial'
 
 const year = new Date().getFullYear()
 </script>
@@ -16,6 +15,8 @@ const year = new Date().getFullYear()
         <RouterLink :to="{ name: ROUTE_NAMES.ACCOUNT_ORDERS }">Mis fotos</RouterLink>
         <RouterLink :to="ROUTE_PATHS.TERMS">Términos</RouterLink>
         <RouterLink :to="ROUTE_PATHS.PRIVACY">Privacidad</RouterLink>
+        <RouterLink :to="ROUTE_PATHS.BRANDS_PAGE">Anuncia tu marca</RouterLink>
+        <RouterLink :to="ROUTE_PATHS.ORGANIZERS_PAGE">Publica tu evento</RouterLink>
         <a :href="`mailto:${CONTACT_EMAIL}`">Contacto</a>
       </nav>
     </div>
