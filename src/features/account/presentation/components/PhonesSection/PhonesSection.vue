@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isAxiosError } from 'axios'
 import { computed, nextTick, ref, watch } from 'vue'
 import { NButton, useMessage } from 'naive-ui'
 import IntlTelInput from 'intl-tel-input/vueWithUtils'
@@ -13,7 +14,7 @@ import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import FormField from '@/shared/components/form/FormField/FormField.vue'
 import { ErrorState, TtSkeleton, useLoadPhase } from '@/shared/components/loading'
 import { PHONE_INPUT_OPTIONS } from '@/shared/constants/phone-input'
-import { generalProblem } from '@/shared/utils/form-problem'
+import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
 import { useAddPhone } from '../../../composables/mutations/use-add-phone'
 import { useDeletePhone } from '../../../composables/mutations/use-delete-phone'
 import { useSetPrimaryPhone } from '../../../composables/mutations/use-set-primary-phone'
@@ -130,11 +131,25 @@ async function save() {
       if (makePrimary.value && added?.id) await setPrimary.mutateAsync(added.id)
     }
   } catch (error) {
-    problem.value = generalProblem(error)
+    problem.value = duplicateProblem(error) ?? generalProblem(error)
     return
   }
   close()
   message.success('Teléfono guardado.')
+}
+
+// A number already on the list: a "no" with its reason, in the server's words (already in the
+// buyer's language). Trying again would never work.
+const DUPLICATE_NUMBER = 'user_phone.duplicate_number'
+function duplicateProblem(error: unknown): IFormProblem | null {
+  if (!isAxiosError(error)) return null
+  const body = error.response?.data?.error as { messageKey?: string; message?: string } | undefined
+  if (body?.messageKey !== DUPLICATE_NUMBER) return null
+  return {
+    title: body.message || 'Ya registraste este número de teléfono',
+    text: 'Revisa el número o cambia el que ya está en la lista.',
+    tone: 'bad',
+  }
 }
 
 async function remove() {

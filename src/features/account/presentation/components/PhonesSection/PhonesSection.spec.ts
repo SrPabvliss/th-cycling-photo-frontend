@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils'
+import { AxiosError, type AxiosResponse } from 'axios'
 import { computed, defineComponent, h, ref } from 'vue'
 
 import type { IUserPhone } from '../../../types/responses/user-phone.response'
@@ -148,6 +149,36 @@ describe('PhonesSection', () => {
       isWhatsapp: true,
     })
     expect(success).toHaveBeenCalledWith('Teléfono guardado.')
+  })
+
+  // H-PE-03: a number already on the list is a "no" with its reason, never "try again".
+  it("says the number is already registered, in the server's words", async () => {
+    add.mockRejectedValue(
+      new AxiosError('failed', 'ERR_BAD_REQUEST', undefined, undefined, {
+        status: 422,
+        data: {
+          error: {
+            code: 'BUSINESS_RULE',
+            messageKey: 'user_phone.duplicate_number',
+            message: 'Ya registraste este número de teléfono',
+          },
+        },
+        headers: {},
+        config: {},
+      } as AxiosResponse),
+    )
+    const wrapper = await mountSection()
+
+    await buttonNamed(wrapper, 'Agregar teléfono')!.trigger('click')
+    await flushPromises()
+    await wrapper.get('#telefono-numero').setValue('997001313')
+    await wrapper.get('#telefono-numero').trigger('input')
+    await buttonNamed(wrapper, 'Guardar teléfono')!.trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Ya registraste este número de teléfono')
+    expect(wrapper.text()).not.toContain('Intenta de nuevo en un momento.')
+    expect(success).not.toHaveBeenCalled()
   })
 
   it('names an empty number', async () => {
