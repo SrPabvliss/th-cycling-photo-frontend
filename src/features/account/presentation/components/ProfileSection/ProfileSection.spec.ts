@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
 
@@ -37,5 +39,17 @@ describe('ProfileSection', () => {
     const open = mountSection(true)
     await open.get('button').trigger('click')
     expect(open.emitted('update:open')).toEqual([[false]])
+  })
+
+  // A closed body is hidden; its own display rule must not paint it with its padding.
+  it('takes no room while closed', () => {
+    const css = readFileSync(
+      resolve(
+        process.cwd(),
+        'src/features/account/presentation/components/ProfileSection/ProfileSection.vue',
+      ),
+      'utf8',
+    )
+    expect(css).toMatch(/\.profile-section__body\[hidden\] \{[^}]*display: none/)
   })
 })

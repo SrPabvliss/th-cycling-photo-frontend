@@ -136,6 +136,11 @@ const bodyId = `perfil-${props.id}`
   padding: var(--tt-space-1) var(--tt-space-4) var(--tt-space-5);
 }
 
+/* Closed: its display above would beat the hidden attribute and paint the padding as a gap. */
+.profile-section__body[hidden] {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .profile-section__chevron {
     transition: none;
