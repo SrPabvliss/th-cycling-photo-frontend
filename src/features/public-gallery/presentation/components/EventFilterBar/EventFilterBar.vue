@@ -33,8 +33,13 @@ const NAMES: Record<MenuKey, string> = {
 
 const eventTypes = computed(() => props.options?.eventTypes ?? [])
 const allProvinces = computed(() => props.options?.provinces ?? [])
-// Only the provinces with races are offered; the others answer a search that finds them.
-const provinces = computed(() => allProvinces.value.filter((province) => province.hasEvents))
+// Only the provinces with races are offered; the others answer a search that finds them. One
+// chosen without races (an old link) stays in the list, dimmed, so it can be taken out there.
+const provinces = computed(() =>
+  allProvinces.value.filter(
+    (province) => province.hasEvents || provinceIds.value.includes(province.id),
+  ),
+)
 
 const row = ref<HTMLElement | null>(null)
 const buttons = ref<Partial<Record<MenuKey, HTMLElement>>>({})

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { NButton } from 'naive-ui'
 
 import { useOnline } from '@/core/network/use-online'
@@ -40,23 +40,32 @@ const {
 
 // The counts follow the filters. Without them the menus keep what they had and the list still
 // works: not an error of the screen.
-const { data: filterOptions } = usePublicEventFiltersQuery(filters)
+const { data: filterOptions, isError: isOptionsError } = usePublicEventFiltersQuery(filters)
 
-// An old or edited link may name a discipline or province the api does not offer: it goes.
+// An old or edited link may name a discipline or province the api does not offer: it goes. A
+// province that exists stays, with or without events (the api lists every province of the
+// countries with events). Until the ids of a link are checked the list is not painted: no "0
+// eventos" for a moment before an unknown one is dropped. Without the options, the link goes on
+// as it is.
+const isCheckingLink = ref(eventTypeIds.value.length > 0 || provinceIds.value.length > 0)
 watch(
-  () => filterOptions.value,
-  (options) => {
-    if (!options) return
-    keepOnly(
-      options.eventTypes.map((option) => option.id),
-      options.provinces.filter((option) => option.hasEvents).map((option) => option.id),
-    )
+  [() => filterOptions.value, isOptionsError],
+  ([options, failed]) => {
+    if (options) {
+      keepOnly(
+        options.eventTypes.map((option) => option.id),
+        options.provinces.map((option) => option.id),
+      )
+    }
+    if (options || failed) isCheckingLink.value = false
   },
   { immediate: true },
 )
 
 // How many events the filters bring, once the list knows; while new filters load, the last one.
-const knownTotal = computed(() => (status.value === 'success' ? total.value : null))
+const knownTotal = computed(() =>
+  status.value === 'success' && !isCheckingLink.value ? total.value : null,
+)
 
 // New filters are loading over the previous list: it stays on screen, dimmed. Loading one more
 // page of the same list is not that.
@@ -68,7 +77,10 @@ const isEmpty = computed(() => events.value.length === 0 && !isPlaceholderData.v
 const canLoadMore = computed(() => hasNextPage.value && !isFetchNextPageError.value)
 // vue-query marks the whole query as failed when only the next page did: what is on screen stays,
 // and the failure is said under it.
-const listStatus = computed(() => (isFetchNextPageError.value ? 'success' : status.value))
+const listStatus = computed(() => {
+  if (isCheckingLink.value) return 'pending'
+  return isFetchNextPageError.value ? 'success' : status.value
+})
 const sentinel = useInfiniteScrollTrigger(() => fetchNextPage(), {
   isBusy: isFetching,
   canLoadMore,

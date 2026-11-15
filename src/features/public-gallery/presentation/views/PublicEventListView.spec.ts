@@ -24,11 +24,16 @@ const list = reactive({
 })
 const options = reactive({
   isError: false,
+  // Still on their way: no data yet, and no error.
+  isLoading: false,
   eventTypes: [
     { id: 3, name: 'Downhill', count: 4 },
     { id: 5, name: 'Enduro', count: 2 },
   ],
-  provinces: [{ id: 7, name: 'Cotopaxi', count: 6, hasEvents: true }],
+  provinces: [
+    { id: 3, name: 'Cañar', count: 0, hasEvents: false },
+    { id: 7, name: 'Cotopaxi', count: 6, hasEvents: true },
+  ],
 })
 const refetch = vi.fn()
 const fetchNextPage = vi.fn()
@@ -58,7 +63,7 @@ vi.mock('@/shared/public-events', async (importOriginal) => ({
     optionsAskedWith = () => filters.value
     return {
       data: computed(() =>
-        options.isError
+        options.isError || options.isLoading
           ? undefined
           : { eventTypes: options.eventTypes, provinces: options.provinces, months: [] },
       ),
@@ -128,6 +133,7 @@ describe('PublicEventListView', () => {
       total: 0,
     })
     options.isError = false
+    options.isLoading = false
     refetch.mockClear()
     fetchNextPage.mockClear()
   })
@@ -213,6 +219,48 @@ describe('PublicEventListView', () => {
 
     expect(askedWith()).toEqual({ eventTypeIds: [3], provinceIds: [] })
     expect(router.currentRoute.value.query).toEqual({ tipo: '3' })
+  })
+
+  it('keeps a province of the link that exists, even without events yet', async () => {
+    const { wrapper, router } = await mountView('/gallery?prov=3')
+
+    expect(askedWith()).toEqual({ eventTypeIds: [], provinceIds: [3] })
+    expect(router.currentRoute.value.query).toEqual({ prov: '3' })
+    expect(filterButtons(wrapper)[1]).toBe('Cañar')
+  })
+
+  // The list of a link with ids waits for them to be checked: no "0 eventos" painted for a
+  // moment before an unknown one is dropped.
+  it('shows no list for the ids of a link until they are checked', async () => {
+    options.isLoading = true
+    list.events = []
+    list.total = 0
+    const { wrapper, router } = await mountView('/gallery?prov=999')
+
+    expect(wrapper.text()).not.toContain('Ningún evento con esos filtros')
+    expect(wrapper.get('.event-list__count').text()).toBe('')
+
+    list.events = [event('a')]
+    list.total = 1
+    options.isLoading = false
+    await flushPromises()
+
+    expect(router.currentRoute.value.query).toEqual({})
+    expect(cards(wrapper)).toHaveLength(1)
+    expect(wrapper.get('.event-list__count').text()).toBe('1 evento')
+  })
+
+  it('goes on with the ids of the link when the options cannot be read', async () => {
+    options.isLoading = true
+    list.events = [event('a')]
+    list.total = 1
+    const { wrapper } = await mountView('/gallery?prov=999')
+
+    options.isLoading = false
+    options.isError = true
+    await flushPromises()
+
+    expect(cards(wrapper)).toHaveLength(1)
   })
 
   it('says how many events the filters bring, as it changes', async () => {
