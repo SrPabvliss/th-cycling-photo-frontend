@@ -111,17 +111,23 @@ watch(
 <template>
   <NotFoundView v-if="failure === 'missing'" />
 
-  <section v-else class="payment-box">
-    <div class="payment-box__title-row">
-      <button type="button" class="payment-box__back" aria-label="Volver al pedido" @click="goBack">
+  <!-- "card-payment", never "payment-box": Payphone's stylesheet paints that class white. -->
+  <section v-else class="card-payment">
+    <div class="card-payment__title-row">
+      <button
+        type="button"
+        class="card-payment__back"
+        aria-label="Volver al pedido"
+        @click="goBack"
+      >
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
       </button>
-      <h1 class="payment-box__title">Pago con tarjeta</h1>
+      <h1 class="card-payment__title">Pago con tarjeta</h1>
     </div>
 
-    <div v-if="total && !failure" class="payment-box__total">
-      <span class="payment-box__muted">Total</span>
-      <span class="payment-box__amount">{{ total }}</span>
+    <div v-if="total && !failure" class="card-payment__total">
+      <span class="card-payment__muted">Total</span>
+      <span class="card-payment__amount">{{ total }}</span>
     </div>
 
     <EmptyState
@@ -190,7 +196,7 @@ watch(
       @setup-failed="handleSetupFailed"
     />
 
-    <BusyNote v-else text="Abriendo la pasarela de pago" class="payment-box__busy" />
+    <BusyNote v-else text="Abriendo la pasarela de pago" class="card-payment__busy" />
   </section>
 </template>
 

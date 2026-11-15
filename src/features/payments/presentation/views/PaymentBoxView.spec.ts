@@ -99,6 +99,14 @@ afterEach(() => {
 })
 
 describe('PaymentBoxView', () => {
+  // Payphone's stylesheet paints any ".payment-box" white: none of our classes may take that name.
+  it('uses no class that the Payphone stylesheet also styles', async () => {
+    const { wrapper } = await mountView()
+
+    expect(wrapper.find('.payment-box').exists()).toBe(false)
+    expect(wrapper.find('.card-payment').exists()).toBe(true)
+  })
+
   it('asks the gateway once for the orders in the address', async () => {
     await mountView()
 
@@ -120,7 +128,7 @@ describe('PaymentBoxView', () => {
     const { wrapper } = await mountView()
 
     expect(wrapper.find('.gateway-checkout').exists()).toBe(true)
-    expect(wrapper.get('.payment-box__amount').text()).toBe('$9,00')
+    expect(wrapper.get('.card-payment__amount').text()).toBe('$9,00')
     expect(wrapper.text()).not.toContain('Abriendo la pasarela de pago')
   })
 

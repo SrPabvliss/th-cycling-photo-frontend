@@ -1,5 +1,6 @@
-/* Card payment. One narrow column; the gateway box keeps its own look inside it. */
-.payment-box {
+/* Card payment. One narrow column; the gateway box keeps its own look inside it. Not named
+ * "payment-box": Payphone's global stylesheet paints that class white. */
+.card-payment {
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
@@ -12,14 +13,14 @@
   font-family: var(--tt-font-sans);
 }
 
-.payment-box__title-row {
+.card-payment__title-row {
   display: flex;
   align-items: center;
   gap: var(--tt-space-2);
   min-block-size: var(--tt-control-m);
 }
 
-.payment-box__back {
+.card-payment__back {
   flex: none;
   display: flex;
   align-items: center;
@@ -35,7 +36,7 @@
   cursor: pointer;
 }
 
-.payment-box__back svg {
+.card-payment__back svg {
   inline-size: var(--tt-icon-l);
   block-size: var(--tt-icon-l);
   fill: none;
@@ -45,7 +46,7 @@
   stroke-linejoin: round;
 }
 
-.payment-box__title {
+.card-payment__title {
   margin: 0;
   font-family: var(--tt-type-display-s-family);
   font-stretch: var(--tt-display-stretch);
@@ -55,7 +56,7 @@
   text-transform: uppercase;
 }
 
-.payment-box__total {
+.card-payment__total {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -64,11 +65,11 @@
   line-height: var(--tt-type-body-line);
 }
 
-.payment-box__muted {
+.card-payment__muted {
   color: var(--tt-ink-muted);
 }
 
-.payment-box__amount {
+.card-payment__amount {
   font-family: var(--tt-type-number-family);
   font-stretch: var(--tt-number-stretch);
   font-size: var(--tt-type-number-size);
@@ -77,13 +78,13 @@
   font-variant-numeric: tabular-nums;
 }
 
-.payment-box__busy {
+.card-payment__busy {
   align-self: center;
   padding-block: var(--tt-space-6);
 }
 
 @media (min-width: 768px) {
-  .payment-box {
+  .card-payment {
     padding: var(--tt-space-5) var(--tt-space-6) var(--tt-space-7);
   }
 }

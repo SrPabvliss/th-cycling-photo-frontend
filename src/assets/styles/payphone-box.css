@@ -1,6 +1,8 @@
 /* Doubled selector: the provider declares the same vars on :root from a stylesheet injected
-   at runtime, which would otherwise win by load order. */
-:root:root {
+   at runtime, which would otherwise win by load order. Declared again on the box, a light island
+   (data-tt-area): there they resolve with its light tokens, also in dark mode. */
+:root:root,
+.tt-payphone-box {
   /* The provider asks for RGB triplets, which a token cannot give: they repeat --tt-primary and
      --tt-primary-hover of awana-tokens.css, in light and in dark (the only literals here). */
   --tt-payphone-primary-rgb: 14, 90, 156;

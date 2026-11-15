@@ -1,7 +1,15 @@
+/* A deliberate light frame around Payphone's box, in light and in dark: the island takes the
+ * light tokens (data-tt-area), so the surface and the ink here are the light ones. */
 .payphone-box {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding: var(--tt-space-2);
+  border: 1px solid var(--tt-line);
+  border-radius: var(--tt-radius-l);
+  background: var(--tt-surface);
+  color: var(--tt-ink);
+  color-scheme: light;
 }
 
 .payphone-box__container {

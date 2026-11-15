@@ -36,7 +36,9 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="payphone-box tt-payphone-box">
+  <!-- A light island: Payphone's box is light and we do not style it, so in dark mode its labels
+       would take the light ink of the page. data-tt-area brings back the light client tokens. -->
+  <div class="payphone-box tt-payphone-box" data-tt-area="client">
     <div :id="PAYPHONE_SDK.CONTAINER_ID" class="payphone-box__container" />
 
     <NSpin v-if="!box.isReady.value" size="small" class="payphone-box__loading" />
