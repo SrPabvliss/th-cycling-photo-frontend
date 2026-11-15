@@ -27,16 +27,20 @@ describe('BrandsPageView', () => {
     const wrapper = mountPage()
 
     expect(wrapper.findAll('h2').map(textOf)).toEqual([
-      'Cuatro lugares donde nadie te salta',
+      'Imposible no verte. Difícil no elegirte.',
       'Un público que ya es el tuyo',
       'Tu marca al aire en tres pasos',
       'Que la próxima carrera te encuentre adentro',
     ])
-    expect(wrapper.findAll('h3').map(textOf)).toEqual([
-      'Lo primero que ven',
-      'Entre sus fotos',
-      'Cuando se encuentra',
-      'Presentas la carrera',
+    expect(
+      wrapper
+        .findAll('h3')
+        .filter((heading) => !heading.element.closest('[aria-hidden="true"]'))
+        .map(textOf),
+    ).toEqual([
+      'Galería',
+      'Búsqueda por placa',
+      'Eventos',
       'Solo gente que pedalea',
       'Miran con calma',
       'Regresan en cada carrera',
@@ -91,8 +95,14 @@ describe('BrandsPageView', () => {
     const wrapper = mountPage()
     const phones = wrapper.findAll('[data-test="phone"]')
 
-    expect(phones.length).toBe(6)
+    expect(phones.length).toBe(11)
     for (const phone of phones) expect(phone.element.closest('[aria-hidden="true"]')).not.toBeNull()
+  })
+
+  it('tells where the brand goes, under the new title', () => {
+    expect(mountPage().text()).toContain(
+      'Entre sus fotos, en su búsqueda, en su carrito. Donde ellos miran, estás tú.',
+    )
   })
 
   it('uses the house illustrations for the audience', () => {

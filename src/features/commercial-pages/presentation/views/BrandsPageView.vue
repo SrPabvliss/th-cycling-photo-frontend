@@ -5,11 +5,12 @@ import {
   type IllustrationKey,
 } from '@/shared/components/empty-state/illustrations'
 import { usePageMeta } from '@/shared/composables/use-page-meta'
+import { BRAND_SCREEN_GROUPS } from '../../constants/brand-screens'
 import { PLATFORM_FIGURES } from '../../constants/platform-figures'
 import CommercialClose from '../components/CommercialClose/CommercialClose.vue'
 import CommercialHero from '../components/CommercialHero/CommercialHero.vue'
-import PhoneMockup from '../components/PhoneMockup/PhoneMockup.vue'
 import type { PhoneBlock } from '../components/PhoneMockup/phone-blocks'
+import ScreenCarousel from '../components/ScreenCarousel/ScreenCarousel.vue'
 import StepList, { type ICommercialStep } from '../components/StepList/StepList.vue'
 
 // For brands: where the house ads go and how to get one. Static: no data, no form.
@@ -34,37 +35,6 @@ const amongPhotos = (cells: number): PhoneBlock[] => [
 ]
 
 const HERO_PHONES: [PhoneBlock[], PhoneBlock[]] = [BETWEEN_EVENTS, amongPhotos(12)]
-
-const PLACES: { title: string; text: string; phone: PhoneBlock[] }[] = [
-  {
-    title: 'Lo primero que ven',
-    text: 'Franja completa entre las carreras. Aparece al entrar y vuelve mientras bajan.',
-    phone: BETWEEN_EVENTS,
-  },
-  {
-    title: 'Entre sus fotos',
-    text: 'Una celda del tamaño de una foto, repetida a lo largo de toda la galería.',
-    phone: amongPhotos(15),
-  },
-  {
-    title: 'Cuando se encuentra',
-    text: 'Al lado de sus fotos, en el momento en que más atención pone.',
-    phone: [
-      { kind: 'bar' },
-      { kind: 'field', text: '# 45' },
-      { kind: 'grid', cells: 5, markAt: 4, markText: 'Tu marca' },
-    ],
-  },
-  {
-    title: 'Presentas la carrera',
-    text: 'Tu nombre arriba del evento y bajo cada foto que abren.',
-    phone: [
-      { kind: 'mark', shape: 'strip', text: 'Presenta: tu marca' },
-      { kind: 'big' },
-      { kind: 'mark', shape: 'wide', text: 'Tu marca aquí' },
-    ],
-  },
-]
 
 const AUDIENCE: { title: string; text: string; illustration: IllustrationKey }[] = [
   {
@@ -112,19 +82,14 @@ const FIGURES = [
 
     <section class="commercial-page__section">
       <div class="commercial-page__band">
-        <h2 class="commercial-page__heading">Cuatro lugares donde nadie te salta</h2>
+        <h2 class="commercial-page__heading">
+          <span class="brands-page__line">Imposible no verte.</span>{{ ' ' }}
+          <span class="brands-page__line">Difícil no elegirte.</span>
+        </h2>
         <p class="commercial-page__sub">
-          Tu marca va dentro del recorrido del corredor, no en una esquina de la pantalla.
+          Entre sus fotos, en su búsqueda, en su carrito. Donde ellos miran, estás tú.
         </p>
-        <div class="brands-page__places">
-          <div v-for="place in PLACES" :key="place.title" class="brands-page__place">
-            <PhoneMockup :blocks="place.phone" />
-            <div class="brands-page__place-text">
-              <h3 class="commercial-page__item-title">{{ place.title }}</h3>
-              <p class="commercial-page__item-text">{{ place.text }}</p>
-            </div>
-          </div>
-        </div>
+        <ScreenCarousel :groups="BRAND_SCREEN_GROUPS" />
       </div>
     </section>
 
@@ -174,24 +139,8 @@ const FIGURES = [
 <style scoped src="./styles/commercial-page.css" />
 
 <style scoped>
-.brands-page__places {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: calc(var(--tt-space-6) - var(--tt-space-1)) var(--tt-space-5);
-}
-
-.brands-page__place {
-  display: flex;
-  flex-direction: column;
-  gap: var(--tt-space-3);
-  min-inline-size: 0;
-}
-
-.brands-page__place-text {
-  display: flex;
-  flex-direction: column;
-  gap: var(--tt-space-1);
-  text-align: center;
+.brands-page__line {
+  display: block;
 }
 
 .brands-page__audience {
@@ -217,12 +166,6 @@ const FIGURES = [
 @media (min-width: 761px) {
   .brands-page__audience {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 901px) {
-  .brands-page__places {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 </style>
