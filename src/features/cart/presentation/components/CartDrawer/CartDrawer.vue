@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { NButton } from 'naive-ui'
 
 import { useSessionStore } from '@/core/auth/stores/session.store'
@@ -9,7 +10,8 @@ import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/
 import { usePriceSheet } from '@/features/pricing/composables/use-price-sheet'
 import { useCartActions, useCartState } from '@/shared/cart'
 import { EmptyState } from '@/shared/components/empty-state'
-import { LoadBoundary, TtSkeleton } from '@/shared/components/loading'
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
+import { LoadBoundary, problemCopy, TtSkeleton } from '@/shared/components/loading'
 import SessionExpiredNotice from '@/shared/components/SessionExpiredNotice/SessionExpiredNotice.vue'
 import { useDialogFocus } from '@/shared/composables/use-dialog-focus'
 import { quotePhotos } from '@/shared/pricing/quote'
@@ -26,6 +28,19 @@ const SKELETON_THUMBS = 4
 const cartStore = useCartStore()
 const session = useSessionStore()
 const cart = useCartState()
+// After the session expired the cart of the account stays with the account: until photos are
+// chosen without one, the drawer says the session closed. Once there are, it shows them, with a
+// short notice to sign in again.
+const hasCartWithoutAccount = computed(
+  () => cart.status.value === 'success' && cart.groups.value.length > 0,
+)
+const showsOnlyExpiry = computed(() => session.expired && !hasCartWithoutAccount.value)
+const expiredCopy = problemCopy('expired', '')
+const route = useRoute()
+const loginTarget = computed(() => ({
+  path: ROUTE_PATHS.LOGIN,
+  query: { redirect: route.fullPath },
+}))
 const cartActions = useCartActions()
 const { data: pricing } = usePricingTiersQuery()
 const priceSheet = usePriceSheet()
@@ -94,7 +109,7 @@ function explainPrices() {
         </div>
 
         <!-- The session expired with the cart on screen: say so, it is not an empty cart. -->
-        <SessionExpiredNotice v-if="session.expired" @leave="close" />
+        <SessionExpiredNotice v-if="showsOnlyExpiry" @leave="close" />
 
         <LoadBoundary
           v-else
@@ -143,6 +158,19 @@ function explainPrices() {
               </template>
             </EmptyState>
           </template>
+
+          <FormAlert
+            v-if="session.expired"
+            class="cart-drawer__session-closed"
+            data-test="cart-session-closed"
+            tone="info"
+            :title="expiredCopy.title"
+            :text="expiredCopy.text"
+          >
+            <template #actions>
+              <RouterLink :to="loginTarget" @click="close">Iniciar sesión</RouterLink>
+            </template>
+          </FormAlert>
 
           <div class="cart-drawer__events">
             <section v-for="item in events" :key="item.group.eventId" class="cart-drawer__event">
@@ -299,6 +327,10 @@ function explainPrices() {
   display: flex;
   flex-direction: column;
   gap: var(--tt-space-3);
+}
+
+.cart-drawer__session-closed {
+  margin-block-end: var(--tt-space-4);
 }
 
 .cart-drawer__events {

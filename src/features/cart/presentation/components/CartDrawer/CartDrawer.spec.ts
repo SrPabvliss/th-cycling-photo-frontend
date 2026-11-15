@@ -191,6 +191,33 @@ describe('CartDrawer', () => {
     expect(useCartStore().isDrawerOpen).toBe(false)
   })
 
+  it('after the session expired, shows the photos chosen without an account, under a short notice', async () => {
+    useSessionStore().expireSession()
+    cart.groups = [group('e1', 2)]
+    const { wrapper } = await open()
+
+    expect(sections(wrapper)).toHaveLength(1)
+    const notice = wrapper.get('[data-test="cart-session-closed"]')
+    expect(notice.classes()).toContain('form-alert--info')
+    expect(notice.text()).toContain('Tu sesión se cerró')
+    const signIn = notice.findAll('a').find((link) => link.text() === 'Iniciar sesión')!
+    expect(signIn.attributes('href')).toBe('/login?redirect=/')
+    expect(wrapper.find('.empty-state').exists()).toBe(false)
+
+    await signIn.trigger('click')
+    await flushPromises()
+    expect(useCartStore().isDrawerOpen).toBe(false)
+  })
+
+  it('keeps saying the session expired while the cart without an account is still being read', async () => {
+    useSessionStore().expireSession()
+    cart.status = 'pending'
+    const { wrapper } = await open()
+
+    expect(wrapper.text()).toContain('Tu sesión se cerró')
+    expect(wrapper.find('[data-test="cart-session-closed"]').exists()).toBe(false)
+  })
+
   it('says the cart is empty and sends to the events', async () => {
     const { wrapper, router } = await open()
 
