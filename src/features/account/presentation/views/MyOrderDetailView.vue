@@ -122,6 +122,14 @@ const askingCancel = ref(false)
 const cancelProblem = ref<IFormProblem | null>(null)
 // A refusal means the order moved on; a lost connection or a server failure says only that.
 const CANNOT_CANCEL: IFormProblem = { title: 'Este pedido ya no se puede cancelar.' }
+// A card payment of this order is still open at the gateway: it can be cancelled once it ends.
+const PAYMENT_IN_PROGRESS: IFormProblem = {
+  title: 'Hay un pago en curso para este pedido. Espera unos minutos e inténtalo de nuevo.',
+}
+const refusalOf = (error: unknown) =>
+  isAxiosError(error)
+    ? (error.response?.data as { error?: { messageKey?: string } } | undefined)?.error?.messageKey
+    : undefined
 
 function askCancel() {
   cancelProblem.value = null
@@ -137,8 +145,10 @@ async function cancel() {
     message.success('Pedido cancelado.')
   } catch (error) {
     const status = failedStatus(error)
-    cancelProblem.value =
-      status >= 400 && status < 500 && status !== 429 ? CANNOT_CANCEL : generalProblem(error)
+    if (refusalOf(error) === 'order.payment_in_progress') cancelProblem.value = PAYMENT_IN_PROGRESS
+    else
+      cancelProblem.value =
+        status >= 400 && status < 500 && status !== 429 ? CANNOT_CANCEL : generalProblem(error)
     void refetch()
   }
 }

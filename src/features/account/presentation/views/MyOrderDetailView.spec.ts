@@ -372,6 +372,30 @@ describe('MyOrderDetailView', () => {
     expect(refetch).toHaveBeenCalled()
   })
 
+  it('says a payment is on its way when that is why it cannot be cancelled yet', async () => {
+    state.order = order('in_process')
+    const response = {
+      status: 422,
+      data: {
+        error: { code: 'BUSINESS_RULE', messageKey: 'order.payment_in_progress', message: 'x' },
+      },
+      headers: {},
+      config: {},
+    } as AxiosResponse
+    cancel.mockRejectedValue(new AxiosError('x', 'ERR_BAD_REQUEST', undefined, undefined, response))
+    const wrapper = await mountView()
+
+    await button(wrapper, 'Cancelar pedido')!.trigger('click')
+    await button(wrapper, 'Sí, cancelar pedido')!.trigger('click')
+    await flushPromises()
+
+    const alert = wrapper.get('[role="alertdialog"] .form-alert')
+    expect(alert.text()).toContain(
+      'Hay un pago en curso para este pedido. Espera unos minutos e inténtalo de nuevo.',
+    )
+    expect(alert.text()).not.toContain('ya no se puede cancelar')
+  })
+
   it('says a lost connection in the dialog, not that the order cannot be cancelled', async () => {
     state.order = order('in_process')
     cancel.mockRejectedValue(new AxiosError('Network Error', 'ERR_NETWORK'))
