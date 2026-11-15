@@ -49,15 +49,19 @@ const linkProblem = computed(() => {
   return previewProblem(error.value)
 })
 
-// Back from signing in with photos chosen: straight to confirming them.
+// Back from signing in with photos chosen: straight to confirming them. Decided once, as soon as
+// the preview is there, which may be at once (still in the cache from before signing in).
+let decidedReturn = false
 watch(
   [preview, () => session.isAuthenticated],
   ([loaded, signedIn]) => {
-    if (loaded && signedIn && selection.selected.value.length > 0 && step.value === 'pick') {
+    if (!loaded || decidedReturn) return
+    decidedReturn = true
+    if (signedIn && selection.selected.value.length > 0 && step.value === 'pick') {
       step.value = 'confirm'
     }
   },
-  { once: true },
+  { immediate: true },
 )
 
 // Some photos left the preview: read it again (the selection drops them) and pick again.

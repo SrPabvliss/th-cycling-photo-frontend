@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils'
 import { AxiosError, type AxiosResponse } from 'axios'
 import { createPinia, setActivePinia } from 'pinia'
-import { computed, reactive, ref } from 'vue'
+import { computed, effectScope, nextTick, reactive, ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 import type { IPreviewData } from '../../types/responses/preview-data.response'
@@ -251,5 +251,32 @@ describe('ClientGalleryView', () => {
     await wrapper.get('[data-test="back"]').trigger('click')
 
     expect(wrapper.findAll('button[aria-pressed="true"]')).toHaveLength(1)
+  })
+  function signIn() {
+    useSessionStore().setSession(
+      'token',
+      toCurrentUser({
+        id: 'u1',
+        email: 'a@b.c',
+        firstName: 'Ana',
+        lastName: null,
+        role: 'customer',
+      }),
+    )
+  }
+
+  // Back from signing in, the preview is still in the cache and the session already open:
+  // nothing changes after the screen mounts, and it must still go on to confirming.
+  it('goes straight to confirming when it comes back from signing in with photos chosen', async () => {
+    const { usePhotoSelection } = await import('../../composables/use-photo-selection')
+    const scope = effectScope()
+    scope.run(() => usePhotoSelection(ref('tok'), ref(['a', 'b', 'c'])).toggle('a'))
+    await nextTick()
+    scope.stop()
+    signIn()
+
+    const { wrapper } = await mountView()
+
+    expect(wrapper.find('[data-test="confirm-step"]').exists()).toBe(true)
   })
 })
