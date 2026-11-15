@@ -16,6 +16,10 @@ export function useDialogFocus(
   panel: Ref<HTMLElement | null>,
   isOpen: () => boolean,
   onEscape: () => void,
+  options: {
+    /** What gets the focus on opening; its first control when missing or null. */
+    initialFocus?: () => HTMLElement | null
+  } = {},
 ): void {
   const layer = Symbol('dialog layer')
   let opener: HTMLElement | null = null
@@ -80,7 +84,7 @@ export function useDialogFocus(
       if (open) {
         activate()
         await nextTick()
-        ;(focusable()[0] ?? panel.value)?.focus()
+        ;(options.initialFocus?.() ?? focusable()[0] ?? panel.value)?.focus()
         return
       }
 

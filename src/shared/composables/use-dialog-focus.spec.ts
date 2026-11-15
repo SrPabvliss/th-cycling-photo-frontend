@@ -185,4 +185,31 @@ describe('useDialogFocus', () => {
       expect(below.emitted('close')).toHaveLength(1)
     })
   })
+
+  it('focuses what the dialog asks for when it opens, instead of its first control', async () => {
+    document.body.innerHTML = ''
+    const Chosen = defineComponent({
+      props: { open: Boolean },
+      setup(props) {
+        const panel = ref<HTMLElement | null>(null)
+        useDialogFocus(
+          panel,
+          () => props.open,
+          () => {},
+          { initialFocus: () => panel.value },
+        )
+        return () =>
+          props.open
+            ? h('div', { ref: panel, id: 'panel', tabindex: -1 }, [h('input', { id: 'search' })])
+            : null
+      },
+    })
+    const wrapper = mount(Chosen, { props: { open: false }, attachTo: document.body })
+
+    await wrapper.setProps({ open: true })
+    await nextTick()
+
+    expect(document.activeElement?.id).toBe('panel')
+    wrapper.unmount()
+  })
 })
