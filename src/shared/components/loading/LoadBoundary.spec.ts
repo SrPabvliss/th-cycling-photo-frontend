@@ -155,7 +155,7 @@ describe('LoadBoundary', () => {
     await wrapper.setProps({ status: 'error' })
     await vi.advanceTimersByTimeAsync(400)
 
-    expect(wrapper.get('.error-state').attributes('style')).toContain('min-block-size: 180px')
+    expect(wrapper.get('.error-state').attributes('style')).toContain('--load-boundary-held: 180px')
   })
 
   it('sets no height when nothing was painted before the error', () => {

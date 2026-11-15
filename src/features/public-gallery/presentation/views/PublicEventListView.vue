@@ -135,8 +135,8 @@ const online = useOnline()
         class="event-list__more"
         data-test="more-problem"
         tone="warn"
-        title="No pudimos cargar más eventos"
-        text="Puede ser tu conexión. Lo que ya ves se queda."
+        title="No pudimos mostrar más eventos"
+        text="Los que ya ves siguen aquí."
         :retrying="isFetchingNextPage"
         @retry="fetchNextPage()"
       />

@@ -159,7 +159,7 @@ describe('PreviewConfirm', () => {
     const { wrapper } = await mountConfirm()
 
     const alert = wrapper.get('[data-test="billing-problem"]')
-    expect(alert.text()).toContain('No pudimos cargar tus datos de facturación')
+    expect(alert.text()).toContain('No pudimos mostrar tus datos de factura')
     expect(wrapper.find('[data-test="billing-add"]').exists()).toBe(false)
     expect(confirmButton(wrapper).attributes('disabled')).toBeDefined()
 

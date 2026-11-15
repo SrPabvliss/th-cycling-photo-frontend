@@ -165,7 +165,10 @@ describe('DeliveryView', () => {
     const wrapper = await mountView()
 
     expect(wrapper.findAll('button[aria-label="Descargar foto"]')).toHaveLength(3)
-    expect(wrapper.get('[data-test="refresh-problem"]').text()).toContain('Demasiados intentos')
+    const alert = wrapper.get('[data-test="refresh-problem"]')
+    expect(alert.text()).toContain('Demasiados intentos')
+    expect(alert.text()).toContain('Espera un minuto antes de volver a intentarlo.')
+    expect(alert.find('button').exists()).toBe(false)
   })
 
   it.each(['expired', 'access-limit'] as const)(

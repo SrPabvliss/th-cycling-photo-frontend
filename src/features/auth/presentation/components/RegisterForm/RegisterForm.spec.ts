@@ -167,7 +167,7 @@ describe('sign up', () => {
     const { wrapper } = await mountView()
 
     const alert = wrapper.get('[data-test="places-problem"]')
-    expect(alert.text()).toContain('No pudimos cargar los países y ciudades')
+    expect(alert.text()).toContain('No pudimos mostrar los países y ciudades')
     await alert.get('button').trigger('click')
     expect(retryPlaces).toHaveBeenCalledTimes(1)
   })

@@ -74,3 +74,22 @@ export function problemCopy(kind: ProblemKind, what: string): IProblemCopy {
       }
   }
 }
+
+/**
+ * Title and detail of something that did not load. `better` says it better than "No pudimos
+ * mostrar…" ("No pudimos mostrar más fotos" / "Las que ya ves siguen aquí."), but only when the
+ * server failed or the cause is unknown: no network, slowness, too many tries and a closed
+ * session keep their own words.
+ */
+export function loadProblemCopy(
+  kind: ProblemKind,
+  what: string,
+  better: { title?: string; text?: string } = {},
+): { title: string; text: string } {
+  const copy = problemCopy(kind, what)
+  const canSayBetter = kind === 'server' || kind === 'unknown'
+  return {
+    title: (canSayBetter && better.title) || copy.title,
+    text: (canSayBetter && better.text) || copy.text,
+  }
+}

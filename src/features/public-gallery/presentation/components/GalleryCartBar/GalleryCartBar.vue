@@ -61,8 +61,8 @@ const online = useOnline()
       class="gallery-cart-bar__problem"
       data-test="cart-problem"
       tone="warn"
-      title="No pudimos cargar tu carrito"
-      text="Puede ser tu conexión."
+      title="No pudimos mostrar tu carrito"
+      text="Vuelve a intentarlo en un momento."
       :retrying="cart.isFetching.value"
       @retry="cart.refetch()"
     />

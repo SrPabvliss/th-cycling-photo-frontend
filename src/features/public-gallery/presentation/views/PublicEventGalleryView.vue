@@ -343,8 +343,8 @@ const online = useOnline()
                 class="gallery__more-problem"
                 data-test="more-problem"
                 tone="warn"
-                title="No pudimos cargar más fotos"
-                text="Puede ser tu conexión. Las que ya ves se quedan."
+                title="No pudimos mostrar más fotos"
+                text="Las que ya ves siguen aquí."
                 :retrying="isFetchingNextPage"
                 @retry="fetchNextPage()"
               />
@@ -369,8 +369,8 @@ const online = useOnline()
                 v-if="hasNextNoPlatePage && isMoreNoPlateError && online"
                 class="gallery__more-problem"
                 tone="warn"
-                title="No pudimos cargar más fotos"
-                text="Puede ser tu conexión. Las que ya ves se quedan."
+                title="No pudimos mostrar más fotos"
+                text="Las que ya ves siguen aquí."
                 :retrying="isFetchingMoreNoPlate"
                 @retry="fetchMoreNoPlate()"
               />

@@ -183,8 +183,8 @@ describe('PhotoFinder', () => {
 
     const problem = wrapper.get('[data-test="finder-problem"]')
     expect(problem.attributes('role')).toBe('alert')
-    expect(problem.text()).toContain('No pudimos cargar las carreras')
-    expect(problem.text()).toContain('Puede ser tu conexión.')
+    expect(problem.text()).toContain('No pudimos mostrar las carreras')
+    expect(problem.text()).toContain('Vuelve a intentarlo en un momento.')
     expect(wrapper.get('.photo-finder__race').text()).not.toContain('No pudimos')
     expect(wrapper.get('.photo-finder__race').find('button').exists()).toBe(false)
     expect(select(wrapper).attributes('disabled')).toBeDefined()

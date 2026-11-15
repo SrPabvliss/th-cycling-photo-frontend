@@ -53,7 +53,7 @@ watch(
   { flush: 'pre' },
 )
 const errorStyle = computed(() =>
-  heldHeight.value > 0 ? { minBlockSize: `${heldHeight.value}px` } : undefined,
+  heldHeight.value > 0 ? { '--load-boundary-held': `${heldHeight.value}px` } : undefined,
 )
 
 const isBusy = computed(
@@ -94,6 +94,13 @@ const isBusy = computed(
 <style scoped>
 .load-boundary__content {
   transition: opacity var(--tt-motion-base) var(--tt-easing-standard);
+}
+
+/* A long skeleton (a list of cards on a phone) would push the message below the fold: the held
+   height stops at most of a screen. What is taller than that was out of sight anyway. Without a
+   held height the declaration is dropped and the error takes its own height. */
+.load-boundary :deep(.error-state) {
+  min-block-size: min(var(--load-boundary-held), 60dvh);
 }
 
 .load-boundary__content--refreshing {

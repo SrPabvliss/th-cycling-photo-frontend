@@ -131,8 +131,8 @@ const online = useOnline()
       class="photo-finder__problem"
       data-test="finder-problem"
       tone="warn"
-      title="No pudimos cargar las carreras"
-      text="Puede ser tu conexión."
+      title="No pudimos mostrar las carreras"
+      text="Vuelve a intentarlo en un momento."
       :retrying="isFetching"
       @retry="refetch()"
     />

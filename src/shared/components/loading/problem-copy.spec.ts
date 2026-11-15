@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { problemCopy } from './problem-copy'
+import { loadProblemCopy, problemCopy } from './problem-copy'
 
 describe('problemCopy', () => {
   it('offline: waits for the network, with no way out', () => {
@@ -67,5 +67,25 @@ describe('problemCopy', () => {
       tone: 'warn',
       retry: false,
     })
+  })
+})
+
+describe('loadProblemCopy', () => {
+  const better = { title: 'No pudimos mostrar más fotos', text: 'Las que ya ves siguen aquí.' }
+
+  it('takes the words the screen says better when the server failed or the cause is unknown', () => {
+    expect(loadProblemCopy('server', 'las fotos', better)).toEqual(better)
+    expect(loadProblemCopy('unknown', 'las fotos', { text: 'Tus fotos están a salvo.' })).toEqual({
+      title: 'No pudimos mostrar las fotos',
+      text: 'Tus fotos están a salvo.',
+    })
+  })
+
+  it('keeps the words of a cause the screen cannot say better', () => {
+    expect(loadProblemCopy('timeout', 'las fotos', better)).toEqual({
+      title: 'Está tardando más de lo normal',
+      text: 'Puedes esperar un poco o volver a intentarlo.',
+    })
+    expect(loadProblemCopy('offline', 'las fotos', better).title).toBe('Sin conexión a internet')
   })
 })

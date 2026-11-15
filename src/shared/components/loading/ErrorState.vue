@@ -6,7 +6,7 @@ import type { ProblemKind } from '@/core/http/problem-kind'
 import { useScreenProblem } from '@/core/layout/client/screen-problem'
 import { useOnline } from '@/core/network/use-online'
 import { ILLUSTRATION_VIEW_BOX, ILLUSTRATIONS } from '@/shared/components/empty-state/illustrations'
-import { problemCopy } from './problem-copy'
+import { loadProblemCopy, problemCopy } from './problem-copy'
 
 // A list, grid or block that did not load, in the place of its content while the rest of the
 // screen goes on. Words and drawing come from the cause. `title` and `text` say it better than
@@ -35,9 +35,9 @@ const emit = defineEmits<{
 const online = useOnline()
 const kind = computed<ProblemKind>(() => (online.value ? props.kind : 'offline'))
 const copy = computed(() => problemCopy(kind.value, props.what))
-const canSayBetter = computed(() => kind.value === 'server' || kind.value === 'unknown')
-const shownTitle = computed(() => (canSayBetter.value && props.title) || copy.value.title)
-const shownText = computed(() => (canSayBetter.value && props.text) || copy.value.text)
+const shown = computed(() =>
+  loadProblemCopy(kind.value, props.what, { title: props.title, text: props.text }),
+)
 const drawing = computed(() =>
   copy.value.illustration ? ILLUSTRATIONS[copy.value.illustration] : null,
 )
@@ -69,8 +69,8 @@ useScreenProblem(root)
       />
       <!-- eslint-enable vue/no-v-html -->
       <div class="error-state__words">
-        <p class="error-state__title">{{ shownTitle }}</p>
-        <p class="error-state__text">{{ shownText }}</p>
+        <p class="error-state__title">{{ shown.title }}</p>
+        <p class="error-state__text">{{ shown.text }}</p>
       </div>
       <NButton
         v-if="copy.retry"

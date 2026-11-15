@@ -38,12 +38,13 @@ const showSkeleton = useDelayedFlag(computed(() => status.value === 'pending'))
 const refreshProblem = computed(() => {
   if (!delivery.value || !problem.value) return null
   if (problem.value === 'rate-limited')
-    return { title: 'Demasiados intentos', text: 'Espera un minuto y vuelve a intentarlo.' }
-  if (problem.value === 'network' || problem.value === 'unknown')
     return {
-      title: 'No pudimos actualizar tus fotos',
-      text: 'Puede ser tu conexión. Tus fotos siguen aquí.',
+      title: 'Demasiados intentos',
+      text: 'Espera un minuto antes de volver a intentarlo.',
+      retry: false,
     }
+  if (problem.value === 'network' || problem.value === 'unknown')
+    return { title: 'No pudimos actualizar tus fotos', text: 'Tus fotos siguen aquí.', retry: true }
   return null
 })
 
@@ -184,7 +185,7 @@ const online = useOnline()
         :title="refreshProblem.title"
         :text="refreshProblem.text"
         :retrying="isFetching"
-        @retry="refetch()"
+        :on-retry="refreshProblem.retry ? () => refetch() : undefined"
       />
       <FormAlert v-else tone="info" title="Listas para descargar" :text="readyText" />
 

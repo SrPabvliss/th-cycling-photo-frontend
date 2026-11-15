@@ -208,8 +208,8 @@ async function confirm() {
           v-if="billingProblem"
           data-test="billing-problem"
           tone="warn"
-          title="No pudimos cargar tus datos de facturación"
-          text="Puede ser tu conexión."
+          title="No pudimos mostrar tus datos de factura"
+          text="Los necesitamos para crear tu pedido."
           :retrying="isBillingRetrying"
           @retry="retryBilling()"
         />

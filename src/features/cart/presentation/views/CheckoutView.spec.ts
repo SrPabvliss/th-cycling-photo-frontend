@@ -315,7 +315,8 @@ describe('CheckoutView', () => {
 
     const alert = wrapper.get('[data-test="billing-problem"]')
     expect(alert.classes()).toContain('form-alert')
-    expect(alert.text()).toContain('No pudimos cargar tus datos de facturación')
+    expect(alert.text()).toContain('No pudimos mostrar tus datos de factura')
+    expect(alert.text()).toContain('Los necesitamos para crear tu pedido.')
     expect(wrapper.find('[data-test="billing-add"]').exists()).toBe(false)
     expect(wrapper.text()).not.toContain('Agrega tus datos de facturación para confirmar.')
     expect(primary(wrapper).attributes('disabled')).toBeDefined()

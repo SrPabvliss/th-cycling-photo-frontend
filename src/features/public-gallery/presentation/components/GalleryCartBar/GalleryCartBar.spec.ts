@@ -132,7 +132,7 @@ describe('GalleryCartBar', () => {
     const problem = wrapper.get('[data-test="cart-problem"]')
     expect(problem.classes()).toContain('form-alert')
     expect(problem.attributes('role')).toBe('alert')
-    expect(problem.text()).toContain('No pudimos cargar tu carrito')
+    expect(problem.text()).toContain('No pudimos mostrar tu carrito')
     expect(confirm(wrapper)).toBeUndefined()
 
     await problem.get('button').trigger('click')

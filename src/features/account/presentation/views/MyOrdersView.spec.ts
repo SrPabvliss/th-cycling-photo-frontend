@@ -159,7 +159,7 @@ describe('MyOrdersView', () => {
     expect(wrapper.findAll('.order-row')).toHaveLength(2)
     expect(wrapper.text()).not.toContain('No pudimos mostrar tus compras')
     const alert = wrapper.get('[data-test="more-problem"]')
-    expect(alert.text()).toContain('No pudimos cargar más compras')
+    expect(alert.text()).toContain('No pudimos mostrar más compras')
     await alert.get('button').trigger('click')
     expect(fetchNextPage).toHaveBeenCalled()
   })

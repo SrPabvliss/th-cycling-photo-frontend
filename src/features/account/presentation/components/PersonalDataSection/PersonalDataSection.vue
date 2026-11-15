@@ -230,8 +230,8 @@ const online = useOnline()
       v-if="hasPlacesProblem && online"
       data-test="places-problem"
       tone="warn"
-      title="No pudimos cargar los países y ciudades"
-      text="Puede ser tu conexión."
+      title="No pudimos mostrar los países y ciudades"
+      text="Vuelve a intentarlo en un momento."
       :retrying="isRetryingPlaces"
       @retry="retryPlaces()"
     />

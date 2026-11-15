@@ -167,7 +167,7 @@ describe('PaymentReturnView', () => {
     const wrapper = await mountView()
 
     expect(wrapper.text()).toContain('No pudimos confirmar tu pago')
-    expect(wrapper.text()).toContain('Puede ser tu conexión. No se cobra dos veces.')
+    expect(wrapper.text()).toContain('No se cobra dos veces.')
     await wrapper
       .findAll('button')
       .find((each) => each.text().includes('Reintentar'))!

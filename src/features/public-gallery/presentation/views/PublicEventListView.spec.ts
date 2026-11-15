@@ -313,7 +313,7 @@ describe('PublicEventListView', () => {
     expect(wrapper.text()).not.toContain('No pudimos mostrar los eventos')
     const alert = wrapper.get('[data-test="more-problem"]')
     expect(alert.classes()).toContain('form-alert')
-    expect(alert.text()).toContain('No pudimos cargar más eventos')
+    expect(alert.text()).toContain('No pudimos mostrar más eventos')
     expect(wrapper.find('.event-list__sentinel').exists()).toBe(false)
 
     await alert.get('button').trigger('click')
