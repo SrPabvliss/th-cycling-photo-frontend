@@ -9,7 +9,13 @@ export const LATE_AFTER_MS = 10_000
  * - `declined`: not charged.
  * - `failed`: the answer could not be asked for; trying again is safe.
  */
-export type PaymentOutcome = 'confirming' | 'late' | 'confirmed' | 'declined' | 'failed'
+export type PaymentOutcome =
+  | 'confirming'
+  | 'late'
+  | 'confirmed'
+  | 'declined'
+  | 'cancelled'
+  | 'failed'
 
 /** The answer to confirming the payment. */
 export interface IConfirmAnswer {

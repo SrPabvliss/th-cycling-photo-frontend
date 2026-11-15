@@ -58,13 +58,20 @@ export function usePaymentReturn(): IPaymentReturn {
   const provider = String(route.meta.provider ?? DEFAULT_PAYMENT_PROVIDER)
   const confirmation = findPaymentGateway(provider)?.parseReturn(route.query) ?? null
 
+  // Back without a payment id (id=0, or none): the buyer cancelled at the gateway, nothing was
+  // charged and there is nothing to confirm. Its orders are still read, for the ways out.
+  const cancelledAtGateway = confirmation === null
+  const cancelledTransactionId = String(route.query.clientTransactionId ?? '')
+
   const answer = ref<IConfirmAnswer | ITransactionAnswer | null>(null)
   const isLate = ref(false)
-  const requestFailed = ref(confirmation === null)
+  const requestFailed = ref(false)
   const orderIds = ref<string[]>([])
 
-  const outcome = computed(() =>
-    paymentOutcome(answer.value, isLate.value ? LATE_AFTER_MS : 0, requestFailed.value),
+  const outcome = computed<PaymentOutcome>(() =>
+    cancelledAtGateway
+      ? 'cancelled'
+      : paymentOutcome(answer.value, isLate.value ? LATE_AFTER_MS : 0, requestFailed.value),
   )
 
   let lateTimer: ReturnType<typeof setTimeout> | undefined
@@ -188,7 +195,18 @@ export function usePaymentReturn(): IPaymentReturn {
     stopPolling()
   })
 
-  void run()
+  async function findCancelledOrders() {
+    if (!cancelledTransactionId) return
+    try {
+      const transaction = await fetchTransaction(cancelledTransactionId)
+      if (!disposed) orderIds.value = transaction.orderIds
+    } catch {
+      // Not known: the screen leads to Mis fotos instead.
+    }
+  }
+
+  if (cancelledAtGateway) void findCancelledOrders()
+  else void run()
 
   return {
     outcome: readonly(outcome),

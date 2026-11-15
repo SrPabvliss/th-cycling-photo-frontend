@@ -26,6 +26,8 @@ const backToOrder = computed(() =>
   eventId.value ? checkoutPath(eventId.value) : ROUTE_PATHS.PUBLIC_GALLERY,
 )
 
+const myPhotos = `${ROUTE_PATHS.ACCOUNT}/orders`
+
 const orderPath = computed(() =>
   orderIds.value[0]
     ? `${ROUTE_PATHS.ACCOUNT}/orders/${orderIds.value[0]}`
@@ -102,14 +104,56 @@ const orderPath = computed(() =>
       </template>
     </EmptyState>
 
-    <ErrorState
-      v-else
-      what="la confirmación de tu pago"
-      stacked
-      title="No pudimos confirmar tu pago"
-      text="No se cobra dos veces."
-      @retry="retry"
-    />
+    <!-- Cancelled at the gateway: nothing was charged; the same ways on as a declined card. -->
+    <EmptyState
+      v-else-if="outcome === 'cancelled'"
+      illustration="fueraDelCamino"
+      title="Cancelaste el pago"
+      text="No se hizo ningún cargo. Puedes intentarlo de nuevo o pagar por transferencia."
+      :heading-level="1"
+    >
+      <template #actions>
+        <template v-if="orderIds.length > 0">
+          <RouterLink v-slot="{ href, navigate }" :to="anotherCard" custom>
+            <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
+              Intentar pagar de nuevo
+            </NButton>
+          </RouterLink>
+          <NButton
+            size="large"
+            block
+            :loading="transfer.isSwitching.value"
+            :disabled="transfer.isSwitching.value"
+            :aria-busy="transfer.isSwitching.value ? 'true' : undefined"
+            @click="transfer.payByTransfer()"
+          >
+            Pagar por transferencia
+          </NButton>
+          <CheckoutProblemAlert
+            v-if="transfer.problem.value"
+            :problem="transfer.problem.value"
+            :gallery-path="backToOrder"
+          />
+          <RouterLink class="payment-return__link" :to="backToOrder">Volver al pedido</RouterLink>
+        </template>
+        <RouterLink v-else v-slot="{ href, navigate }" :to="myPhotos" custom>
+          <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
+            Ir a Mis fotos
+          </NButton>
+        </RouterLink>
+      </template>
+    </EmptyState>
+
+    <template v-else>
+      <ErrorState
+        what="la confirmación de tu pago"
+        stacked
+        title="No pudimos confirmar tu pago"
+        text="No se cobra dos veces."
+        @retry="retry"
+      />
+      <RouterLink class="payment-return__link" :to="myPhotos">Ir a Mis fotos</RouterLink>
+    </template>
   </div>
 </template>
 

@@ -281,11 +281,25 @@ describe('usePaymentReturn', () => {
     expect(state.outcome.value).toBe('confirmed')
   })
 
-  it('fails without asking anything when the return cannot be read', async () => {
+  // The gateway comes back without a payment id (id=0, or none) when the buyer cancels there:
+  // nothing was charged, and there is nothing to confirm.
+  it('says the payment was cancelled at the gateway, without confirming, and finds its orders', async () => {
     parseReturn.mockReturnValue(null)
+    get.mockResolvedValue(transaction('initiated'))
     await start()
 
-    expect(state.outcome.value).toBe('failed')
+    expect(state.outcome.value).toBe('cancelled')
     expect(confirm).not.toHaveBeenCalled()
+    expect(get).toHaveBeenCalledWith(TX_URL, { silent: true })
+    expect(state.orderIds.value).toEqual(['o1'])
+  })
+
+  it('still says cancelled when its orders cannot be found', async () => {
+    parseReturn.mockReturnValue(null)
+    get.mockRejectedValue(notFound())
+    await start()
+
+    expect(state.outcome.value).toBe('cancelled')
+    expect(state.orderIds.value).toEqual([])
   })
 })

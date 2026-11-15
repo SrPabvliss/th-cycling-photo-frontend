@@ -174,4 +174,54 @@ describe('PaymentReturnView', () => {
       .trigger('click')
     expect(retry).toHaveBeenCalled()
   })
+
+  it('offers a way out besides retrying when the payment could not be confirmed', async () => {
+    outcome.value = 'failed'
+    const wrapper = await mountView()
+
+    expect(
+      wrapper
+        .findAll('a')
+        .find((link) => link.text() === 'Ir a Mis fotos')
+        ?.attributes('href'),
+    ).toBe('/account/orders')
+  })
+
+  describe('cancelled at the gateway', () => {
+    it('says it was cancelled and nothing was charged, and offers to pay again, by transfer, or go back', async () => {
+      outcome.value = 'cancelled'
+      orderIds.value = ['o1']
+      rememberCardPaymentEvent(['o1'], 'e1')
+      const wrapper = await mountView()
+
+      expect(wrapper.get('h1').text()).toBe('Cancelaste el pago')
+      expect(wrapper.text()).toContain('No se hizo ningún cargo.')
+      expect(wrapper.text()).not.toContain('No se cobra dos veces')
+      const again = wrapper.findAll('a').find((link) => link.text() === 'Intentar pagar de nuevo')!
+      expect(again.attributes('href')).toBe('/checkout/payment?orders=o1&evento=e1')
+      await wrapper
+        .findAll('button')
+        .find((each) => each.text() === 'Pagar por transferencia')!
+        .trigger('click')
+      expect(payByTransfer).toHaveBeenCalled()
+      expect(
+        wrapper
+          .findAll('a')
+          .find((link) => link.text() === 'Volver al pedido')
+          ?.attributes('href'),
+      ).toBe('/checkout/e1')
+      expect(wrapper.findAll('button').some((each) => each.text().includes('Reintentar'))).toBe(
+        false,
+      )
+    })
+
+    it('leads to Mis fotos when its orders are not known', async () => {
+      outcome.value = 'cancelled'
+      const wrapper = await mountView()
+
+      expect(wrapper.get('h1').text()).toBe('Cancelaste el pago')
+      expect(wrapper.findAll('a').map((link) => link.text())).toContain('Ir a Mis fotos')
+      expect(wrapper.text()).not.toContain('Intentar pagar de nuevo')
+    })
+  })
 })
