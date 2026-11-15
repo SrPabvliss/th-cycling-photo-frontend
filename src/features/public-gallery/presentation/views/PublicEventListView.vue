@@ -90,6 +90,8 @@ const sentinel = useInfiniteScrollTrigger(() => fetchNextPage(), {
 // of a shorter list. Each one starts on its own piece.
 const SPOT_PLAN = { first: 3, every: 6 }
 const SPOT_SEED = 7
+// The pieces could not be downloaded: every band goes at once, like the gallery's tiles.
+const spotsGone = ref(false)
 // Index of the card each one goes after, and which appearance it is.
 const spotAfter = computed(
   () => new Map(spotSlots(events.value.length, SPOT_PLAN).map((before, n) => [before - 1, n])),
@@ -168,10 +170,11 @@ const moreProblem = computed(() =>
         <template v-for="(event, index) in events" :key="event.slug">
           <PublicEventCard :event="event" />
           <HouseSpot
-            v-if="spotAfter.has(index)"
+            v-if="!spotsGone && spotAfter.has(index)"
             class="event-list__spot"
             format="AB"
             :seed="SPOT_SEED + spotAfter.get(index)!"
+            @unavailable="spotsGone = true"
           />
         </template>
         <template v-if="isFetchingNextPage">

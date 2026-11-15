@@ -314,6 +314,19 @@ describe('PublicEventListView', () => {
       expect(ads(wrapper).map(cardBefore)).toEqual(['/gallery/e2'])
     })
 
+    // The pieces could not be downloaded: every band goes at once, as the gallery does, instead
+    // of each frame dropping its height while the person scrolls.
+    it('takes every band out when the pieces cannot be shown', async () => {
+      list.events = slugs(16).map(event)
+      const { wrapper } = await mountView()
+
+      wrapper.getComponent({ name: 'HouseSpot' }).vm.$emit('unavailable')
+      await flushPromises()
+
+      expect(ads(wrapper)).toHaveLength(0)
+      expect(cards(wrapper)).toHaveLength(16)
+    })
+
     it('never stands alone on an empty or failed list', async () => {
       list.events = []
       const empty = await mountView()
