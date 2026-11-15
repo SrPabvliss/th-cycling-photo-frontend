@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { NButton } from 'naive-ui'
 
@@ -95,6 +95,10 @@ const allLabel = computed(() =>
 
 // Without network the offline strip says it once: this alert does not repeat it.
 const online = useOnline()
+// A photo that failed without network is not a problem once it is back: the notice goes.
+watch(online, (isOnline) => {
+  if (isOnline) singleFailed.value = false
+})
 </script>
 
 <template>

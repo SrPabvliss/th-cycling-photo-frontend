@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { ref } from 'vue'
+import { nextTick, ref } from 'vue'
+
+const online = ref(true)
+vi.mock('@/core/network/use-online', () => ({ useOnline: () => online }))
 
 import type { ISequentialDownload } from './use-sequential-download'
 import DownloadAllButton from './DownloadAllButton.vue'
@@ -70,5 +73,20 @@ describe('DownloadAllButton', () => {
     const resume = wrapper.findAll('button').find((each) => each.text() === 'Continuar descarga')!
     await resume.trigger('click')
     expect(value.resume).toHaveBeenCalled()
+  })
+
+  it('drops the cut notice once the network is back, keeping the way to continue', async () => {
+    online.value = false
+    const value = download('failed', 0, 3)
+    const wrapper = mountButton(value)
+    expect(wrapper.find('.form-alert').exists()).toBe(true)
+
+    online.value = true
+    await nextTick()
+
+    expect(wrapper.find('.form-alert').exists()).toBe(false)
+    expect(wrapper.findAll('button').some((each) => each.text() === 'Continuar descarga')).toBe(
+      true,
+    )
   })
 })

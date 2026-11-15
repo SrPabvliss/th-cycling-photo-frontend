@@ -9,6 +9,9 @@ vi.mock('@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
   default: (await import('@/features/house-spots/testing/spot-stubs')).HouseSpotStub,
 }))
 
+const online = ref(true)
+vi.mock('@/core/network/use-online', () => ({ useOnline: () => online }))
+
 import DeliveryView from './DeliveryView.vue'
 
 const state = reactive({
@@ -141,6 +144,21 @@ describe('DeliveryView', () => {
     expect(wrapper.get('[role="alert"]').text()).toContain(
       'No pudimos descargar la foto. Intenta de nuevo.',
     )
+  })
+
+  it('drops the failed photo notice once the network is back', async () => {
+    online.value = false
+    downloadFile.mockRejectedValue(new Error('offline'))
+    const wrapper = await mountView()
+    await wrapper.findAll('button[aria-label="Descargar foto"]')[0]!.trigger('click')
+    await flushPromises()
+    expect(wrapper.text()).toContain('No pudimos descargar la foto. Intenta de nuevo.')
+
+    online.value = true
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('No pudimos descargar la foto.')
+    downloadFile.mockReset()
   })
 
   it.each(['network', 'unknown'] as const)(

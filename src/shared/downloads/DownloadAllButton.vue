@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { NButton } from 'naive-ui'
 
+import { useOnline } from '@/core/network/use-online'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { ProgressCount } from '@/shared/components/loading'
 import type { ISequentialDownload } from './use-sequential-download'
@@ -17,6 +18,17 @@ const total = computed(() => props.download.total.value)
 
 // Stopped or cut, it goes on from the first photo not downloaded, never from the start.
 const canContinue = computed(() => state.value === 'failed' || state.value === 'stopped')
+
+// A cut said while the network was gone stops applying once it is back: the notice goes, the
+// way to continue stays.
+const online = useOnline()
+const showsCut = ref(true)
+watch(state, (current) => {
+  if (current === 'failed') showsCut.value = true
+})
+watch(online, (isOnline) => {
+  if (isOnline) showsCut.value = false
+})
 
 const notice = computed(() => {
   if (state.value === 'done' && total.value > 0) {
@@ -59,7 +71,9 @@ const notice = computed(() => {
     </NButton>
 
     <!-- A cut download is a problem, painted like every other one; the button resumes it. -->
-    <FormAlert v-if="notice && state === 'failed'" tone="warn" :title="notice" />
+    <template v-if="state === 'failed'">
+      <FormAlert v-if="notice && showsCut" tone="warn" :title="notice" />
+    </template>
     <p v-else-if="notice" class="download-all__notice" role="status">
       {{ notice }}
     </p>
