@@ -10,6 +10,7 @@ import ProfileView from './ProfileView.vue'
 
 const state = reactive({
   status: 'success' as 'pending' | 'error' | 'success',
+  billingFailed: false,
   accounts: 2,
 })
 const refetch = vi.fn()
@@ -40,10 +41,14 @@ vi.mock('../../composables/queries/use-my-profile', () => ({
 }))
 vi.mock('../../composables/queries/use-my-billing-accounts', () => ({
   useMyBillingAccountsQuery: () => ({
-    data: computed(() => ({
-      accounts: Array.from({ length: state.accounts }, (_, index) => ({ id: `b${index}` })),
-      invoiceConsentGiven: true,
-    })),
+    data: computed(() =>
+      state.billingFailed
+        ? undefined
+        : {
+            accounts: Array.from({ length: state.accounts }, (_, index) => ({ id: `b${index}` })),
+            invoiceConsentGiven: true,
+          },
+    ),
   }),
 }))
 vi.mock('@/core/auth/use-logout', () => ({
@@ -156,6 +161,14 @@ describe('ProfileView (buyer)', () => {
     const { wrapper } = await mountView()
 
     expect(head(wrapper, 'Datos de facturación').text()).toContain('Ninguno')
+  })
+
+  it('says nothing about billing data that could not be read', async () => {
+    state.billingFailed = true
+    const { wrapper } = await mountView()
+
+    expect(head(wrapper, 'Datos de facturación').text()).not.toContain('Ninguno')
+    state.billingFailed = false
   })
 
   it('shows the shape of the profile while it loads', async () => {

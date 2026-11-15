@@ -59,8 +59,14 @@ const fullName = computed(() =>
 )
 const emailVerified = computed(() => session.currentUser?.emailVerified ?? false)
 const phoneCount = computed(() => profile.value?.phones.length ?? 0)
-const billingCount = computed(() => billing.value?.accounts.length ?? 0)
+
 const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`
+// Unread (loading or failed): the row says nothing, rather than "Ninguno" for data that may exist.
+const billingMeta = computed(() => {
+  if (!billing.value) return undefined
+  const count = billing.value.accounts.length
+  return count ? plural(count, 'guardado', 'guardados') : 'Ninguno'
+})
 </script>
 
 <template>
@@ -154,7 +160,7 @@ const plural = (count: number, one: string, many: string) => `${count} ${count =
           id="fact"
           title="Datos de facturación"
           icon="docu"
-          :meta="billingCount ? plural(billingCount, 'guardado', 'guardados') : 'Ninguno'"
+          :meta="billingMeta"
           :open="openSection === 'fact'"
           @update:open="setOpen('fact', $event)"
         >
