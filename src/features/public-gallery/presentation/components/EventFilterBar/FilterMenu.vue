@@ -97,7 +97,8 @@ const doneText = computed(() =>
         @click="close"
       />
 
-      <div ref="panel" class="filter-menu__panel" role="menu" :aria-label="label" tabindex="-1">
+      <!-- A dialog with a list of checkboxes (and a search): what a menu role does not allow. -->
+      <div ref="panel" class="filter-menu__panel" role="dialog" :aria-label="label" tabindex="-1">
         <p class="filter-menu__title" aria-hidden="true">{{ label }}</p>
 
         <slot />

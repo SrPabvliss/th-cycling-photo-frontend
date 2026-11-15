@@ -66,8 +66,11 @@ const KEYS: Record<string, string> = {
   Fecha: 'months',
 }
 const opener = (bar: Bar, name: string) => bar.wrapper.get(`[data-filter="${KEYS[name]}"]`)
-const menu = () => document.querySelector<HTMLElement>('[role="menu"]')
-const rows = () => Array.from(document.querySelectorAll<HTMLElement>('[role="menuitemcheckbox"]'))
+const menu = () => document.querySelector<HTMLElement>('.filter-menu [role="dialog"]')
+const rows = () =>
+  Array.from(document.querySelectorAll<HTMLElement>('.filter-menu [role="checkbox"]')).filter(
+    (each) => !each.classList.contains('filter-months__all'),
+  )
 const row = (name: string) => rows().find((each) => each.textContent?.includes(name))!
 const inMenu = (text: string) =>
   Array.from(menu()?.querySelectorAll<HTMLElement>('button') ?? []).find(
@@ -98,7 +101,7 @@ describe('EventFilterBar', () => {
 
     expect(labels(bar)).toEqual(['Disciplina', 'Provincia', 'Fecha'])
     bar.wrapper.findAll('.event-filter__open').forEach((button) => {
-      expect(button.attributes('aria-haspopup')).toBe('menu')
+      expect(button.attributes('aria-haspopup')).toBe('dialog')
       expect(button.attributes('aria-expanded')).toBe('false')
     })
     expect(menu()).toBeNull()
@@ -400,6 +403,48 @@ describe('EventFilterBar', () => {
     )
     expect(bar.wrapper.find('.event-filters > .event-filters__clear-all').exists()).toBe(true)
     expect(bar.wrapper.findAll('.event-filters__scroll .event-filter')).toHaveLength(3)
+  })
+
+  // A dialog with a list of checkboxes: the search inside is allowed, and the arrows move.
+  describe('the keyboard inside a menu', () => {
+    const press = (key: string) =>
+      document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }))
+    const focusedName = () => (document.activeElement as HTMLElement).textContent?.trim()
+
+    it('is a named dialog with checkboxes', async () => {
+      const bar = mountBar()
+      await openMenu(bar, 'Disciplina')
+
+      expect(menu()!.getAttribute('aria-label')).toBe('Disciplina')
+      expect(rows().every((each) => each.getAttribute('aria-checked') !== null)).toBe(true)
+    })
+
+    it('goes down from the search to the options and between them with the arrows', async () => {
+      const bar = mountBar()
+      await openMenu(bar, 'Disciplina')
+      menu()!.querySelector('input')!.focus()
+
+      press('ArrowDown')
+      expect(focusedName()).toContain('Downhill')
+      press('ArrowDown')
+      expect(focusedName()).toContain('Enduro')
+      press('ArrowUp')
+      expect(focusedName()).toContain('Downhill')
+      press('ArrowUp')
+      expect(document.activeElement).toBe(menu()!.querySelector('input'))
+    })
+
+    it('moves between months with the arrows, skipping the ones without events', async () => {
+      const bar = mountBar()
+      await openMenu(bar, 'Fecha')
+      const june = rows().find((each) => each.textContent?.trim().startsWith('Jun'))!
+      june.focus()
+
+      press('ArrowRight')
+      expect(focusedName()).toMatch(/^Ago/)
+      press('ArrowLeft')
+      expect(focusedName()).toMatch(/^Jun/)
+    })
   })
 
   describe('Fecha', () => {

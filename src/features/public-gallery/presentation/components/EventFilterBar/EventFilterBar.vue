@@ -120,7 +120,7 @@ useFocusHandOff(
           :ref="(element) => setButton(key, element)"
           type="button"
           class="event-filter__open tt-hit-area"
-          aria-haspopup="menu"
+          aria-haspopup="dialog"
           :aria-expanded="open === key ? 'true' : 'false'"
           :data-filter="key"
           @click="toggle(key)"

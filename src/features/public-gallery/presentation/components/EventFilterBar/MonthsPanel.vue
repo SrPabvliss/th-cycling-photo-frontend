@@ -61,6 +61,27 @@ const cells = computed(() =>
     }
   }),
 )
+// Arrows move between the months that can be tapped, across the grid of four.
+const GRID_COLUMNS = 4
+const MOVES: Record<string, number> = {
+  ArrowLeft: -1,
+  ArrowRight: 1,
+  ArrowUp: -GRID_COLUMNS,
+  ArrowDown: GRID_COLUMNS,
+}
+const grid = ref<HTMLElement | null>(null)
+function onGridKeydown(event: KeyboardEvent) {
+  const step = MOVES[event.key]
+  if (!step || !grid.value) return
+  const cellsOn = Array.from(grid.value.querySelectorAll<HTMLButtonElement>('.filter-month'))
+  let index = cellsOn.indexOf(event.target as HTMLButtonElement)
+  if (index < 0) return
+  event.preventDefault()
+  do index += step
+  while (cellsOn[index]?.disabled)
+  cellsOn[index]?.focus()
+}
+
 const yearCount = computed(() => cells.value.reduce((sum, cell) => sum + cell.count, 0))
 const isWholeYear = computed(
   () =>
@@ -103,7 +124,7 @@ const hint = computed(() =>
       type="button"
       class="filter-months__all"
       :class="{ 'filter-months__all--on': isWholeYear }"
-      role="menuitemcheckbox"
+      role="checkbox"
       :aria-checked="isWholeYear ? 'true' : 'false'"
       :disabled="yearCount === 0 && !isWholeYear"
       @click="range = pickYear(range, year)"
@@ -112,7 +133,7 @@ const hint = computed(() =>
       <span class="filter-months__all-count">{{ yearCount }}</span>
     </button>
 
-    <div class="filter-months__grid">
+    <div ref="grid" class="filter-months__grid" @keydown="onGridKeydown">
       <button
         v-for="cell in cells"
         :key="cell.key"
@@ -124,7 +145,7 @@ const hint = computed(() =>
           'filter-month--start': cell.isStart,
           'filter-month--end': cell.isEnd,
         }"
-        role="menuitemcheckbox"
+        role="checkbox"
         :aria-checked="cell.inRange ? 'true' : 'false'"
         :aria-label="`${cell.name} ${year}, ${cell.count}`"
         :disabled="cell.count === 0 && !cell.inRange"

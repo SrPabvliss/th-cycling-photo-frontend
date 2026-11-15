@@ -24,6 +24,21 @@ const shown = computed(() =>
 const isChosen = (id: number) => chosen.value.includes(id)
 const isIdle = (option: IPublicEventFilterOption) => option.count === 0 && !isChosen(option.id)
 
+// Down from the search to the options, and up and down between them; up from the first goes back
+// to the search.
+const root = ref<HTMLElement | null>(null)
+function onKeydown(event: KeyboardEvent) {
+  if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return
+  const search = root.value?.querySelector<HTMLInputElement>('.filter-options__search')
+  const options = Array.from(root.value?.querySelectorAll<HTMLElement>('.filter-option') ?? [])
+  const stops = [search, ...options].filter((each): each is HTMLElement => !!each)
+  const index = stops.indexOf(event.target as HTMLElement)
+  if (index < 0) return
+  event.preventDefault()
+  const next = event.key === 'ArrowDown' ? index + 1 : index - 1
+  stops[Math.max(0, Math.min(stops.length - 1, next))]?.focus()
+}
+
 function toggle(option: IPublicEventFilterOption) {
   if (isChosen(option.id)) chosen.value = chosen.value.filter((id) => id !== option.id)
   else if (!isIdle(option)) chosen.value = [...chosen.value, option.id]
@@ -31,7 +46,7 @@ function toggle(option: IPublicEventFilterOption) {
 </script>
 
 <template>
-  <div class="filter-options">
+  <div ref="root" class="filter-options" @keydown="onKeydown">
     <input
       v-model="search"
       class="filter-options__search"
@@ -48,7 +63,7 @@ function toggle(option: IPublicEventFilterOption) {
         type="button"
         class="filter-option"
         :class="{ 'filter-option--idle': option.count === 0 }"
-        role="menuitemcheckbox"
+        role="checkbox"
         :aria-checked="isChosen(option.id) ? 'true' : 'false'"
         :aria-disabled="isIdle(option) ? 'true' : undefined"
         :title="option.name"
