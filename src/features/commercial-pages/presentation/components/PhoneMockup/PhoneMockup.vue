@@ -24,9 +24,17 @@ defineProps<{ blocks: PhoneBlock[] }>()
         class="phone-mockup__mark"
         :class="`phone-mockup__mark--${block.shape}`"
       >
-        {{ block.text }}
+        <template v-if="block.short">
+          <span class="phone-mockup__label">{{ block.text }}</span>
+          <span class="phone-mockup__label phone-mockup__label--short">{{ block.short }}</span>
+        </template>
+        <template v-else>{{ block.text }}</template>
       </div>
       <div v-else-if="block.kind === 'field'" class="phone-mockup__field">{{ block.text }}</div>
+      <div v-else-if="block.kind === 'item'" class="phone-mockup__item">
+        <span class="phone-mockup__thumb" />
+        <span class="phone-mockup__row" />
+      </div>
       <div v-else :class="`phone-mockup__${block.kind}`" />
     </template>
   </div>
@@ -70,6 +78,31 @@ defineProps<{ blocks: PhoneBlock[] }>()
   flex: none;
   block-size: calc(var(--tt-space-6) + var(--tt-space-1) / 2);
   border-radius: var(--tt-radius-s);
+}
+
+.phone-mockup__cover {
+  flex: none;
+  block-size: 30%;
+  border-radius: var(--tt-radius-s);
+  background: var(--tt-line);
+}
+
+.phone-mockup__item {
+  flex: none;
+  display: flex;
+  gap: var(--tt-space-2);
+}
+
+.phone-mockup__item .phone-mockup__row {
+  flex: 1;
+}
+
+.phone-mockup__thumb {
+  flex: none;
+  inline-size: calc(var(--tt-space-6) + var(--tt-space-1) / 2);
+  block-size: calc(var(--tt-space-6) + var(--tt-space-1) / 2);
+  border-radius: var(--tt-radius-s);
+  background: var(--tt-line);
 }
 
 .phone-mockup__big {
@@ -124,6 +157,10 @@ defineProps<{ blocks: PhoneBlock[] }>()
   letter-spacing: 0.04em;
   text-align: center;
   text-transform: uppercase;
+}
+
+.phone-mockup__label--short {
+  display: none;
 }
 
 .phone-mockup__mark--band {
