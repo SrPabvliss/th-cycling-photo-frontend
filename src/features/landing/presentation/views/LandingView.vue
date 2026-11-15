@@ -68,7 +68,6 @@ const hasRecentSection = computed(() => status.value !== 'success' || recentEven
 
       <ErrorState
         v-if="hasFailed"
-        class="landing__problem"
         data-test="recent-problem"
         what="los eventos"
         :kind="problemKind(error)"

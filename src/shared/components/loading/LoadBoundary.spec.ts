@@ -147,8 +147,8 @@ describe('LoadBoundary', () => {
     expect(wrapper.find('.error-state--stacked').exists()).toBe(true)
   })
 
-  it('keeps the height of the skeleton when the load fails, so nothing jumps', async () => {
-    const wrapper = mountBoundary({ status: 'pending' })
+  it('stacked, keeps the height of the skeleton when the load fails', async () => {
+    const wrapper = mountBoundary({ status: 'pending', stacked: true })
     await vi.advanceTimersByTimeAsync(400)
     Object.defineProperty(wrapper.element, 'offsetHeight', { configurable: true, value: 180 })
 
@@ -156,6 +156,17 @@ describe('LoadBoundary', () => {
     await vi.advanceTimersByTimeAsync(400)
 
     expect(wrapper.get('.error-state').attributes('style')).toContain('--load-boundary-held: 180px')
+  })
+
+  it('compact or wide, takes only the height of its own content', async () => {
+    const wrapper = mountBoundary({ status: 'pending' })
+    await vi.advanceTimersByTimeAsync(400)
+    Object.defineProperty(wrapper.element, 'offsetHeight', { configurable: true, value: 180 })
+
+    await wrapper.setProps({ status: 'error' })
+    await vi.advanceTimersByTimeAsync(400)
+
+    expect(wrapper.get('.error-state').attributes('style')).toBeUndefined()
   })
 
   it('sets no height when nothing was painted before the error', () => {

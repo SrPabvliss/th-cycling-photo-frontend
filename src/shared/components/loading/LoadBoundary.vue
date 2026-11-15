@@ -40,8 +40,9 @@ const showSkeleton = useDelayedFlag(isPending)
 
 const kind = computed(() => (isOffline.value ? 'offline' : problemKind(props.error)))
 
-// What was painted before the error (the skeleton, mostly) keeps its height, so the error takes
-// its place without the page jumping. Read before the error replaces it.
+// A stacked error is all the screen has: it keeps the height of what was painted before it (the
+// skeleton, mostly), so the page does not shrink under the person. Compact and wide errors take
+// only their own height: stretched, they read as an empty box. Read before the error replaces it.
 const root = ref<HTMLElement | null>(null)
 const heldHeight = ref(0)
 const showsProblem = computed(() => props.status === 'error' || isOffline.value)
@@ -53,7 +54,9 @@ watch(
   { flush: 'pre' },
 )
 const errorStyle = computed(() =>
-  heldHeight.value > 0 ? { '--load-boundary-held': `${heldHeight.value}px` } : undefined,
+  props.stacked && heldHeight.value > 0
+    ? { '--load-boundary-held': `${heldHeight.value}px` }
+    : undefined,
 )
 
 const isBusy = computed(
@@ -99,7 +102,7 @@ const isBusy = computed(
 /* A long skeleton (a list of cards on a phone) would push the message below the fold: the held
    height stops at most of a screen. What is taller than that was out of sight anyway. Without a
    held height the declaration is dropped and the error takes its own height. */
-.load-boundary :deep(.error-state) {
+.load-boundary :deep(.error-state--stacked) {
   min-block-size: min(var(--load-boundary-held), 60dvh);
 }
 
