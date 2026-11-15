@@ -50,7 +50,7 @@ const total = computed(() => {
 // What went wrong, if anything. 'missing': no orders, or not the buyer's. 'not-payable': the
 // server will not charge these orders (paid already, cancelled). 'failed': nothing was charged
 // and trying again may work.
-const failure = computed<'missing' | 'not-payable' | 'failed' | null>(() => {
+const failure = computed<'missing' | 'not-payable' | 'is-transfer' | 'failed' | null>(() => {
   if (orderIds.value.length === 0) return 'missing'
   if (renderFailed.value || (intent.value && !gateway.value)) return 'failed'
 
@@ -58,9 +58,19 @@ const failure = computed<'missing' | 'not-payable' | 'failed' | null>(() => {
   if (!error) return null
   const status = isAxiosError(error) ? (error.response?.status ?? 0) : 0
   if (status === 403 || status === 404) return 'missing'
+  // Born to be paid by transfer: cards are not for it, and the order says how to pay it.
+  if (status === 422 && messageKeyOf(error) === 'payment.order_is_transfer') return 'is-transfer'
   if (status === 422) return 'not-payable'
   return 'failed'
 })
+
+function messageKeyOf(error: unknown): string | undefined {
+  return isAxiosError(error)
+    ? (error.response?.data?.error?.messageKey as string | undefined)
+    : undefined
+}
+
+const firstOrderPath = computed(() => `${ROUTE_PATHS.ACCOUNT}/orders/${orderIds.value[0] ?? ''}`)
 
 // Already in the buyer's language: the api translates it.
 const notPayableText = computed(() => {
@@ -115,7 +125,20 @@ watch(
     </div>
 
     <EmptyState
-      v-if="failure === 'not-payable'"
+      v-if="failure === 'is-transfer'"
+      illustration="fueraDelCamino"
+      title="Este pedido se paga por transferencia"
+      text="En el detalle del pedido ves cómo pagarlo."
+    >
+      <template #actions>
+        <NButton type="primary" size="large" block @click="router.push(firstOrderPath)">
+          Ver el pedido
+        </NButton>
+      </template>
+    </EmptyState>
+
+    <EmptyState
+      v-else-if="failure === 'not-payable'"
       illustration="fueraDelCamino"
       title="Este pedido ya no se puede pagar con tarjeta"
       :text="notPayableText"

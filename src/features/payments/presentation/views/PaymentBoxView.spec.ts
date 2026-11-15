@@ -211,6 +211,26 @@ describe('PaymentBoxView', () => {
     expect(push).toHaveBeenCalledWith({ name: 'account-orders' })
   })
 
+  it('says an order paid by transfer is paid that way, and leads to that order', async () => {
+    const response = {
+      status: 422,
+      data: {
+        error: { code: 'BUSINESS_RULE', messageKey: 'payment.order_is_transfer', message: 'x' },
+      },
+      headers: {},
+      config: {},
+    } as AxiosResponse
+    intentError.value = new AxiosError('failed', 'ERR_BAD_REQUEST', undefined, undefined, response)
+    const { wrapper } = await mountView()
+
+    expect(wrapper.get('h2, .empty-state__title').text()).toBe(
+      'Este pedido se paga por transferencia',
+    )
+    expect(wrapper.text()).not.toContain('ya no se puede pagar con tarjeta')
+    await buttonNamed(wrapper, 'Ver el pedido')!.trigger('click')
+    expect(push).toHaveBeenCalledWith('/account/orders/o1')
+  })
+
   it('goes back to the order of the event', async () => {
     const { wrapper } = await mountView()
 
