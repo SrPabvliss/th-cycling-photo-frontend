@@ -3,6 +3,7 @@ import axios, { AxiosError, type AxiosAdapter, type InternalAxiosRequestConfig }
 import { createPinia, setActivePinia } from 'pinia'
 
 import { useSessionStore } from '@/core/auth/stores/session.store'
+import { problemKind } from '../problem-kind'
 import { isSessionExpired } from '../session-expired'
 import { registerAuthInterceptor } from './auth.interceptor'
 
@@ -56,6 +57,76 @@ describe('auth interceptor', () => {
     expect(isSessionExpired(error)).toBe(true)
     expect(useSessionStore().isAuthenticated).toBe(false)
     expect(useSessionStore().expired).toBe(true)
+  })
+
+  describe('when the refresh itself does not get a "no"', () => {
+    // The request gets 401; the refresh answers what the test says.
+    function refreshAnswers(answer: (config: InternalAxiosRequestConfig) => never) {
+      const instance = axios.create({
+        adapter: async (config) => {
+          calls.push(config.url ?? '')
+          if (config.url === '/auth/refresh') answer(config)
+          const response = { status: 401, statusText: '', data: {}, headers: {}, config }
+          throw new AxiosError('unauthorized', 'ERR_BAD_REQUEST', config, undefined, response)
+        },
+      })
+      registerAuthInterceptor(instance)
+      return instance
+    }
+    const failWith =
+      (status: number) =>
+      (config: InternalAxiosRequestConfig): never => {
+        const response = { status, statusText: '', data: {}, headers: {}, config }
+        throw new AxiosError('failed', 'ERR_BAD_RESPONSE', config, undefined, response)
+      }
+
+    it.each([429, 500, 503])('keeps the session when the refresh answers %i', async (status) => {
+      useSessionStore().setAccessToken('old-token')
+
+      const error = await refreshAnswers(failWith(status))
+        .get('/orders/me')
+        .catch((reason: unknown) => reason)
+
+      expect(isSessionExpired(error)).toBe(false)
+      expect(useSessionStore().isAuthenticated).toBe(true)
+      expect(useSessionStore().expired).toBe(false)
+      expect(router.push).not.toHaveBeenCalled()
+    })
+
+    it('says "too many tries" for a refresh turned away for that, not that the session closed', async () => {
+      useSessionStore().setAccessToken('old-token')
+
+      const error = await refreshAnswers(failWith(429))
+        .get('/orders/me')
+        .catch((reason: unknown) => reason)
+
+      expect(problemKind(error)).toBe('rate')
+    })
+
+    // A deactivated account is refused with 422: the session ends, as for any refusal.
+    it('ends the session when the refresh is refused for the account (422)', async () => {
+      useSessionStore().setAccessToken('old-token')
+
+      const error = await refreshAnswers(failWith(422))
+        .get('/orders/me')
+        .catch((reason: unknown) => reason)
+
+      expect(isSessionExpired(error)).toBe(true)
+      expect(useSessionStore().expired).toBe(true)
+    })
+
+    it('keeps the session when the refresh gets no answer at all', async () => {
+      useSessionStore().setAccessToken('old-token')
+
+      await refreshAnswers((config) => {
+        throw new AxiosError('Network Error', 'ERR_NETWORK', config)
+      })
+        .get('/orders/me')
+        .catch(() => null)
+
+      expect(useSessionStore().isAuthenticated).toBe(true)
+      expect(useSessionStore().expired).toBe(false)
+    })
   })
 
   it('keeps the session when the refresh works and only the retried request fails', async () => {

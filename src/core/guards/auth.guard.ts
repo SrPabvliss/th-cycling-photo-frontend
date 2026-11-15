@@ -3,6 +3,7 @@ import type { Router } from 'vue-router'
 import { API_ROUTES } from '@/core/api/api-routes'
 import { getHomePath } from '@/core/auth/role-config'
 import { httpClient } from '@/core/http/axios-client'
+import { isSessionExpired } from '@/core/http/session-expired'
 import { toCurrentUser } from '@/core/auth/current-user.mapper'
 import { STANDALONE_PATHS } from '@/core/views/standalone-routes'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
@@ -26,9 +27,11 @@ async function hydrateSession(authStore: ReturnType<typeof useSessionStore>): Pr
     })
     const user = toCurrentUser(response.data)
     authStore.setSession(authStore.accessToken!, user)
-  } catch {
-    // Token invalid or expired — clear it
-    authStore.clearSession()
+  } catch (error) {
+    // Ended for good (the refresh said no): clear it. Too many tries, a server failure or no
+    // answer say nothing about the session: keep it, and read it again on the next screen.
+    if (isSessionExpired(error)) authStore.clearSession()
+    else isHydrated = false
   }
 }
 

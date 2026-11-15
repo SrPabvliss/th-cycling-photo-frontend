@@ -1,4 +1,9 @@
-import type { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios'
+import {
+  isAxiosError,
+  type AxiosError,
+  type AxiosInstance,
+  type InternalAxiosRequestConfig,
+} from 'axios'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { useSessionStore } from '@/core/auth/stores/session.store'
@@ -20,6 +25,15 @@ function processQueue(error: unknown, token: string | null) {
     }
   }
   _failedQueue = []
+}
+
+// The refresh refused: no valid refresh cookie, a deactivated account (422)... Any answer of the
+// client family but "too many tries" (429) and a timeout (408) ends the session.
+const NOT_REFUSALS = new Set([408, 429])
+
+function isRefusal(error: unknown): boolean {
+  const status = isAxiosError(error) ? error.response?.status : undefined
+  return status !== undefined && status >= 400 && status < 500 && !NOT_REFUSALS.has(status)
 }
 
 export function registerAuthInterceptor(axios: AxiosInstance): void {
@@ -76,6 +90,14 @@ export function registerAuthInterceptor(axios: AxiosInstance): void {
 
       processQueue(null, newToken)
     } catch (refreshError) {
+      // Only a "no" to the refresh ends the session. Too many tries (429), a server failure or no
+      // answer at all say nothing about it: the session stays, and the requests fail with that
+      // reason, which each screen words as such ("Demasiados intentos", no connection...).
+      if (!isRefusal(refreshError)) {
+        processQueue(refreshError, null)
+        return Promise.reject(refreshError)
+      }
+
       // Every request waiting on this refresh failed for the same reason: the session expired.
       const expired = new SessionExpiredError(refreshError)
       processQueue(expired, null)

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
+import { AxiosError, type AxiosResponse } from 'axios'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 const get = vi.fn()
@@ -67,5 +68,57 @@ describe('auth guard', () => {
     expect(await navigate('/login?redirect=/account/orders')).toBe(
       '/login?redirect=/account/orders',
     )
+  })
+
+  describe('when the session cannot be read on arrival', () => {
+    const tooMany = () => {
+      const response = { status: 429, data: {}, headers: {}, config: {} } as AxiosResponse
+      return new AxiosError('too many', 'ERR_BAD_REQUEST', undefined, undefined, response)
+    }
+
+    // A fresh app: the session is read on the first navigation only.
+    async function arrive(path: string) {
+      vi.resetModules()
+      localStorage.setItem('titan_access_token', 'old-token')
+      setActivePinia(createPinia())
+      const { registerAuthGuard: register } = await import('./auth.guard')
+      const { useSessionStore: store } = await import('@/core/auth/stores/session.store')
+      const Screen = { render: () => null }
+      const router = createRouter({
+        history: createMemoryHistory(),
+        routes: [
+          { path: '/', component: Screen, meta: { public: true } },
+          { path: '/login', component: Screen, meta: { public: true } },
+          { path: '/account/orders', component: Screen },
+        ],
+      })
+      register(router)
+      await router.push(path)
+      return { path: router.currentRoute.value.fullPath, session: store() }
+    }
+
+    // Too many tries or no answer say nothing about the session: it stays, and is read again on
+    // the next screen.
+    it('keeps the session, and the screen that needs it, when it was only too many tries', async () => {
+      get.mockReset().mockRejectedValueOnce(tooMany()).mockResolvedValue({ data: BUYER })
+
+      const { path, session } = await arrive('/account/orders')
+
+      expect(path).toBe('/account/orders')
+      expect(session.isAuthenticated).toBe(true)
+    })
+
+    it('ends it when it expired', async () => {
+      // Imported when it is thrown: the fresh app has its own copy of the class.
+      get.mockReset().mockImplementation(async () => {
+        const { SessionExpiredError } = await import('@/core/http/session-expired')
+        throw new SessionExpiredError()
+      })
+
+      const { path, session } = await arrive('/account/orders')
+
+      expect(path).toBe('/login?redirect=/account/orders')
+      expect(session.isAuthenticated).toBe(false)
+    })
   })
 })
