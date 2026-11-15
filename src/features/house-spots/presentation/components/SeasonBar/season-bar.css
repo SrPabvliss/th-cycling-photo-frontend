@@ -13,6 +13,14 @@
   overflow: hidden;
 }
 
+.season-bar__link {
+  position: absolute;
+  inset: 0;
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
 .season-bar__content :deep(.season-bar__slide) {
   position: absolute;
   inset: 0;

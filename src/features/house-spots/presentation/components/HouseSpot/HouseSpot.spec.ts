@@ -15,7 +15,10 @@ vi.mock('../../../pieces/piece-loaders', () => ({
   loadMaskUrl: async () => '/helmet-mask.webp',
 }))
 
+import { createMemoryHistory, createRouter, type Router } from 'vue-router'
+
 import { resetPieceCache } from '../../../composables/use-spot-pieces'
+import { SPOTS_STARTED_AT } from '../../../utils/spot-rotation'
 import HouseSpot from './HouseSpot.vue'
 
 const STYLE = (name: string) =>
@@ -53,6 +56,21 @@ function setReducedMotion(reduced: boolean) {
   })) as unknown as typeof window.matchMedia
 }
 
+const Page = { render: () => null }
+let router: Router
+
+function mountSpot(props: { format: 'A' | 'B' | 'C' | 'D' | 'AB'; seed: number }) {
+  router = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/', component: Page },
+      { path: '/anunciate', component: Page },
+      { path: '/organizadores', component: Page },
+    ],
+  })
+  return mount(HouseSpot, { props, global: { plugins: [router] } })
+}
+
 describe('HouseSpot', () => {
   beforeEach(() => {
     config.SPOTS_ENABLED = true
@@ -65,17 +83,17 @@ describe('HouseSpot', () => {
   afterEach(() => vi.unstubAllGlobals())
 
   it('reserves the space of its format before loading anything', () => {
-    const wrapper = mount(HouseSpot, { props: { format: 'D', seed: 31 } })
+    const wrapper = mountSpot({ format: 'D', seed: 31 })
 
     const region = wrapper.get('[role="region"]')
     expect(region.attributes('aria-label')).toBe('Espacio publicitario')
     expect(region.attributes('aria-roledescription')).toBe('carrusel')
-    expect(region.attributes('style')).toContain('aspect-ratio: 32 / 5')
+    expect(wrapper.get('.house-spot__frame').attributes('style')).toContain('aspect-ratio: 32 / 5')
     expect(loaders.D).not.toHaveBeenCalled()
   })
 
   it('loads near the screen and shows four styles, the organizer message on one of them', async () => {
-    const wrapper = mount(HouseSpot, { props: { format: 'D', seed: 31 } })
+    const wrapper = mountSpot({ format: 'D', seed: 31 })
 
     reveal()
     await flushPromises()
@@ -88,20 +106,21 @@ describe('HouseSpot', () => {
     expect(slides[0]!.text()).toContain('topo: Tu marca aquí')
   })
 
-  it('hides its moving content from screen readers and from the keyboard', async () => {
-    const wrapper = mount(HouseSpot, { props: { format: 'D', seed: 31 } })
+  it('hides its moving content from screen readers and from the keyboard, all but one link', async () => {
+    const wrapper = mountSpot({ format: 'D', seed: 31 })
     reveal()
     await flushPromises()
 
     const content = wrapper.get('.house-spot__slides')
     expect(content.attributes('aria-hidden')).toBe('true')
     expect(content.attributes('inert')).toBeDefined()
-    expect(wrapper.find('a, button, input, [tabindex]').exists()).toBe(false)
+    expect(wrapper.findAll('a, button, input, [tabindex]')).toHaveLength(1)
+    expect(wrapper.get('a').element.contains(content.element)).toBe(true)
   })
 
   it('leaves nothing behind when the banners cannot be downloaded', async () => {
     loaders.D.mockRejectedValue(new Error('blocked'))
-    const wrapper = mount(HouseSpot, { props: { format: 'D', seed: 31 } })
+    const wrapper = mountSpot({ format: 'D', seed: 31 })
 
     reveal()
     await flushPromises()
@@ -112,7 +131,7 @@ describe('HouseSpot', () => {
 
   it('shows nothing and downloads nothing when ads are switched off', async () => {
     config.SPOTS_ENABLED = false
-    const wrapper = mount(HouseSpot, { props: { format: 'D', seed: 31 } })
+    const wrapper = mountSpot({ format: 'D', seed: 31 })
 
     reveal()
     await flushPromises()
@@ -123,7 +142,7 @@ describe('HouseSpot', () => {
 
   it('shows one still style with reduced motion', async () => {
     setReducedMotion(true)
-    const wrapper = mount(HouseSpot, { props: { format: 'D', seed: 31 } })
+    const wrapper = mountSpot({ format: 'D', seed: 31 })
 
     reveal()
     await flushPromises()
@@ -134,7 +153,7 @@ describe('HouseSpot', () => {
 
   it('shows position dots only on the wide carousels', async () => {
     loaders.A.mockResolvedValue({ default: FILE })
-    const wrapper = mount(HouseSpot, { props: { format: 'A', seed: 3 } })
+    const wrapper = mountSpot({ format: 'A', seed: 3 })
 
     reveal()
     await flushPromises()
@@ -159,10 +178,107 @@ describe('HouseSpot', () => {
     const problem = mount(Problem, { attachTo: host })
     await nextTick()
 
-    const wrapper = mount(HouseSpot, { props: { format: 'D', seed: 31 } })
+    const wrapper = mountSpot({ format: 'D', seed: 31 })
 
     expect(wrapper.html()).toBe('<!--v-if-->')
     problem.unmount()
     host.remove()
+  })
+
+  describe('destination', () => {
+    // Seed 31: the organizer message is on slide 3, which is the one on screen when the visit starts.
+    const at = (seconds: number) => vi.setSystemTime(SPOTS_STARTED_AT + seconds * 1000)
+    const link = (wrapper: ReturnType<typeof mountSpot>) => wrapper.get('a.house-spot__frame')
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date', 'setInterval', 'clearInterval'] })
+      at(0)
+    })
+    afterEach(() => vi.useRealTimers())
+
+    it('leads to the page of the slide on screen, named after it, through the four slides', async () => {
+      const wrapper = mountSpot({ format: 'D', seed: 31 })
+      reveal()
+      await flushPromises()
+
+      const seen = []
+      for (let slide = 0; slide < 4; slide++) {
+        seen.push([link(wrapper).attributes('href'), link(wrapper).attributes('aria-label')])
+        vi.advanceTimersByTime(6000)
+        await flushPromises()
+      }
+
+      expect(seen).toEqual([
+        ['/organizadores', 'Titan cubre tu carrera'],
+        ['/anunciate', 'Anúnciate en Titan'],
+        ['/anunciate', 'Anúnciate en Titan'],
+        ['/anunciate', 'Anúnciate en Titan'],
+      ])
+    })
+
+    it('goes, on a click, to the page of the slide on screen at that moment', async () => {
+      const wrapper = mountSpot({ format: 'D', seed: 31 })
+      reveal()
+      await flushPromises()
+
+      at(6.5)
+      await link(wrapper).trigger('click', { button: 0 })
+      await flushPromises()
+      expect(router.currentRoute.value.path).toBe('/anunciate')
+
+      at(24)
+      await link(wrapper).trigger('click', { button: 0 })
+      await flushPromises()
+      expect(router.currentRoute.value.path).toBe('/organizadores')
+    })
+
+    it('follows a paused animation rather than the clock', async () => {
+      const wrapper = mountSpot({ format: 'D', seed: 31 })
+      reveal()
+      await flushPromises()
+      // Stopped on slide 3 (organizers) while the clock already says slide 1 (brands).
+      const stopped = [0.5, 0.75, 0.9, 0.1]
+      wrapper.findAll('.house-spot__slide').forEach((slide, index) => {
+        Object.assign(slide.element, {
+          getAnimations: () => [
+            { effect: { getComputedTiming: () => ({ progress: stopped[index] }) } },
+          ],
+        })
+      })
+
+      at(9)
+      await link(wrapper).trigger('click', { button: 0 })
+      await flushPromises()
+
+      expect(router.currentRoute.value.path).toBe('/organizadores')
+      vi.advanceTimersByTime(1000)
+      await flushPromises()
+      expect(link(wrapper).attributes('aria-label')).toBe('Titan cubre tu carrera')
+    })
+
+    it('leads to the page of its only slide with reduced motion', async () => {
+      setReducedMotion(true)
+      const wrapper = mountSpot({ format: 'D', seed: 31 })
+      reveal()
+      await flushPromises()
+
+      expect(link(wrapper).attributes('href')).toBe('/anunciate')
+      await link(wrapper).trigger('click', { button: 0 })
+      await flushPromises()
+      expect(router.currentRoute.value.path).toBe('/anunciate')
+    })
+
+    it('leaves a click with a modifier to the browser (new tab)', async () => {
+      const wrapper = mountSpot({ format: 'D', seed: 31 })
+      reveal()
+      await flushPromises()
+
+      const event = new MouseEvent('click', { button: 0, ctrlKey: true, cancelable: true })
+      link(wrapper).element.dispatchEvent(event)
+      await flushPromises()
+
+      expect(event.defaultPrevented).toBe(false)
+      expect(router.currentRoute.value.path).toBe('/')
+    })
   })
 })

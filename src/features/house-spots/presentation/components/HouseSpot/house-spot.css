@@ -9,6 +9,9 @@
 
 .house-spot__frame {
   position: relative;
+  display: block;
+  color: inherit;
+  text-decoration: none;
   isolation: isolate;
   inline-size: 100%;
   overflow: hidden;

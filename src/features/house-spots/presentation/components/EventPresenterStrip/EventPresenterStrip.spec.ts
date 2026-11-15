@@ -15,6 +15,8 @@ vi.mock('../../../pieces/piece-loaders', () => ({
   loadMaskUrl: async () => '/helmet-mask.webp',
 }))
 
+import { createMemoryHistory, createRouter, type Router } from 'vue-router'
+
 import { resetPieceCache } from '../../../composables/use-spot-pieces'
 import EventPresenterStrip from './EventPresenterStrip.vue'
 
@@ -45,6 +47,21 @@ function setMedia({ wide = false, reduced = false } = {}) {
   })) as unknown as typeof window.matchMedia
 }
 
+const Page = { render: () => null }
+let router: Router
+
+function withRouter() {
+  router = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/', component: Page },
+      { path: '/anunciate', component: Page },
+      { path: '/organizadores', component: Page },
+    ],
+  })
+  return { global: { plugins: [router] } }
+}
+
 describe('EventPresenterStrip', () => {
   beforeEach(() => {
     config.SPOTS_ENABLED = true
@@ -59,7 +76,7 @@ describe('EventPresenterStrip', () => {
   afterEach(() => vi.unstubAllGlobals())
 
   it('reserves its height as one ad region before loading', () => {
-    const wrapper = mount(EventPresenterStrip)
+    const wrapper = mount(EventPresenterStrip, withRouter())
 
     const region = wrapper.get('[role="region"]')
     expect(region.attributes('aria-label')).toBe('Espacio publicitario')
@@ -68,7 +85,7 @@ describe('EventPresenterStrip', () => {
   })
 
   it('loads the narrow strip on a phone and starts each slide at its own point', async () => {
-    const wrapper = mount(EventPresenterStrip)
+    const wrapper = mount(EventPresenterStrip, withRouter())
 
     reveal()
     await flushPromises()
@@ -84,7 +101,7 @@ describe('EventPresenterStrip', () => {
 
   it('loads the wide strip from 768 px', async () => {
     setMedia({ wide: true })
-    mount(EventPresenterStrip)
+    mount(EventPresenterStrip, withRouter())
 
     reveal()
     await flushPromises()
@@ -93,7 +110,7 @@ describe('EventPresenterStrip', () => {
   })
 
   it('keeps its content away from screen readers and the keyboard', async () => {
-    const wrapper = mount(EventPresenterStrip)
+    const wrapper = mount(EventPresenterStrip, withRouter())
     reveal()
     await flushPromises()
 
@@ -104,20 +121,20 @@ describe('EventPresenterStrip', () => {
 
   it('takes no space when it cannot be downloaded, and none when ads are off', async () => {
     loaders['presenter-narrow'].mockRejectedValue(new Error('blocked'))
-    const failed = mount(EventPresenterStrip)
+    const failed = mount(EventPresenterStrip, withRouter())
     reveal()
     await flushPromises()
     expect(failed.html()).toBe('<!--v-if-->')
 
     config.SPOTS_ENABLED = false
     resetPieceCache()
-    const off = mount(EventPresenterStrip)
+    const off = mount(EventPresenterStrip, withRouter())
     expect(off.html()).toBe('<!--v-if-->')
   })
 
   it('holds still on the first slide with reduced motion', async () => {
     setMedia({ reduced: true })
-    const wrapper = mount(EventPresenterStrip)
+    const wrapper = mount(EventPresenterStrip, withRouter())
 
     reveal()
     await flushPromises()
@@ -141,10 +158,25 @@ describe('EventPresenterStrip', () => {
     const problem = mount(Problem, { attachTo: host })
     await nextTick()
 
-    const wrapper = mount(EventPresenterStrip, { props: {} })
+    const wrapper = mount(EventPresenterStrip, { props: {}, ...withRouter() })
 
     expect(wrapper.html()).toBe('<!--v-if-->')
     problem.unmount()
     host.remove()
+  })
+
+  it('is one link, always to the brands page: every slide of the strip speaks to brands', async () => {
+    const wrapper = mount(EventPresenterStrip, withRouter())
+    reveal()
+    await flushPromises()
+
+    const link = wrapper.get('a.presenter-strip__link')
+    expect(wrapper.findAll('a')).toHaveLength(1)
+    expect(link.attributes('href')).toBe('/anunciate')
+    expect(link.attributes('aria-label')).toBe('Anúnciate en Titan')
+
+    await link.trigger('click', { button: 0 })
+    await flushPromises()
+    expect(router.currentRoute.value.path).toBe('/anunciate')
   })
 })

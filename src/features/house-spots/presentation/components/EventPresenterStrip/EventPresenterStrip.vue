@@ -3,15 +3,18 @@ import { computed, ref, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 
 import { hasScreenProblem } from '@/core/layout/client/screen-problem'
+import { COMMERCIAL_PAGE_PATHS } from '@/shared/constants/commercial'
 import { SPOTS_ENABLED } from '../../../spots-config'
 import { useSpotPieces } from '../../../composables/use-spot-pieces'
 import { useNearScreen } from '../../../composables/use-near-screen'
+import { SPOT_LINK_LABEL } from '../../../composables/use-spot-destination'
 import { SPOTS_STARTED_AT, fillPiece, slideDelay } from '../../../utils/spot-rotation'
 
 const SLIDES = 4
 
 // The "this event is presented by" strip of the gallery, for now with Titan's own pieces: a
-// narrow strip on phones and a wide one from 768 px. Decorative, like every house ad.
+// narrow strip on phones and a wide one from 768 px. Decorative, like every house ad; every slide
+// speaks to brands, so the whole strip is one link to their page.
 const props = withDefaults(defineProps<{ seed?: number }>(), { seed: 2 })
 
 const isWide = useMediaQuery('(min-width: 768px)')
@@ -59,7 +62,13 @@ const isGone = computed(() => !SPOTS_ENABLED || loaded.value.failed.value || has
       aria-roledescription="carrusel"
       aria-label="Espacio publicitario"
     >
-      <div class="presenter-strip__content" aria-hidden="true" inert v-html="html" />
+      <RouterLink
+        class="presenter-strip__link"
+        :to="COMMERCIAL_PAGE_PATHS.marca"
+        :aria-label="SPOT_LINK_LABEL.marca"
+      >
+        <div class="presenter-strip__content" aria-hidden="true" inert v-html="html" />
+      </RouterLink>
     </div>
   </div>
 </template>

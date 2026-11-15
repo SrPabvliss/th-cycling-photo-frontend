@@ -15,7 +15,10 @@ vi.mock('../../../pieces/piece-loaders', () => ({
   loadMaskUrl: async () => '/helmet-mask.webp',
 }))
 
+import { createMemoryHistory, createRouter, type Router } from 'vue-router'
+
 import { resetPieceCache } from '../../../composables/use-spot-pieces'
+import { SPOTS_STARTED_AT } from '../../../utils/spot-rotation'
 import SeasonBar from './SeasonBar.vue'
 
 const STYLE = (name: string) => `<div><b>${name}: {{titleM}}</b><i>{{maskUrl}}</i></div>`
@@ -52,6 +55,21 @@ function setMedia({ wide = false, reduced = false } = {}) {
   })) as unknown as typeof window.matchMedia
 }
 
+const Page = { render: () => null }
+let router: Router
+
+function withRouter() {
+  router = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/', component: Page },
+      { path: '/anunciate', component: Page },
+      { path: '/organizadores', component: Page },
+    ],
+  })
+  return { global: { plugins: [router] } }
+}
+
 describe('SeasonBar', () => {
   beforeEach(() => {
     config.SPOTS_ENABLED = true
@@ -66,7 +84,7 @@ describe('SeasonBar', () => {
   afterEach(() => vi.unstubAllGlobals())
 
   it('reserves its height as an ad region before loading', () => {
-    const wrapper = mount(SeasonBar)
+    const wrapper = mount(SeasonBar, withRouter())
 
     const region = wrapper.get('[role="region"]')
     expect(region.attributes('aria-label')).toBe('Espacio publicitario')
@@ -75,7 +93,7 @@ describe('SeasonBar', () => {
   })
 
   it('loads the narrow bar on a phone and rotates four styles inside its frame', async () => {
-    const wrapper = mount(SeasonBar)
+    const wrapper = mount(SeasonBar, withRouter())
 
     reveal()
     await flushPromises()
@@ -91,7 +109,7 @@ describe('SeasonBar', () => {
 
   it('loads the wide bar from 768 px', async () => {
     setMedia({ wide: true })
-    mount(SeasonBar)
+    mount(SeasonBar, withRouter())
 
     reveal()
     await flushPromises()
@@ -101,7 +119,7 @@ describe('SeasonBar', () => {
   })
 
   it('keeps its content away from screen readers and the keyboard', async () => {
-    const wrapper = mount(SeasonBar)
+    const wrapper = mount(SeasonBar, withRouter())
     reveal()
     await flushPromises()
 
@@ -112,7 +130,7 @@ describe('SeasonBar', () => {
 
   it('takes no space when the bar cannot be downloaded', async () => {
     loaders['season-narrow'].mockRejectedValue(new Error('blocked'))
-    const wrapper = mount(SeasonBar)
+    const wrapper = mount(SeasonBar, withRouter())
 
     reveal()
     await flushPromises()
@@ -122,7 +140,7 @@ describe('SeasonBar', () => {
 
   it('shows nothing and downloads nothing when ads are off', async () => {
     config.SPOTS_ENABLED = false
-    const wrapper = mount(SeasonBar)
+    const wrapper = mount(SeasonBar, withRouter())
 
     reveal()
     await flushPromises()
@@ -133,11 +151,56 @@ describe('SeasonBar', () => {
 
   it('stays on one style with reduced motion', async () => {
     setMedia({ reduced: true })
-    const wrapper = mount(SeasonBar)
+    const wrapper = mount(SeasonBar, withRouter())
 
     reveal()
     await flushPromises()
 
     expect(wrapper.findAll('.season-bar__slide')).toHaveLength(1)
+  })
+
+  describe('destination', () => {
+    // Seed 13: the organizer message is on slide 1, the one on screen when the visit starts.
+    const at = (seconds: number) => vi.setSystemTime(SPOTS_STARTED_AT + seconds * 1000)
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date', 'setInterval', 'clearInterval'] })
+      at(0)
+    })
+    afterEach(() => vi.useRealTimers())
+
+    it('is one link to the page of the slide on screen, through the four slides', async () => {
+      const wrapper = mount(SeasonBar, withRouter())
+      reveal()
+      await flushPromises()
+
+      const seen = []
+      for (let slide = 0; slide < 4; slide++) {
+        const link = wrapper.get('a.season-bar__link')
+        seen.push([link.attributes('href'), link.attributes('aria-label')])
+        vi.advanceTimersByTime(6000)
+        await flushPromises()
+      }
+
+      expect(wrapper.findAll('a')).toHaveLength(1)
+      expect(seen).toEqual([
+        ['/organizadores', 'Titan cubre tu carrera'],
+        ['/anunciate', 'Anúnciate en Titan'],
+        ['/anunciate', 'Anúnciate en Titan'],
+        ['/anunciate', 'Anúnciate en Titan'],
+      ])
+    })
+
+    it('goes, on a click, to the page of the slide on screen at that moment', async () => {
+      const wrapper = mount(SeasonBar, withRouter())
+      reveal()
+      await flushPromises()
+
+      at(7)
+      await wrapper.get('a.season-bar__link').trigger('click', { button: 0 })
+      await flushPromises()
+
+      expect(router.currentRoute.value.path).toBe('/anunciate')
+    })
   })
 })

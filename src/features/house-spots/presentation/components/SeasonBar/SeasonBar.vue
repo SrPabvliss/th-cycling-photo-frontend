@@ -6,12 +6,9 @@ import { SPOTS_ENABLED } from '../../../spots-config'
 import { PIECE_COPY } from '../../../pieces/piece-copy'
 import { useSpotPieces } from '../../../composables/use-spot-pieces'
 import { useNearScreen } from '../../../composables/use-near-screen'
-import {
-  SPOTS_STARTED_AT,
-  fillPiece,
-  organizerSlide,
-  slideDelay,
-} from '../../../utils/spot-rotation'
+import { useSpotDestination } from '../../../composables/use-spot-destination'
+import { SPOTS_STARTED_AT, fillPiece, slideDelay } from '../../../utils/spot-rotation'
+import { slideMessage } from '../../../utils/visible-slide'
 
 const STYLES = ['topo', 'casco', 'textura', 'facetado'] as const
 
@@ -37,10 +34,9 @@ watch(
 const html = computed(() => {
   const file = loaded.value.piece.value
   if (!file?.frame) return ''
-  const organizerAt = organizerSlide(props.seed)
   const now = Date.now()
   const slides = STYLES.map((style, index) => {
-    const copy = PIECE_COPY.E[index === organizerAt ? 'organizador' : 'marca']
+    const copy = PIECE_COPY.E[slideMessage(index, props.seed)]
     const delay = slideDelay(index, props.seed, SPOTS_STARTED_AT, now)
     const piece = fillPiece(file.styles?.[style] ?? '', { ...copy, maskUrl: file.maskUrl ?? '' })
     return `<span class="season-bar__slide" style="animation-delay: ${delay}">${piece}</span>`
@@ -48,6 +44,13 @@ const html = computed(() => {
   return fillPiece(file.frame, {
     slides: (reducedMotion.value ? slides.slice(0, 1) : slides).join(''),
   })
+})
+
+// One link over the whole bar, to the page of the message on screen.
+const destination = useSpotDestination(root, {
+  slideSelector: '.season-bar__slide',
+  seed: () => props.seed,
+  still: () => reducedMotion.value,
 })
 
 const isGone = computed(() => !SPOTS_ENABLED || loaded.value.failed.value)
@@ -61,7 +64,14 @@ const isGone = computed(() => !SPOTS_ENABLED || loaded.value.failed.value)
       aria-roledescription="carrusel"
       aria-label="Espacio publicitario"
     >
-      <div class="season-bar__content" aria-hidden="true" inert v-html="html" />
+      <a
+        class="season-bar__link"
+        :href="destination.href.value"
+        :aria-label="destination.label.value"
+        @click="destination.follow"
+      >
+        <div class="season-bar__content" aria-hidden="true" inert v-html="html" />
+      </a>
     </div>
   </div>
 </template>

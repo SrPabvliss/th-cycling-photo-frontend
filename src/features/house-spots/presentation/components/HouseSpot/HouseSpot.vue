@@ -7,17 +7,15 @@ import { SPOT_RATIO, SPOTS_ENABLED, type SpotFormat } from '../../../spots-confi
 import { PIECE_COPY } from '../../../pieces/piece-copy'
 import { useSpotPieces } from '../../../composables/use-spot-pieces'
 import { useNearScreen } from '../../../composables/use-near-screen'
-import {
-  SPOTS_STARTED_AT,
-  fillPiece,
-  organizerSlide,
-  slideDelay,
-} from '../../../utils/spot-rotation'
+import { useSpotDestination } from '../../../composables/use-spot-destination'
+import { SPOTS_STARTED_AT, fillPiece, slideDelay } from '../../../utils/spot-rotation'
+import { slideMessage } from '../../../utils/visible-slide'
 
 const STYLES = ['topo', 'casco', 'textura', 'facetado'] as const
 
 // A house ad: it keeps the shape of its format from the first paint and rotates four styles.
-// The banners are decorative, so the moving part is hidden from screen readers and the keyboard.
+// The banners are decorative, so the moving part is hidden from screen readers and the keyboard;
+// the whole piece is one link, to the page of the message on screen.
 const props = defineProps<{
   /** 'AB': the 2:1 piece below 768 px, the 5:1 piece from there. */
   format: SpotFormat | 'AB'
@@ -52,10 +50,9 @@ watch(
 const slides = computed(() => {
   const file = loaded.value.piece.value
   if (!file) return []
-  const organizerAt = organizerSlide(props.seed)
   const now = Date.now()
   const all = STYLES.map((style, index) => {
-    const message = index === organizerAt ? 'organizador' : 'marca'
+    const message = slideMessage(index, props.seed)
     const html =
       (message === 'organizador' && file.organizer?.[style]) || file.styles?.[style] || ''
     return {
@@ -68,6 +65,12 @@ const slides = computed(() => {
     }
   })
   return reducedMotion.value ? all.slice(0, 1) : all
+})
+
+const destination = useSpotDestination(root, {
+  slideSelector: '.house-spot__slide',
+  seed: () => props.seed,
+  still: () => reducedMotion.value,
 })
 
 const hasDots = computed(
@@ -84,13 +87,21 @@ watch(
 </script>
 
 <template>
-  <div v-if="!isGone" ref="root" class="house-spot" :class="`house-spot--${format}`">
-    <div
+  <div
+    v-if="!isGone"
+    ref="root"
+    class="house-spot"
+    :class="`house-spot--${format}`"
+    role="region"
+    aria-roledescription="carrusel"
+    aria-label="Espacio publicitario"
+  >
+    <a
       class="house-spot__frame"
-      role="region"
-      aria-roledescription="carrusel"
-      aria-label="Espacio publicitario"
+      :href="destination.href.value"
+      :aria-label="destination.label.value"
       :style="{ aspectRatio: SPOT_RATIO[format] }"
+      @click="destination.follow"
     >
       <div class="house-spot__slides" aria-hidden="true" inert>
         <!-- Generated banner files only (scripts/sync-house-pieces.mjs): never API or URL data. -->
@@ -103,7 +114,7 @@ watch(
           v-html="slide.html"
         />
       </div>
-    </div>
+    </a>
     <div v-if="hasDots" class="house-spot__dots" aria-hidden="true">
       <span
         v-for="(slide, index) in slides"

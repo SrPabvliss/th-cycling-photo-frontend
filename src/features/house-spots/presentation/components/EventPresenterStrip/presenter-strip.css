@@ -64,3 +64,11 @@
     border-radius: var(--tt-radius-l);
   }
 }
+
+.presenter-strip__link {
+  position: absolute;
+  inset: 0;
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
