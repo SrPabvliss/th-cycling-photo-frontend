@@ -139,62 +139,68 @@ const moreProblem = computed(() =>
       <template v-if="knownTotal !== null">{{ eventsCountText(knownTotal) }}</template>
     </p>
 
-    <LoadBoundary
-      :status="listStatus"
-      :empty="isEmpty"
-      :refreshing="isRefreshing"
-      what="los eventos"
-      :error="error"
-      stacked
-      @retry="refetch()"
+    <!-- Keeps room while the list loads (the skeleton waits a moment): the footer does not jump. -->
+    <div
+      class="event-list__body"
+      :class="{ 'event-list__body--loading': listStatus === 'pending' }"
     >
-      <template #skeleton>
-        <div class="event-list__grid" aria-label="Cargando eventos">
-          <PublicEventCardSkeleton v-for="n in SKELETON_COUNT" :key="n" />
-        </div>
-      </template>
+      <LoadBoundary
+        :status="listStatus"
+        :empty="isEmpty"
+        :refreshing="isRefreshing"
+        what="los eventos"
+        :error="error"
+        stacked
+        @retry="refetch()"
+      >
+        <template #skeleton>
+          <div class="event-list__grid" aria-label="Cargando eventos">
+            <PublicEventCardSkeleton v-for="n in SKELETON_COUNT" :key="n" />
+          </div>
+        </template>
 
-      <template #empty>
-        <EmptyState
-          illustration="sinEventos"
-          title="Ningún evento con esos filtros"
-          text="Prueba quitando alguno o busca por otra ciudad."
-        >
-          <template #actions>
-            <NButton type="primary" size="large" @click="reset">Limpiar filtros</NButton>
+        <template #empty>
+          <EmptyState
+            illustration="sinEventos"
+            title="Ningún evento con esos filtros"
+            text="Prueba quitando alguno o busca por otra ciudad."
+          >
+            <template #actions>
+              <NButton type="primary" size="large" @click="reset">Limpiar filtros</NButton>
+            </template>
+          </EmptyState>
+        </template>
+
+        <div class="event-list__grid">
+          <template v-for="(event, index) in events" :key="event.slug">
+            <PublicEventCard :event="event" />
+            <HouseSpot
+              v-if="!spotsGone && spotAfter.has(index)"
+              class="event-list__spot"
+              format="AB"
+              :seed="SPOT_SEED + spotAfter.get(index)!"
+              @unavailable="spotsGone = true"
+            />
           </template>
-        </EmptyState>
-      </template>
+          <template v-if="isFetchingNextPage">
+            <PublicEventCardSkeleton v-for="n in SKELETON_COUNT" :key="`next-${n}`" />
+          </template>
+        </div>
 
-      <div class="event-list__grid">
-        <template v-for="(event, index) in events" :key="event.slug">
-          <PublicEventCard :event="event" />
-          <HouseSpot
-            v-if="!spotsGone && spotAfter.has(index)"
-            class="event-list__spot"
-            format="AB"
-            :seed="SPOT_SEED + spotAfter.get(index)!"
-            @unavailable="spotsGone = true"
-          />
-        </template>
-        <template v-if="isFetchingNextPage">
-          <PublicEventCardSkeleton v-for="n in SKELETON_COUNT" :key="`next-${n}`" />
-        </template>
-      </div>
+        <div v-if="canLoadMore" ref="sentinel" class="event-list__sentinel" aria-hidden="true" />
 
-      <div v-if="canLoadMore" ref="sentinel" class="event-list__sentinel" aria-hidden="true" />
-
-      <FormAlert
-        v-if="hasNextPage && isFetchNextPageError && online"
-        class="event-list__more"
-        data-test="more-problem"
-        tone="warn"
-        :title="moreProblem.title"
-        :text="moreProblem.text"
-        :retrying="isFetchingNextPage"
-        @retry="fetchNextPage()"
-      />
-    </LoadBoundary>
+        <FormAlert
+          v-if="hasNextPage && isFetchNextPageError && online"
+          class="event-list__more"
+          data-test="more-problem"
+          tone="warn"
+          :title="moreProblem.title"
+          :text="moreProblem.text"
+          :retrying="isFetchingNextPage"
+          @retry="fetchNextPage()"
+        />
+      </LoadBoundary>
+    </div>
   </div>
 </template>
 

@@ -33,6 +33,11 @@
   gap: var(--tt-space-3);
 }
 
+/* While the list loads it keeps about a screen of room, so the footer does not show and drop. */
+.event-list__body--loading {
+  min-block-size: 70dvh;
+}
+
 .event-list__count {
   min-block-size: var(--tt-type-body-s-line);
   margin: 0 0 calc(var(--tt-space-2) * -1);

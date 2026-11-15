@@ -263,6 +263,19 @@ describe('PublicEventListView', () => {
     expect(cards(wrapper)).toHaveLength(1)
   })
 
+  // Before the skeleton shows (it waits a moment), the list keeps room: the footer does not jump.
+  it('keeps room for the list while it loads', async () => {
+    list.status = 'pending'
+    const { wrapper } = await mountView()
+
+    expect(wrapper.get('.event-list__body').classes()).toContain('event-list__body--loading')
+
+    list.status = 'success'
+    list.events = [event('a')]
+    await flushPromises()
+    expect(wrapper.get('.event-list__body').classes()).not.toContain('event-list__body--loading')
+  })
+
   it('says how many events the filters bring, as it changes', async () => {
     list.events = [event('a')]
     list.total = 520
