@@ -109,45 +109,47 @@ useFocusHandOff(
 
 <template>
   <div ref="row" class="event-filters" role="group" aria-label="Filtros">
-    <span
-      v-for="key in ['types', 'provinces', 'months'] as const"
-      :key="key"
-      class="event-filter"
-      :class="{ 'event-filter--on': isChosen[key] }"
-    >
-      <button
-        :ref="(element) => setButton(key, element)"
-        type="button"
-        class="event-filter__open tt-hit-area"
-        aria-haspopup="menu"
-        :aria-expanded="open === key ? 'true' : 'false'"
-        :data-filter="key"
-        @click="toggle(key)"
+    <div class="event-filters__scroll">
+      <span
+        v-for="key in ['types', 'provinces', 'months'] as const"
+        :key="key"
+        class="event-filter"
+        :class="{ 'event-filter--on': isChosen[key] }"
       >
-        <span class="event-filter__label">{{ labels[key].text }}</span>
-        <span v-if="labels[key].more" class="event-filter__more">{{ labels[key].more }}</span>
-        <svg
-          v-if="!isChosen[key]"
-          class="event-filter__icon"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
+        <button
+          :ref="(element) => setButton(key, element)"
+          type="button"
+          class="event-filter__open tt-hit-area"
+          aria-haspopup="menu"
+          :aria-expanded="open === key ? 'true' : 'false'"
+          :data-filter="key"
+          @click="toggle(key)"
         >
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      </button>
-      <button
-        v-if="isChosen[key]"
-        :ref="(element) => setCross(key, element)"
-        type="button"
-        class="event-filter__clear tt-hit-area"
-        :aria-label="`Quitar ${NAMES[key].toLowerCase()}`"
-        @click="clear(key)"
-      >
-        <svg class="event-filter__icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M6 6l12 12M18 6 6 18" />
-        </svg>
-      </button>
-    </span>
+          <span class="event-filter__label">{{ labels[key].text }}</span>
+          <span v-if="labels[key].more" class="event-filter__more">{{ labels[key].more }}</span>
+          <svg
+            v-if="!isChosen[key]"
+            class="event-filter__icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </button>
+        <button
+          v-if="isChosen[key]"
+          :ref="(element) => setCross(key, element)"
+          type="button"
+          class="event-filter__clear tt-hit-area"
+          :aria-label="`Quitar ${NAMES[key].toLowerCase()}`"
+          @click="clear(key)"
+        >
+          <svg class="event-filter__icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg>
+        </button>
+      </span>
+    </div>
 
     <button
       v-if="hasChoices"
@@ -190,20 +192,40 @@ useFocusHandOff(
 </template>
 
 <style scoped>
-/* One row that scrolls sideways on a phone, with no visible scrollbar. */
+/* The buttons and, outside them, "Limpiar", always in view. */
 .event-filters {
   display: flex;
   align-items: center;
   gap: var(--tt-space-2);
-  /* Room for the buttons' 44 px touch zone, which a scrolling row would otherwise clip. */
+  min-inline-size: 0;
+}
+
+/* The buttons scroll sideways on a phone, with no visible scrollbar. Room around them for their
+ * 44 px touch zone and their focus ring, which a scrolling row would otherwise clip. */
+.event-filters__scroll {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: var(--tt-space-2);
+  min-inline-size: 0;
   padding-block: calc((var(--tt-control-m) - var(--tt-control-s)) / 2);
+  padding-inline: var(--tt-space-1);
   margin-block: calc((var(--tt-control-m) - var(--tt-control-s)) / -2);
+  margin-inline: calc(var(--tt-space-1) * -1);
   overflow-x: auto;
   scrollbar-width: none;
 }
 
-.event-filters::-webkit-scrollbar {
+.event-filters__scroll::-webkit-scrollbar {
   display: none;
+}
+
+/* From 768 the buttons break into lines instead of sliding. */
+@media (min-width: 768px) {
+  .event-filters__scroll {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
 }
 
 .event-filter {

@@ -390,6 +390,18 @@ describe('EventFilterBar', () => {
     expect(menu()).toBeNull()
   })
 
+  // On a phone the buttons slide sideways; "Limpiar" stays out of that, always in view.
+  it('keeps "Limpiar" out of the row that slides', async () => {
+    const bar = mountBar({ types: [1] })
+    await flushPromises()
+
+    expect(bar.wrapper.find('.event-filters__scroll .event-filters__clear-all').exists()).toBe(
+      false,
+    )
+    expect(bar.wrapper.find('.event-filters > .event-filters__clear-all').exists()).toBe(true)
+    expect(bar.wrapper.findAll('.event-filters__scroll .event-filter')).toHaveLength(3)
+  })
+
   describe('Fecha', () => {
     const month = (name: string) =>
       rows().find((each) => each.textContent?.trim().startsWith(name))!
