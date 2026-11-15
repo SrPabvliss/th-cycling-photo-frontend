@@ -146,12 +146,53 @@ describe('usePaymentReturn', () => {
     expect(replace).toHaveBeenCalledWith('/checkout/confirmed/o1')
   })
 
-  it('reads a resolved transaction instead of confirming again (reload, back)', async () => {
-    serve({ [TX_URL]: transaction('declined') })
-    await start()
+  // The gateway gave a payment id: money may have moved, whatever our transaction says. Only the
+  // server's confirmation settles it (it answers a repeated one with the answer it already gave,
+  // and revives an expired attempt that was charged). Without it the charge stays authorized and
+  // the gateway reverses it with no trace on our side.
+  describe('with a payment id from the gateway, it always confirms', () => {
+    const approved = {
+      approved: true,
+      settled: true,
+      orderIds: ['o1'],
+      message: null,
+      deliveries: [],
+    }
 
-    expect(confirm).not.toHaveBeenCalled()
-    expect(state.outcome.value).toBe('declined')
+    it('confirms even when the transaction already reads as declined (reload, back)', async () => {
+      serve({ [TX_URL]: transaction('declined') })
+      confirm.mockResolvedValue({ ...approved, approved: false, settled: false })
+      await start()
+
+      expect(confirm).toHaveBeenCalledTimes(1)
+      expect(state.outcome.value).toBe('declined')
+    })
+
+    it('confirms an attempt our side already expired, and opens the order when it was charged', async () => {
+      serve({ [TX_URL]: transaction('expired') })
+      confirm.mockResolvedValue(approved)
+      await start()
+
+      expect(confirm).toHaveBeenCalledWith({ id: 7, clientTransactionId: 'tx-1' })
+      expect(state.outcome.value).toBe('confirmed')
+      expect(replace).toHaveBeenCalledWith('/checkout/confirmed/o1')
+    })
+
+    it('never says "no charge" for an expired attempt whose confirmation got no answer', async () => {
+      serve({ [TX_URL]: transaction('expired') })
+      confirm.mockRejectedValue(new AxiosError('Network Error', 'ERR_NETWORK'))
+      await start()
+
+      expect(state.outcome.value).toBe('failed')
+    })
+
+    it('keeps the gateway\'s own "no" when the confirmation gets no answer', async () => {
+      serve({ [TX_URL]: transaction('declined') })
+      confirm.mockRejectedValue(new AxiosError('Network Error', 'ERR_NETWORK'))
+      await start()
+
+      expect(state.outcome.value).toBe('declined')
+    })
   })
 
   it('says it is late after ten seconds without an answer', async () => {
@@ -251,6 +292,17 @@ describe('usePaymentReturn', () => {
     declined = true
     await advance(5_000)
     expect(state.outcome.value).toBe('declined')
+  })
+
+  // Expired is our clock, not the gateway's verdict: the confirmation may still revive it.
+  it('stays late when the transaction reads as expired while late', async () => {
+    confirm.mockReturnValue(new Promise(() => {}))
+    serve({ [TX_URL]: transaction('expired'), [ORDER_URL]: order('confirming') })
+    await start()
+    await advance(15_000)
+    await advance(5_000)
+
+    expect(state.outcome.value).toBe('late')
   })
 
   it('stops asking after two minutes', async () => {

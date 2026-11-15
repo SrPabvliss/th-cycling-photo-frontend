@@ -30,7 +30,9 @@ const POLL_EVERY_MS = 5_000
 /** …for this long. After that the screen stays late: the order is in Mis fotos either way. */
 const POLL_FOR_MS = 120_000
 
-const RESOLVED_DECLINED = new Set(['declined', 'expired', 'reversed', 'cancelled'])
+// The gateway's own "no" on a transaction. "expired" is not one: it is our clock, and a charge the
+// gateway made after it still has to be confirmed (the server revives the attempt).
+const GATEWAY_NO = new Set(['declined', 'reversed', 'cancelled'])
 
 export interface IPaymentReturn {
   outcome: Readonly<Ref<PaymentOutcome>>
@@ -47,9 +49,10 @@ export interface IPaymentReturn {
  * screen honest while the answer takes: late after ten seconds, asking again every five seconds
  * for two minutes. A charge approved but not settled is never shown as paid.
  *
- * Reloading or coming back with the browser does not charge again: a transaction that already
- * has a final "no" is read, not confirmed (and the server answers a repeated confirmation with
- * the answer it already gave).
+ * With a payment id from the gateway it always confirms, whatever our transaction says: money may
+ * have moved, and only the confirmation settles it. Confirming charges nothing; the server answers
+ * a repeated confirmation with the answer it already gave, and revives an expired attempt that the
+ * gateway charged. Without a payment id there is nothing to confirm.
  */
 export function usePaymentReturn(): IPaymentReturn {
   const route = useRoute()
@@ -128,7 +131,7 @@ export function usePaymentReturn(): IPaymentReturn {
 
     if (transaction.status === 'fulfilled') {
       if (orderIds.value.length === 0) orderIds.value = transaction.value.orderIds
-      if (RESOLVED_DECLINED.has(transaction.value.status)) {
+      if (GATEWAY_NO.has(transaction.value.status)) {
         answer.value = { status: transaction.value.status }
         return
       }
@@ -155,13 +158,13 @@ export function usePaymentReturn(): IPaymentReturn {
     clearTimeout(lateTimer)
     lateTimer = setTimeout(() => (isLate.value = true), LATE_AFTER_MS)
 
+    // Read first for its orders and for the gateway's own "no", kept in case the confirmation
+    // gets no answer. Never a reason to skip confirming.
+    let knownNo: string | null = null
     try {
       const transaction = await fetchTransaction(confirmation.clientTransactionId)
       orderIds.value = transaction.orderIds
-      if (RESOLVED_DECLINED.has(transaction.status)) {
-        answer.value = { status: transaction.status }
-        return
-      }
+      if (GATEWAY_NO.has(transaction.status)) knownNo = transaction.status
     } catch {
       // Unknown yet: confirming answers it.
     }
@@ -173,7 +176,11 @@ export function usePaymentReturn(): IPaymentReturn {
       // A "no" that arrived while polling already told the truth: keep it.
       if (outcome.value !== 'declined') answer.value = result
     } catch {
-      if (!disposed && !answer.value) requestFailed.value = true
+      if (disposed || answer.value) return
+      // The gateway already said no: that stands. Otherwise nobody knows yet, not even for an
+      // expired attempt, so the screen never says nothing was charged.
+      if (knownNo) answer.value = { status: knownNo }
+      else requestFailed.value = true
     }
   }
 
