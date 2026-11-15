@@ -9,7 +9,7 @@ import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
 import { EmptyState } from '@/shared/components/empty-state'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
-import { ErrorState, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
+import { ErrorState, TtSkeleton, useLoadPhase } from '@/shared/components/loading'
 import DownloadAllButton from '@/shared/downloads/DownloadAllButton.vue'
 import PurchasedPhotoTile from '@/shared/downloads/PurchasedPhotoTile.vue'
 import { downloadFile } from '@/shared/downloads/download-file'
@@ -30,7 +30,8 @@ const {
   refetch,
   ensureFresh,
 } = useDeliveryQuery(token)
-const showSkeleton = useDelayedFlag(computed(() => status.value === 'pending'))
+// Without network a load that did not finish waits for it: the error state says so.
+const { isPending, showSkeleton } = useLoadPhase(status)
 
 // Only the link itself going bad (expired, out of accesses, unknown) changes the screen. A
 // refresh that fails for any other reason leaves the photos already read where they are and
@@ -112,7 +113,7 @@ const online = useOnline()
       </div>
     </div>
 
-    <template v-else-if="status === 'pending'" />
+    <template v-else-if="isPending" />
 
     <EmptyState
       v-else-if="problem === 'expired'"

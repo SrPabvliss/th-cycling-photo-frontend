@@ -8,7 +8,7 @@ import { useSessionStore } from '@/core/auth/stores/session.store'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { safeRedirect } from '@/core/navigation/safe-redirect'
 import { EmptyState } from '@/shared/components/empty-state'
-import { ErrorState, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
+import { ErrorState, TtSkeleton, useLoadPhase } from '@/shared/components/loading'
 import { usePreviewGallery } from '../../composables/queries/use-preview-gallery'
 import { usePhotoSelection } from '../../composables/use-photo-selection'
 import { previewProblem } from '../../utils/preview-problem'
@@ -26,7 +26,8 @@ const session = useSessionStore()
 
 const token = computed(() => route.params.token as string)
 const { status, data: preview, error, isFetching, refetch } = usePreviewGallery(token)
-const showSkeleton = useDelayedFlag(computed(() => status.value === 'pending'))
+// Without network a load that did not finish waits for it: the error state says so.
+const { isPending, showSkeleton } = useLoadPhase(status)
 
 const photoIds = computed(() => preview.value?.photos.map((photo) => photo.id) ?? [])
 const selection = usePhotoSelection(token, photoIds)
@@ -93,7 +94,7 @@ function proceed() {
       </div>
     </div>
 
-    <template v-else-if="status === 'pending'" />
+    <template v-else-if="isPending" />
 
     <EmptyState
       v-else-if="linkProblem === 'expired'"

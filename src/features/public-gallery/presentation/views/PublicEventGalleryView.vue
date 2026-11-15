@@ -12,7 +12,7 @@ import EventPresenterStrip from '@/features/house-spots/presentation/components/
 import { useCartActions, useCartState } from '@/shared/cart'
 import { EmptyState } from '@/shared/components/empty-state'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
-import { ErrorState, LoadBoundary, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
+import { ErrorState, LoadBoundary, TtSkeleton, useLoadPhase } from '@/shared/components/loading'
 import { eventDateLabel } from '@/shared/public-events'
 import { useGalleryPlate } from '../../composables/use-gallery-plate'
 import { useGalleryViewer } from '../../composables/use-gallery-viewer'
@@ -44,8 +44,8 @@ const {
   refetch: refetchEvent,
 } = usePublicEventDetailQuery(slug)
 
-const isEventPending = computed(() => eventStatus.value === 'pending')
-const showEventSkeleton = useDelayedFlag(isEventPending)
+// Without network an event that did not load waits for it: the error state says so.
+const { isPending: isEventPending, showSkeleton: showEventSkeleton } = useLoadPhase(eventStatus)
 const isEventMissing = computed(
   () => isAxiosError(eventError.value) && eventError.value.response?.status === 404,
 )

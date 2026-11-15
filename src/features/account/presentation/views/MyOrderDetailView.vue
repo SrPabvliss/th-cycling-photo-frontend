@@ -11,7 +11,7 @@ import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
 import ConfirmDialog from '@/shared/components/confirm-dialog/ConfirmDialog.vue'
 import { EmptyState } from '@/shared/components/empty-state'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
-import { ErrorState, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
+import { ErrorState, TtSkeleton, useLoadPhase } from '@/shared/components/loading'
 import { useVisiblePolling } from '@/shared/composables/use-visible-polling'
 import { formatMoney } from '@/shared/pricing/tier-cards'
 import { failedStatus, generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
@@ -52,7 +52,8 @@ const cancelOrder = useCancelMyOrder({ silent: true })
 const downloadTaxDocument = useDownloadMyTaxDocument(orderId)
 const correctBilling = useCorrectMyOrderBilling(orderId)
 
-const showSkeleton = useDelayedFlag(computed(() => status.value === 'pending'))
+// Without network a load that did not finish waits for it: the error state says so.
+const { isPending, showSkeleton } = useLoadPhase(status)
 const isNotFound = computed(() => isAxiosError(error.value) && error.value.response?.status === 404)
 
 // --- Confirming: asked again while it lasts; it ends paid, or gone (payment not completed) ---
@@ -178,7 +179,7 @@ function submitCorrection(request: Parameters<typeof correctBilling.mutate>[0]) 
       </div>
     </div>
 
-    <template v-else-if="status === 'pending'" />
+    <template v-else-if="isPending" />
 
     <EmptyState
       v-else-if="paymentFailed"

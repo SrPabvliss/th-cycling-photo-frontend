@@ -10,7 +10,7 @@ import NotFoundView from '@/core/views/NotFoundView.vue'
 import { useMyOrderDetailQuery } from '@/features/account/composables/queries/use-my-order-detail'
 import { useMyPhonesQuery } from '@/features/account/composables/queries/use-my-phones'
 import { EmptyState } from '@/shared/components/empty-state'
-import { ErrorState, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
+import { ErrorState, TtSkeleton, useLoadPhase } from '@/shared/components/loading'
 import { formatMoney } from '@/shared/pricing/tier-cards'
 import { maskPhone } from '@/shared/utils/mask-phone'
 import { orderCode } from '@/features/account/utils/order-code'
@@ -37,8 +37,8 @@ const {
 } = useMyOrderDetailQuery(orderId, { silent: true })
 const { data: phones } = useMyPhonesQuery({ silent: true })
 
-const isPending = computed(() => status.value === 'pending')
-const showSkeleton = useDelayedFlag(isPending)
+// Without network a load that did not finish waits for it: the error state says so.
+const { isPending, showSkeleton } = useLoadPhase(status)
 const isMissing = computed(
   () => isAxiosError(error.value) && [403, 404].includes(error.value.response?.status ?? 0),
 )

@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 
 import { problemKind } from '@/core/http/problem-kind'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
-import { ErrorState, TtSkeleton } from '@/shared/components/loading'
+import { ErrorState, TtSkeleton, useLoadPhase } from '@/shared/components/loading'
 import DownloadAllButton from '@/shared/downloads/DownloadAllButton.vue'
 import { downloadFile } from '@/shared/downloads/download-file'
 import { useSequentialDownload } from '@/shared/downloads/use-sequential-download'
@@ -33,6 +33,8 @@ const {
   isFetching,
   refetch,
 } = useMyOrderDownloadsQuery(orderId, released)
+// Without network a load that did not finish waits for it, in the place of the list.
+const { isPending, isWaitingForNetwork } = useLoadPhase(status)
 
 async function freshFiles(force: boolean): Promise<IApiMyOrderDownloadPhoto[]> {
   const stale = Date.now() - dataUpdatedAt.value > FRESH_FOR_MS
@@ -71,7 +73,7 @@ const downloadAll = useSequentialDownload({
 <template>
   <section class="order-photos" aria-label="Fotos del pedido">
     <template v-if="released">
-      <div v-if="status === 'pending'" class="order-photos__grid" aria-busy="true">
+      <div v-if="isPending" class="order-photos__grid" aria-busy="true">
         <TtSkeleton
           v-for="photo in order.photos"
           :key="photo.id"
@@ -82,7 +84,7 @@ const downloadAll = useSequentialDownload({
       </div>
 
       <ErrorState
-        v-else-if="hasNothing"
+        v-else-if="hasNothing || isWaitingForNetwork"
         what="tus fotos"
         :kind="problemKind(error)"
         :retrying="isFetching"

@@ -9,7 +9,7 @@ import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
 import ConfirmDialog from '@/shared/components/confirm-dialog/ConfirmDialog.vue'
 import { EmptyState } from '@/shared/components/empty-state'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
-import { ErrorState, TtSkeleton } from '@/shared/components/loading'
+import { ErrorState, TtSkeleton, useLoadPhase } from '@/shared/components/loading'
 import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
 import { useDeleteBillingAccount } from '../../../composables/mutations/use-delete-billing-account'
 import { useSetDefaultBillingAccount } from '../../../composables/mutations/use-set-default-billing-account'
@@ -34,6 +34,8 @@ const SKELETON_ROWS = 2
 const message = useMessage()
 const session = useSessionStore()
 const { data, status, error, isFetching, refetch } = useMyBillingAccountsQuery()
+// Without network a load that did not finish waits for it, in the place of the list.
+const { isPending, isWaitingForNetwork } = useLoadPhase(status)
 const setDefault = useSetDefaultBillingAccount()
 const deleteAccount = useDeleteBillingAccount()
 const updateAccount = useUpdateBillingAccount()
@@ -159,7 +161,7 @@ const editInitial = computed<ICreateBillingAccountRequest | undefined>(() =>
 
 <template>
   <div class="billing-section">
-    <div v-if="status === 'pending'" class="billing-section__list">
+    <div v-if="isPending" class="billing-section__list">
       <TtSkeleton
         v-for="row in SKELETON_ROWS"
         :key="row"
@@ -169,7 +171,7 @@ const editInitial = computed<ICreateBillingAccountRequest | undefined>(() =>
     </div>
 
     <ErrorState
-      v-else-if="status === 'error'"
+      v-else-if="status === 'error' || isWaitingForNetwork"
       what="tus datos de facturación"
       :kind="problemKind(error)"
       :retrying="isFetching"

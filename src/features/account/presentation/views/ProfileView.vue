@@ -8,7 +8,7 @@ import { canOperate } from '@/core/auth/capabilities'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import { useLogoutMutation } from '@/core/auth/use-logout'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
-import { ErrorState, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
+import { ErrorState, TtSkeleton, useLoadPhase } from '@/shared/components/loading'
 import { useMyBillingAccountsQuery } from '../../composables/queries/use-my-billing-accounts'
 import { useMyProfileQuery } from '../../composables/queries/use-my-profile'
 import BillingSection from '../components/BillingSection/BillingSection.vue'
@@ -33,7 +33,8 @@ const isOperator = computed(() => canOperate(session.currentUser?.permissions ??
 
 const { status, data: profile, error, isFetching, refetch } = useMyProfileQuery()
 const { data: billing } = useMyBillingAccountsQuery({ enabled: () => !isOperator.value })
-const showSkeleton = useDelayedFlag(computed(() => status.value === 'pending'))
+// Without network a load that did not finish waits for it: the error state says so.
+const { isPending, showSkeleton } = useLoadPhase(status)
 const { mutateAsync: logout, isPending: isLoggingOut } = useLogoutMutation({
   redirectTo: ROUTE_PATHS.LANDING,
 })
@@ -95,7 +96,7 @@ const plural = (count: number, one: string, many: string) => `${count} ${count =
       />
     </div>
 
-    <template v-else-if="status === 'pending'" />
+    <template v-else-if="isPending" />
 
     <ErrorState
       v-else-if="!profile"

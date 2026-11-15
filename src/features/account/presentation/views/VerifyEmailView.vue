@@ -9,7 +9,7 @@ import { safeRedirect } from '@/core/navigation/safe-redirect'
 import AuthPage from '@/features/auth/presentation/components/AuthPage/AuthPage.vue'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { EmptyState } from '@/shared/components/empty-state'
-import { BusyNote, ErrorState } from '@/shared/components/loading'
+import { BusyNote, ErrorState, useLoadPhase } from '@/shared/components/loading'
 import { useConfirmEmailVerification } from '../../composables/mutations/use-confirm-email-verification'
 import { useResendEmailVerification } from '../../composables/mutations/use-resend-email-verification'
 import { useSendEmailVerification } from '../../composables/mutations/use-send-email-verification'
@@ -60,6 +60,10 @@ const {
   isFetching: isStatusFetching,
   refetch: refetchStatus,
 } = useEmailVerificationStatusQuery()
+// Without network a status that did not load waits for it: the error state says so.
+const { isWaitingForNetwork: isStatusWaiting } = useLoadPhase(() =>
+  isStatusLoading.value ? 'pending' : isStatusError.value ? 'error' : 'success',
+)
 const sendCode = useSendEmailVerification({ silent: true })
 const resendCode = useResendEmailVerification({ silent: true })
 const confirmCode = useConfirmEmailVerification({ silent: true })
@@ -76,6 +80,7 @@ const isChangeEmail = computed(() => status.value?.purpose === 'change_email')
 const screen = computed(() => {
   if (confirmed.value) return 'confirmed'
   if (exhausted.value) return 'exhausted'
+  if (isStatusWaiting.value) return 'error'
   if (isStatusLoading.value) return 'loading'
   if (isStatusError.value && !status.value) return 'error'
   if (status.value?.expired) return 'expired'

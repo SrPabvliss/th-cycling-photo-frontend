@@ -5,6 +5,9 @@ import { createPinia, setActivePinia } from 'pinia'
 import { computed, reactive, ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
+const online = ref(true)
+vi.mock('@/core/network/use-online', () => ({ useOnline: () => online }))
+
 import type { IMyOrderInvoice } from '../../types/responses/my-order-invoice.response'
 import type { IMyOrderDetail, MyOrderState } from '../../types/responses/my-order.response'
 vi.mock('@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue', async () => ({
@@ -142,6 +145,7 @@ const button = (wrapper: DOMWrapper<Element>, name: string) =>
 
 describe('MyOrderDetailView', () => {
   beforeEach(() => {
+    online.value = true
     document.body.innerHTML = ''
     setActivePinia(createPinia())
     Object.assign(state, { status: 'success', order: order('ready'), error: null })
@@ -221,6 +225,18 @@ describe('MyOrderDetailView', () => {
     expect(wrapper.text()).toContain('No se hizo ningún cargo. Tus fotos siguen en el carrito.')
     expect(button(wrapper, 'Ver mi carrito')).toBeDefined()
     expect(wrapper.text()).not.toContain('No encontramos este pedido')
+  })
+
+  it('without network, says the order waits for it instead of a skeleton that never ends', async () => {
+    online.value = false
+    Object.assign(state, { status: 'pending', order: undefined })
+    const wrapper = await mountView()
+    await new Promise((resolve) => setTimeout(resolve, 450))
+
+    expect(wrapper.text()).toContain('Sin conexión a internet')
+    expect(wrapper.text()).toContain('Tu pedido aparecerá cuando vuelvas a tener conexión.')
+    expect(wrapper.find('.order-detail__skeleton').exists()).toBe(false)
+    online.value = true
   })
 
   it('says the order is not there when it is missing from the start', async () => {

@@ -2,9 +2,8 @@
 import { computed, ref, watch } from 'vue'
 
 import { problemKind } from '@/core/http/problem-kind'
-import { useOnline } from '@/core/network/use-online'
 import ErrorState from './ErrorState.vue'
-import { useDelayedFlag } from './use-delayed-flag'
+import { useLoadPhase } from './use-load-phase'
 
 const props = withDefaults(
   defineProps<{
@@ -30,13 +29,9 @@ const emit = defineEmits<{
   retry: []
 }>()
 
-// Without network vue-query pauses a load instead of failing it: it stays pending until the
-// network is back. That wait is said in place, never painted as a skeleton that does not end.
-const online = useOnline()
-const isOffline = computed(() => !online.value && props.status !== 'success')
-
-const isPending = computed(() => props.status === 'pending' && !isOffline.value)
-const showSkeleton = useDelayedFlag(isPending)
+// Without network vue-query pauses a load instead of failing it: that wait is said in place,
+// never painted as a skeleton that does not end.
+const { isPending, showSkeleton, isWaitingForNetwork: isOffline } = useLoadPhase(() => props.status)
 
 const kind = computed(() => (isOffline.value ? 'offline' : problemKind(props.error)))
 

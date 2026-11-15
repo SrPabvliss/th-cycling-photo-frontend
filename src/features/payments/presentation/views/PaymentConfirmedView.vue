@@ -10,7 +10,7 @@ import NotFoundView from '@/core/views/NotFoundView.vue'
 import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
 import { useMyOrderDetailQuery } from '@/features/account/composables/queries/use-my-order-detail'
 import { EmptyState } from '@/shared/components/empty-state'
-import { ErrorState, TtSkeleton, useDelayedFlag } from '@/shared/components/loading'
+import { ErrorState, TtSkeleton, useLoadPhase } from '@/shared/components/loading'
 
 const route = useRoute()
 const router = useRouter()
@@ -26,8 +26,8 @@ const {
   refetch,
 } = useMyOrderDetailQuery(orderId, { silent: true })
 
-const isPending = computed(() => status.value === 'pending')
-const showSkeleton = useDelayedFlag(isPending)
+// Without network a load that did not finish waits for it: the error state says so.
+const { isPending, showSkeleton } = useLoadPhase(status)
 const isMissing = computed(
   () => isAxiosError(error.value) && [403, 404].includes(error.value.response?.status ?? 0),
 )

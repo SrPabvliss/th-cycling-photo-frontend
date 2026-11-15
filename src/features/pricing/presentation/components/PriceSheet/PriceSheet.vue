@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { NButton } from 'naive-ui'
 
 import { problemKind } from '@/core/http/problem-kind'
-import { ErrorState } from '@/shared/components/loading'
+import { ErrorState, useLoadPhase } from '@/shared/components/loading'
 import { useDialogFocus } from '@/shared/composables/use-dialog-focus'
 import { quotePhotos, sortTiers } from '@/shared/pricing/quote'
 import { buildTierCards, formatMoney } from '@/shared/pricing/tier-cards'
@@ -22,6 +22,8 @@ const emit = defineEmits<{
 }>()
 
 const { data, status, error, isFetching, refetch } = usePricingTiersQuery()
+// Without network prices that did not load wait for it, in the place of the table.
+const { isWaitingForNetwork } = useLoadPhase(status)
 
 const panel = ref<HTMLElement | null>(null)
 useDialogFocus(
@@ -102,7 +104,7 @@ const thirdPhotoNote = computed(() => {
         </div>
 
         <ErrorState
-          v-if="status === 'error'"
+          v-if="status === 'error' || isWaitingForNetwork"
           what="los precios"
           :kind="problemKind(error)"
           :retrying="isFetching"

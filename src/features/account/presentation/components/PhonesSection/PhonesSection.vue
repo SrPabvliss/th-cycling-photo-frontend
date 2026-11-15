@@ -10,7 +10,7 @@ import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
 import ConfirmDialog from '@/shared/components/confirm-dialog/ConfirmDialog.vue'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import FormField from '@/shared/components/form/FormField/FormField.vue'
-import { ErrorState, TtSkeleton } from '@/shared/components/loading'
+import { ErrorState, TtSkeleton, useLoadPhase } from '@/shared/components/loading'
 import { PHONE_INPUT_OPTIONS } from '@/shared/constants/phone-input'
 import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
 import { useAddPhone } from '../../../composables/mutations/use-add-phone'
@@ -26,6 +26,8 @@ const SKELETON_ROWS = 2
 
 const message = useMessage()
 const { data: phones, status, error, isFetching, refetch } = useMyPhonesQuery({ silent: true })
+// Without network a load that did not finish waits for it, in the place of the list.
+const { isPending, isWaitingForNetwork } = useLoadPhase(status)
 const addPhone = useAddPhone({ silent: true })
 const updatePhone = useUpdatePhone({ silent: true })
 const deletePhone = useDeletePhone({ silent: true })
@@ -152,12 +154,12 @@ async function remove() {
 
 <template>
   <div class="phones-section">
-    <div v-if="status === 'pending'" class="phones-section__list">
+    <div v-if="isPending" class="phones-section__list">
       <TtSkeleton v-for="row in SKELETON_ROWS" :key="row" height="var(--tt-control-l)" radius="m" />
     </div>
 
     <ErrorState
-      v-else-if="status === 'error'"
+      v-else-if="status === 'error' || isWaitingForNetwork"
       what="tus teléfonos"
       :kind="problemKind(error)"
       :retrying="isFetching"
