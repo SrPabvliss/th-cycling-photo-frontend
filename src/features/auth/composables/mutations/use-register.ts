@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
+import { runPostLoginTasks } from '@/core/auth/post-login-tasks'
 import { httpClient } from '@/core/http/axios-client'
 import { toCurrentUser } from '@/core/auth/current-user.mapper'
 import { useSessionStore } from '@/core/auth/stores/session.store'
@@ -33,6 +34,9 @@ export function useRegisterMutation() {
       const user = toCurrentUser(meResponse.data)
 
       authStore.setSession(accessToken, user)
+
+      // A new account is a sign-in too: the photos chosen before it go with it, as on login.
+      await runPostLoginTasks({ permissions: user.permissions })
 
       return user
     },
