@@ -58,6 +58,7 @@ const {
   isError: isStatusError,
   error: statusError,
   isFetching: isStatusFetching,
+  dataUpdatedAt: statusReadAt,
   refetch: refetchStatus,
 } = useEmailVerificationStatusQuery()
 // Without network a status that did not load waits for it: the error state says so.
@@ -115,6 +116,11 @@ async function confirm() {
   if (code.value.length !== CODE_LENGTH || confirmCode.isPending.value) return
   alert.value = null
   wrongCode.value = false
+  // The mutation reads the status again once the try is answered, and waits for it. Only a status
+  // read after this try says how many are left: a read that failed (the api allows ten a minute)
+  // leaves the count from before it, one too many.
+  const triedAt = Date.now()
+  const isStatusFresh = () => statusReadAt.value > triedAt
   try {
     await confirmCode.mutateAsync({ code: code.value })
     confirmed.value = true
@@ -129,12 +135,11 @@ async function confirm() {
       key === 'auth.email_verification_expired' ||
       key === 'auth.email_verification_not_pending'
     ) {
-      await refetchStatus()
+      if (!isStatusFresh()) await refetchStatus()
       return
     }
     if (key === 'auth.email_verification_invalid') {
-      const { data } = await refetchStatus()
-      const left = data?.attemptsRemaining
+      const left = isStatusFresh() ? status.value?.attemptsRemaining : null
       if (left === 0) {
         exhausted.value = true
         return

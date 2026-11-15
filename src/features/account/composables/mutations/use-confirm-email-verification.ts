@@ -27,8 +27,9 @@ export function useConfirmEmailVerification(options: { silent?: boolean } = {}) 
       })
       authStore.setSession(authStore.accessToken, toCurrentUser(meResponse.data))
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ACCOUNT_QUERY_KEYS.emailVerification() })
-    },
+    // Waited for: whoever tried the code reads the status from this one read, without asking
+    // again (the api allows ten reads a minute).
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ACCOUNT_QUERY_KEYS.emailVerification() }),
   })
 }

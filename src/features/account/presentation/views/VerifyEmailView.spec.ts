@@ -10,6 +10,8 @@ import VerifyEmailView from './VerifyEmailView.vue'
 const status = ref<IApiEmailVerificationStatus | undefined>(undefined)
 const statusPending = ref(false)
 const statusError = ref(false)
+// When the status was last read: the confirm mutation reads it again after each try.
+const statusUpdatedAt = ref(0)
 const refetchStatus = vi.fn(async () => ({ data: status.value }))
 const send = vi.fn()
 const resend = vi.fn()
@@ -21,6 +23,7 @@ vi.mock('../../composables/queries/use-email-verification-status', () => ({
     isPending: statusPending,
     isError: statusError,
     isFetching: ref(false),
+    dataUpdatedAt: statusUpdatedAt,
     refetch: refetchStatus,
   }),
 }))
@@ -86,6 +89,15 @@ const buttonNamed = (wrapper: Wrapper, name: string) =>
   wrapper.findAll('button, a').find((each) => each.text().replace(/\s+/g, ' ').trim() === name)
 const boxes = (wrapper: Wrapper) => wrapper.findAll('input[aria-label^="Dígito"]')
 
+/** A wrong code, after which the mutation read the status again and got `after`. */
+function wrongCodeThen(after: IApiEmailVerificationStatus) {
+  confirm.mockImplementation(async () => {
+    status.value = after
+    statusUpdatedAt.value = Date.now() + 1
+    throw apiError(422, 'auth.email_verification_invalid')
+  })
+}
+
 async function typeCode(wrapper: Wrapper, code: string) {
   const event = new Event('paste', { bubbles: true, cancelable: true }) as Event & {
     clipboardData: { getData: () => string }
@@ -102,6 +114,7 @@ describe('VerifyEmailView', () => {
     status.value = pending()
     statusPending.value = false
     statusError.value = false
+    statusUpdatedAt.value = Date.now()
     refetchStatus.mockClear()
     send.mockReset()
     resend.mockReset()
@@ -163,9 +176,8 @@ describe('VerifyEmailView', () => {
   })
 
   it('says a wrong code is wrong, with the tries left, and starts the boxes over', async () => {
-    confirm.mockRejectedValue(apiError(422, 'auth.email_verification_invalid'))
+    wrongCodeThen(pending({ attemptsRemaining: 2 }))
     const { wrapper } = await mountView()
-    status.value = pending({ attemptsRemaining: 2 })
 
     await typeCode(wrapper, '123456')
     await buttonNamed(wrapper, 'Confirmar código')?.trigger('click')
@@ -184,15 +196,42 @@ describe('VerifyEmailView', () => {
   })
 
   it('does not count tries the api did not give', async () => {
-    confirm.mockRejectedValue(apiError(422, 'auth.email_verification_invalid'))
+    wrongCodeThen(pending({ attemptsRemaining: null }))
     const { wrapper } = await mountView()
-    status.value = pending({ attemptsRemaining: null })
 
     await typeCode(wrapper, '123456')
     await buttonNamed(wrapper, 'Confirmar código')?.trigger('click')
     await flushPromises()
 
     expect(wrapper.get('[role="alert"]').text()).not.toContain('intento')
+  })
+
+  it('reads the status once per try: the screen does not ask again on top of the mutation', async () => {
+    wrongCodeThen(pending({ attemptsRemaining: 1 }))
+    const { wrapper } = await mountView()
+
+    await typeCode(wrapper, '123456')
+    await buttonNamed(wrapper, 'Confirmar código')?.trigger('click')
+    await flushPromises()
+
+    expect(refetchStatus).not.toHaveBeenCalled()
+    expect(wrapper.get('[role="alert"]').text()).toContain('Te queda 1 intento.')
+  })
+
+  // The status read after the try can fail (the api allows ten a minute): what is on screen then
+  // is the count before this try, and it would be one too many.
+  it('says no count it could not confirm after the try', async () => {
+    status.value = pending({ attemptsRemaining: 2 })
+    confirm.mockRejectedValue(apiError(422, 'auth.email_verification_invalid'))
+    const { wrapper } = await mountView()
+
+    await typeCode(wrapper, '123456')
+    await buttonNamed(wrapper, 'Confirmar código')?.trigger('click')
+    await flushPromises()
+
+    const alert = wrapper.get('[role="alert"]')
+    expect(alert.text()).toContain('Código incorrecto')
+    expect(alert.text()).not.toContain('intento')
   })
 
   it('keeps "Pedir código nuevo" off, with the seconds left, while the minute after the last code lasts', async () => {
