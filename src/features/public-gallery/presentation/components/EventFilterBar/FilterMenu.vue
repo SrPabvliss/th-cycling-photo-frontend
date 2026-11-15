@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
-import { useEventListener, useMediaQuery } from '@vueuse/core'
+import { onClickOutside, useEventListener, useMediaQuery } from '@vueuse/core'
 
 import { useDialogFocus } from '@/shared/composables/use-dialog-focus'
 import { useFocusHandOff } from '@/shared/composables/use-focus-hand-off'
@@ -43,6 +43,11 @@ useFocusHandOff(
 const place = ref({ top: 0, left: 0 })
 
 const close = () => emit('close')
+// A click outside closes it. On desktop the scrim lets it through, so a click on another filter
+// button also opens that one at once; the button that opened this menu toggles it itself.
+onClickOutside(panel, () => props.open && close(), {
+  ignore: [computed(() => props.anchor)],
+})
 
 // On a phone the keyboard would cover the sheet: the focus goes to the sheet, not to its search.
 useDialogFocus(panel, () => props.open, close, {
@@ -246,14 +251,17 @@ const doneText = computed(() =>
 @media (min-width: 768px) {
   .filter-menu {
     display: block;
+    pointer-events: none;
   }
 
   .filter-menu__scrim {
     background: transparent;
     animation: none;
+    pointer-events: none;
   }
 
   .filter-menu__panel {
+    pointer-events: auto;
     position: absolute;
     inset-block-start: calc(var(--filter-menu-top) + var(--tt-space-2));
     inset-inline-start: var(--filter-menu-left);

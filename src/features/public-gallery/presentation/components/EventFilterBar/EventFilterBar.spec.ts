@@ -367,6 +367,29 @@ describe('EventFilterBar', () => {
     )
   })
 
+  // On desktop the scrim lets clicks through: another filter button opens with one click, and a
+  // click anywhere else closes the menu.
+  it('lets a click outside through on desktop, and closes on it', async () => {
+    const css = readFileSync(
+      resolve(
+        process.cwd(),
+        'src/features/public-gallery/presentation/components/EventFilterBar/FilterMenu.vue',
+      ),
+      'utf8',
+    )
+    const desktop = css.slice(css.indexOf('@media (min-width: 768px)'))
+    expect(desktop).toMatch(/\.filter-menu \{[^}]*pointer-events: none/)
+    expect(desktop).toMatch(/\.filter-menu__panel \{[^}]*pointer-events: auto/)
+
+    const bar = mountBar()
+    await openMenu(bar, 'Disciplina')
+    document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+    document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    await flushPromises()
+
+    expect(menu()).toBeNull()
+  })
+
   describe('Fecha', () => {
     const month = (name: string) =>
       rows().find((each) => each.textContent?.trim().startsWith(name))!
