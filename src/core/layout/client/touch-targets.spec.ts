@@ -38,7 +38,7 @@ const SMALL_CONTROLS: [file: string, marker: RegExp][] = [
   ],
   ['src/features/auth/presentation/views/LoginView.vue', /class="login-form__link tt-hit-area"/],
   ['src/core/views/NotFoundView.vue', /<NButton text class="tt-hit-area"/],
-  ['src/core/views/AccessDeniedView.vue', /<NButton text class="tt-hit-area"/],
+  ['src/core/views/AccessDeniedView.vue', /<NButton\s+text\s+class="tt-hit-area"/],
   ['src/core/views/ServerErrorView.vue', /<NButton text class="tt-hit-area"/],
 ]
 
