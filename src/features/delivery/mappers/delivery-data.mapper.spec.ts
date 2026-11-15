@@ -5,7 +5,6 @@ import { toDeliveryData } from './delivery-data.mapper'
 const API = {
   token: 't',
   eventName: 'Mama Rumi 2026',
-  customerName: 'Ana',
   status: 'active',
   expiresAt: '2026-12-13T00:00:00.000Z',
   downloadCount: 3,
@@ -27,6 +26,11 @@ describe('toDeliveryData', () => {
 
     expect(data.photos.map((photo) => photo.thumbnailUrl)).toEqual(['https://cdn/t/a', null])
     expect(data.expiresAt).toEqual(new Date('2026-12-13T00:00:00.000Z'))
+  })
+
+  // The delivery link no longer names its buyer: whoever holds the link sees no personal data.
+  it('carries no name of the buyer', () => {
+    expect(toDeliveryData(API)).not.toHaveProperty('customerName')
   })
 
   it('leaves the end date out when the api does not give one', () => {

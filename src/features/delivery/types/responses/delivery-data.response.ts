@@ -19,7 +19,6 @@ export interface IApiDeliveryPhoto {
 export interface IApiDeliveryData {
   token: string
   eventName: string
-  customerName: string
   status: string
   expiresAt: string | null
   downloadCount: number
@@ -38,7 +37,6 @@ export interface IDeliveryPhoto {
 export interface IDeliveryData {
   token: string
   eventName: string
-  customerName: string
   status: DeliveryStatus
   /** Null when the api does not say when the link ends. */
   expiresAt: Date | null

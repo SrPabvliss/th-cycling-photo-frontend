@@ -16,7 +16,6 @@ const DATA = {
   data: {
     token: 't',
     eventName: 'x',
-    customerName: 'y',
     status: 'active',
     expiresAt: '2026-12-13T00:00:00.000Z',
     downloadCount: 0,

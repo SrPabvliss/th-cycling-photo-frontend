@@ -49,7 +49,6 @@ const photos = (count: number) =>
 const DATA = (count = 3, expiresAt: Date | null = new Date(2026, 10, 30)): IDeliveryData => ({
   token: 't',
   eventName: 'Mama Rumi 2026',
-  customerName: 'Ana',
   status: 'active',
   expiresAt,
   downloadCount: 0,

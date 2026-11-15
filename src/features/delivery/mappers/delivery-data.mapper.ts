@@ -20,7 +20,6 @@ export function toDeliveryData(api: IApiDeliveryData): IDeliveryData {
   return {
     token: api.token,
     eventName: api.eventName,
-    customerName: api.customerName,
     status: api.status as DeliveryStatus,
     expiresAt: api.expiresAt ? new Date(api.expiresAt) : null,
     downloadCount: api.downloadCount,
