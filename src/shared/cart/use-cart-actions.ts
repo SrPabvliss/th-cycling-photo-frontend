@@ -70,13 +70,17 @@ type ChangeOutcome = 'done' | 'undone' | 'superseded' | 'expired'
 
 const SESSION_EXPIRED = 'Tu sesión se cerró. Inicia sesión de nuevo para continuar.'
 
-// The server answers this when there is no cart to take the photo from: it is not in the cart,
-// which is what the person asked for.
+// The server answers this when there is no cart to take the photo from (it was ordered in
+// another tab, say): the photo is not in the cart, which is what the person asked for. The api
+// names the reason in `messageKey`; `code` is its family (BUSINESS_RULE).
 const NO_CART = 'cart.no_active_cart'
 
 function isAlreadyOut(error: unknown): boolean {
   if (!isAxiosError(error)) return false
-  return error.response?.status === 404 || error.response?.data?.error?.code === NO_CART
+  const reason = error.response?.data?.error
+  return (
+    error.response?.status === 404 || reason?.messageKey === NO_CART || reason?.code === NO_CART
+  )
 }
 
 /**
@@ -143,7 +147,9 @@ export function useCartActions(): ICartActions {
         if (left > 0) engine.busy.set(photoId, left)
         else engine.busy.delete(photoId)
 
-        if (engine.queue.isIdle()) void queryClient.invalidateQueries({ queryKey: cartKey })
+        // The outcome is told once the cart was read again: what it says about prices has to
+        // hold for the cart the server has, not for the one this tab still showed.
+        if (engine.queue.isIdle()) return queryClient.invalidateQueries({ queryKey: cartKey })
       })
   }
 
@@ -157,7 +163,8 @@ export function useCartActions(): ICartActions {
   function add(photo: ICartPhotoInput) {
     const before = unitPriceFor(countOf(readCart(), photo.event.id))
     writeCart((groups) => withPhoto(groups, photo))
-    const after = unitPriceFor(countOf(readCart(), photo.event.id))
+    const expected = countOf(readCart(), photo.event.id)
+    const after = unitPriceFor(expected)
 
     void run(
       photo.id,
@@ -175,7 +182,9 @@ export function useCartActions(): ICartActions {
         return void message.error('No pudimos agregar la foto. Intenta de nuevo.')
       }
 
-      if (before && after && after.price < before.price) {
+      // Another tab may have changed the cart meanwhile: no price it no longer has.
+      const agrees = countOf(readCart(), photo.event.id) === expected
+      if (agrees && before && after && after.price < before.price) {
         const price = formatMoney(after.price, after.currency)
         return void message.success(`Bajaste de precio: todas tus fotos a ${price} c/u.`)
       }
@@ -211,7 +220,8 @@ export function useCartActions(): ICartActions {
     const eventId = removal.group.eventId
     const before = unitPriceFor(countOf(readCart(), eventId))
     writeCart((groups) => withoutPhoto(groups, photoId))
-    const after = unitPriceFor(countOf(readCart(), eventId))
+    const expected = countOf(readCart(), eventId)
+    const after = unitPriceFor(expected)
 
     void run(
       photoId,
@@ -228,7 +238,9 @@ export function useCartActions(): ICartActions {
         return void message.error('No pudimos quitar la foto. Intenta de nuevo.')
       }
 
-      if (before && after && after.price > before.price) {
+      // Another tab may have ordered these photos meanwhile: no price the cart no longer has.
+      const agrees = countOf(readCart(), eventId) === expected
+      if (agrees && before && after && after.price > before.price) {
         const price = formatMoney(after.price, after.currency)
         return void message.info(`Foto quitada. Tus fotos vuelven a ${price} c/u.`)
       }

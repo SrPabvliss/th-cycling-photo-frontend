@@ -285,6 +285,7 @@ describe('useCartActions', () => {
 
     it('says the price goes back up when leaving a tier with photos left', async () => {
       const { actions } = await setup({ inCart: ['p1', 'p2', 'p3'] })
+      http.get.mockResolvedValue(serverCart(['p1', 'p2']))
 
       actions.remove('p3')
       await flushPromises()
@@ -302,6 +303,39 @@ describe('useCartActions', () => {
 
       expect(state.isInCart('p1')).toBe(false)
       expect(message.error).not.toHaveBeenCalled()
+    })
+
+    // The api names the reason in `messageKey`; `code` is the family (BUSINESS_RULE).
+    it('counts it as removed when the cart was already ordered in another tab', async () => {
+      const { state, actions } = await setup({ inCart: ['p1', 'p2'] })
+      const response = {
+        status: 422,
+        data: { error: { code: 'BUSINESS_RULE', messageKey: 'cart.no_active_cart', message: 'x' } },
+        headers: {},
+        config: {},
+      }
+      http.delete.mockRejectedValue(
+        new AxiosError('failed', 'ERR', undefined, undefined, response as AxiosResponse),
+      )
+      http.get.mockResolvedValue(serverCart([]))
+
+      actions.remove('p1')
+      await flushPromises()
+
+      expect(message.error).not.toHaveBeenCalled()
+      expect(toasts('info')).toEqual(['Foto quitada del carrito.'])
+      expect(state.photoIdsFor('e1')).toEqual([])
+    })
+
+    it('announces no price the cart no longer has, when another tab already ordered it', async () => {
+      const { actions } = await setup({ inCart: ['p1', 'p2', 'p3'] })
+      // The server took out p3 fine, but the other two left in an order meanwhile.
+      http.get.mockResolvedValue(serverCart([]))
+
+      actions.remove('p3')
+      await flushPromises()
+
+      expect(toasts('info')).toEqual(['Foto quitada del carrito.'])
     })
   })
 
