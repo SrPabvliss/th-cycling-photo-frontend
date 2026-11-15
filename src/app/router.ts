@@ -4,9 +4,10 @@ import AppLayout from '@/core/layout/AppLayout.vue'
 import ClientLayout from '@/core/layout/client/ClientLayout.vue'
 import { registerAuthGuard } from '@/core/guards/auth.guard'
 import { registerRouteProgress } from '@/core/navigation/route-progress'
+import { whenTallEnough } from '@/core/navigation/scroll-restore'
 import { registerRouteLoadProblems } from '@/core/navigation/route-load-problem'
 import { registerStaleChunkReload } from '@/core/navigation/stale-chunk-reload'
-import { inPanelArea, registerUiArea } from '@/core/theme/area'
+import { areaOfRoute, inPanelArea, registerUiArea } from '@/core/theme/area'
 import { standaloneRoutes } from '@/core/views/standalone-routes'
 import { authRoutes } from '@/features/auth/routes'
 import { eventRoutes } from '@/features/events/routes'
@@ -32,7 +33,10 @@ import { tenantProfileRoutes } from '@/features/tenant-profile/routes'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   scrollBehavior(to, from, savedPosition) {
-    if (savedPosition) return savedPosition
+    // The client area waits for its lists to be tall enough; the panel stays as it was.
+    if (savedPosition) {
+      return areaOfRoute(to) === 'client' ? whenTallEnough(savedPosition) : savedPosition
+    }
     if (to.hash) return { el: to.hash }
     if (to.path === from.path) return false
     return { top: 0 }
