@@ -191,6 +191,27 @@ describe('MyOrderDetailView', () => {
     expect(wrapper.text().replace(/\s+/g, ' ')).toContain(text)
   })
 
+  it('never says nothing was charged for a transfer order, which may have been paid already', async () => {
+    state.order = order('in_process', { paymentMethod: 'transfer' })
+    const wrapper = await mountView()
+
+    await button(wrapper, 'Cancelar pedido')!.trigger('click')
+    expect(wrapper.text()).toContain(
+      'Si ya transferiste, no lo canceles: envía el comprobante en el chat de WhatsApp del pedido.',
+    )
+    expect(wrapper.text()).not.toContain('No se cobra nada')
+  })
+
+  it('tells how to get a transfer back once a transfer order is cancelled', async () => {
+    state.order = order('cancelled', { paymentMethod: 'transfer' })
+    const wrapper = await mountView()
+
+    expect(wrapper.text().replace(/\s+/g, ' ')).toContain(
+      'Si alcanzaste a transferir, escríbenos en el chat de WhatsApp del pedido y te devolvemos el dinero.',
+    )
+    expect(wrapper.text()).not.toContain('No se cobró nada')
+  })
+
   it('offers no download and no cancel while confirming', async () => {
     state.order = order('confirming')
     const wrapper = await mountView()

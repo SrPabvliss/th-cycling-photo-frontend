@@ -100,6 +100,20 @@ const phone = computed(() => {
   return main ? maskPhone(main.phoneNumber) : ''
 })
 const PAYMENT_METHOD_LABELS = { card: 'Tarjeta', transfer: 'Transferencia' } as const
+
+// A transfer may already be on its way when the buyer cancels (the payment details reached them
+// by WhatsApp): never say nothing was charged, say how to get it back.
+const isTransfer = computed(() => order.value?.paymentMethod === 'transfer')
+const cancelledText = computed(() =>
+  isTransfer.value
+    ? 'Si alcanzaste a transferir, escríbenos en el chat de WhatsApp del pedido y te devolvemos el dinero. Las fotos siguen disponibles en la galería del evento.'
+    : 'No se cobró nada. Las fotos siguen disponibles en la galería del evento.',
+)
+const cancelAskText = computed(() =>
+  isTransfer.value
+    ? 'Si ya transferiste, no lo canceles: envía el comprobante en el chat de WhatsApp del pedido. Si no, las fotos vuelven a estar disponibles en la galería.'
+    : 'No se cobra nada. Las fotos vuelven a estar disponibles en la galería.',
+)
 const photoLine = computed(() => {
   const count = order.value?.photos.length ?? 0
   const photos = count === 1 ? '1 foto' : `${count} fotos`
@@ -272,7 +286,7 @@ function submitCorrection(request: Parameters<typeof correctBilling.mutate>[0]) 
         v-else-if="order.state === 'cancelled'"
         tone="info"
         title="Pedido cancelado"
-        text="No se cobró nada. Las fotos siguen disponibles en la galería del evento."
+        :text="cancelledText"
       />
       <FormAlert
         v-else-if="order.state === 'gifted'"
@@ -333,7 +347,7 @@ function submitCorrection(request: Parameters<typeof correctBilling.mutate>[0]) 
       <ConfirmDialog
         :open="askingCancel"
         title="¿Cancelar este pedido?"
-        text="No se cobra nada. Las fotos vuelven a estar disponibles en la galería."
+        :text="cancelAskText"
         confirm-label="Sí, cancelar pedido"
         keep-label="Conservar pedido"
         :busy="cancelOrder.isPending.value"
