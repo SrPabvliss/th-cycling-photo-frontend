@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref, watch, type ComponentPublicInstance } from 'vue'
+
 import ErrorBoundary from '@/core/layout/ErrorBoundary.vue'
 import { retryRouteLoad, routeLoadProblem } from '@/core/navigation/route-load-problem'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
@@ -22,14 +24,38 @@ const seasonBars = useLayoutSlot(LAYOUT_SLOTS.CLIENT_SEASON_BAR)
 const isSessionClosed = useSessionClosedScreen()
 // The next page's code could not be fetched with network: said above the screen still up.
 const routeProblemCopy = loadProblemCopy('server', 'esta página')
+
+// No house ad goes with a screen that shows a problem, but the bar leaves its room behind: the
+// screen does not jump up when its skeleton turns into the problem. Measured just before it goes.
+const seasonBarRefs = ref<ComponentPublicInstance[]>([])
+const seasonHold = ref(0)
+watch(
+  hasScreenProblem,
+  (problem) => {
+    seasonHold.value = problem
+      ? seasonBarRefs.value.reduce(
+          (sum, bar) =>
+            sum + (bar?.$el instanceof Element ? bar.$el.getBoundingClientRect().height : 0),
+          0,
+        )
+      : 0
+  },
+  { flush: 'pre' },
+)
 </script>
 
 <template>
   <div class="client-layout" :data-tab-bar="shell.tabBar ? 'true' : undefined">
     <!-- No house ad goes with a screen that shows a problem. -->
     <template v-if="shell.seasonBar && !hasScreenProblem">
-      <component :is="bar" v-for="(bar, index) in seasonBars" :key="index" />
+      <component :is="bar" v-for="(bar, index) in seasonBars" ref="seasonBarRefs" :key="index" />
     </template>
+    <div
+      v-else-if="shell.seasonBar && seasonHold > 0"
+      class="client-layout__season-hold"
+      :style="{ blockSize: `${seasonHold}px` }"
+      aria-hidden="true"
+    />
     <ClientHeader v-if="shell.header" />
     <div v-else class="client-layout__brand">
       <ClientLogo />

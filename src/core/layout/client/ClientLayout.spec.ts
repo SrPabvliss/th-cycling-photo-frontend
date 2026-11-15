@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
-import { defineComponent, h, onMounted } from 'vue'
+import { defineComponent, h, onMounted, ref } from 'vue'
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router'
 import { createPinia, setActivePinia } from 'pinia'
 
@@ -11,6 +11,8 @@ import { ErrorState } from '@/shared/components/loading'
 import ClientLayout from './ClientLayout.vue'
 
 const layoutMounted = vi.fn()
+// A screen that goes from loading to a problem without leaving the route.
+const laterFails = ref(false)
 
 const stub = (name: string) =>
   defineComponent({ name, render: () => h('div', { 'data-test': name }) })
@@ -23,6 +25,12 @@ const CountedLayout = defineComponent({
     onMounted(layoutMounted)
     return () => h(ClientLayout)
   },
+})
+
+// Every mounted layout goes at the end of its test: a problem left on screen would count in the next.
+const mountedLayouts: { unmount(): void }[] = []
+afterEach(() => {
+  while (mountedLayouts.length) mountedLayouts.pop()!.unmount()
 })
 
 async function mountAt(path: string) {
@@ -39,6 +47,14 @@ async function mountAt(path: string) {
           {
             path: 'season-error',
             component: defineComponent({ render: () => h(ErrorState, { what: 'los eventos' }) }),
+            meta: { shell: { seasonBar: true } },
+          },
+          {
+            path: 'season-later',
+            component: defineComponent({
+              render: () =>
+                laterFails.value ? h(ErrorState, { what: 'los eventos' }) : h('p', 'cargando'),
+            }),
             meta: { shell: { seasonBar: true } },
           },
           {
@@ -73,6 +89,7 @@ async function mountAt(path: string) {
       },
     },
   })
+  mountedLayouts.push(wrapper)
   await flushPromises()
 
   return { wrapper, router }
@@ -209,6 +226,35 @@ describe('ClientLayout', () => {
 
     expect(has(wrapper, 'season-bar')).toBe(false)
     expect(wrapper.get('main').text()).toContain('No pudimos mostrar los eventos')
+  })
+
+  // The rule stays (no ad next to a problem), but the bar leaves its room behind: the screen
+  // does not jump up when its skeleton turns into the problem.
+  it('keeps the room of the season bar when a problem takes it away', async () => {
+    laterFails.value = false
+    registerLayoutSlot(
+      LAYOUT_SLOTS.CLIENT_SEASON_BAR,
+      defineComponent({
+        setup() {
+          const el = ref<HTMLElement | null>(null)
+          onMounted(() => {
+            el.value!.getBoundingClientRect = () => ({ height: 36 }) as DOMRect
+          })
+          return () => h('aside', { 'data-test': 'season-bar', ref: el })
+        },
+      }),
+    )
+    const { wrapper } = await mountAt('/season-later')
+    expect(has(wrapper, 'season-bar')).toBe(true)
+
+    laterFails.value = true
+    await flushPromises()
+
+    expect(has(wrapper, 'season-bar')).toBe(false)
+    const hold = wrapper.get('.client-layout__season-hold')
+    expect(hold.attributes('style')).toContain('block-size: 36px')
+    expect(hold.attributes('aria-hidden')).toBe('true')
+    expect(hold.text()).toBe('')
   })
 
   it('applies the shell of the next route without mounting the layout again', async () => {
