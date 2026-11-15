@@ -15,7 +15,7 @@ interface IApiCartGroup {
   eventSlug: string
   startDate: string
   endDate: string
-  photos: { id: string; publicSlug: string }[]
+  photos: { id: string; publicSlug: string; alreadyPurchased?: boolean }[]
 }
 
 function toCartGroup(api: IApiCartGroup): ICartGroup {
@@ -25,7 +25,11 @@ function toCartGroup(api: IApiCartGroup): ICartGroup {
     eventSlug: api.eventSlug,
     startDate: parseDateOnly(api.startDate),
     endDate: parseDateOnly(api.endDate),
-    photos: api.photos.map((photo) => ({ id: photo.id, publicSlug: photo.publicSlug })),
+    photos: api.photos.map((photo) => ({
+      id: photo.id,
+      publicSlug: photo.publicSlug,
+      alreadyPurchased: photo.alreadyPurchased === true,
+    })),
   }
 }
 

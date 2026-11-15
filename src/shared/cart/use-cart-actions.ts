@@ -6,6 +6,7 @@ import { API_ROUTES } from '@/core/api/api-routes'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import { httpClient } from '@/core/http/axios-client'
 import { isSessionExpired, SessionExpiredError } from '@/core/http/session-expired'
+import { ROUTE_NAMES } from '@/core/navigation/route-names'
 import { message } from '@/core/ui/discrete-api'
 import { CART_QUERY_KEYS } from '@/shared/constants/cart-query-keys'
 import { quotePhotos } from '@/shared/pricing/quote'
@@ -75,6 +76,46 @@ const SESSION_EXPIRED = 'Tu sesión se cerró. Inicia sesión de nuevo para cont
 // names the reason in `messageKey`; `code` is its family (BUSINESS_RULE).
 const NO_CART = 'cart.no_active_cart'
 
+// Refusals with a reason the person can act on: each one says it instead of "try again".
+const ALREADY_BOUGHT = 'cart.photo_already_purchased'
+const EVENT_OUT_OF_SALE = 'cart.event_not_available'
+
+function refusalOf(error: unknown): string | undefined {
+  return isAxiosError(error) ? error.response?.data?.error?.messageKey : undefined
+}
+
+/** A toast text followed by one way out, drawn as a link-like button. */
+function withWayOut(text: string, label: string, onClick: () => unknown) {
+  return () =>
+    h('span', [
+      text,
+      h(
+        'button',
+        {
+          type: 'button',
+          style: {
+            marginInlineStart: 'var(--tt-space-3)',
+            padding: '0',
+            border: '0',
+            background: 'none',
+            color: 'var(--tt-primary-ink)',
+            font: 'inherit',
+            fontWeight: 'var(--tt-type-title-weight)',
+            textDecoration: 'underline',
+            cursor: 'pointer',
+          },
+          onClick,
+        },
+        label,
+      ),
+    ])
+}
+
+async function openMyPhotos() {
+  const { default: router } = await import('@/app/router')
+  await router.push({ name: ROUTE_NAMES.ACCOUNT_ORDERS })
+}
+
 function isAlreadyOut(error: unknown): boolean {
   if (!isAxiosError(error)) return false
   const reason = error.response?.data?.error
@@ -115,7 +156,11 @@ export function useCartActions(): ICartActions {
     return quote && tiers ? { price: quote.unitPrice, currency: tiers.currency } : null
   }
 
-  function run(photoId: string, request: () => Promise<unknown>, undo: () => void) {
+  function run(
+    photoId: string,
+    request: () => Promise<unknown>,
+    undo: () => void,
+  ): Promise<{ outcome: ChangeOutcome; failure?: unknown }> {
     const change = ++engine.changes
     engine.lastChangeOf.set(photoId, change)
     engine.busy.set(photoId, (engine.busy.get(photoId) ?? 0) + 1)
@@ -130,16 +175,18 @@ export function useCartActions(): ICartActions {
     return engine.queue
       .run(send)
       .then(
-        (): ChangeOutcome => 'done',
-        (error: unknown): ChangeOutcome => {
+        () => ({ outcome: 'done' as ChangeOutcome }),
+        (error: unknown) => {
           // Neither done nor refused: the session ended, and with it the cart that was on screen.
-          if (isSessionExpired(error)) return 'expired'
-          if (isAlreadyOut(error)) return 'done'
+          if (isSessionExpired(error)) return { outcome: 'expired' as ChangeOutcome }
+          if (isAlreadyOut(error)) return { outcome: 'done' as ChangeOutcome }
           // A later tap on the same photo already decided where it ends: leave it there, and say
           // nothing, since what the person sees is what they asked for last.
-          if (engine.lastChangeOf.get(photoId) !== change) return 'superseded'
+          if (engine.lastChangeOf.get(photoId) !== change) {
+            return { outcome: 'superseded' as ChangeOutcome }
+          }
           undo()
-          return 'undone'
+          return { outcome: 'undone' as ChangeOutcome, failure: error }
         },
       )
       .finally(() => {
@@ -175,10 +222,23 @@ export function useCartActions(): ICartActions {
           { silent: true },
         ),
       () => writeCart((groups) => withoutPhoto(groups, photo.id)),
-    ).then((outcome) => {
+    ).then(({ outcome, failure }) => {
       if (outcome === 'superseded') return
       if (outcome === 'expired') return reportExpiry()
       if (outcome === 'undone') {
+        const refusal = refusalOf(failure)
+        if (refusal === ALREADY_BOUGHT) {
+          return void message.error(
+            withWayOut(
+              'Ya compraste esta foto. La encuentras en Mis fotos.',
+              'Ir a Mis fotos',
+              openMyPhotos,
+            ),
+          )
+        }
+        if (refusal === EVENT_OUT_OF_SALE) {
+          return void message.error('Las fotos de este evento no están disponibles para la compra.')
+        }
         return void message.error('No pudimos agregar la foto. Intenta de nuevo.')
       }
 
@@ -188,29 +248,8 @@ export function useCartActions(): ICartActions {
         const price = formatMoney(after.price, after.currency)
         return void message.success(`Bajaste de precio: todas tus fotos a ${price} c/u.`)
       }
-      message.success(() =>
-        h('span', [
-          'Foto agregada al carrito.',
-          h(
-            'button',
-            {
-              type: 'button',
-              style: {
-                marginInlineStart: 'var(--tt-space-3)',
-                padding: '0',
-                border: '0',
-                background: 'none',
-                color: 'var(--tt-primary-ink)',
-                font: 'inherit',
-                fontWeight: 'var(--tt-type-title-weight)',
-                textDecoration: 'underline',
-                cursor: 'pointer',
-              },
-              onClick: () => cartStore.setDrawerOpen(true),
-            },
-            'Ver carrito',
-          ),
-        ]),
+      message.success(
+        withWayOut('Foto agregada al carrito.', 'Ver carrito', () => cartStore.setDrawerOpen(true)),
       )
     })
   }
@@ -231,7 +270,7 @@ export function useCartActions(): ICartActions {
           silent: true,
         }),
       () => writeCart((groups) => withPhotoBack(groups, removal)),
-    ).then((outcome) => {
+    ).then(({ outcome }) => {
       if (outcome === 'superseded') return
       if (outcome === 'expired') return reportExpiry()
       if (outcome === 'undone') {

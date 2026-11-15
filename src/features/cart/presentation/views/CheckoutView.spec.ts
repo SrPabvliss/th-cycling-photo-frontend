@@ -534,6 +534,78 @@ describe('CheckoutView', () => {
     expect(refetchCart).toHaveBeenCalled()
   })
 
+  describe('photos already bought', () => {
+    function withBought(...ids: string[]): ICartGroup {
+      const base = group(3)
+      return {
+        ...base,
+        photos: base.photos.map((photo) => ({
+          ...photo,
+          alreadyPurchased: ids.includes(photo.id),
+        })),
+      }
+    }
+
+    it('marks them, says so next to the button with the way to Mis fotos, and keeps it off', async () => {
+      signIn()
+      state.groups = [withBought('p1')]
+      const { wrapper } = await mountView()
+
+      const marks = wrapper.findAll('.order-summary__bought')
+      expect(marks.map((mark) => mark.text())).toEqual(['Ya la compraste'])
+      const alert = wrapper.get('[data-test="already-bought"]')
+      expect(alert.classes()).toContain('form-alert--bad')
+      expect(alert.text()).toContain('Ya compraste alguna de estas fotos')
+      expect(alert.text()).toContain(
+        'Quita las marcadas para confirmar. Las encuentras en Mis fotos.',
+      )
+      expect(alert.find('a').attributes('href')).toBe('/account/orders')
+      expect(primary(wrapper).attributes('disabled')).toBeDefined()
+
+      await primary(wrapper).trigger('click')
+      await flushPromises()
+      expect(place).not.toHaveBeenCalled()
+    })
+
+    it('lets the order go on once they are taken out', async () => {
+      signIn()
+      state.groups = [withBought('p1')]
+      const { wrapper } = await mountView()
+
+      state.groups = [group(2)]
+      await flushPromises()
+
+      expect(wrapper.find('[data-test="already-bought"]').exists()).toBe(false)
+      expect(primary(wrapper).attributes('disabled')).toBeUndefined()
+    })
+
+    it('reads the cart again when the server turns the order down for one, and says it once', async () => {
+      signIn()
+      state.groups = [withBought('p1')]
+      problem.value = 'already-purchased'
+      const { wrapper } = await mountView()
+      await flushPromises()
+
+      expect(refetchCart).toHaveBeenCalled()
+      expect(
+        wrapper.findAll('.form-alert').filter((alert) => alert.text().includes('Ya compraste')),
+      ).toHaveLength(1)
+    })
+  })
+
+  it('keeps the photos of an event out of sale in the cart, to take them out, and says why', async () => {
+    signIn()
+    problem.value = 'event-unavailable'
+    const { wrapper } = await mountView()
+    await flushPromises()
+
+    const alert = wrapper.get('[data-test="checkout-problem"]')
+    expect(alert.classes()).toContain('form-alert--bad')
+    expect(alert.text()).toContain('Las fotos de este evento no están disponibles para la compra')
+    expect(wrapper.findAll('.order-summary__thumb')).toHaveLength(3)
+    expect(refetchCart).not.toHaveBeenCalled()
+  })
+
   it('reads the billing data again when the consent is missing on the server', async () => {
     signIn()
     refreshBilling.mockClear()

@@ -5,6 +5,7 @@ import { useMediaQuery } from '@vueuse/core'
 import { NButton } from 'naive-ui'
 
 import { useSessionStore } from '@/core/auth/stores/session.store'
+import { ROUTE_NAMES } from '@/core/navigation/route-names'
 import { checkoutPath, ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { useBillingSelection } from '@/features/account/composables/use-billing-selection'
 import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
@@ -21,6 +22,7 @@ import { useEventPaymentOptionsQuery } from '@/shared/composables/use-event-paym
 import { quotePhotos } from '@/shared/pricing/quote'
 import { formatMoney } from '@/shared/pricing/tier-cards'
 import { usePricingTiersQuery } from '@/shared/pricing/use-pricing-tiers'
+import { checkoutProblemText } from '@/shared/utils/checkout-error'
 import { useCheckoutDraftStore } from '../../stores/checkout-draft.store'
 import { usePlaceOrder } from '../../composables/use-place-order'
 import CheckoutProblemAlert from '@/shared/components/CheckoutProblemAlert/CheckoutProblemAlert.vue'
@@ -45,6 +47,11 @@ const group = computed(
   () => cart.groups.value.find((each) => each.eventId === eventId.value) ?? null,
 )
 const count = computed(() => group.value?.photos.length ?? 0)
+// Photos of an earlier order cannot be ordered again: they are marked, to take them out first.
+const boughtCount = computed(
+  () => group.value?.photos.filter((photo) => photo.alreadyPurchased).length ?? 0,
+)
+const boughtText = checkoutProblemText('already-purchased')
 const galleryPath = computed(() =>
   group.value
     ? `${ROUTE_PATHS.PUBLIC_GALLERY}/${group.value.eventSlug}`
@@ -101,14 +108,19 @@ const { place, isPlacing, problem } = usePlaceOrder()
 watch(
   problem,
   (current) => {
-    if (current === 'cart-missing') void cart.refetch()
+    if (current === 'cart-missing' || current === 'already-purchased') void cart.refetch()
     if (current === 'consent' || current === 'billing') void refreshBilling()
   },
   { immediate: true },
 )
 
 const canContinue = computed(
-  () => isBillingReady.value && !!paymentOptions.value && !isPlacing.value,
+  () =>
+    isBillingReady.value && !!paymentOptions.value && boughtCount.value === 0 && !isPlacing.value,
+)
+// The server's refusal of a bought photo is said by the marks of the cart read again, once.
+const shownProblem = computed(() =>
+  problem.value === 'already-purchased' && boughtCount.value > 0 ? null : problem.value,
 )
 
 // The draft lives while the buyer moves between this screen and the method screen of the event.
@@ -248,7 +260,23 @@ async function confirm() {
             @retry="refetchOptions()"
           />
 
-          <CheckoutProblemAlert v-if="problem" :problem="problem" :gallery-path="galleryPath" />
+          <FormAlert
+            v-if="boughtCount > 0"
+            data-test="already-bought"
+            tone="bad"
+            :title="boughtText.title"
+            :text="boughtText.text"
+          >
+            <template #actions>
+              <RouterLink :to="{ name: ROUTE_NAMES.ACCOUNT_ORDERS }">Ir a Mis fotos</RouterLink>
+            </template>
+          </FormAlert>
+
+          <CheckoutProblemAlert
+            v-if="shownProblem"
+            :problem="shownProblem"
+            :gallery-path="galleryPath"
+          />
 
           <div class="checkout__actions">
             <RouterLink

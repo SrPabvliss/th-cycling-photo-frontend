@@ -26,6 +26,8 @@ vi.mock('@/core/http/axios-client', () => ({
   },
 }))
 vi.mock('@/core/ui/discrete-api', () => ({ message }))
+const routerPush = vi.hoisted(() => vi.fn())
+vi.mock('@/app/router', () => ({ default: { push: routerPush } }))
 
 const EVENT = {
   id: 'e1',
@@ -85,6 +87,17 @@ function deferred<T = unknown>() {
     reject = rej
   })
   return { promise, resolve, reject }
+}
+
+/** A refusal as the api sends it: the reason in `messageKey`, BUSINESS_RULE as its family. */
+function refusal(messageKey: string): AxiosError {
+  const response = {
+    status: 422,
+    data: { error: { code: 'BUSINESS_RULE', messageKey, message: 'x' } },
+    headers: {},
+    config: {},
+  }
+  return new AxiosError('failed', 'ERR', undefined, undefined, response as AxiosResponse)
 }
 
 function httpError(status: number, code?: string): AxiosError {
@@ -181,6 +194,38 @@ describe('useCartActions', () => {
       expect(state.countFor('e1')).toBe(1)
       expect(toasts('error')).toEqual(['No pudimos agregar la foto. Intenta de nuevo.'])
       expect(message.success).not.toHaveBeenCalled()
+    })
+
+    it('says a photo already bought is in Mis fotos, with the way there, and leaves it out', async () => {
+      const { state, actions } = await setup()
+      http.post.mockRejectedValue(refusal('cart.photo_already_purchased'))
+
+      actions.toggle(photo('p1'))
+      await flushPromises()
+
+      expect(state.isInCart('p1')).toBe(false)
+      expect(toasts('error')).toEqual([
+        'Ya compraste esta foto. La encuentras en Mis fotos.Ir a Mis fotos',
+      ])
+      const render = message.error.mock.calls[0]![0] as () => VNode
+      const button = (render().children as VNode[]).find(
+        (child) => isVNode(child) && child.type === 'button',
+      )!
+      await (button.props as { onClick: () => Promise<void> }).onClick()
+      expect(routerPush).toHaveBeenCalledWith({ name: 'account-orders' })
+    })
+
+    it('says the photos of an event out of sale cannot be bought, and leaves it out', async () => {
+      const { state, actions } = await setup()
+      http.post.mockRejectedValue(refusal('cart.event_not_available'))
+
+      actions.toggle(photo('p1'))
+      await flushPromises()
+
+      expect(state.isInCart('p1')).toBe(false)
+      expect(toasts('error')).toEqual([
+        'Las fotos de este evento no están disponibles para la compra.',
+      ])
     })
 
     it('takes the photo back out when the network is down', async () => {

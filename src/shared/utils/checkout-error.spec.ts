@@ -23,6 +23,8 @@ describe('checkoutProblem', () => {
     ['cart.cart_empty', 'cart-missing'],
     ['cart.event_not_in_cart', 'cart-missing'],
     ['cart.no_active_cart', 'cart-missing'],
+    ['cart.photo_already_purchased', 'already-purchased'],
+    ['cart.event_not_available', 'event-unavailable'],
     ['order.something_else', 'unknown'],
   ])('reads %s as %s', (key, problem) => {
     expect(checkoutProblem(apiError(422, key))).toBe(problem)
@@ -82,6 +84,16 @@ describe('checkoutProblemText', () => {
       'network',
       'No se pudo completar',
       'Parece un problema de conexión. Nada se perdió: intenta de nuevo.',
+    ],
+    [
+      'already-purchased',
+      'Ya compraste alguna de estas fotos',
+      'Quita las marcadas para confirmar. Las encuentras en Mis fotos.',
+    ],
+    [
+      'event-unavailable',
+      'Las fotos de este evento no están disponibles para la compra',
+      'Quítalas de tu carrito. No se creó ningún pedido.',
     ],
     ['unknown', 'No se pudo completar', 'Intenta de nuevo en un momento.'],
   ])('words %s for the buyer', (problem, title, text) => {

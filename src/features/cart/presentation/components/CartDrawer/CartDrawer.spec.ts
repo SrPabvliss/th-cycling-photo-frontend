@@ -218,6 +218,30 @@ describe('CartDrawer', () => {
     expect(wrapper.find('[data-test="cart-session-closed"]').exists()).toBe(false)
   })
 
+  it('marks photos already bought and keeps their event from being confirmed until they are out', async () => {
+    signIn()
+    const bought = group('e1', 2)
+    bought.photos[0] = { ...bought.photos[0]!, alreadyPurchased: true }
+    cart.groups = [bought, group('e2', 1)]
+    const { wrapper } = await open()
+
+    const [first, second] = sections(wrapper)
+    expect(first!.findAll('.cart-drawer__bought').map((mark) => mark.text())).toEqual([
+      'Ya la compraste',
+    ])
+    expect(first!.get('[data-test="drawer-already-bought"]').text()).toContain(
+      'Ya compraste alguna de estas fotos',
+    )
+    const confirmFirst = first!.findAll('a').find((link) => link.text() === 'Confirmar pedido')!
+    expect(confirmFirst.attributes('aria-disabled')).toBe('true')
+    await confirmFirst.trigger('click')
+    expect(useCartStore().isDrawerOpen).toBe(true)
+
+    expect(second!.find('[data-test="drawer-already-bought"]').exists()).toBe(false)
+    const confirmSecond = second!.findAll('a').find((link) => link.text() === 'Confirmar pedido')!
+    expect(confirmSecond.attributes('aria-disabled')).toBeUndefined()
+  })
+
   it('says the cart is empty and sends to the events', async () => {
     const { wrapper, router } = await open()
 

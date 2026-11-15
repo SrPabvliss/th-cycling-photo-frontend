@@ -18,6 +18,7 @@ import { quotePhotos } from '@/shared/pricing/quote'
 import { formatMoney } from '@/shared/pricing/tier-cards'
 import { usePricingTiersQuery } from '@/shared/pricing/use-pricing-tiers'
 import { useCartStore } from '@/shared/stores/cart.store'
+import { checkoutProblemText } from '@/shared/utils/checkout-error'
 import { getGalleryUrl } from '@/shared/utils/cdn.utils'
 
 const TITLE_ID = 'cart-drawer-title'
@@ -68,6 +69,8 @@ const events = computed(() =>
       count: `${count} ${count === 1 ? 'foto' : 'fotos'}`,
       unit: quote ? `${money(quote.unitPrice)} c/u` : null,
       total: quote ? money(quote.total) : null,
+      // Photos of an earlier order cannot be ordered again: out first, then the order goes on.
+      hasBought: group.photos.some((photo) => photo.alreadyPurchased),
       // The checkout asks for a session to confirm: without one, sign in first and come back.
       confirm: session.isAuthenticated
         ? checkoutPath(group.eventId)
@@ -75,6 +78,8 @@ const events = computed(() =>
     }
   }),
 )
+
+const boughtText = checkoutProblemText('already-purchased')
 
 function explainPrices() {
   const only = cart.groups.value.length === 1 ? cart.groups.value[0] : null
@@ -180,13 +185,21 @@ function explainPrices() {
               </div>
 
               <ul class="cart-drawer__thumbs">
-                <li v-for="photo in item.group.photos" :key="photo.id" class="cart-drawer__thumb">
+                <li
+                  v-for="photo in item.group.photos"
+                  :key="photo.id"
+                  class="cart-drawer__thumb"
+                  :class="{ 'cart-drawer__thumb--bought': photo.alreadyPurchased }"
+                >
                   <img
                     :src="getGalleryUrl(photo.publicSlug)"
                     alt="Foto en el carrito"
                     loading="lazy"
                     decoding="async"
                   />
+                  <span v-if="photo.alreadyPurchased" class="cart-drawer__bought">
+                    Ya la compraste
+                  </span>
                   <button
                     type="button"
                     class="cart-drawer__remove"
@@ -206,13 +219,23 @@ function explainPrices() {
                 <strong class="cart-drawer__total">{{ item.total }}</strong>
               </div>
 
+              <FormAlert
+                v-if="item.hasBought"
+                data-test="drawer-already-bought"
+                tone="bad"
+                :title="boughtText.title"
+                :text="boughtText.text"
+              />
+
               <RouterLink v-slot="{ href, navigate }" :to="item.confirm" custom>
                 <NButton
                   tag="a"
-                  :href="href"
+                  :href="item.hasBought ? undefined : href"
                   type="primary"
                   size="large"
                   block
+                  :disabled="item.hasBought"
+                  :aria-disabled="item.hasBought ? 'true' : undefined"
                   @click="(event: MouseEvent) => (close(), navigate(event))"
                 >
                   Confirmar pedido
@@ -360,6 +383,25 @@ function explainPrices() {
 
 .cart-drawer__thumb {
   position: relative;
+}
+
+/* A photo of an earlier order: dimmed, with a label along its foot, still with its "Quitar". */
+.cart-drawer__thumb--bought img {
+  opacity: 0.55;
+}
+
+.cart-drawer__bought {
+  position: absolute;
+  inset-inline: calc(var(--tt-space-1) / 2);
+  inset-block-end: calc(var(--tt-space-1) / 2);
+  padding: calc(var(--tt-space-1) / 2);
+  border-radius: var(--tt-radius-s);
+  background: var(--tt-danger-soft);
+  color: var(--tt-danger-ink);
+  font-size: var(--tt-type-label-size);
+  line-height: var(--tt-type-label-line);
+  font-weight: var(--tt-type-label-weight);
+  text-align: center;
 }
 
 .cart-drawer__thumb img,

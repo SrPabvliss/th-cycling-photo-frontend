@@ -34,13 +34,19 @@ const nextTier = computed(() =>
 <template>
   <div class="order-summary">
     <ul class="order-summary__thumbs">
-      <li v-for="photo in group.photos" :key="photo.id" class="order-summary__thumb">
+      <li
+        v-for="photo in group.photos"
+        :key="photo.id"
+        class="order-summary__thumb"
+        :class="{ 'order-summary__thumb--bought': photo.alreadyPurchased }"
+      >
         <img
           :src="getGalleryUrl(photo.publicSlug)"
           alt="Foto del pedido"
           loading="lazy"
           decoding="async"
         />
+        <span v-if="photo.alreadyPurchased" class="order-summary__bought">Ya la compraste</span>
         <button
           type="button"
           class="order-summary__remove"
@@ -119,6 +125,25 @@ const nextTier = computed(() =>
 
 .order-summary__thumb img {
   object-fit: cover;
+}
+
+/* A photo of an earlier order: dimmed, with a label along its foot, still with its "Quitar". */
+.order-summary__thumb--bought img {
+  opacity: 0.55;
+}
+
+.order-summary__bought {
+  position: absolute;
+  inset-inline: calc(var(--tt-space-1) / 2);
+  inset-block-end: calc(var(--tt-space-1) / 2);
+  padding: calc(var(--tt-space-1) / 2) var(--tt-space-1);
+  border-radius: var(--tt-radius-s);
+  background: var(--tt-danger-soft);
+  color: var(--tt-danger-ink);
+  font-size: var(--tt-type-label-size);
+  line-height: var(--tt-type-label-line);
+  font-weight: var(--tt-type-label-weight);
+  text-align: center;
 }
 
 .order-summary__remove {

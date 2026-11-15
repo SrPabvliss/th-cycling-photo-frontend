@@ -9,6 +9,8 @@ export type CheckoutProblem =
   | 'profile'
   | 'card-unavailable'
   | 'cart-missing'
+  | 'already-purchased'
+  | 'event-unavailable'
   | 'offline'
   | 'network'
   | 'unknown'
@@ -22,6 +24,10 @@ const PROBLEM_BY_KEY: Record<string, CheckoutProblem> = {
   'cart.cart_empty': 'cart-missing',
   'cart.event_not_in_cart': 'cart-missing',
   'cart.no_active_cart': 'cart-missing',
+  // Photos of an earlier order: the cart, read again, marks them to take them out.
+  'cart.photo_already_purchased': 'already-purchased',
+  // The organizer took the event out of sale: its photos stay in the cart to be taken out.
+  'cart.event_not_available': 'event-unavailable',
 }
 
 interface IApiErrorBody {
@@ -65,6 +71,14 @@ const TEXT: Record<CheckoutProblem, { title: string; text?: string }> = {
   'cart-missing': {
     title: 'No encontramos estas fotos en tu carrito',
     text: 'Si ya confirmaste este pedido, está en Mis fotos. Si no, vuelve a la galería y agrégalas de nuevo.',
+  },
+  'already-purchased': {
+    title: 'Ya compraste alguna de estas fotos',
+    text: 'Quita las marcadas para confirmar. Las encuentras en Mis fotos.',
+  },
+  'event-unavailable': {
+    title: 'Las fotos de este evento no están disponibles para la compra',
+    text: 'Quítalas de tu carrito. No se creó ningún pedido.',
   },
   offline: { title: 'Sin conexión a internet' },
   network: {
