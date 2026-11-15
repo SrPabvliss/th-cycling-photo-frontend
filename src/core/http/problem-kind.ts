@@ -11,6 +11,16 @@ export type ProblemKind = 'offline' | 'server' | 'timeout' | 'expired' | 'rate' 
 
 const TIMEOUT_CODES = new Set(['ECONNABORTED', 'ETIMEDOUT'])
 
+/** The request gave up waiting: nothing answered within its time limit. */
+export function isTimeoutError(error: unknown): boolean {
+  return (
+    isAxiosError(error) &&
+    error.response === undefined &&
+    error.code !== undefined &&
+    TIMEOUT_CODES.has(error.code)
+  )
+}
+
 function deviceIsOffline(): boolean {
   return typeof navigator !== 'undefined' && navigator.onLine === false
 }
@@ -28,7 +38,7 @@ export function problemKind(error: unknown): ProblemKind {
     // Nothing answered. Without network on the device it is the connection; with network, it is
     // the server that is not there, and the offline strip must not show.
     if (deviceIsOffline()) return 'offline'
-    if (error.code && TIMEOUT_CODES.has(error.code)) return 'timeout'
+    if (isTimeoutError(error)) return 'timeout'
     return 'server'
   }
 

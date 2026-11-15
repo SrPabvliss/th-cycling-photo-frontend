@@ -25,4 +25,11 @@ describe('shouldRetryQuery', () => {
     expect(shouldRetryQuery(0, new Error('network'))).toBe(true)
     expect(shouldRetryQuery(1, new Error('network'))).toBe(false)
   })
+
+  it('does not retry a request that ran out of time: the screen offers it, after one wait', () => {
+    expect(shouldRetryQuery(0, new AxiosError('timeout of 20000ms exceeded', 'ECONNABORTED'))).toBe(
+      false,
+    )
+    expect(shouldRetryQuery(0, new AxiosError('timeout', 'ETIMEDOUT'))).toBe(false)
+  })
 })
