@@ -232,6 +232,25 @@ describe('AccountMenu', () => {
     expect(document.activeElement).toBe(wrapper.get('[data-test="trigger"]').element)
   })
 
+  // From 768 px it opens under the avatar wherever the avatar is: the season bar on top moves
+  // it down until the page scrolls.
+  it('places itself under the avatar, and follows it when the page scrolls', async () => {
+    const at = vi
+      .spyOn(HTMLButtonElement.prototype, 'getBoundingClientRect')
+      .mockReturnValue({ bottom: 94 } as DOMRect)
+    const { wrapper } = await mountMenu()
+    await flushPromises()
+
+    const root = () => (wrapper.get('.account-menu').element as HTMLElement).style
+    expect(root().getPropertyValue('--account-menu-top')).toBe('94px')
+
+    at.mockReturnValue({ bottom: 58 } as DOMRect)
+    window.dispatchEvent(new Event('scroll'))
+    await flushPromises()
+    expect(root().getPropertyValue('--account-menu-top')).toBe('58px')
+    at.mockRestore()
+  })
+
   it('closes when tapping outside', async () => {
     const { wrapper } = await mountMenu()
 

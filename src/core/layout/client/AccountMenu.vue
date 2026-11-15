@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useEventListener } from '@vueuse/core'
 
 import { canOperate } from '@/core/auth/capabilities'
 import { getHomePath } from '@/core/auth/role-config'
@@ -102,13 +103,27 @@ watch(
   { immediate: true },
 )
 
+// From 768 px the panel opens under the avatar, wherever the avatar is: the season bar above the
+// header moves it down until the page scrolls.
+const top = ref<number | null>(null)
+function placeUnderTrigger() {
+  if (props.show && props.trigger)
+    top.value = Math.round(props.trigger.getBoundingClientRect().bottom)
+}
+watch(() => [props.show, props.trigger], placeUnderTrigger, { immediate: true })
+useEventListener(window, 'scroll', placeUnderTrigger, { passive: true })
+useEventListener(window, 'resize', placeUnderTrigger, { passive: true })
+const placement = computed(() =>
+  top.value === null ? {} : { '--account-menu-top': `${top.value}px` },
+)
+
 // Any navigation closes it: a menu link, the back button, a redirect.
 watch(() => route.fullPath, close)
 </script>
 
 <template>
   <Teleport to="body">
-    <div v-if="show" class="account-menu">
+    <div v-if="show" class="account-menu" :style="placement">
       <button
         type="button"
         class="account-menu__scrim"
@@ -373,7 +388,8 @@ watch(() => route.fullPath, close)
 
   .account-menu__panel {
     inline-size: calc(var(--tt-sidebar-width) + var(--tt-space-8));
-    margin: calc(var(--tt-header-desktop) - var(--tt-space-1)) var(--tt-space-5) 0 0;
+    margin: calc(var(--account-menu-top, var(--tt-header-desktop)) + var(--tt-space-1))
+      var(--tt-space-5) 0 0;
     padding: var(--tt-space-3);
     border-radius: var(--tt-radius-l);
     box-shadow: var(--tt-shadow-pop);
