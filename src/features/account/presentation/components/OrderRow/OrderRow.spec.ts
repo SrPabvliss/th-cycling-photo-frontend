@@ -6,7 +6,7 @@ import type { IMyOrderListItem } from '../../../types/responses/my-order.respons
 import OrderRow from './OrderRow.vue'
 
 const ORDER: IMyOrderListItem = {
-  id: 'o1',
+  id: '04eff3a1-0000-4000-8000-000000000000',
   state: 'ready',
   eventName: 'Mama Rumi 2026',
   createdAt: '2026-11-12T15:00:00.000Z',
@@ -39,9 +39,22 @@ describe('OrderRow', () => {
     const wrapper = await mountRow()
 
     const link = wrapper.get('a')
-    expect(link.attributes('href')).toBe('/account/orders/o1')
-    expect(link.attributes('aria-label')).toBe('Mama Rumi 2026, Lista para descargar, 3 fotos')
-    expect(wrapper.text()).toContain('12 nov 2026 · 3 fotos · $9,00')
+    expect(link.attributes('href')).toBe('/account/orders/04eff3a1-0000-4000-8000-000000000000')
+    expect(link.attributes('aria-label')).toBe(
+      'Mama Rumi 2026, pedido 04EFF3A1, Lista para descargar, 3 fotos',
+    )
+    expect(wrapper.text()).toMatch(/12 nov 2026, \d{2}:\d{2} · 3 fotos · \$9,00/)
+  })
+
+  // Several orders of the same event and day are told apart by their code (the one the staff
+  // asks for) and their time.
+  it('shows the code of the order and the time it was made', async () => {
+    const wrapper = await mountRow()
+
+    expect(wrapper.get('.order-row__code').text()).toBe('Pedido 04EFF3A1')
+    const local = new Date(ORDER.createdAt)
+    const time = `${String(local.getHours()).padStart(2, '0')}:${String(local.getMinutes()).padStart(2, '0')}`
+    expect(wrapper.get('.order-row__line').text()).toContain(time)
   })
 
   it('shows at most two thumbnails, never more', async () => {

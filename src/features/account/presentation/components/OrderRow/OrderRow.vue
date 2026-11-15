@@ -3,9 +3,10 @@ import { computed, ref } from 'vue'
 
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { formatMoney } from '@/shared/pricing/tier-cards'
-import { formatDate } from '@/shared/utils/date.utils'
+import { formatDateWithTime } from '@/shared/utils/date.utils'
 import { ORDER_STATE_PILL } from '../../../constants/order-state-pill'
 import type { IMyOrderListItem } from '../../../types/responses/my-order.response'
+import { orderCode } from '../../../utils/order-code'
 import OrderStatePill from '../OrderStatePill/OrderStatePill.vue'
 
 const PREVIEW_COUNT = 2
@@ -34,13 +35,17 @@ const amount = computed(() => {
   if (props.order.subtotal == null || !props.order.currency) return null
   return formatMoney(Number(props.order.subtotal), props.order.currency)
 })
+// Several orders of the same event and day: the code (the one the staff asks for) and the time
+// tell them apart.
+const code = computed(() => orderCode(props.order.id))
 const line = computed(() =>
-  [formatDate(new Date(props.order.createdAt)), photos.value, amount.value]
+  [formatDateWithTime(new Date(props.order.createdAt)), photos.value, amount.value]
     .filter(Boolean)
     .join(' · '),
 )
 const label = computed(
-  () => `${props.order.eventName}, ${ORDER_STATE_PILL[props.order.state].text}, ${photos.value}`,
+  () =>
+    `${props.order.eventName}, pedido ${code.value}, ${ORDER_STATE_PILL[props.order.state].text}, ${photos.value}`,
 )
 </script>
 
@@ -68,6 +73,7 @@ const label = computed(
     </span>
     <span class="order-row__body">
       <strong class="order-row__event">{{ order.eventName }}</strong>
+      <span class="order-row__code">Pedido {{ code }}</span>
       <span class="order-row__line">{{ line }}</span>
       <OrderStatePill :state="order.state" />
     </span>
@@ -150,6 +156,13 @@ const label = computed(
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.order-row__code {
+  color: var(--tt-ink-muted);
+  font-size: var(--tt-type-caption-size);
+  line-height: var(--tt-type-caption-line);
+  font-variant-numeric: tabular-nums;
 }
 
 .order-row__line {
