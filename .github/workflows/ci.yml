@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   ci:
-    name: Lint, Type Check & Build
+    name: Lint, Type Check, Test & Build
     runs-on: ubuntu-latest
 
     steps:
@@ -31,6 +31,9 @@ jobs:
 
       - name: Type check
         run: pnpm type-check
+
+      - name: Unit tests
+        run: pnpm test:unit run
 
       - name: Build
         run: pnpm build-only

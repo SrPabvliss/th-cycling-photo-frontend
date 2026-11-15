@@ -6,7 +6,17 @@ import { httpClient } from '@/core/http/axios-client'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { useSessionStore } from './stores/session.store'
 
-export function useLogoutMutation() {
+export interface ILogoutOptions {
+  /**
+   * Where to go once the session is gone. The panel goes to the login page. The client area
+   * passes null and decides by itself: most of its screens work without a session.
+   */
+  redirectTo?: string | null
+}
+
+export function useLogoutMutation(options: ILogoutOptions = {}) {
+  const redirectTo = options.redirectTo === undefined ? ROUTE_PATHS.LOGIN : options.redirectTo
+
   const sessionStore = useSessionStore()
   const queryClient = useQueryClient()
   const router = useRouter()
@@ -18,7 +28,7 @@ export function useLogoutMutation() {
     onSettled: () => {
       sessionStore.clearSession()
       queryClient.clear()
-      router.push(ROUTE_PATHS.LOGIN)
+      if (redirectTo !== null) router.push(redirectTo)
     },
   })
 }

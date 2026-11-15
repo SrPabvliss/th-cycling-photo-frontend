@@ -7,12 +7,13 @@ import { ACCOUNT_QUERY_KEYS } from '../../constants/query-keys'
 import { toMyOrderDetail } from '../../mappers/my-order.mapper'
 import type { IApiMyOrderDetail } from '../../types/responses/my-order.response'
 
-export function useMyOrderDetailQuery(orderId: Ref<string>) {
+export function useMyOrderDetailQuery(orderId: Ref<string>, options: { silent?: boolean } = {}) {
   return useQuery({
     queryKey: computed(() => ACCOUNT_QUERY_KEYS.order(orderId.value)),
     queryFn: async () => {
       const response = await httpClient.get<IApiMyOrderDetail>(
         API_ROUTES.MY_ORDERS.GET_BY_ID(orderId.value),
+        { silent: options.silent },
       )
       return toMyOrderDetail(response.data)
     },

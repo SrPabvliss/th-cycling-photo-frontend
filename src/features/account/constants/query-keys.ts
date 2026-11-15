@@ -6,6 +6,6 @@ export const ACCOUNT_QUERY_KEYS = {
   billingAccounts: () => [API_ROUTES.BILLING_ACCOUNTS.BASE] as const,
   orders: () => [API_ROUTES.MY_ORDERS.BASE] as const,
   order: (id: string) => [API_ROUTES.MY_ORDERS.BASE, id] as const,
-  ordersSummary: () => [API_ROUTES.MY_ORDERS.SUMMARY] as const,
+  orderDownloads: (id: string) => [API_ROUTES.MY_ORDERS.BASE, id, 'downloads'] as const,
   emailVerification: () => [API_ROUTES.AUTH.EMAIL_VERIFICATION.BASE] as const,
 } as const

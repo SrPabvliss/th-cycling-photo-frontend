@@ -1,0 +1,19 @@
+/* Grid of the event gallery: three columns on mobile, five from 768px. The virtualized grid sets
+ * the same columns from script (photo-grid.constants.ts) and has to agree with this file. */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--tt-space-2);
+}
+
+.photo-grid__placeholder {
+  aspect-ratio: 3 / 4;
+  block-size: auto;
+}
+
+@media (min-width: 768px) {
+  .photo-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--tt-space-3);
+  }
+}

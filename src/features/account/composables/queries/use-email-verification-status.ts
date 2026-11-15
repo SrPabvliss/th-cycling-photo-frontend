@@ -11,6 +11,8 @@ export function useEmailVerificationStatusQuery() {
     queryFn: async () => {
       const response = await httpClient.get<IApiEmailVerificationStatus>(
         API_ROUTES.AUTH.EMAIL_VERIFICATION.BASE,
+        // Silent: the verify screen says on the page when it fails.
+        { silent: true },
       )
       return response.data
     },

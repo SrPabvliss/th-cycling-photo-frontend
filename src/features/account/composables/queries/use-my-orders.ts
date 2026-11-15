@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/vue-query'
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
@@ -25,6 +25,8 @@ export function useMyOrdersQuery() {
     queryFn: async ({ pageParam }: { pageParam: IPageParams }): Promise<IPageResult> => {
       const response = await httpClient.get<IApiMyOrderListItem[]>(API_ROUTES.MY_ORDERS.BASE, {
         params: { page: pageParam.page, limit: PAGE_SIZE },
+        // The screen says what went wrong, in place.
+        silent: true,
       })
 
       const items = toMyOrderList(response.data)
@@ -41,5 +43,6 @@ export function useMyOrdersQuery() {
       last.pagination.page < last.pagination.totalPages
         ? ({ page: last.pagination.page + 1 } satisfies IPageParams)
         : undefined,
+    placeholderData: keepPreviousData,
   })
 }

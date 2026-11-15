@@ -1,292 +1,350 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NButton, NDivider, NIcon } from 'naive-ui'
-import { ArrowBack, CheckmarkCircle, ChevronBack } from '@vicons/ionicons5'
+import { useMediaQuery } from '@vueuse/core'
+import { NButton } from 'naive-ui'
 
-import PublicLayout from '@/core/layout/public/PublicLayout.vue'
-import { checkoutPath } from '@/core/navigation/route-paths'
-import { useAuth } from '@/features/auth/composables/use-auth'
-import PaymentMethodModal from '@/shared/components/PaymentMethodModal/PaymentMethodModal.vue'
-import { useCheckout } from '@/shared/composables/use-checkout'
-import { PAYMENT_METHOD } from '@/shared/types/payment-method.types'
-import { useCartStore } from '@/shared/stores/cart.store'
-import type { ICheckoutOrderResult } from '@/shared/types/cart.types'
-import { useMergeCart } from '../../composables/mutations/use-merge-cart'
-import { useEventPaymentOptionsQuery } from '@/shared/composables/use-event-payment-options'
-import CheckoutSummary from '../components/CheckoutSummary/CheckoutSummary.vue'
-import { useCartPricing } from '../../composables/use-cart-pricing'
-import PricingTotalBlock from '@/features/pricing/presentation/components/PricingTotalBlock/PricingTotalBlock.vue'
+import { useSessionStore } from '@/core/auth/stores/session.store'
+import { ROUTE_NAMES } from '@/core/navigation/route-names'
+import { checkoutPath, ROUTE_PATHS } from '@/core/navigation/route-paths'
 import { useBillingSelection } from '@/features/account/composables/use-billing-selection'
+import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
 import BillingAccountForm from '@/features/account/presentation/components/BillingAccountForm/BillingAccountForm.vue'
-import BillingCard from '@/features/account/presentation/components/BillingCard/BillingCard.vue'
-import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
 import BillingAccountPicker from '@/features/account/presentation/components/BillingAccountPicker/BillingAccountPicker.vue'
+import BillingCard from '@/features/account/presentation/components/BillingCard/BillingCard.vue'
+import { useCartState } from '@/shared/cart'
+import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
+import { EmptyState } from '@/shared/components/empty-state'
+import { LoadBoundary, TtSkeleton } from '@/shared/components/loading'
+import SessionExpiredNotice from '@/shared/components/SessionExpiredNotice/SessionExpiredNotice.vue'
+import { paymentOptionsProblem } from '@/shared/composables/payment-options-problem'
+import { useEventPaymentOptionsQuery } from '@/shared/composables/use-event-payment-options'
+import { quotePhotos } from '@/shared/pricing/quote'
+import { formatMoney } from '@/shared/pricing/tier-cards'
+import { usePricingTiersQuery } from '@/shared/pricing/use-pricing-tiers'
+import { checkoutProblemText } from '@/shared/utils/checkout-error'
+import { useCheckoutDraftStore } from '../../stores/checkout-draft.store'
+import { usePlaceOrder } from '../../composables/use-place-order'
+import CheckoutProblemAlert from '@/shared/components/CheckoutProblemAlert/CheckoutProblemAlert.vue'
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
+import CheckoutSummary from '../components/CheckoutSummary/CheckoutSummary.vue'
+
+const SKELETON_THUMBS = 3
 
 const route = useRoute()
 const router = useRouter()
-const cartStore = useCartStore()
-const { isAuthenticated } = useAuth()
-const { mutateAsync: mergeCart, isPending: isMerging } = useMergeCart()
+const session = useSessionStore()
 
 const eventId = computed(() => route.params.eventId as string)
-const { data: paymentOptions, isLoading: isLoadingPaymentOptions } = useEventPaymentOptionsQuery(
-  eventId,
-  isAuthenticated,
+const isSignedIn = computed(() => session.isAuthenticated)
+// The house strip: under the summary from 768 px, under the buttons on a phone; not for a guest.
+const SPOT_SEED = 31
+const isWide = useMediaQuery('(min-width: 768px)')
+
+// --- The order: the photos of this event in the cart ---
+const cart = useCartState()
+const group = computed(
+  () => cart.groups.value.find((each) => each.eventId === eventId.value) ?? null,
 )
-const cardAvailable = computed(() => paymentOptions.value?.cardAvailable ?? false)
-const { mutateAsync: checkout, isPending: isPlacingOrder } = useCheckout()
-
-watch(
-  eventId,
-  (id) => {
-    if (id) cartStore.setActiveEvent(id)
-  },
-  { immediate: true },
+const count = computed(() => group.value?.photos.length ?? 0)
+// Photos of an earlier order cannot be ordered again: they are marked, to take them out first.
+const boughtCount = computed(
+  () => group.value?.photos.filter((photo) => photo.alreadyPurchased).length ?? 0,
+)
+const boughtText = checkoutProblemText('already-purchased')
+const galleryPath = computed(() =>
+  group.value
+    ? `${ROUTE_PATHS.PUBLIC_GALLERY}/${group.value.eventSlug}`
+    : ROUTE_PATHS.PUBLIC_GALLERY,
 )
 
-const checkoutGroup = computed(
-  () => cartStore.groups.find((group) => group.eventId === eventId.value) ?? null,
-)
-const checkoutCount = computed(() => checkoutGroup.value?.photos.length ?? 0)
-const cartPricing = useCartPricing(checkoutCount)
+const { data: pricing } = usePricingTiersQuery()
+const totalLabel = computed(() => {
+  const quote = pricing.value ? quotePhotos(pricing.value.tiers, count.value) : null
+  return quote && pricing.value ? ` · ${formatMoney(quote.total, pricing.value.currency)}` : ''
+})
 
-const orderResults = ref<ICheckoutOrderResult[] | null>(null)
-const showMethodModal = ref(false)
-
+// --- Billing and how the event is paid ---
 const {
+  isBillingLoaded,
+  billingProblem,
+  billingProblemCopy,
+  isBillingRetrying,
+  retryBilling,
   billingAccounts,
   needsInvoiceConsent,
   selectedBillingAccountId,
   invoiceConsentChecked,
   billingSheet,
+  pickProblem,
   billingPrefill,
   isBillingReady,
   isSettingDefault,
-  isRecordingConsent,
   handleBillingSaved,
   handleBillingChosen,
-  ensureInvoiceConsent,
-} = useBillingSelection(() => isAuthenticated.value)
+  refreshBilling,
+} = useBillingSelection(() => isSignedIn.value)
 
-async function handleConfirm() {
-  if (!eventId.value) return
+const {
+  data: paymentOptions,
+  status: optionsStatus,
+  error: optionsError,
+  isFetching: isOptionsFetching,
+  refetch: refetchOptions,
+} = useEventPaymentOptionsQuery(eventId, isSignedIn)
+const takesCards = computed(() => paymentOptions.value?.cardAvailable === true)
+// Without the ways to pay nothing is confirmed: the screen says so and offers to read them again.
+const optionsProblem = computed(() =>
+  paymentOptionsProblem(optionsStatus.value, !!paymentOptions.value, optionsError.value),
+)
+const confirmLabel = computed(() => {
+  if (!paymentOptions.value) return 'Continuar'
+  return takesCards.value ? 'Continuar al pago' : 'Confirmar pedido'
+})
 
-  if (!isAuthenticated.value) {
-    router.push({ path: '/login', query: { redirect: checkoutPath(eventId.value) } })
+// --- Placing the order ---
+const { place, isPlacing, problem } = usePlaceOrder()
+
+// The server answered from data this screen no longer agrees with: read it again.
+watch(
+  problem,
+  (current) => {
+    if (current === 'cart-missing' || current === 'already-purchased') void cart.refetch()
+    if (current === 'consent' || current === 'billing') void refreshBilling()
+  },
+  { immediate: true },
+)
+
+const canContinue = computed(
+  () =>
+    isBillingReady.value && !!paymentOptions.value && boughtCount.value === 0 && !isPlacing.value,
+)
+// The server's refusal of a bought photo is said by the marks of the cart read again, once.
+const shownProblem = computed(() =>
+  problem.value === 'already-purchased' && boughtCount.value > 0 ? null : problem.value,
+)
+
+// The draft lives while the buyer moves between this screen and the method screen of the event.
+const drafts = useCheckoutDraftStore()
+const draftEventId = route.params.eventId as string
+onBeforeUnmount(() => {
+  if (router.currentRoute.value.path !== `${checkoutPath(draftEventId)}/method`) {
+    drafts.forget(draftEventId)
+  }
+})
+
+async function confirm() {
+  if (!canContinue.value || !selectedBillingAccountId.value) return
+
+  if (takesCards.value) {
+    // The method screen creates the order: it gets the billing data chosen here and whether the
+    // consent box was ticked, in memory, never in the address.
+    drafts.keep(eventId.value, {
+      billingAccountId: selectedBillingAccountId.value,
+      consentChecked: needsInvoiceConsent.value && invoiceConsentChecked.value,
+    })
+    router.push(`${checkoutPath(eventId.value)}/method`)
     return
   }
 
-  if (!isBillingReady.value) return
-
-  try {
-    await mergeCart()
-  } catch {
-    /* already merged */
-  }
-
-  await ensureInvoiceConsent()
-
-  if (!cardAvailable.value) {
-    await placeTransferOrder()
-    return
-  }
-
-  showMethodModal.value = true
-}
-
-async function placeTransferOrder() {
-  if (!selectedBillingAccountId.value) return
-
-  const orders = await checkout({
+  const orders = await place({
     eventId: eventId.value,
-    method: PAYMENT_METHOD.TRANSFER,
+    method: 'transfer',
     billingAccountId: selectedBillingAccountId.value,
-  }).catch(() => null)
-
-  if (orders) orderResults.value = orders
-}
-
-function handlePaidOrders(orders: ICheckoutOrderResult[]) {
-  orderResults.value = orders
+    recordConsent: needsInvoiceConsent.value && invoiceConsentChecked.value,
+  })
+  // Replaced: going back from the received order must not land on a checkout already used.
+  if (orders?.[0]) router.replace(`${ROUTE_PATHS.CHECKOUT}/received/${orders[0].orderId}`)
 }
 </script>
 
 <template>
-  <PublicLayout>
-    <!-- Success (reuses OrderConfirmation design) -->
-    <div v-if="orderResults" class="state-page">
-      <div class="state-page__content">
-        <div class="state-page__hero">
-          <span class="state-page__code">OK</span>
-          <div class="state-page__icon state-page__icon--success">
-            <NIcon :component="CheckmarkCircle" :size="64" color="#fff" />
-          </div>
-        </div>
-
-        <h1 class="state-page__title">¡Pedido recibido!</h1>
-        <p class="state-page__description">
-          Se {{ orderResults.length === 1 ? 'registró' : 'registraron' }}
-          <strong
-            >{{ orderResults.length }} pedido{{ orderResults.length !== 1 ? 's' : '' }}</strong
-          >
-          correctamente. Completa el pago para recibir tus fotos.
-        </p>
-
-        <div class="checkout-order-list">
-          <div v-for="order in orderResults" :key="order.orderId" class="checkout-order-item">
-            <span class="checkout-order-item__name">{{ order.eventName }}</span>
-            <span class="checkout-order-item__count">{{ order.photoCount }} fotos</span>
-          </div>
-        </div>
-
-        <div class="checkout-payment-actions">
-          <p class="checkout-transfer-notice">
-            Te enviaremos los datos para la transferencia. Apenas confirmemos el pago recibirás tus
-            fotos.
-          </p>
-        </div>
-
-        <div class="state-page__actions">
-          <NButton type="primary" size="large" @click="router.push('/gallery')">
-            <template #icon><NIcon :component="ArrowBack" /></template>
-            Volver a la galería
-          </NButton>
-        </div>
-      </div>
-      <div class="state-page__mountain" />
+  <div class="checkout">
+    <div class="checkout__title-row">
+      <RouterLink class="checkout__back" :to="galleryPath" aria-label="Volver a la galería">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
+      </RouterLink>
+      <h1 class="checkout__title">Confirmar pedido</h1>
     </div>
 
-    <!-- Checkout summary -->
-    <template v-else>
-      <div class="cf-back-bar">
-        <a class="cf-back-link" @click="router.back()">
-          <NIcon :component="ChevronBack" :size="14" />
-          Volver
-        </a>
-        <span class="cf-breadcrumb-sep">/</span>
-        <span class="cf-breadcrumb-cur">Confirmar pedido</span>
-      </div>
+    <!-- The session expired with the order on screen: say so, it is not an order without photos. -->
+    <SessionExpiredNotice v-if="session.expired" />
 
-      <div v-if="!checkoutGroup" class="checkout-empty">
-        <h2 class="checkout-empty__title">Tu carrito está vacío</h2>
-        <NButton type="primary" @click="router.push('/gallery')">Explorar eventos</NButton>
-      </div>
-
-      <section v-else class="checkout-summary">
-        <header class="checkout-summary__header">
-          <h1 class="checkout-summary__title">Resumen del pedido</h1>
-          <p class="checkout-summary__subtitle">
-            Revisa las fotos que vas a pedir. Si todo está bien, confirma tu pedido.
-          </p>
-        </header>
-
-        <div class="checkout-summary__layout">
-          <div class="checkout-summary__main">
-            <CheckoutSummary
-              :group="checkoutGroup"
-              :unit-price="cartPricing.preview.value?.unitPrice ?? 0"
-              :base-price="cartPricing.basePrice.value"
-              :currency="cartPricing.currency.value"
-              :is-loading="cartPricing.isLoading.value"
+    <LoadBoundary
+      v-else
+      :status="cart.status.value"
+      :empty="!group"
+      :refreshing="cart.status.value === 'error' && cart.isFetching.value"
+      what="tu carrito"
+      :error="cart.error.value"
+      stacked
+      @retry="cart.refetch()"
+    >
+      <template #skeleton>
+        <div class="checkout__skeleton">
+          <TtSkeleton width="60%" height="var(--tt-space-5)" radius="text" />
+          <div class="checkout__skeleton-thumbs">
+            <TtSkeleton
+              v-for="n in SKELETON_THUMBS"
+              :key="n"
+              class="checkout__skeleton-thumb"
+              height="auto"
+              radius="m"
             />
           </div>
+          <TtSkeleton height="var(--tt-control-m)" radius="m" />
+        </div>
+      </template>
 
-          <aside class="checkout-summary__aside">
-            <div class="checkout-summary__panel">
-              <NDivider class="checkout-summary__divider" />
+      <template #empty>
+        <EmptyState
+          illustration="carritoVacio"
+          title="No hay fotos en este pedido"
+          text="Vuelve a la galería y agrega las fotos que quieras."
+        >
+          <template #actions>
+            <RouterLink v-slot="{ href, navigate }" :to="ROUTE_PATHS.PUBLIC_GALLERY" custom>
+              <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
+                Volver a la galería
+              </NButton>
+            </RouterLink>
+          </template>
+        </EmptyState>
+      </template>
 
-              <div class="checkout-summary__totals">
-                <PricingTotalBlock
-                  v-if="cartPricing.preview.value"
-                  emphasis="soft"
-                  :quantity="cartPricing.preview.value.quantity"
-                  :subtotal="cartPricing.preview.value.subtotal"
-                  :unit-price="cartPricing.preview.value.unitPrice"
-                  :currency="cartPricing.currency.value"
-                  :tier="cartPricing.preview.value.tier"
-                  :next-tier="cartPricing.preview.value.nextTier"
-                  :photos-to-next-tier="cartPricing.preview.value.photosToNextTier"
-                  :is-loading="cartPricing.isLoading.value"
-                />
-                <div v-else class="checkout-summary__totals-loading">Calculando precio…</div>
-              </div>
+      <div v-if="group" class="checkout__columns">
+        <section class="checkout__main">
+          <div class="checkout__event">
+            <h2 class="checkout__event-name">{{ group.eventName }}</h2>
+          </div>
+          <CheckoutSummary :group="group" />
+          <HouseSpot v-if="isSignedIn && isWide" format="D" :seed="SPOT_SEED" />
+        </section>
 
-              <BillingCard
-                v-if="isAuthenticated"
-                v-model:consented="invoiceConsentChecked"
-                :accounts="billingAccounts"
-                :selected-id="selectedBillingAccountId"
-                :needs-consent="needsInvoiceConsent && billingAccounts.length > 0"
-                @add="billingSheet = 'form'"
-                @change="billingSheet = 'picker'"
-              />
+        <aside class="checkout__side">
+          <div v-if="!isSignedIn" class="checkout__notice" role="status">
+            <strong>Inicia sesión para comprar</strong>
+            <p>
+              Tus {{ count }}
+              {{ count === 1 ? 'foto se queda guardada' : 'fotos se quedan guardadas' }} en el
+              carrito.
+            </p>
+          </div>
 
+          <FormAlert
+            v-else-if="billingProblem"
+            data-test="billing-problem"
+            tone="warn"
+            :title="billingProblemCopy.title"
+            :text="billingProblemCopy.text"
+            :retrying="isBillingRetrying"
+            @retry="retryBilling()"
+          />
+
+          <BillingCard
+            v-else
+            v-model:consented="invoiceConsentChecked"
+            :accounts="billingAccounts"
+            :selected-id="selectedBillingAccountId"
+            :needs-consent="needsInvoiceConsent && billingAccounts.length > 0"
+            @add="billingSheet = 'form'"
+            @change="billingSheet = 'picker'"
+          />
+
+          <FormAlert
+            v-if="isSignedIn && optionsProblem"
+            data-test="payment-options-problem"
+            tone="warn"
+            :title="optionsProblem.title"
+            :text="optionsProblem.text"
+            :retrying="isOptionsFetching"
+            @retry="refetchOptions()"
+          />
+
+          <FormAlert
+            v-if="boughtCount > 0"
+            data-test="already-bought"
+            tone="bad"
+            :title="boughtText.title"
+            :text="boughtText.text"
+          >
+            <template #actions>
+              <RouterLink :to="{ name: ROUTE_NAMES.ACCOUNT_ORDERS }">Ir a Mis fotos</RouterLink>
+            </template>
+          </FormAlert>
+
+          <CheckoutProblemAlert
+            v-if="shownProblem"
+            :problem="shownProblem"
+            :gallery-path="galleryPath"
+          />
+
+          <div class="checkout__actions">
+            <RouterLink
+              v-if="!isSignedIn"
+              v-slot="{ href, navigate }"
+              :to="{ path: ROUTE_PATHS.LOGIN, query: { redirect: checkoutPath(eventId) } }"
+              custom
+            >
+              <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
+                Iniciar sesión para continuar
+              </NButton>
+            </RouterLink>
+
+            <template v-else>
               <NButton
                 type="primary"
                 size="large"
                 block
                 data-test="checkout-confirm"
-                :loading="isMerging || isRecordingConsent || isPlacingOrder"
-                :disabled="
-                  isMerging ||
-                  isPlacingOrder ||
-                  cartPricing.isLoading.value ||
-                  (isAuthenticated && (!isBillingReady || isLoadingPaymentOptions))
-                "
-                @click="handleConfirm"
+                :loading="isPlacing"
+                :disabled="!canContinue"
+                :aria-busy="isPlacing ? 'true' : undefined"
+                @click="confirm"
               >
-                Confirmar pedido
+                {{ confirmLabel }}{{ totalLabel }}
               </NButton>
-
-              <p
-                v-if="isAuthenticated && paymentOptions && !cardAvailable"
-                class="checkout-summary__method-hint"
-              >
-                Pagas por transferencia bancaria: al confirmar te enviamos los datos.
+              <p v-if="isBillingLoaded && !selectedBillingAccountId" class="checkout__hint">
+                Agrega tus datos de facturación para confirmar.
               </p>
+              <p v-else-if="paymentOptions && !takesCards" class="checkout__hint">
+                Este evento se paga por transferencia. Al confirmar, te escribimos por WhatsApp con
+                el total y los datos para pagar.
+              </p>
+            </template>
 
-              <NButton quaternary size="medium" block @click="router.push('/gallery')">
-                Seguir explorando
-              </NButton>
-            </div>
-          </aside>
-        </div>
-      </section>
+            <RouterLink class="checkout__link" :to="ROUTE_PATHS.PUBLIC_GALLERY">
+              Seguir explorando
+            </RouterLink>
+          </div>
+          <HouseSpot v-if="isSignedIn && !isWide" format="D" :seed="SPOT_SEED" />
+        </aside>
+      </div>
+    </LoadBoundary>
 
-      <PaymentMethodModal
-        v-model:show="showMethodModal"
-        :event-id="eventId"
-        :total="cartPricing.subtotal.value"
-        :currency="cartPricing.currency.value"
-        :billing-account-id="selectedBillingAccountId ?? undefined"
-        @paid-orders="handlePaidOrders"
+    <BillingSheet
+      v-if="billingSheet"
+      :title="billingSheet === 'form' ? 'Datos de facturación' : '¿A nombre de quién?'"
+      @close="billingSheet = null"
+    >
+      <BillingAccountForm
+        v-if="billingSheet === 'form'"
+        :needs-consent="needsInvoiceConsent"
+        :prefill="billingPrefill"
+        @saved="handleBillingSaved"
+        @cancel="billingSheet = null"
       />
-
-      <BillingSheet
-        v-if="billingSheet"
-        :title="billingSheet === 'form' ? 'Datos de facturación' : '¿A nombre de quién?'"
-        @close="billingSheet = null"
-      >
-        <BillingAccountForm
-          v-if="billingSheet === 'form'"
-          :needs-consent="needsInvoiceConsent"
-          :prefill="billingPrefill"
-          @saved="handleBillingSaved"
-          @cancel="billingSheet = null"
-        />
-        <BillingAccountPicker
-          v-else
-          :accounts="billingAccounts"
-          :selected-id="selectedBillingAccountId"
-          :is-saving="isSettingDefault"
-          @choose="handleBillingChosen"
-          @add="billingSheet = 'form'"
-        />
-      </BillingSheet>
-    </template>
-  </PublicLayout>
+      <BillingAccountPicker
+        v-else
+        :accounts="billingAccounts"
+        :selected-id="selectedBillingAccountId"
+        :is-saving="isSettingDefault"
+        :problem="pickProblem"
+        @choose="handleBillingChosen"
+        @add="billingSheet = 'form'"
+      />
+    </BillingSheet>
+  </div>
 </template>
 
-<style src="./checkout-success.css"></style>
 <style scoped src="./checkout-view.css" />

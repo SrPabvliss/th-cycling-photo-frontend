@@ -1,387 +1,355 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { NAlert, NButton, NInput } from 'naive-ui'
-import { useIntervalFn } from '@vueuse/core'
+import { NButton } from 'naive-ui'
+import { isAxiosError } from 'axios'
 
-import PublicLayout from '@/core/layout/public/PublicLayout.vue'
-import { ACCOUNT_ROUTE_NAMES } from '../../routes'
+import { problemKind } from '@/core/http/problem-kind'
+import { safeRedirect } from '@/core/navigation/safe-redirect'
+import AuthPage from '@/features/auth/presentation/components/AuthPage/AuthPage.vue'
+import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
+import { EmptyState } from '@/shared/components/empty-state'
+import { BusyNote, ErrorState, useLoadPhase } from '@/shared/components/loading'
 import { useConfirmEmailVerification } from '../../composables/mutations/use-confirm-email-verification'
 import { useResendEmailVerification } from '../../composables/mutations/use-resend-email-verification'
 import { useSendEmailVerification } from '../../composables/mutations/use-send-email-verification'
 import { useEmailVerificationStatusQuery } from '../../composables/queries/use-email-verification-status'
+import { useResendCooldown } from '../../composables/use-resend-cooldown'
+import { ACCOUNT_ROUTE_NAMES } from '../../routes'
+import CodeInput from '../components/CodeInput/CodeInput.vue'
 
+// The api's numbers: a code lasts 15 minutes and a new one can be asked for every 60 seconds.
+const CODE_LIFETIME_MINUTES = 15
+const RESEND_EVERY_SECONDS = 60
 const CODE_LENGTH = 6
-const RESEND_COOLDOWN_SECONDS = 60
 const CONTACT_EMAIL = 'info@titantv.com.ec'
+const SECOND = 1000
 
-const router = useRouter()
-const route = useRoute()
-
-const returnPath = computed<string | null>(() => {
-  const raw = route.query.redirect
-  const value = Array.isArray(raw) ? raw[0] : raw
-  return typeof value === 'string' && value.startsWith('/') && !value.startsWith('//')
-    ? value
-    : null
-})
-const isReturningToContract = computed(() => returnPath.value?.startsWith('/contracts/') ?? false)
-
-function continueAfterVerification() {
-  if (returnPath.value) router.push(returnPath.value)
-  else goToProfile()
+interface IAlert {
+  tone: 'bad' | 'warn' | 'info'
+  title: string
+  text?: string
 }
+
+const NETWORK_ALERT: IAlert = {
+  tone: 'warn',
+  title: 'No se pudo completar',
+  text: 'Parece un problema de conexión. Nada se perdió: intenta de nuevo.',
+}
+const TOO_MANY_ALERT: IAlert = {
+  tone: 'warn',
+  title: 'Demasiados intentos. Espera unos minutos antes de pedir otro código.',
+}
+const RESENT_ALERT: IAlert = {
+  tone: 'info',
+  title: 'Te enviamos un código nuevo',
+  text: 'El anterior ya no sirve: usa el del correo más reciente.',
+}
+
+const route = useRoute()
+const router = useRouter()
+
+const returnPath = computed(() => safeRedirect(route.query.redirect))
+const isReturningToContract = computed(() => returnPath.value?.startsWith('/contracts/') ?? false)
 
 const {
   data: status,
   isPending: isStatusLoading,
   isError: isStatusError,
+  error: statusError,
+  isFetching: isStatusFetching,
+  dataUpdatedAt: statusReadAt,
   refetch: refetchStatus,
 } = useEmailVerificationStatusQuery()
-
-const sendVerification = useSendEmailVerification()
-const resendVerification = useResendEmailVerification()
-const confirmVerification = useConfirmEmailVerification()
+// Without network a status that did not load waits for it: the error state says so.
+const { isWaitingForNetwork: isStatusWaiting } = useLoadPhase(() =>
+  isStatusLoading.value ? 'pending' : isStatusError.value ? 'error' : 'success',
+)
+const sendCode = useSendEmailVerification({ silent: true })
+const resendCode = useResendEmailVerification({ silent: true })
+const confirmCode = useConfirmEmailVerification({ silent: true })
+const cooldown = useResendCooldown(RESEND_EVERY_SECONDS)
 
 const code = ref('')
+const codeInput = ref<InstanceType<typeof CodeInput> | null>(null)
+const alert = ref<IAlert | null>(null)
+const wrongCode = ref(false)
 const confirmed = ref(false)
 const exhausted = ref(false)
-const exhaustedForChangeEmail = ref(false)
-const justResent = ref(false)
-const now = ref(Date.now())
-const cooldownUntil = ref<number | null>(null)
-
-const { pause: stopClock } = useIntervalFn(() => {
-  now.value = Date.now()
-}, 1000)
-onUnmounted(stopClock)
-
-const isPending = computed(() => status.value?.pending ?? false)
 const isChangeEmail = computed(() => status.value?.purpose === 'change_email')
 
-const expiresAtMs = computed(() =>
-  status.value?.expiresAt ? new Date(status.value.expiresAt).getTime() : null,
-)
-
-const secondsUntilExpiry = computed(() => {
-  if (expiresAtMs.value === null) return 0
-  return Math.max(0, Math.floor((expiresAtMs.value - now.value) / 1000))
-})
-
-const expiryLabel = computed(() => {
-  const minutes = Math.floor(secondsUntilExpiry.value / 60)
-  const seconds = secondsUntilExpiry.value % 60
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`
-})
-
-const cooldownSeconds = computed(() => {
-  if (!cooldownUntil.value) return 0
-  return Math.max(0, Math.ceil((cooldownUntil.value - now.value) / 1000))
-})
-const canResend = computed(() => cooldownSeconds.value === 0)
-
-const screen = computed<
-  'loading' | 'error' | 'offer' | 'form' | 'expired' | 'exhausted' | 'success'
->(() => {
-  if (confirmed.value) return 'success'
+const screen = computed(() => {
+  if (confirmed.value) return 'confirmed'
   if (exhausted.value) return 'exhausted'
+  if (isStatusWaiting.value) return 'error'
   if (isStatusLoading.value) return 'loading'
-  if (isStatusError.value) return 'error'
+  if (isStatusError.value && !status.value) return 'error'
   if (status.value?.expired) return 'expired'
-  if (isPending.value) return 'form'
+  if (status.value?.pending) return 'code'
   return 'offer'
 })
 
-const canConfirm = computed(
-  () => code.value.length === CODE_LENGTH && !confirmVerification.isPending.value,
-)
-
-function startCooldown() {
-  cooldownUntil.value = Date.now() + RESEND_COOLDOWN_SECONDS * 1000
+// A code sent less than a minute ago (right after signing up, say) cannot be sent again yet.
+function waitAfterLastCode() {
+  const expiresAt = status.value?.expiresAt ? new Date(status.value.expiresAt).getTime() : null
+  if (!status.value?.pending || expiresAt === null) return
+  const sentAt = expiresAt - CODE_LIFETIME_MINUTES * 60 * SECOND
+  const left = RESEND_EVERY_SECONDS - (Date.now() - sentAt) / SECOND
+  if (left > 0) cooldown.start(left)
 }
+onMounted(waitAfterLastCode)
+watch(() => status.value?.expiresAt, waitAfterLastCode)
 
-function resetTransientState() {
-  exhausted.value = false
-  exhaustedForChangeEmail.value = false
-  justResent.value = false
+const messageKeyOf = (error: unknown) =>
+  isAxiosError(error)
+    ? (error.response?.data as { error?: { messageKey?: string; message?: string } } | undefined)
+        ?.error
+    : undefined
+const statusOf = (error: unknown) => (isAxiosError(error) ? (error.response?.status ?? 0) : -1)
+
+function startOver() {
   code.value = ''
-  confirmVerification.reset()
+  codeInput.value?.focusFirst()
 }
 
-function onCodeInput(value: string) {
-  code.value = value.replace(/\D/g, '').slice(0, CODE_LENGTH)
+async function confirm() {
+  if (code.value.length !== CODE_LENGTH || confirmCode.isPending.value) return
+  alert.value = null
+  wrongCode.value = false
+  // The mutation reads the status again once the try is answered, and waits for it. Only a status
+  // read after this try says how many are left: a read that failed (the api allows ten a minute)
+  // leaves the count from before it, one too many.
+  const triedAt = Date.now()
+  const isStatusFresh = () => statusReadAt.value > triedAt
+  try {
+    await confirmCode.mutateAsync({ code: code.value })
+    confirmed.value = true
+  } catch (error) {
+    const body = messageKeyOf(error)
+    const key = body?.messageKey
+    if (key === 'auth.email_verification_no_attempts_left') {
+      exhausted.value = true
+      return
+    }
+    if (
+      key === 'auth.email_verification_expired' ||
+      key === 'auth.email_verification_not_pending'
+    ) {
+      if (!isStatusFresh()) await refetchStatus()
+      return
+    }
+    if (key === 'auth.email_verification_invalid') {
+      const left = isStatusFresh() ? status.value?.attemptsRemaining : null
+      if (left === 0) {
+        exhausted.value = true
+        return
+      }
+      wrongCode.value = true
+      const tries =
+        left == null ? '' : left === 1 ? ' Te queda 1 intento.' : ` Te quedan ${left} intentos.`
+      alert.value = {
+        tone: 'bad',
+        title: 'Código incorrecto',
+        text: `Revisa el correo e intenta de nuevo.${tries}`,
+      }
+      startOver()
+      return
+    }
+    const failed = statusOf(error)
+    alert.value =
+      failed === 0 || failed >= 500 || !body?.message
+        ? NETWORK_ALERT
+        : { tone: 'bad', title: 'No se pudo completar', text: body.message }
+  }
 }
 
-function handleSend() {
-  sendVerification.mutate(undefined, {
-    onSuccess: () => {
-      resetTransientState()
-      startCooldown()
-    },
-  })
+async function requestCode(kind: 'send' | 'resend') {
+  if (!cooldown.canResend.value) return
+  alert.value = null
+  wrongCode.value = false
+  try {
+    await (kind === 'send' ? sendCode : resendCode).mutateAsync()
+    exhausted.value = false
+    code.value = ''
+    cooldown.start()
+    if (kind === 'resend') alert.value = RESENT_ALERT
+    await refetchStatus()
+  } catch (error) {
+    alert.value = statusOf(error) === 429 ? TOO_MANY_ALERT : NETWORK_ALERT
+  }
 }
 
-function handleResend() {
-  resendVerification.mutate(undefined, {
-    onSuccess: () => {
-      resetTransientState()
-      justResent.value = true
-      startCooldown()
-    },
-  })
-}
-
-function handleConfirm() {
-  const wasChangeEmail = isChangeEmail.value
-  confirmVerification.mutate(
-    { code: code.value },
-    {
-      onSuccess: () => {
-        confirmed.value = true
-      },
-      onError: async () => {
-        const result = await refetchStatus()
-        // Burnt means the backend consumed the code: nothing pending AND nothing expired waiting.
-        if (result.data?.pending === false && result.data?.expired === false) {
-          exhausted.value = true
-          exhaustedForChangeEmail.value = wasChangeEmail
-        }
-      },
-    },
-  )
-}
-
-function goToProfile() {
-  router.push({ name: ACCOUNT_ROUTE_NAMES.PROFILE })
+function continueAfter() {
+  router.push(returnPath.value ?? '/')
 }
 </script>
 
 <template>
-  <PublicLayout>
-    <div class="verify-email-view">
-      <div class="verify-email-view__card">
-        <div
-          class="verify-email-view__illustration"
-          :class="{ 'is-success': screen === 'success' }"
+  <div v-if="screen === 'loading'" class="verify-email__center">
+    <BusyNote text="Cargando" />
+  </div>
+
+  <div v-else-if="screen === 'error'" class="verify-email__center">
+    <ErrorState
+      what="el estado de tu correo"
+      :kind="problemKind(statusError)"
+      stacked
+      :retrying="isStatusFetching"
+      @retry="refetchStatus()"
+    />
+  </div>
+
+  <div v-else-if="screen === 'confirmed'" class="verify-email__center">
+    <EmptyState
+      illustration="correo"
+      title="Correo confirmado"
+      :text="
+        isReturningToContract
+          ? 'Ya puedes volver a tu contrato para aceptarlo.'
+          : 'Tu cuenta está lista.'
+      "
+      :heading-level="1"
+    >
+      <template #actions>
+        <NButton type="primary" size="large" block @click="continueAfter">
+          {{ isReturningToContract ? 'Volver al contrato' : 'Continuar' }}
+        </NButton>
+      </template>
+    </EmptyState>
+  </div>
+
+  <div v-else-if="screen === 'exhausted'" class="verify-email__center">
+    <EmptyState
+      illustration="enlaceExpirado"
+      title="Se agotaron los intentos"
+      :text="
+        isChangeEmail
+          ? 'Vuelve a tu perfil para pedir de nuevo el cambio de correo.'
+          : 'Pide un código nuevo para volver a intentarlo.'
+      "
+      :heading-level="1"
+    >
+      <template #actions>
+        <RouterLink
+          v-if="isChangeEmail"
+          v-slot="{ href, navigate }"
+          :to="{ name: ACCOUNT_ROUTE_NAMES.PROFILE }"
+          custom
         >
-          <svg
-            viewBox="0 0 96 96"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-          >
-            <circle cx="48" cy="48" r="48" fill="var(--tt-primary-light)" fill-opacity="0.16" />
-            <rect
-              x="18"
-              y="30"
-              width="60"
-              height="42"
-              rx="8"
-              fill="var(--tt-surface)"
-              stroke="var(--tt-primary)"
-              stroke-width="2.5"
-            />
-            <path
-              d="M20 34L48 55L76 34"
-              stroke="var(--tt-primary)"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <template v-if="screen === 'success'">
-              <circle cx="74" cy="26" r="16" fill="var(--tt-success)" />
-              <path
-                d="M67 26L72 31L81 21"
-                stroke="white"
-                stroke-width="3"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                fill="none"
-              />
-            </template>
-          </svg>
-        </div>
-
-        <template v-if="screen === 'loading'">
-          <p class="verify-email-view__hint">Cargando el estado de tu verificación…</p>
-        </template>
-
-        <template v-else-if="screen === 'error'">
-          <h1 class="verify-email-view__title">No pudimos cargar esto</h1>
-          <p class="verify-email-view__hint">Intenta de nuevo en unos segundos.</p>
-          <NButton
-            type="primary"
-            size="large"
-            class="verify-email-view__action"
-            @click="refetchStatus()"
-          >
-            Reintentar
-          </NButton>
-        </template>
-
-        <template v-else-if="screen === 'offer'">
-          <h1 class="verify-email-view__title">Verifiquemos tu correo</h1>
-          <p class="verify-email-view__hint">
-            Ayúdanos a darte un mejor servicio: confirma tu dirección y te avisamos de tus compras
-            sin sorpresas. Te enviamos un código a tu correo registrado.
-          </p>
-          <NButton
-            type="primary"
-            size="large"
-            class="verify-email-view__action"
-            :loading="sendVerification.isPending.value"
-            @click="handleSend"
-          >
-            Enviar código
-          </NButton>
-        </template>
-
-        <template v-else-if="screen === 'form' || screen === 'expired'">
-          <h1 class="verify-email-view__title">Revisa tu correo</h1>
-          <p class="verify-email-view__target">
-            Te enviamos un código a
-            <strong>{{ status?.maskedTargetEmail }}</strong>
-          </p>
-          <NAlert
-            v-if="isChangeEmail"
-            type="warning"
-            :show-icon="true"
-            class="verify-email-view__warning"
-          >
-            Al confirmar este código, esa dirección pasa a ser con la que inicias sesión y la
-            anterior deja de servir. Hasta entonces sigues entrando con la de siempre.
-          </NAlert>
-
-          <template v-if="screen === 'expired'">
-            <p class="verify-email-view__hint is-warning">El código venció.</p>
-            <NButton
-              type="primary"
-              size="large"
-              class="verify-email-view__action"
-              :loading="resendVerification.isPending.value"
-              @click="handleResend"
-            >
-              Reenviar código
-            </NButton>
-          </template>
-
-          <template v-else>
-            <NInput
-              class="verify-email-view__code-input"
-              :value="code"
-              maxlength="6"
-              placeholder="000000"
-              :input-props="{
-                inputmode: 'numeric',
-                autocomplete: 'one-time-code',
-                pattern: '[0-9]*',
-              }"
-              @update:value="onCodeInput"
-            />
-            <p class="verify-email-view__hint">Vence en {{ expiryLabel }}</p>
-            <p v-if="justResent" class="verify-email-view__notice">
-              Te enviamos un código nuevo: el anterior ya no sirve, usa el del correo más reciente.
-            </p>
-
-            <NButton
-              type="primary"
-              size="large"
-              class="verify-email-view__action"
-              :disabled="!canConfirm"
-              :loading="confirmVerification.isPending.value"
-              @click="handleConfirm"
-            >
-              Confirmar código
-            </NButton>
-
-            <p
-              v-if="isChangeEmail && confirmVerification.isError.value"
-              class="verify-email-view__escape"
-            >
-              <a href="#" @click.prevent="goToProfile">Volver al perfil</a> para intentar con otra
-              dirección.
-            </p>
-
-            <NButton
-              size="large"
-              class="verify-email-view__action"
-              :disabled="!canResend"
-              :loading="resendVerification.isPending.value"
-              @click="handleResend"
-            >
-              {{ canResend ? 'Reenviar código' : `Reenviar en ${cooldownSeconds}s` }}
-            </NButton>
-          </template>
-
-          <p class="verify-email-view__support">
-            ¿No te llega?
-            <a :href="`mailto:${CONTACT_EMAIL}`">Escríbenos</a>
-          </p>
-        </template>
-
-        <template v-else-if="screen === 'exhausted'">
-          <h1 class="verify-email-view__title">Se agotaron los intentos</h1>
-          <p v-if="exhaustedForChangeEmail" class="verify-email-view__hint">
-            Vuelve al perfil para pedir de nuevo el cambio de correo.
-          </p>
-          <p v-else class="verify-email-view__hint">
-            Pide un código nuevo para volver a intentarlo.
-          </p>
-
-          <NButton
-            v-if="exhaustedForChangeEmail"
-            type="primary"
-            size="large"
-            class="verify-email-view__action"
-            @click="goToProfile"
-          >
+          <NButton tag="a" :href="href" type="primary" size="large" block @click="navigate">
             Volver al perfil
           </NButton>
-          <NButton
-            v-else
-            type="primary"
-            size="large"
-            class="verify-email-view__action"
-            :loading="sendVerification.isPending.value"
-            @click="handleSend"
-          >
-            Pedir código nuevo
-          </NButton>
+        </RouterLink>
+        <NButton
+          v-else
+          type="primary"
+          size="large"
+          block
+          :loading="sendCode.isPending.value"
+          :disabled="sendCode.isPending.value || !cooldown.canResend.value"
+          @click="requestCode('send')"
+        >
+          {{
+            cooldown.canResend.value
+              ? 'Pedir código nuevo'
+              : `Pedir código nuevo en ${cooldown.remaining.value} s`
+          }}
+        </NButton>
+        <FormAlert v-if="alert" :tone="alert.tone" :title="alert.title" :text="alert.text" />
+      </template>
+    </EmptyState>
+  </div>
 
-          <p class="verify-email-view__support">
-            ¿No te llega?
-            <a :href="`mailto:${CONTACT_EMAIL}`">Escríbenos</a>
-          </p>
-        </template>
+  <div v-else-if="screen === 'expired'" class="verify-email__center">
+    <EmptyState
+      illustration="enlaceExpirado"
+      title="El código venció"
+      :text="`Los códigos duran ${CODE_LIFETIME_MINUTES} minutos. Pide uno nuevo y usa el del correo más reciente.`"
+      :heading-level="1"
+    >
+      <template #actions>
+        <NButton
+          type="primary"
+          size="large"
+          block
+          :loading="resendCode.isPending.value"
+          :disabled="resendCode.isPending.value || !cooldown.canResend.value"
+          @click="requestCode('resend')"
+        >
+          {{
+            cooldown.canResend.value
+              ? 'Reenviar código'
+              : `Reenviar en ${cooldown.remaining.value} s`
+          }}
+        </NButton>
+        <FormAlert v-if="alert" :tone="alert.tone" :title="alert.title" :text="alert.text" />
+      </template>
+    </EmptyState>
+  </div>
 
-        <template v-else-if="screen === 'success'">
-          <h1 class="verify-email-view__title">Listo, verificamos tu correo</h1>
-          <p class="verify-email-view__hint">
-            {{
-              isReturningToContract
-                ? 'Gracias por confirmarlo. Ya puedes volver a tu contrato para aceptarlo.'
-                : 'Gracias por confirmarlo. Ya puedes volver a tu perfil.'
-            }}
-          </p>
-          <NButton
-            type="primary"
-            size="large"
-            class="verify-email-view__action"
-            data-test="verify-continue"
-            @click="continueAfterVerification"
-          >
-            {{
-              isReturningToContract
-                ? 'Volver al contrato'
-                : returnPath
-                  ? 'Continuar'
-                  : 'Volver al perfil'
-            }}
-          </NButton>
-        </template>
-      </div>
-    </div>
-  </PublicLayout>
+  <AuthPage v-else-if="screen === 'offer'" title="Verifiquemos tu correo">
+    <p class="verify-email__text">
+      Confirma tu dirección y ahí te avisamos de tus compras y tus facturas.
+    </p>
+    <FormAlert v-if="alert" :tone="alert.tone" :title="alert.title" :text="alert.text" />
+    <NButton
+      type="primary"
+      size="large"
+      block
+      :loading="sendCode.isPending.value"
+      :disabled="sendCode.isPending.value"
+      @click="requestCode('send')"
+    >
+      Enviar código
+    </NButton>
+    <RouterLink class="verify-email__link verify-email__later" to="/">Ahora no</RouterLink>
+  </AuthPage>
+
+  <AuthPage v-else title="Revisa tu correo">
+    <p class="verify-email__text">
+      Te enviamos un código de 6 dígitos a
+      <strong class="verify-email__target">{{ status?.maskedTargetEmail }}</strong
+      >.
+    </p>
+
+    <FormAlert
+      v-if="isChangeEmail"
+      tone="info"
+      title="Estás cambiando tu correo"
+      text="Al confirmar este código, esa dirección pasa a ser con la que inicias sesión."
+    />
+
+    <form class="verify-email__form" novalidate @submit.prevent="confirm">
+      <CodeInput ref="codeInput" v-model="code" :invalid="wrongCode" @complete="confirm" />
+      <FormAlert v-if="alert" :tone="alert.tone" :title="alert.title" :text="alert.text" />
+      <p class="verify-email__note">El código vence en {{ CODE_LIFETIME_MINUTES }} minutos.</p>
+      <NButton
+        type="primary"
+        size="large"
+        block
+        attr-type="submit"
+        :loading="confirmCode.isPending.value"
+        :disabled="code.length !== CODE_LENGTH || confirmCode.isPending.value"
+        :aria-busy="confirmCode.isPending.value ? 'true' : undefined"
+      >
+        Confirmar código
+      </NButton>
+      <button
+        type="button"
+        class="verify-email__link"
+        :disabled="!cooldown.canResend.value || resendCode.isPending.value"
+        @click="requestCode('resend')"
+      >
+        {{
+          cooldown.canResend.value ? 'Reenviar código' : `Reenviar en ${cooldown.remaining.value} s`
+        }}
+      </button>
+    </form>
+
+    <p class="verify-email__note">
+      ¿No te llega? Escríbenos a <span class="verify-email__contact">{{ CONTACT_EMAIL }}</span>
+    </p>
+  </AuthPage>
 </template>
 
 <style scoped src="./styles/verify-email-view.css"></style>

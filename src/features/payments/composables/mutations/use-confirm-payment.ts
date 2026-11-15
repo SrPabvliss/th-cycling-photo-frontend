@@ -7,12 +7,14 @@ import type { IConfirmPaymentRequest } from '@/features/payments/types/requests/
 import type { IPaymentResult } from '@/features/payments/types/responses/payment-intent.response'
 import { CART_QUERY_KEYS } from '@/shared/constants/cart-query-keys'
 import { useCartStore } from '@/shared/stores/cart.store'
+import { CLIENT_MUTATION } from '@/shared/constants/client-mutation'
 
 export function useConfirmPayment() {
   const queryClient = useQueryClient()
   const cartStore = useCartStore()
 
   return useMutation({
+    ...CLIENT_MUTATION,
     mutationFn: async (data: IConfirmPaymentRequest) => {
       const response = await httpClient.post<IPaymentResult>(API_ROUTES.PAYMENTS.CONFIRM, data, {
         silent: true,

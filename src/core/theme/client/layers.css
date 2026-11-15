@@ -1,0 +1,25 @@
+/* Layers of the client area, from the content up to the route bar. Local to this repo: these are
+ * not awana tokens (awana has no layer scale). The organizer panel keeps its own numbers; a piece
+ * both areas paint writes its old number behind the variable, so the panel stays as it was.
+ *
+ * Naive's own modals (consent, prompts, discrete dialogs) stack from 2000 with Naive's manager:
+ * above the client dialog and under the toasts. */
+[data-tt-area='client'] {
+  /* Inside a component: a piece over its own image. */
+  --tt-layer-lift: 1;
+  --tt-layer-lift-over: 2;
+  /* The house season bar, over the content, scrolling away under the header. */
+  --tt-layer-season: 10;
+  --tt-layer-tab-bar: 40;
+  --tt-layer-header: 50;
+  /* Bottom bars of a screen: the gallery cart bar and the preview bar. */
+  --tt-layer-cart-bar: 60;
+  --tt-layer-menu: 1500;
+  --tt-layer-drawer: 1550;
+  /* Sheets: prices (opened from the drawer too) and billing. */
+  --tt-layer-sheet: 1600;
+  --tt-layer-viewer: 1700;
+  --tt-layer-dialog: 1800;
+  --tt-layer-toast: 5000;
+  --tt-layer-route: 6000;
+}

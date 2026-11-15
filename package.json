@@ -9,13 +9,17 @@
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "test:unit": "vitest",
-    "build-only": "vite build",
+    "build-only": "vite build && node scripts/check-blocker-names.mjs",
+    "check:blocker-names": "node scripts/check-blocker-names.mjs",
     "type-check": "vue-tsc --build",
     "lint": "run-s lint:*",
     "lint:oxlint": "oxlint . --fix",
     "lint:eslint": "eslint . --fix --cache",
     "format": "prettier --write --experimental-cli src/",
-    "prepare": "husky"
+    "prepare": "husky",
+    "tokens:sync": "node scripts/sync-awana-tokens.mjs",
+    "illustrations:sync": "node scripts/sync-illustrations.mjs",
+    "pieces:sync": "node --experimental-strip-types --no-warnings scripts/sync-house-pieces.mjs"
   },
   "dependencies": {
     "@tanstack/vue-form": "^1.28.3",

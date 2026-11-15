@@ -1,0 +1,17 @@
+/* Panel styles, as the billing form had them before the client got its own look. */
+.billing-correction-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.billing-correction-form__alert {
+  margin-bottom: 12px;
+}
+
+.billing-correction-form__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}

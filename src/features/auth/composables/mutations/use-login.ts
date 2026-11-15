@@ -8,15 +8,19 @@ import { useSessionStore } from '@/core/auth/stores/session.store'
 import type { IApiCurrentUser } from '@/core/auth/current-user'
 import type { IApiAuthTokens } from '../../types/responses/auth-tokens.response'
 import type { ILoginRequest } from '../../types/requests/login.request'
+import { CLIENT_MUTATION } from '@/shared/constants/client-mutation'
 
 export function useLoginMutation() {
   const authStore = useSessionStore()
 
   return useMutation({
+    ...CLIENT_MUTATION,
     mutationFn: async (credentials: ILoginRequest) => {
       const loginResponse = await httpClient.post<IApiAuthTokens>(
         API_ROUTES.AUTH.LOGIN,
         credentials,
+        // The screen says what went wrong; a 401 here is a wrong password, not an old session.
+        { silent: true, skipAuthRetry: true },
       )
       const accessToken = loginResponse.data.accessToken
 

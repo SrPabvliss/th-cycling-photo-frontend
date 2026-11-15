@@ -1,7 +1,8 @@
 import type { BillingIdType } from './billing-account.response'
 import type { IApiMyOrderInvoice, IMyOrderInvoice } from './my-order-invoice.response'
 
-export type MyOrderState = 'in_process' | 'ready' | 'gifted' | 'cancelled'
+/** `confirming`: a card payment is being confirmed with the gateway. */
+export type MyOrderState = 'in_process' | 'confirming' | 'ready' | 'gifted' | 'cancelled'
 
 export interface IApiMyOrderPreviewPhoto {
   photoId: string
@@ -44,6 +45,12 @@ export interface IApiMyOrderDetail {
   photos: IApiMyOrderPhoto[]
   invoice: IApiMyOrderInvoice | null
   billing: IMyOrderBilling | null
+  /** Card payment being confirmed; null otherwise. */
+  confirmingTransactionId: string | null
+  /** How it is paid. Optional: older api versions do not send it. */
+  paymentMethod?: 'card' | 'transfer' | null
+  /** Public gallery of the event; null when it is no longer listed. Optional, like above. */
+  eventSlug?: string | null
 }
 
 export interface IApiMyOrderDownloadPhoto {
@@ -51,6 +58,8 @@ export interface IApiMyOrderDownloadPhoto {
   filename: string
   fileSize: number
   downloadUrl: string
+  /** Small image of the photo itself (TIT-116). Lasts an hour; may be null or fail. */
+  thumbnailUrl?: string | null
 }
 
 export interface IApiMyOrderDownloads {
@@ -81,26 +90,15 @@ export interface IMyOrderDetail {
   photos: IApiMyOrderPhoto[]
   invoice: IMyOrderInvoice | null
   billing: IMyOrderBilling | null
+  /** Card payment being confirmed; null otherwise. */
+  confirmingTransactionId: string | null
+  /** How it is paid. Optional: older api versions do not send it. */
+  paymentMethod?: 'card' | 'transfer' | null
+  /** Public gallery of the event; null when it is no longer listed. Optional, like above. */
+  eventSlug?: string | null
 }
 
 export interface IMyOrderDownloads {
   orderId: string
   photos: IApiMyOrderDownloadPhoto[]
-}
-
-export interface IApiMyOrdersSummarySpent {
-  currency: string
-  amount: string
-}
-
-export interface IApiMyOrdersSummary {
-  orderCount: number
-  photoCount: number
-  eventCount: number
-  spent: IApiMyOrdersSummarySpent[]
-}
-
-export interface IMyOrdersSummary {
-  orderCount: number
-  photoCount: number
 }

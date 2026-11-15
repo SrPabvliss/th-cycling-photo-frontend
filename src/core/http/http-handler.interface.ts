@@ -9,6 +9,11 @@ export interface IHttpRequestConfig {
   silent?: boolean
   /** Suppress only the automatic success toast; errors still surface */
   silentSuccess?: boolean
+  /**
+   * A 401 is the answer itself, not an expired session: no renewal is tried. For requests that
+   * check credentials (signing in), where a 401 means "wrong email or password".
+   */
+  skipAuthRetry?: boolean
   /** Request body for methods that otherwise take no data argument, e.g. DELETE */
   data?: unknown
 }

@@ -1,19 +1,29 @@
 import { useMutation } from '@tanstack/vue-query'
 
 import { API_ROUTES } from '@/core/api/api-routes'
+import { runPostLoginTasks } from '@/core/auth/post-login-tasks'
 import { httpClient } from '@/core/http/axios-client'
 import { toCurrentUser } from '@/core/auth/current-user.mapper'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import type { IApiCurrentUser } from '@/core/auth/current-user'
 import type { IApiAuthTokens } from '../../types/responses/auth-tokens.response'
 import type { IRegisterRequest } from '../../types/requests/register.request'
+import { CLIENT_MUTATION } from '@/shared/constants/client-mutation'
 
 export function useRegisterMutation() {
   const authStore = useSessionStore()
 
   return useMutation({
+    ...CLIENT_MUTATION,
     mutationFn: async (data: IRegisterRequest) => {
-      const registerResponse = await httpClient.post<IApiAuthTokens>(API_ROUTES.AUTH.REGISTER, data)
+      // The form says what went wrong, on each field.
+      const registerResponse = await httpClient.post<IApiAuthTokens>(
+        API_ROUTES.AUTH.REGISTER,
+        data,
+        {
+          silent: true,
+        },
+      )
       const accessToken = registerResponse.data.accessToken
 
       authStore.setAccessToken(accessToken)
@@ -24,6 +34,9 @@ export function useRegisterMutation() {
       const user = toCurrentUser(meResponse.data)
 
       authStore.setSession(accessToken, user)
+
+      // A new account is a sign-in too: the photos chosen before it go with it, as on login.
+      await runPostLoginTasks({ permissions: user.permissions })
 
       return user
     },

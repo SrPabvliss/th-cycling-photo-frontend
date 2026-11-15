@@ -10,7 +10,7 @@ export const forgotPasswordFormSchema = z.object({
   email: z
     .string()
     .trim()
-    .min(1, 'El correo es requerido')
-    .email('Ingresa un correo válido')
-    .max(255, 'Máximo 255 caracteres'),
+    .min(1, 'Escribe un correo válido, como tu@correo.com.')
+    .email('Escribe un correo válido, como tu@correo.com.')
+    .max(255, 'Escribe un correo válido, como tu@correo.com.'),
 })

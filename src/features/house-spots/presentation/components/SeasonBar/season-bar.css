@@ -1,0 +1,70 @@
+/* The season bar scrolls away with the page; the sticky header stays. Its own layers stay inside
+ * it (isolation), so nothing of the bar ever covers the header, a sheet or a dialog. */
+.season-bar {
+  position: relative;
+  z-index: var(--tt-layer-season);
+  flex: none;
+  isolation: isolate;
+}
+
+.season-bar__frame {
+  position: relative;
+  block-size: var(--tt-space-6);
+  overflow: hidden;
+}
+
+.season-bar__link {
+  position: absolute;
+  inset: 0;
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.season-bar__content :deep(.season-bar__slide) {
+  position: absolute;
+  inset: 0;
+  display: block;
+  opacity: 0;
+  animation: season-bar-slide 24s linear infinite;
+}
+
+.season-bar--still .season-bar__content :deep(.season-bar__slide) {
+  opacity: 1;
+  animation: none;
+}
+
+@keyframes season-bar-slide {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  3% {
+    opacity: 1;
+    transform: none;
+  }
+  25% {
+    opacity: 1;
+    transform: none;
+  }
+  28% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .season-bar__content :deep(.season-bar__slide) {
+    animation: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .season-bar__frame {
+    block-size: calc(var(--tt-space-6) + var(--tt-space-1));
+  }
+}

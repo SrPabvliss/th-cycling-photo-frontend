@@ -1,6 +1,5 @@
-import { useInfiniteQuery } from '@tanstack/vue-query'
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/vue-query'
 import { computed, type MaybeRefOrGetter, type Ref, toValue } from 'vue'
-import { refDebounced } from '@vueuse/core'
 
 import { API_ROUTES } from '@/core/api/api-routes'
 import { httpClient } from '@/core/http/axios-client'
@@ -10,117 +9,76 @@ import type { IApiPublicPhoto, IPublicPhoto } from '../../types/responses/public
 
 const PHOTOS_PER_PAGE = 30
 
+async function fetchPhotos(slug: string, page: number, filters: Record<string, unknown>) {
+  const response = await httpClient.get<IApiPublicPhoto[]>(API_ROUTES.PUBLIC_EVENTS.PHOTOS(slug), {
+    params: { page, limit: PHOTOS_PER_PAGE, ...filters },
+    silent: true,
+  })
+  const items = response.data as IPublicPhoto[]
+
+  return {
+    items,
+    pagination: toPagination(response.meta.pagination, {
+      page,
+      limit: PHOTOS_PER_PAGE,
+      itemsCount: items.length,
+    }),
+  }
+}
+
+type IPhotosPage = Awaited<ReturnType<typeof fetchPhotos>>
+
+const nextPageOf = (last: IPhotosPage) =>
+  last.pagination.page < last.pagination.totalPages ? last.pagination.page + 1 : undefined
+
 /**
- * Paginated photos for the public gallery. When `bibNumber` is set the
- * backend returns only the photos that match the bib (the "matched"
- * section). The companion "no_bib" section is paginated separately via
- * `usePublicEventNoBibPhotosInfinite` so each block can grow on its own
- * scroll sentinel.
+ * Photos of a public event, page by page. With a plate, only the photos where that exact plate
+ * was read: a rider's plate is a whole number, and "12" must not bring "127". Without one, every
+ * photo. While another plate or category loads, the previous photos stay. Silent: the gallery
+ * shows the failure in place.
  */
 export function usePublicEventPhotosInfinite(
   slug: MaybeRefOrGetter<string>,
   categoryId: Ref<number | null>,
-  bibNumber: Ref<string>,
-  bibMatch: Ref<'exact' | 'starts' | 'contains'>,
+  plate: Ref<string | null>,
 ) {
-  const debouncedBib = refDebounced(bibNumber, 300)
-
   return useInfiniteQuery({
     queryKey: computed(() =>
-      PUBLIC_GALLERY_QUERY_KEYS.photos(
-        toValue(slug),
-        undefined,
-        categoryId.value ?? undefined,
-        debouncedBib.value || undefined,
-        bibMatch.value,
-      ),
+      PUBLIC_GALLERY_QUERY_KEYS.photos(toValue(slug), categoryId.value, plate.value, 'matched'),
     ),
-    queryFn: async ({ pageParam }) => {
-      const params: Record<string, unknown> = { page: pageParam, limit: PHOTOS_PER_PAGE }
-      if (categoryId.value) params.photoCategoryId = categoryId.value
-      if (debouncedBib.value) {
-        params.bibNumber = debouncedBib.value
-        params.bibMatch = bibMatch.value
-      }
-
-      const response = await httpClient.get<IApiPublicPhoto[]>(
-        API_ROUTES.PUBLIC_EVENTS.PHOTOS(toValue(slug)),
-        { params },
-      )
-      const items = response.data as IPublicPhoto[]
-      return {
-        items,
-        pagination: toPagination(response.meta.pagination, {
-          page: pageParam as number,
-          limit: PHOTOS_PER_PAGE,
-          itemsCount: items.length,
-        }),
-      }
-    },
+    queryFn: ({ pageParam }) =>
+      fetchPhotos(toValue(slug), pageParam, {
+        ...(categoryId.value ? { photoCategoryId: categoryId.value } : {}),
+        ...(plate.value ? { bibNumber: plate.value, bibMatch: 'exact' } : {}),
+      }),
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
-      if (lastPage.pagination.page < lastPage.pagination.totalPages) {
-        return lastPage.pagination.page + 1
-      }
-      return undefined
-    },
+    getNextPageParam: nextPageOf,
     enabled: computed(() => !!toValue(slug)),
+    placeholderData: keepPreviousData,
   })
 }
 
 /**
- * Paginated companion stream for the public gallery search: photos in
- * the same event that have no detected bib. Enabled only when the user
- * is actively searching by bib number, so the additional request only
- * fires when the rider explicitly asks for it.
+ * Companion of a plate search: the photos of the event where no plate could be read, for the
+ * rider the recognition missed. Only asked for while a plate is being searched, and paged on its
+ * own.
  */
 export function usePublicEventNoBibPhotosInfinite(
   slug: MaybeRefOrGetter<string>,
   categoryId: Ref<number | null>,
-  bibNumber: Ref<string>,
+  plate: Ref<string | null>,
 ) {
-  const debouncedBib = refDebounced(bibNumber, 300)
-
   return useInfiniteQuery({
     queryKey: computed(() =>
-      PUBLIC_GALLERY_QUERY_KEYS.photos(
-        toValue(slug),
-        undefined,
-        categoryId.value ?? undefined,
-        undefined,
-        undefined,
-        'no_bib',
-      ),
+      PUBLIC_GALLERY_QUERY_KEYS.photos(toValue(slug), categoryId.value, null, 'no_bib'),
     ),
-    queryFn: async ({ pageParam }) => {
-      const params: Record<string, unknown> = {
-        page: pageParam,
-        limit: PHOTOS_PER_PAGE,
+    queryFn: ({ pageParam }) =>
+      fetchPhotos(toValue(slug), pageParam, {
         section: 'no_bib',
-      }
-      if (categoryId.value) params.photoCategoryId = categoryId.value
-
-      const response = await httpClient.get<IApiPublicPhoto[]>(
-        API_ROUTES.PUBLIC_EVENTS.PHOTOS(toValue(slug)),
-        { params },
-      )
-      const items = response.data as IPublicPhoto[]
-      return {
-        items,
-        pagination: toPagination(response.meta.pagination, {
-          page: pageParam as number,
-          limit: PHOTOS_PER_PAGE,
-          itemsCount: items.length,
-        }),
-      }
-    },
+        ...(categoryId.value ? { photoCategoryId: categoryId.value } : {}),
+      }),
     initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
-      if (lastPage.pagination.page < lastPage.pagination.totalPages) {
-        return lastPage.pagination.page + 1
-      }
-      return undefined
-    },
-    enabled: computed(() => !!toValue(slug) && !!debouncedBib.value.trim()),
+    getNextPageParam: nextPageOf,
+    enabled: computed(() => !!toValue(slug) && !!plate.value),
   })
 }

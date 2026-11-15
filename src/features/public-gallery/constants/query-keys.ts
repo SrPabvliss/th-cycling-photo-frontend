@@ -1,20 +1,12 @@
 import { API_ROUTES } from '@/core/api/api-routes'
 
 export const PUBLIC_GALLERY_QUERY_KEYS = {
-  events: () => [API_ROUTES.PUBLIC_EVENTS.BASE, 'list'] as const,
   eventDetail: (eventId: string) => [API_ROUTES.PUBLIC_EVENTS.BASE, 'detail', eventId] as const,
+  /** `matched` is the main list (everything, or one exact plate); `no_bib` its companion. */
   photos: (
     eventId: string,
-    page?: number,
-    categoryId?: number,
-    bibNumber?: string,
-    bibMatch?: 'exact' | 'starts' | 'contains',
-    section?: 'matched' | 'no_bib',
-  ) =>
-    [
-      API_ROUTES.PUBLIC_EVENTS.BASE,
-      'photos',
-      eventId,
-      { page, categoryId, bibNumber, bibMatch, section },
-    ] as const,
+    categoryId: number | null,
+    plate: string | null,
+    section: 'matched' | 'no_bib',
+  ) => [API_ROUTES.PUBLIC_EVENTS.BASE, 'photos', eventId, { categoryId, plate, section }] as const,
 } as const

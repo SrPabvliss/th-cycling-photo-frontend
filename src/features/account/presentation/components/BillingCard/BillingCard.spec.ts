@@ -39,13 +39,33 @@ describe('BillingCard', () => {
     expect(wrapper.emitted('change')).toHaveLength(1)
   })
 
+  it('breaks a long email at the @ rather than leaving a letter alone on a line', () => {
+    const long = { ...account, email: 'comprador.prueba.9e7449@example.test' }
+    const wrapper = mount(BillingCard, {
+      props: { accounts: [long], selectedId: 'ba-1', needsConsent: false, consented: false },
+    })
+
+    const line = wrapper.get('[data-test="billing-email"]')
+    expect(line.text()).toBe('comprador.prueba.9e7449@example.test')
+    expect(line.html()).toMatch(/comprador\.prueba\.9e7449<wbr[^>]*>@example\.test/)
+    expect(line.classes()).toContain('billing-card__email')
+  })
+
   it('asks again for the consent when the buyer has accounts but no consent', async () => {
     const wrapper = mount(BillingCard, {
       props: { accounts: [account], selectedId: 'ba-1', needsConsent: true, consented: false },
     })
 
-    await wrapper.find('[data-test="billing-card-consent"]').trigger('click')
+    await wrapper.find('[data-test="billing-card-consent"] input').setValue(true)
 
     expect(wrapper.emitted('update:consented')).toEqual([[true]])
+  })
+
+  it('has no consent box when the consent was given', () => {
+    const wrapper = mount(BillingCard, {
+      props: { accounts: [account], selectedId: 'ba-1', needsConsent: false, consented: false },
+    })
+
+    expect(wrapper.find('[data-test="billing-card-consent"]').exists()).toBe(false)
   })
 })
