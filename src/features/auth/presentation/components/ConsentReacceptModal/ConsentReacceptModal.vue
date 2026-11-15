@@ -6,8 +6,9 @@ import { LEGAL_PATHS } from '@/features/legal/routes'
 import { useRecordConsentsMutation } from '../../../composables/mutations/use-record-consents'
 import { CONSENT_TYPE } from '../../../constants/consent.constants'
 import { useSessionStore } from '@/core/auth/stores/session.store'
+import { useFormProblem } from '@/shared/composables/use-form-problem'
 import ModalCloseButton from '@/shared/components/ModalCloseButton/ModalCloseButton.vue'
-import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
+import { generalProblem } from '@/shared/utils/form-problem'
 
 const authStore = useSessionStore()
 // Silent: a failure is said inside the modal, which stays open to try again.
@@ -15,7 +16,7 @@ const { mutateAsync: recordConsents, isPending } = useRecordConsentsMutation({ s
 
 const dismissed = ref(false)
 const accepted = ref(false)
-const problem = ref<IFormProblem | null>(null)
+const problem = useFormProblem()
 
 const isVisible = computed(
   () =>

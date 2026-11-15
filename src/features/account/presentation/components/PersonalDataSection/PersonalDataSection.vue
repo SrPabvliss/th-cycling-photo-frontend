@@ -8,11 +8,12 @@ import { useBirthDateFields } from '@/features/auth/composables/use-birth-date-f
 import { GENDER_OPTIONS, MONTH_OPTIONS } from '@/features/auth/constants/register-form.options'
 import { registerFieldValidators as v } from '@/features/auth/constants/register-form.schema'
 import { useLocationOptions } from '@/features/locations/composables/use-location-options'
+import { useFormProblem } from '@/shared/composables/use-form-problem'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { loadAlertCopy } from '@/shared/components/loading'
 import FormField from '@/shared/components/form/FormField/FormField.vue'
 import { fieldErrorText, sendClientForm } from '@/shared/utils/form.utils'
-import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
+import { generalProblem } from '@/shared/utils/form-problem'
 import { useUpdateProfile } from '../../../composables/mutations/use-update-profile'
 import type { IProfileFormData } from '../../../constants/profile-form.schema'
 import type { IMyProfile, IUserGender } from '../../../types/responses/my-profile.response'
@@ -41,7 +42,7 @@ function toFormData(profile: IMyProfile): IProfileFormData {
 const saved = ref<IProfileFormData>(toFormData(props.profile))
 const formRef = ref<HTMLFormElement | null>(null)
 const submitted = ref(false)
-const problem = ref<IFormProblem | null>(null)
+const problem = useFormProblem()
 
 const form = useForm({
   defaultValues: saved.value,

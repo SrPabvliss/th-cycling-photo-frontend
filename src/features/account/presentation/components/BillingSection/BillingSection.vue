@@ -5,12 +5,13 @@ import { isAxiosError } from 'axios'
 
 import { problemKind } from '@/core/http/problem-kind'
 import { useSessionStore } from '@/core/auth/stores/session.store'
+import { useFormProblem } from '@/shared/composables/use-form-problem'
 import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
 import ConfirmDialog from '@/shared/components/confirm-dialog/ConfirmDialog.vue'
 import { EmptyState } from '@/shared/components/empty-state'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { ErrorState, TtSkeleton, useLoadPhase } from '@/shared/components/loading'
-import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
+import { generalProblem } from '@/shared/utils/form-problem'
 import { useDeleteBillingAccount } from '../../../composables/mutations/use-delete-billing-account'
 import { useSetDefaultBillingAccount } from '../../../composables/mutations/use-set-default-billing-account'
 import {
@@ -58,8 +59,8 @@ const serverError = ref<IBillingServerError | null>(null)
 const busyId = ref<string | null>(null)
 const deleting = ref<IBillingAccount | null>(null)
 // What a failed "make default" has to say, above the list. A failed delete says it in its dialog.
-const listProblem = ref<IFormProblem | null>(null)
-const deleteProblem = ref<IFormProblem | null>(null)
+const listProblem = useFormProblem()
+const deleteProblem = useFormProblem()
 
 function open(kind: 'add' | 'edit', account: IBillingAccount | null = null) {
   target.value = account

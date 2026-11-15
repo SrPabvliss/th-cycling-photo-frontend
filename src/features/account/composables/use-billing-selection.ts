@@ -3,8 +3,9 @@ import { computed, ref, watch } from 'vue'
 import { useSessionStore } from '@/core/auth/stores/session.store'
 import { problemKind } from '@/core/http/problem-kind'
 import { useOnline } from '@/core/network/use-online'
+import { useFormProblem } from '@/shared/composables/use-form-problem'
 import { loadProblemCopy } from '@/shared/components/loading'
-import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
+import { generalProblem } from '@/shared/utils/form-problem'
 import { useSetDefaultBillingAccount } from './mutations/use-set-default-billing-account'
 import { useRecordInvoiceConsent } from './mutations/use-record-invoice-consent'
 import { useMyBillingAccountsQuery } from './queries/use-my-billing-accounts'
@@ -34,7 +35,7 @@ export function useBillingSelection(enabled: () => boolean) {
   const invoiceConsentChecked = ref(false)
   const billingSheet = ref<BillingSheet>(null)
   /** Why the last pick did not go through, said in the picker above its button. */
-  const pickProblem = ref<IFormProblem | null>(null)
+  const pickProblem = useFormProblem()
   watch(billingSheet, () => (pickProblem.value = null))
 
   watch(

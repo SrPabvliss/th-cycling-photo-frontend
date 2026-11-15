@@ -5,6 +5,7 @@ import { NButton } from 'naive-ui'
 
 import { problemKind, type ProblemKind } from '@/core/http/problem-kind'
 import { useSessionStore } from '@/core/auth/stores/session.store'
+import { useFormProblem } from '@/shared/composables/use-form-problem'
 import PasswordRules from '@/shared/auth/PasswordRules.vue'
 import { EmptyState } from '@/shared/components/empty-state'
 import { ErrorState } from '@/shared/components/loading'
@@ -22,7 +23,7 @@ import {
   resetPasswordFieldValidators,
 } from '../../constants/reset-password-form.schema'
 import { AUTH_ROUTE_NAMES, FORGOT_PASSWORD_PATH } from '../../routes'
-import { failedStatus, generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
+import { failedStatus, generalProblem } from '@/shared/utils/form-problem'
 
 const session = useSessionStore()
 const { mutateAsync: validateToken } = useValidateResetTokenMutation()
@@ -32,7 +33,7 @@ const token = ref('')
 const screen = ref<'checking' | 'form' | 'useless' | 'unchecked' | 'done'>('checking')
 const formRef = ref<HTMLFormElement | null>(null)
 const submitted = ref(false)
-const problem = ref<IFormProblem | null>(null)
+const problem = useFormProblem()
 
 // The token travels in the fragment (never sent to a server) and leaves the address at once.
 onMounted(async () => {

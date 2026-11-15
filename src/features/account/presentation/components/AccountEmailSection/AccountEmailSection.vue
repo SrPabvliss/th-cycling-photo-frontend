@@ -7,10 +7,11 @@ import { isAxiosError } from 'axios'
 import { z } from 'zod'
 
 import { useSessionStore } from '@/core/auth/stores/session.store'
+import { useFormProblem } from '@/shared/composables/use-form-problem'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import FormField from '@/shared/components/form/FormField/FormField.vue'
 import { fieldErrorText, focusFirstInvalid, sendClientForm } from '@/shared/utils/form.utils'
-import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
+import { generalProblem } from '@/shared/utils/form-problem'
 import { useChangeEmail } from '../../../composables/mutations/use-change-email'
 import { useSendEmailVerification } from '../../../composables/mutations/use-send-email-verification'
 import { EMAIL_FORM_DEFAULTS } from '../../../constants/profile-form.schema'
@@ -40,7 +41,7 @@ const isVerified = computed(() => session.currentUser?.emailVerified === true)
 const editing = ref(false)
 const formRef = ref<HTMLFormElement | null>(null)
 const submitted = ref(false)
-const problem = ref<IFormProblem | null>(null)
+const problem = useFormProblem()
 const serverErrors = ref<Partial<Record<Field, string>>>({})
 
 const newEmail = z.string().trim().min(1, EMAIL_MESSAGE).email(EMAIL_MESSAGE)

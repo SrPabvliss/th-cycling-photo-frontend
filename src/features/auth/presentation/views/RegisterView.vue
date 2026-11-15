@@ -8,12 +8,13 @@ import { safeRedirect } from '@/core/navigation/safe-redirect'
 import { useSendEmailVerification } from '@/features/account/composables/mutations/use-send-email-verification'
 import AuthPage from '../components/AuthPage/AuthPage.vue'
 import AuthTabs from '../components/AuthTabs/AuthTabs.vue'
+import { useFormProblem } from '@/shared/composables/use-form-problem'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import RegisterForm, { type RegisterField } from '../components/RegisterForm/RegisterForm.vue'
 import { useAuth } from '../../composables/use-auth'
 import type { IRegisterFormData } from '../../constants/register-form.schema'
 import { toRegisterRequest } from '../../mappers/register-form.mapper'
-import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
+import { generalProblem } from '@/shared/utils/form-problem'
 
 const EMAIL_TAKEN_KEY = 'auth.email_already_exists'
 
@@ -40,7 +41,7 @@ const redirectQuery = computed(() => (redirect.value ? { redirect: redirect.valu
 
 const serverErrors = ref<Partial<Record<RegisterField, string>>>({})
 const emailTaken = ref(false)
-const problem = ref<IFormProblem | null>(null)
+const problem = useFormProblem()
 
 function fieldErrors(error: unknown): Partial<Record<RegisterField, string>> {
   if (!isAxiosError(error) || error.response?.status !== 400) return {}

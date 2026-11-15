@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useForm } from '@tanstack/vue-form'
 import { NButton } from 'naive-ui'
 
+import { useFormProblem } from '@/shared/composables/use-form-problem'
 import { EmptyState } from '@/shared/components/empty-state'
 import { fieldErrorText, sendClientForm } from '@/shared/utils/form.utils'
 import AuthPage from '../components/AuthPage/AuthPage.vue'
@@ -14,14 +15,14 @@ import {
   forgotPasswordFormSchema,
 } from '../../constants/forgot-password-form.schema'
 import { AUTH_ROUTE_NAMES } from '../../routes'
-import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
+import { generalProblem } from '@/shared/utils/form-problem'
 
 const { mutateAsync: requestLink, isPending } = useForgotPasswordMutation()
 
 const formRef = ref<HTMLFormElement | null>(null)
 const submitted = ref(false)
 const sent = ref(false)
-const problem = ref<IFormProblem | null>(null)
+const problem = useFormProblem()
 
 // Only an accepted request says the link is on its way. The api accepts an email with no
 // account too, so the message never tells whether there is one.

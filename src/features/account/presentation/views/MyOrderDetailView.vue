@@ -8,6 +8,7 @@ import { isAxiosError } from 'axios'
 import { problemKind } from '@/core/http/problem-kind'
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
 import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
+import { useFormProblem } from '@/shared/composables/use-form-problem'
 import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
 import ConfirmDialog from '@/shared/components/confirm-dialog/ConfirmDialog.vue'
 import { EmptyState } from '@/shared/components/empty-state'
@@ -119,7 +120,7 @@ const eventGallery = computed(() =>
 
 // --- Cancelling ---
 const askingCancel = ref(false)
-const cancelProblem = ref<IFormProblem | null>(null)
+const cancelProblem = useFormProblem()
 // A refusal means the order moved on; a lost connection or a server failure says only that.
 const CANNOT_CANCEL: IFormProblem = { title: 'Este pedido ya no se puede cancelar.' }
 // A card payment of this order is still open at the gateway: it can be cancelled once it ends.

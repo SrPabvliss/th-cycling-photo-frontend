@@ -5,12 +5,13 @@ import { NButton, useMessage } from 'naive-ui'
 import { isAxiosError } from 'axios'
 import { z } from 'zod'
 
+import { useFormProblem } from '@/shared/composables/use-form-problem'
 import PasswordRules from '@/shared/auth/PasswordRules.vue'
 import { isAccountPassword, PASSWORD_RULE_MESSAGE } from '@/shared/auth/password-rule'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import FormField from '@/shared/components/form/FormField/FormField.vue'
 import { fieldErrorText, focusFirstInvalid, sendClientForm } from '@/shared/utils/form.utils'
-import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
+import { generalProblem } from '@/shared/utils/form-problem'
 import { useChangePassword } from '../../../composables/mutations/use-change-password'
 import { PASSWORD_FORM_DEFAULTS } from '../../../constants/profile-form.schema'
 
@@ -36,7 +37,7 @@ const changePassword = useChangePassword({ silent: true })
 
 const formRef = ref<HTMLFormElement | null>(null)
 const submitted = ref(false)
-const problem = ref<IFormProblem | null>(null)
+const problem = useFormProblem()
 const serverErrors = ref<Partial<Record<Field, string>>>({})
 
 const form = useForm({

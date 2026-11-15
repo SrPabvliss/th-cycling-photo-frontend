@@ -6,13 +6,14 @@ import 'intl-tel-input/styles'
 
 import { problemKind } from '@/core/http/problem-kind'
 import { dialCodeOf } from '@/features/auth/utils/phone-prefix'
+import { useFormProblem } from '@/shared/composables/use-form-problem'
 import BillingSheet from '@/shared/components/BillingSheet/BillingSheet.vue'
 import ConfirmDialog from '@/shared/components/confirm-dialog/ConfirmDialog.vue'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import FormField from '@/shared/components/form/FormField/FormField.vue'
 import { ErrorState, TtSkeleton, useLoadPhase } from '@/shared/components/loading'
 import { PHONE_INPUT_OPTIONS } from '@/shared/constants/phone-input'
-import { generalProblem, type IFormProblem } from '@/shared/utils/form-problem'
+import { generalProblem } from '@/shared/utils/form-problem'
 import { useAddPhone } from '../../../composables/mutations/use-add-phone'
 import { useDeletePhone } from '../../../composables/mutations/use-delete-phone'
 import { useSetPrimaryPhone } from '../../../composables/mutations/use-set-primary-phone'
@@ -48,7 +49,7 @@ const isWhatsapp = ref(true)
 const makePrimary = ref(false)
 const numberError = ref<string | null>(null)
 const NUMBER_FIELD_ID = 'telefono-numero'
-const problem = ref<IFormProblem | null>(null)
+const problem = useFormProblem()
 
 const isBusy = computed(
   () =>

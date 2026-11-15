@@ -7,6 +7,7 @@ import { isAxiosError } from 'axios'
 
 import { getHomePath } from '@/core/auth/nav-config'
 import { safeRedirect } from '@/core/navigation/safe-redirect'
+import { useFormProblem } from '@/shared/composables/use-form-problem'
 import { useCartState } from '@/shared/cart'
 import { fieldErrorText, sendClientForm } from '@/shared/utils/form.utils'
 import AuthPage from '../components/AuthPage/AuthPage.vue'
@@ -53,7 +54,7 @@ const subtitle = computed(() =>
 
 const formRef = ref<HTMLFormElement | null>(null)
 const submitted = ref(false)
-const problem = ref<IFormProblem | null>(null)
+const problem = useFormProblem()
 
 const form = useForm({
   defaultValues: LOGIN_FORM_DEFAULTS,
