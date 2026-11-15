@@ -13,6 +13,7 @@ export type CheckoutProblem =
   | 'event-unavailable'
   | 'offline'
   | 'network'
+  | 'unconfirmed'
   | 'unknown'
 
 const PROBLEM_BY_KEY: Record<string, CheckoutProblem> = {
@@ -81,6 +82,11 @@ const TEXT: Record<CheckoutProblem, { title: string; text?: string }> = {
     text: 'Quítalas de tu carrito. No se creó ningún pedido.',
   },
   offline: { title: 'Sin conexión a internet' },
+  // The order request got no answer: it may have reached the server and the order exist.
+  unconfirmed: {
+    title: 'No sabemos si tu pedido se creó',
+    text: 'Se perdió la conexión antes de la respuesta. Revisa Mis fotos antes de intentarlo de nuevo.',
+  },
   network: {
     title: 'No se pudo completar',
     text: 'Parece un problema de conexión. Nada se perdió: intenta de nuevo.',

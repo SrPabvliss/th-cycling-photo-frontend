@@ -95,6 +95,11 @@ describe('checkoutProblemText', () => {
       'Las fotos de este evento no están disponibles para la compra',
       'Quítalas de tu carrito. No se creó ningún pedido.',
     ],
+    [
+      'unconfirmed',
+      'No sabemos si tu pedido se creó',
+      'Se perdió la conexión antes de la respuesta. Revisa Mis fotos antes de intentarlo de nuevo.',
+    ],
     ['unknown', 'No se pudo completar', 'Intenta de nuevo en un momento.'],
   ])('words %s for the buyer', (problem, title, text) => {
     expect(checkoutProblemText(problem)).toEqual({ title, text })

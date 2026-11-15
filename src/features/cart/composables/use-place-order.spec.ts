@@ -124,13 +124,40 @@ describe('usePlaceOrder', () => {
     expect(placeOrder.isPlacing.value).toBe(false)
   })
 
-  it('names a network problem when the order request gets no answer', async () => {
+  // The request may have reached the server and the order been created: the answer was lost.
+  it('does not claim nothing happened when the order request gets no answer', async () => {
     answerCheckout(() => Promise.reject(new AxiosError('Network Error', 'ERR_NETWORK')))
-    const { placeOrder } = setup()
+    const { placeOrder, invalidate } = setup()
+    invalidate.mockClear()
 
     await placeOrder.place(INPUT)
+    await flushPromises()
 
-    expect(placeOrder.problem.value).toBe('network')
+    expect(placeOrder.problem.value).toBe('unconfirmed')
+    const keys = invalidate.mock.calls.map(([filters]) => JSON.stringify(filters?.queryKey))
+    expect(keys).toContain(JSON.stringify(['/cart']))
+    expect(keys).toContain(JSON.stringify(['/orders/me']))
+  })
+
+  it('reads the cart again when the server says the photos are not in it, so the badge agrees', async () => {
+    const response = {
+      status: 422,
+      data: { error: { messageKey: 'cart.event_not_in_cart', message: 'x' } },
+      headers: {},
+      config: {},
+    } as AxiosResponse
+    answerCheckout(() =>
+      Promise.reject(new AxiosError('failed', 'ERR_BAD_REQUEST', undefined, undefined, response)),
+    )
+    const { placeOrder, invalidate } = setup()
+    invalidate.mockClear()
+
+    await placeOrder.place(INPUT)
+    await flushPromises()
+
+    expect(placeOrder.problem.value).toBe('cart-missing')
+    const keys = invalidate.mock.calls.map(([filters]) => JSON.stringify(filters?.queryKey))
+    expect(keys).toContain(JSON.stringify(['/cart']))
   })
 
   it('stops, and creates no order, when the cart merge gets no answer', async () => {

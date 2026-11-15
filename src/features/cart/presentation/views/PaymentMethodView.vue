@@ -218,7 +218,8 @@ async function proceed() {
       >
         Continuar
       </NButton>
-      <p class="payment-method__note">
+      <!-- Only while nothing went wrong: after a lost answer the order may already exist. -->
+      <p v-if="!problem" class="payment-method__note">
         Todavía no se registra nada. El pedido se crea al continuar.
       </p>
     </div>

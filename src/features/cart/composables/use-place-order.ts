@@ -67,6 +67,8 @@ export function usePlaceOrder(): IPlaceOrder {
       return null
     }
 
+    // Set once the order request itself left: only its lost answer leaves the order unknown.
+    let orderAsked = false
     try {
       if (input.recordConsent) {
         await httpClient.post(
@@ -77,6 +79,7 @@ export function usePlaceOrder(): IPlaceOrder {
         void queryClient.invalidateQueries({ queryKey: ACCOUNT_QUERY_KEYS.billingAccounts() })
       }
 
+      orderAsked = true
       const response = await httpClient.post<{ orders: IPlacedOrder[] }>(
         API_ROUTES.CART.CHECKOUT,
         {
@@ -93,7 +96,13 @@ export function usePlaceOrder(): IPlaceOrder {
       }
       return response.data.orders
     } catch (error) {
-      problem.value = checkoutProblem(error)
+      const failed = checkoutProblem(error)
+      // No answer to the order itself: it may exist. Say so instead of "nothing was lost".
+      problem.value = orderAsked && failed === 'network' ? 'unconfirmed' : failed
+      // Whatever the server did, the cart and the orders on screen may be out of date now (an
+      // order created anyway, the photos ordered in another tab): read them again.
+      void queryClient.invalidateQueries({ queryKey: CART_QUERY_KEYS.cart() })
+      void queryClient.invalidateQueries({ queryKey: ACCOUNT_QUERY_KEYS.orders() })
       return null
     }
   }
