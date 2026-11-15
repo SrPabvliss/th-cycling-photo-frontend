@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useDocumentVisibility } from '@vueuse/core'
 import { NButton, useMessage } from 'naive-ui'
 import { isAxiosError } from 'axios'
 
@@ -30,6 +31,8 @@ import OrderPhotoGrid from '../components/OrderPhotoGrid/OrderPhotoGrid.vue'
 
 /** While a payment is being confirmed, the order is read again this often. */
 const CONFIRMING_POLL_MS = 10_000
+// A transfer is confirmed by hand, in minutes or hours: asking once a minute is enough.
+const AWAITING_PAYMENT_POLL_MS = 60_000
 /** A confirmation longer than this is a charge not settled yet: the buyer gets a way to ask. */
 const LONG_CONFIRMATION_MS = 30 * 60_000
 const CORRECTION_FALLBACK = 'No pudimos enviar la corrección. Intenta de nuevo.'
@@ -65,11 +68,20 @@ useVisiblePolling(
   CONFIRMING_POLL_MS,
   () => refetch(),
 )
+// --- Waiting for the transfer: the staff confirms it by hand and nothing tells this page, so
+// it asks again while in view, and as soon as the person comes back to it ---
+const isAwaitingPayment = computed(() => order.value?.state === 'in_process')
+useVisiblePolling(isAwaitingPayment, AWAITING_PAYMENT_POLL_MS, () => refetch())
+const visibility = useDocumentVisibility()
+watch(visibility, (current, previous) => {
+  if (current === 'visible' && previous === 'hidden' && isAwaitingPayment.value) void refetch()
+})
+
 watch(
   () => order.value?.state,
   (current, previous) => {
     if (current === 'confirming') wasConfirming.value = true
-    if (previous === 'confirming' && current === 'ready') {
+    if ((previous === 'confirming' || previous === 'in_process') && current === 'ready') {
       message.success('Pago confirmado. Tus fotos están listas.')
     }
   },

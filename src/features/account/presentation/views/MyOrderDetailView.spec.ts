@@ -269,6 +269,65 @@ describe('MyOrderDetailView', () => {
     expect(refetch).toHaveBeenCalledTimes(1)
   })
 
+  describe('while the transfer waits for the payment', () => {
+    function setVisibility(state: 'visible' | 'hidden') {
+      Object.defineProperty(document, 'visibilityState', { configurable: true, value: state })
+      document.dispatchEvent(new Event('visibilitychange'))
+    }
+    afterEach(() => setVisibility('visible'))
+
+    it('asks again every minute while the page is in view', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      state.order = order('in_process')
+      await mountView()
+
+      await vi.advanceTimersByTimeAsync(59_000)
+      expect(refetch).not.toHaveBeenCalled()
+      await vi.advanceTimersByTimeAsync(1_000)
+      expect(refetch).toHaveBeenCalledTimes(1)
+
+      setVisibility('hidden')
+      await vi.advanceTimersByTimeAsync(120_000)
+      expect(refetch).toHaveBeenCalledTimes(1)
+    })
+
+    it('asks again as soon as the person comes back to the page', async () => {
+      state.order = order('in_process')
+      await mountView()
+
+      setVisibility('hidden')
+      await flushPromises()
+      setVisibility('visible')
+      await flushPromises()
+
+      expect(refetch).toHaveBeenCalledTimes(1)
+    })
+
+    it('says once that the payment was confirmed, when the staff confirms it', async () => {
+      state.order = order('in_process')
+      await mountView()
+
+      state.order = order('ready')
+      await flushPromises()
+
+      expect(success).toHaveBeenCalledTimes(1)
+      expect(success).toHaveBeenCalledWith('Pago confirmado. Tus fotos están listas.')
+    })
+
+    it('stops asking once the order is ready', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      state.order = order('ready')
+      await mountView()
+
+      await vi.advanceTimersByTimeAsync(120_000)
+      setVisibility('hidden')
+      setVisibility('visible')
+      await flushPromises()
+
+      expect(refetch).not.toHaveBeenCalled()
+    })
+  })
+
   it('asks before cancelling, and keeping does not call the api', async () => {
     state.order = order('in_process')
     const wrapper = await mountView()
