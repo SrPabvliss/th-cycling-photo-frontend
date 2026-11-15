@@ -2,6 +2,8 @@
 import { computed, ref } from 'vue'
 import { useEventListener } from '@vueuse/core'
 
+import { useFocusHandOff } from '@/shared/composables/use-focus-hand-off'
+
 import type { IPublicEventFilterOptions } from '@/shared/public-events'
 import type { IMonthRange } from '../../../composables/use-event-list-filters'
 import { choiceLabel, monthsLabel, provinceSearchMiss } from '../../../utils/event-filters'
@@ -82,6 +84,27 @@ useEventListener(window, 'popstate', close)
 function setButton(key: MenuKey, element: unknown) {
   if (element instanceof HTMLElement) buttons.value[key] = element
 }
+
+// A cross goes once its filter is clear, and "Limpiar" once all are: the focus goes to the button
+// of that filter, or to the first one, instead of falling to the page.
+const crosses: Partial<Record<MenuKey, HTMLElement>> = {}
+function setCross(key: MenuKey, element: unknown) {
+  if (element instanceof HTMLElement) crosses[key] = element
+}
+const MENU_KEYS: MenuKey[] = ['types', 'provinces', 'months']
+MENU_KEYS.forEach((key) =>
+  useFocusHandOff(
+    () => isChosen.value[key],
+    () => crosses[key],
+    () => buttons.value[key],
+  ),
+)
+const clearAllButton = ref<HTMLButtonElement | null>(null)
+useFocusHandOff(
+  () => hasChoices.value,
+  () => clearAllButton.value,
+  () => buttons.value.types,
+)
 </script>
 
 <template>
@@ -114,6 +137,7 @@ function setButton(key: MenuKey, element: unknown) {
       </button>
       <button
         v-if="isChosen[key]"
+        :ref="(element) => setCross(key, element)"
         type="button"
         class="event-filter__clear tt-hit-area"
         :aria-label="`Quitar ${NAMES[key].toLowerCase()}`"
@@ -127,6 +151,7 @@ function setButton(key: MenuKey, element: unknown) {
 
     <button
       v-if="hasChoices"
+      ref="clearAllButton"
       type="button"
       class="event-filters__clear-all tt-hit-area"
       @click="clearAll"

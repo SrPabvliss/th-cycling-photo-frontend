@@ -3,6 +3,7 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { useEventListener, useMediaQuery } from '@vueuse/core'
 
 import { useDialogFocus } from '@/shared/composables/use-dialog-focus'
+import { useFocusHandOff } from '@/shared/composables/use-focus-hand-off'
 import { eventsCountText } from '../../../utils/event-filters'
 
 // The one container of the three filter menus: a sheet from the bottom on a phone, a menu under
@@ -31,6 +32,14 @@ const emit = defineEmits<{
 const isDesktop = useMediaQuery('(min-width: 768px)')
 
 const panel = ref<HTMLElement | null>(null)
+// "Borrar" turns off once there is nothing to clear: the focus goes to the main button.
+const clearButton = ref<HTMLButtonElement | null>(null)
+const doneButton = ref<HTMLButtonElement | null>(null)
+useFocusHandOff(
+  () => props.canClear,
+  () => clearButton.value,
+  () => doneButton.value,
+)
 const place = ref({ top: 0, left: 0 })
 
 const close = () => emit('close')
@@ -90,6 +99,7 @@ const doneText = computed(() =>
 
         <div class="filter-menu__foot">
           <button
+            ref="clearButton"
             type="button"
             class="filter-menu__clear"
             :disabled="!canClear"
@@ -97,7 +107,9 @@ const doneText = computed(() =>
           >
             Borrar
           </button>
-          <button type="button" class="filter-menu__done" @click="close">{{ doneText }}</button>
+          <button ref="doneButton" type="button" class="filter-menu__done" @click="close">
+            {{ doneText }}
+          </button>
         </div>
       </div>
     </div>

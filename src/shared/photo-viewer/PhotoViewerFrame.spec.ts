@@ -59,4 +59,16 @@ describe('PhotoViewerFrame', () => {
     await wrapper!.setProps({ photoId: 'a' })
     expect(body.get('button[aria-label="Foto anterior"]').attributes('disabled')).toBeDefined()
   })
+
+  it('keeps the focus on the other arrow when the one used reaches the end', async () => {
+    const body = await mountFrame()
+    const previous = body.get('button[aria-label="Foto anterior"]')
+    ;(previous.element as HTMLButtonElement).focus()
+
+    await previous.trigger('click')
+    await wrapper!.setProps({ photoId: 'a' })
+    await flushPromises()
+
+    expect(document.activeElement?.getAttribute('aria-label')).toBe('Foto siguiente')
+  })
 })

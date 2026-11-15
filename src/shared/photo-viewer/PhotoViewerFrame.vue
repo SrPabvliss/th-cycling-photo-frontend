@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, toRef } from 'vue'
 
 import { useDialogFocus } from '@/shared/composables/use-dialog-focus'
+import { useFocusHandOff } from '@/shared/composables/use-focus-hand-off'
 import { useViewerNavigation } from './use-viewer-navigation'
 
 export interface IViewerFramePhoto {
@@ -44,6 +45,19 @@ const { hasPrevious, hasNext, previous, next } = useViewerNavigation(
 const photo = computed(() => props.photos.find((each) => each.id === props.photoId) ?? null)
 
 const panel = ref<HTMLElement | null>(null)
+// An arrow that reaches the end turns off: the focus goes to the other one.
+const previousButton = ref<HTMLButtonElement | null>(null)
+const nextButton = ref<HTMLButtonElement | null>(null)
+useFocusHandOff(
+  () => hasPrevious.value,
+  () => previousButton.value,
+  () => nextButton.value,
+)
+useFocusHandOff(
+  () => hasNext.value,
+  () => nextButton.value,
+  () => previousButton.value,
+)
 useDialogFocus(
   panel,
   () => true,
@@ -92,6 +106,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
         />
 
         <button
+          ref="previousButton"
           type="button"
           class="photo-viewer__round photo-viewer__nav photo-viewer__nav--previous"
           aria-label="Foto anterior"
@@ -101,6 +116,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
         </button>
         <button
+          ref="nextButton"
           type="button"
           class="photo-viewer__round photo-viewer__nav photo-viewer__nav--next"
           aria-label="Foto siguiente"

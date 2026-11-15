@@ -302,6 +302,56 @@ describe('EventFilterBar', () => {
     expect(menu()).toBeNull()
   })
 
+  describe('the focus, when the control that had it goes away or turns off', () => {
+    const focused = () => document.activeElement as HTMLElement | null
+
+    it('goes from the cross to the button of the same filter', async () => {
+      const bar = mountBar({ types: [1] })
+      const cross = bar.wrapper.get('[aria-label="Quitar disciplina"]')
+      ;(cross.element as HTMLElement).focus()
+
+      await cross.trigger('click')
+      await flushPromises()
+
+      expect(focused()).toBe(opener(bar, 'Disciplina').element)
+    })
+
+    it('goes from "Limpiar" to the first filter button', async () => {
+      const bar = mountBar({ types: [1] })
+      const clearAll = bar.wrapper.get('.event-filters__clear-all')
+      ;(clearAll.element as HTMLElement).focus()
+
+      await clearAll.trigger('click')
+      await flushPromises()
+
+      expect(focused()).toBe(opener(bar, 'Disciplina').element)
+    })
+
+    it('goes from "Borrar" to the main button of the menu', async () => {
+      const bar = mountBar({ types: [1] })
+      await openMenu(bar, 'Disciplina')
+      const clear = inMenu('Borrar')
+      clear.focus()
+
+      clear.click()
+      await flushPromises()
+
+      expect(focused()?.textContent?.trim()).toMatch(/^Ver \d+ eventos?$/)
+    })
+
+    it('goes from the year arrow that turns off to the other one', async () => {
+      const bar = mountBar()
+      await openMenu(bar, 'Fecha')
+      const previous = menu()!.querySelector<HTMLButtonElement>('[aria-label="Año anterior"]')!
+      previous.focus()
+
+      previous.click()
+      await flushPromises()
+
+      expect(focused()?.getAttribute('aria-label')).toBe('Año siguiente')
+    })
+  })
+
   describe('Fecha', () => {
     const month = (name: string) =>
       rows().find((each) => each.textContent?.trim().startsWith(name))!

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
+import { useFocusHandOff } from '@/shared/composables/use-focus-hand-off'
+
 import type { IPublicMonthOption } from '@/shared/public-events'
 import type { IMonthRange } from '../../../composables/use-event-list-filters'
 import { MONTH_SHORT, monthKey, pickMonth, pickYear } from '../../../utils/event-filters'
@@ -28,6 +30,19 @@ const year = ref(
 // The arrows go to the year before or after that has events: an empty year has nothing to pick.
 const previousYear = computed(() => [...years.value].reverse().find((each) => each < year.value))
 const nextYear = computed(() => years.value.find((each) => each > year.value))
+// An arrow that reaches the first or last year turns off: the focus goes to the other one.
+const previousArrow = ref<HTMLButtonElement | null>(null)
+const nextArrow = ref<HTMLButtonElement | null>(null)
+useFocusHandOff(
+  () => previousYear.value !== undefined,
+  () => previousArrow.value,
+  () => nextArrow.value,
+)
+useFocusHandOff(
+  () => nextYear.value !== undefined,
+  () => nextArrow.value,
+  () => previousArrow.value,
+)
 
 const cells = computed(() =>
   MONTH_SHORT.map((name, index) => {
@@ -62,6 +77,7 @@ const hint = computed(() =>
   <div class="filter-months">
     <div class="filter-months__year">
       <button
+        ref="previousArrow"
         type="button"
         class="filter-months__arrow"
         aria-label="Año anterior"
@@ -72,6 +88,7 @@ const hint = computed(() =>
       </button>
       <span class="filter-months__year-number" aria-live="polite">{{ year }}</span>
       <button
+        ref="nextArrow"
         type="button"
         class="filter-months__arrow"
         aria-label="Año siguiente"
