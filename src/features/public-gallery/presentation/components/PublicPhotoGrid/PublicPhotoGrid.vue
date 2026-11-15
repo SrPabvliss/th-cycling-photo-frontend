@@ -8,7 +8,8 @@ import { SPOTS_ENABLED } from '@/features/house-spots/spots-config'
 import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
 import {
   isSpotTile,
-  withSpotTile,
+  spotSlotsInside,
+  withSpotTiles,
   type ISpotTile,
 } from '@/features/house-spots/utils/spot-placement'
 import { TtSkeleton } from '@/shared/components/loading'
@@ -23,9 +24,10 @@ const TILE_RATIO = 4 / 3
 const LOADING_MORE_PLACEHOLDERS = 3
 // Rows from the end at which the next page is asked for, before the person gets there.
 const LOAD_MORE_MARGIN_ROWS = 2
-// The house ad tile: 13th cell, only when there are at least 13 photos (demo seed 59).
-const SPOT_POSITION = 12
-const SPOT_MIN_PHOTOS = 13
+// House ad tiles: before the 8th photo, 18 photos further down, then one every 30. Neither 18
+// nor 30 is a multiple of 3 or 5: each next tile lands in another column. One never closes the
+// gallery, so the first needs at least 8 photos. Each one starts on its own piece.
+const SPOT_PLAN = { first: 7, second: 18, every: 30 }
 const SPOT_SEED = 59
 
 const props = withDefaults(
@@ -62,11 +64,12 @@ const rowHeight = computed(() => {
 })
 
 // The tile is a cell like a photo, 3:4 too, so every row keeps the same height. It is not a
-// photo: the viewer moves through `photos`, never through these cells.
+// photo: the viewer moves through `photos`, never through these cells. Their places depend only
+// on the photos before them, so a new page never moves the cells already placed.
 const spotGone = ref(false)
 const cells = computed<(IPublicPhoto | ISpotTile)[]>(() =>
   props.withSpot && SPOTS_ENABLED && !spotGone.value
-    ? withSpotTile(props.photos, SPOT_POSITION, SPOT_MIN_PHOTOS)
+    ? withSpotTiles(props.photos, spotSlotsInside(props.photos.length, SPOT_PLAN))
     : props.photos,
 )
 
@@ -121,11 +124,14 @@ watch(
         class="photo-grid photo-grid-virtual__row"
         :style="{ transform: `translateY(${row.start - scrollMargin}px)` }"
       >
-        <template v-for="cell in rows[row.index]" :key="isSpotTile(cell) ? 'ad' : cell.id">
+        <template
+          v-for="cell in rows[row.index]"
+          :key="isSpotTile(cell) ? `ad-${cell.n}` : cell.id"
+        >
           <HouseSpot
             v-if="isSpotTile(cell)"
             format="C"
-            :seed="SPOT_SEED"
+            :seed="SPOT_SEED + cell.n"
             @unavailable="spotGone = true"
           />
           <PhotoTile

@@ -185,36 +185,50 @@ describe('PublicEventListView', () => {
   })
 
   describe('the house carousel', () => {
-    const ad = (wrapper: Wrapper) => wrapper.find('[data-test="house-spot"]')
-    const cardBefore = (wrapper: Wrapper) =>
-      ad(wrapper).element.previousElementSibling?.getAttribute('href')
+    const ads = (wrapper: Wrapper) => wrapper.findAll('[data-test="house-spot"]')
+    const cardBefore = (ad: ReturnType<Wrapper['find']>) =>
+      (ad.element as Element).previousElementSibling?.getAttribute('href')
+    const slugs = (count: number) => Array.from({ length: count }, (_, index) => `e${index + 1}`)
 
-    it('spans the grid after the third card', async () => {
-      list.events = ['a', 'b', 'c', 'd', 'e'].map(event)
+    it('spans the grid after the third card, then after every sixth', async () => {
+      list.events = slugs(16).map(event)
       const { wrapper } = await mountView()
 
-      expect(ad(wrapper).attributes('data-format')).toBe('AB')
-      expect(ad(wrapper).attributes('data-seed')).toBe('7')
-      expect(ad(wrapper).classes()).toContain('event-list__spot')
-      expect(cardBefore(wrapper)).toBe('/gallery/c')
-      expect(cards(wrapper)).toHaveLength(5)
+      expect(ads(wrapper).map(cardBefore)).toEqual(['/gallery/e3', '/gallery/e9', '/gallery/e15'])
+      expect(ads(wrapper).map((ad) => ad.attributes('data-format'))).toEqual(['AB', 'AB', 'AB'])
+      expect(ads(wrapper).every((ad) => ad.classes().includes('event-list__spot'))).toBe(true)
+      expect(cards(wrapper)).toHaveLength(16)
+    })
+
+    it('starts each one on its own piece', async () => {
+      list.events = slugs(16).map(event)
+      const { wrapper } = await mountView()
+
+      expect(ads(wrapper).map((ad) => ad.attributes('data-seed'))).toEqual(['7', '8', '9'])
+    })
+
+    it('has one, after the third, with four results', async () => {
+      list.events = slugs(4).map(event)
+      const { wrapper } = await mountView()
+
+      expect(ads(wrapper).map(cardBefore)).toEqual(['/gallery/e3'])
     })
 
     it('goes after the last card when there are fewer than three', async () => {
-      list.events = [event('a'), event('b')]
+      list.events = slugs(2).map(event)
       const { wrapper } = await mountView()
 
-      expect(cardBefore(wrapper)).toBe('/gallery/b')
+      expect(ads(wrapper).map(cardBefore)).toEqual(['/gallery/e2'])
     })
 
     it('never stands alone on an empty or failed list', async () => {
       list.events = []
       const empty = await mountView()
-      expect(ad(empty.wrapper).exists()).toBe(false)
+      expect(ads(empty.wrapper)).toHaveLength(0)
 
       list.status = 'error'
       const failed = await mountView()
-      expect(ad(failed.wrapper).exists()).toBe(false)
+      expect(ads(failed.wrapper)).toHaveLength(0)
     })
   })
 

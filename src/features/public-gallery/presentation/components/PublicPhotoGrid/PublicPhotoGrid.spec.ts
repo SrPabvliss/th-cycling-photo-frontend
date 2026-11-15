@@ -69,24 +69,45 @@ describe('PublicPhotoGrid', () => {
   })
   afterEach(() => vi.unstubAllGlobals())
 
-  it('puts the ad tile 13th among 20 photos, in a 3:4 cell, keeping the photo order', async () => {
-    const wrapper = mountGrid(20)
+  const adsAt = (order: ReturnType<typeof cells>) =>
+    order.flatMap((cell, index) => (cell === 'ad' ? [index] : []))
+
+  it('puts the first tile 8th, the next 18 photos further down, then one every 30', async () => {
+    const wrapper = mountGrid(100)
     await flushPromises()
 
     const order = cells(wrapper)
-    expect(order).toHaveLength(21)
-    expect(order[12]).toBe('ad')
-    expect(order.filter((cell) => cell !== 'ad')).toEqual(photos(20).map((each) => each.publicSlug))
-    const ad = wrapper.get('[data-test="house-spot"]')
-    expect(ad.attributes('data-format')).toBe('C')
-    expect(ad.attributes('data-seed')).toBe('59')
+    // Before photos 8, 26, 56 and 86: each cell also counts the ads before it.
+    expect(adsAt(order)).toEqual([7, 26, 57, 88])
+    expect(order.filter((cell) => cell !== 'ad')).toEqual(
+      photos(100).map((each) => each.publicSlug),
+    )
+    const ads = wrapper.findAll('[data-test="house-spot"]')
+    expect(ads.map((ad) => ad.attributes('data-format'))).toEqual(['C', 'C', 'C', 'C'])
+    expect(ads.map((ad) => ad.attributes('data-seed'))).toEqual(['59', '60', '61', '62'])
   })
 
-  it('has no tile with fewer than 13 photos', async () => {
-    const wrapper = mountGrid(12)
+  it.each([
+    [12, [7]],
+    [8, [7]],
+    [7, []],
+  ])('with %i photos has tiles at %j: one never closes the gallery', async (count, expected) => {
+    const wrapper = mountGrid(count)
     await flushPromises()
 
-    expect(wrapper.find('[data-test="house-spot"]').exists()).toBe(false)
+    expect(adsAt(cells(wrapper))).toEqual(expected)
+  })
+
+  it('keeps the cells already placed where they were when the next page arrives', async () => {
+    const wrapper = mountGrid(24)
+    await flushPromises()
+    const before = cells(wrapper)
+
+    await wrapper.setProps({ photos: photos(48) })
+    const after = cells(wrapper)
+
+    expect(after.slice(0, before.length)).toEqual(before)
+    expect(adsAt(after)).toEqual([7, 26])
   })
 
   it('has no tile when the screen does not ask for one, or ads are off', async () => {
@@ -96,23 +117,23 @@ describe('PublicPhotoGrid', () => {
     expect(mountGrid(20).find('[data-test="house-spot"]').exists()).toBe(false)
   })
 
-  it('gives the cell back to the photos when the tile cannot be shown', async () => {
-    const wrapper = mountGrid(20)
+  it('gives every cell back to the photos when the tiles cannot be shown', async () => {
+    const wrapper = mountGrid(30)
     await flushPromises()
 
     wrapper.getComponent({ name: 'HouseSpot' }).vm.$emit('unavailable')
     await flushPromises()
 
-    expect(cells(wrapper)).toEqual(photos(20).map((each) => each.publicSlug))
+    expect(cells(wrapper)).toEqual(photos(30).map((each) => each.publicSlug))
   })
 
   it('opens the photo, never the tile, and asks for more from the photo rows', async () => {
     const wrapper = mountGrid(20)
     await flushPromises()
 
-    const thirteenth = wrapper.findAll('.photo-tile__open')[12]!
-    await thirteenth.trigger('click')
+    const eighth = wrapper.findAll('.photo-tile__open')[7]!
+    await eighth.trigger('click')
 
-    expect(wrapper.emitted('open')).toEqual([['p13']])
+    expect(wrapper.emitted('open')).toEqual([['p8']])
   })
 })

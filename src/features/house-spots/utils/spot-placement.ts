@@ -1,9 +1,9 @@
-/** The ad tile placed among the items of a grid: not an item, nothing to open or pick. */
+/** An ad tile placed among the items of a grid: not an item, nothing to open or pick. */
 export interface ISpotTile {
   kind: 'spot'
+  /** Which appearance it is, from 0: its key and its seed. */
+  n: number
 }
-
-const SPOT_TILE: ISpotTile = { kind: 'spot' }
 
 export function isSpotTile(value: unknown): value is ISpotTile {
   return typeof value === 'object' && value !== null && (value as ISpotTile).kind === 'spot'
@@ -18,8 +18,49 @@ export function spotIndexAfter(length: number, after: number): number | null {
   return Math.min(after, length) - 1
 }
 
-/** A copy of `items` with the ad tile at `position`, only when there are at least `minItems`. */
-export function withSpotTile<T>(items: T[], position: number, minItems: number): (T | ISpotTile)[] {
-  if (items.length < minItems) return items
-  return [...items.slice(0, position), SPOT_TILE, ...items.slice(position)]
+/**
+ * How often ads come in a list: after the first `first` items, then `second` items further down
+ * (`every` when missing), then one every `every`.
+ */
+export interface ISpotPlan {
+  first: number
+  second?: number
+  every: number
+}
+
+/**
+ * How many items go before each ad, in a list of `length`. An ad may close the list; a list
+ * shorter than `first` gets one at its end; an empty one, none.
+ */
+export function spotSlots(length: number, plan: ISpotPlan): number[] {
+  if (length <= 0) return []
+  if (length < plan.first) return [length]
+  const slots: number[] = []
+  let at = plan.first
+  let step = plan.second ?? plan.every
+  while (at <= length) {
+    slots.push(at)
+    at += step
+    step = plan.every
+  }
+  return slots
+}
+
+/** Like `spotSlots`, only where at least one item stays after the ad: it never closes the list. */
+export function spotSlotsInside(length: number, plan: ISpotPlan): number[] {
+  return spotSlots(length, plan).filter((before) => before < length)
+}
+
+/** A copy of `items` with one ad tile before each slot of `spotSlots`, numbered from 0. */
+export function withSpotTiles<T>(items: T[], slots: number[]): (T | ISpotTile)[] {
+  const result: (T | ISpotTile)[] = []
+  let next = 0
+  items.forEach((item, index) => {
+    if (slots[next] === index) {
+      result.push({ kind: 'spot', n: next })
+      next += 1
+    }
+    result.push(item)
+  })
+  return result
 }

@@ -4,7 +4,7 @@ import { NButton } from 'naive-ui'
 
 import { useOnline } from '@/core/network/use-online'
 import HouseSpot from '@/features/house-spots/presentation/components/HouseSpot/HouseSpot.vue'
-import { spotIndexAfter } from '@/features/house-spots/utils/spot-placement'
+import { spotSlots } from '@/features/house-spots/utils/spot-placement'
 import { EmptyState } from '@/shared/components/empty-state'
 import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { LoadBoundary } from '@/shared/components/loading'
@@ -55,10 +55,14 @@ const sentinel = useInfiniteScrollTrigger(() => fetchNextPage(), {
   canLoadMore,
 })
 
-// The house carousel spans the grid after the third card, or after the last of a shorter list.
-const SPOT_AFTER = 3
+// The house carousel spans the grid after the third card, then after every sixth; after the last
+// of a shorter list. Each one starts on its own piece.
+const SPOT_PLAN = { first: 3, every: 6 }
 const SPOT_SEED = 7
-const spotAfter = computed(() => spotIndexAfter(events.value.length, SPOT_AFTER))
+// Index of the card each one goes after, and which appearance it is.
+const spotAfter = computed(
+  () => new Map(spotSlots(events.value.length, SPOT_PLAN).map((before, n) => [before - 1, n])),
+)
 
 // Without network the offline strip says it once: this alert does not repeat it.
 const online = useOnline()
@@ -117,10 +121,10 @@ const online = useOnline()
         <template v-for="(event, index) in events" :key="event.slug">
           <PublicEventCard :event="event" />
           <HouseSpot
-            v-if="index === spotAfter"
+            v-if="spotAfter.has(index)"
             class="event-list__spot"
             format="AB"
-            :seed="SPOT_SEED"
+            :seed="SPOT_SEED + spotAfter.get(index)!"
           />
         </template>
         <template v-if="isFetchingNextPage">
