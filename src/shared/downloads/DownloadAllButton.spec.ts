@@ -48,10 +48,16 @@ describe('DownloadAllButton', () => {
     )
   })
 
-  it('says where it stopped', () => {
-    expect(mountButton(download('stopped', 2, 5)).text()).toContain(
-      'Descarga detenida en la foto 2 de 5.',
-    )
+  // Stopping and starting again must not download the first photos again.
+  it('says where it stopped, and goes on from there', async () => {
+    const value = download('stopped', 2, 5)
+    const wrapper = mountButton(value)
+
+    expect(wrapper.text()).toContain('Descarga detenida en la foto 2 de 5.')
+    const resume = wrapper.findAll('button').find((each) => each.text() === 'Continuar descarga')!
+    await resume.trigger('click')
+    expect(value.resume).toHaveBeenCalled()
+    expect(value.start).not.toHaveBeenCalled()
   })
 
   it('says where it was cut and offers to continue', async () => {

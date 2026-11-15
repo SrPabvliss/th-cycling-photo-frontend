@@ -15,6 +15,9 @@ const state = computed(() => props.download.state.value)
 const done = computed(() => props.download.done.value)
 const total = computed(() => props.download.total.value)
 
+// Stopped or cut, it goes on from the first photo not downloaded, never from the start.
+const canContinue = computed(() => state.value === 'failed' || state.value === 'stopped')
+
 const notice = computed(() => {
   if (state.value === 'done' && total.value > 0) {
     // The page cannot see the files land: it says what it did, and where to look.
@@ -45,14 +48,14 @@ const notice = computed(() => {
       type="primary"
       size="large"
       block
-      @click="state === 'failed' ? download.resume() : download.start()"
+      @click="canContinue ? download.resume() : download.start()"
     >
       <template #icon>
         <svg class="download-all__icon" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />
         </svg>
       </template>
-      {{ state === 'failed' ? 'Continuar descarga' : label }}
+      {{ canContinue ? 'Continuar descarga' : label }}
     </NButton>
 
     <!-- A cut download is a problem, painted like every other one; the button resumes it. -->
