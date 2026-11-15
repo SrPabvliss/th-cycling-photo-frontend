@@ -4,6 +4,7 @@ import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 import { AxiosError, type AxiosResponse } from 'axios'
 import { defineComponent, ref } from 'vue'
 
+import { CLIENT_GALLERY_QUERY_KEYS } from '../constants/query-keys'
 import { usePlacePreviewOrder } from './use-place-preview-order'
 
 const post = vi.fn()
@@ -50,6 +51,24 @@ describe('usePlacePreviewOrder', () => {
 
     expect(order).toEqual(CREATED)
     expect(ordersPosted()).toEqual([['/preview/tok/orders', INPUT, { silent: true }]])
+  })
+
+  // Back from "Pedido recibido", the preview still in the cache must read as ordered, not as a
+  // link to pick from again.
+  it('marks the preview in the cache as ordered once the order exists', async () => {
+    post.mockResolvedValue({ data: CREATED })
+    setup()
+    queryClient.setQueryData(CLIENT_GALLERY_QUERY_KEYS.preview('tok'), {
+      status: 'active',
+      photos: [],
+    })
+
+    await api.place(INPUT)
+
+    expect(
+      queryClient.getQueryData<{ status: string }>(CLIENT_GALLERY_QUERY_KEYS.preview('tok'))
+        ?.status,
+    ).toBe('converted')
   })
 
   it('sends one order for two quick calls', async () => {

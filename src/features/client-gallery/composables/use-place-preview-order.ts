@@ -6,8 +6,10 @@ import { httpClient } from '@/core/http/axios-client'
 import { ACCOUNT_QUERY_KEYS } from '@/features/account/constants/query-keys'
 import { CONSENT_TYPE } from '@/features/auth/constants/consent.constants'
 import type { PaymentMethod } from '@/shared/types/payment-method.types'
+import { CLIENT_GALLERY_QUERY_KEYS } from '../constants/query-keys'
 import { toCreateOrderRequest } from '../mappers/create-order.mapper'
 import { toPreviewOrderCreated } from '../mappers/preview-order-created.mapper'
+import type { IPreviewData } from '../types/responses/preview-data.response'
 import type {
   IApiPreviewOrderCreated,
   IPreviewOrderCreated,
@@ -56,6 +58,11 @@ export function usePlacePreviewOrder(token: Ref<string>): IPlacePreviewOrder {
         { silent: true },
       )
       void queryClient.invalidateQueries({ queryKey: ACCOUNT_QUERY_KEYS.orders() })
+      // The link is used now: coming back to it (the back button) says it was ordered.
+      queryClient.setQueryData<IPreviewData>(
+        CLIENT_GALLERY_QUERY_KEYS.preview(token.value),
+        (current) => (current ? { ...current, status: 'converted' } : current),
+      )
       return toPreviewOrderCreated(response.data)
     } catch (error) {
       problem.value = previewProblem(error)
