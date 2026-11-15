@@ -18,7 +18,8 @@ export const accountRoutes: RouteRecordRaw[] = [
     name: ACCOUNT_ROUTE_NAMES.PROFILE,
     component: () => import('./presentation/views/ProfileView.vue'),
     // Self-scoped profile: authenticated only, like the backend's @Authenticated().
-    meta: { requiresAuth: true, shell: { tab: 'home', footer: false } },
+    // In no destination of the navigation: none is marked as the current page.
+    meta: { requiresAuth: true, shell: { footer: false } },
   },
   {
     path: `${ACCOUNT_PATH}/verify-email`,

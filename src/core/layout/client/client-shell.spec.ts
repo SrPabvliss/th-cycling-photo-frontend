@@ -86,7 +86,7 @@ describe('the shell each client route of the app asks for', () => {
     ],
     [
       '/account/profile',
-      { tab: 'home', tabBar: false, header: true, footer: false, seasonBar: false },
+      { tab: null, tabBar: false, header: true, footer: false, seasonBar: false },
     ],
     [
       '/account/verify-email',
