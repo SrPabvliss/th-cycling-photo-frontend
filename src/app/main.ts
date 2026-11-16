@@ -15,6 +15,7 @@ import { createPinia } from 'pinia'
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 
 import { startOnlineState } from '@/core/network/use-online'
+import { fitViewportToScreen } from '@/core/viewport/fit-viewport-to-screen'
 import { useColorSchemeStore } from '@/core/theme/color-scheme.store'
 import { registerHouseSpotsLayoutSlots } from '@/features/house-spots/layout-slots'
 import { registerCartLayoutSlots } from '@/features/cart/layout-slots'
@@ -24,6 +25,9 @@ import { registerPricingLayoutSlots } from '@/features/pricing/layout-slots'
 import App from './App.vue'
 import { queryClientConfig } from './providers'
 import router from './router'
+
+// Before anything is drawn: the page reaches the bottom edge of the screen in portrait.
+fitViewportToScreen()
 
 const app = createApp(App)
 const queryClient = new QueryClient(queryClientConfig)

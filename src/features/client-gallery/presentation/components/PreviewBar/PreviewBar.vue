@@ -65,7 +65,7 @@ const nextTier = computed(() =>
   display: flex;
   flex-direction: column;
   gap: var(--tt-space-2);
-  padding: var(--tt-space-3) var(--tt-space-4) calc(var(--tt-space-3) + env(safe-area-inset-bottom));
+  padding: var(--tt-space-3) var(--tt-space-4);
   background: var(--tt-surface-raised);
   color: var(--tt-ink);
   box-shadow: var(--tt-shadow-sheet);
@@ -94,5 +94,13 @@ const nextTier = computed(() =>
 .preview-bar__hint {
   margin: 0;
   text-align: center;
+}
+
+/* On a phone the bar reaches the bottom edge, where the screen corners are rounded: its sides keep
+ * the last line out of them. */
+@media (max-width: 767px) {
+  .preview-bar {
+    padding-inline: var(--tt-space-5);
+  }
 }
 </style>
