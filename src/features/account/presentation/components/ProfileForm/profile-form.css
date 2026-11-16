@@ -36,7 +36,7 @@
   position: sticky;
   bottom: 0;
   margin-top: 4px;
-  padding: 16px 0 calc(16px + env(safe-area-inset-bottom));
+  padding: 16px 0;
   background-color: var(--tt-surface, #fff);
   border-top: 1px solid var(--tt-neutral-light, #e6e7eb);
   z-index: 10;

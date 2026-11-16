@@ -53,9 +53,8 @@ const shell = useClientShell()
   grid-template-columns: repeat(3, minmax(0, 1fr));
   /* Border included: the layout reserves exactly this height under the page. */
   box-sizing: border-box;
-  block-size: calc(var(--tt-tabbar-height) + env(safe-area-inset-bottom));
+  block-size: var(--tt-tabbar-height);
   padding-inline: var(--tt-space-2);
-  padding-block-end: env(safe-area-inset-bottom);
   border-block-start: thin solid var(--tt-line);
   background: var(--tt-surface-raised);
   font-family: var(--tt-font-sans);

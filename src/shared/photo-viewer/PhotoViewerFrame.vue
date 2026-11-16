@@ -226,7 +226,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
   display: flex;
   flex-direction: column;
   gap: var(--tt-space-3);
-  padding: var(--tt-space-3) var(--tt-space-4) calc(var(--tt-space-3) + env(safe-area-inset-bottom));
+  padding: var(--tt-space-3) var(--tt-space-4);
 }
 
 .photo-viewer__bar {

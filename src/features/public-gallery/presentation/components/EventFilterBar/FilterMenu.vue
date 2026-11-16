@@ -154,7 +154,7 @@ const doneText = computed(() =>
   display: flex;
   flex-direction: column;
   max-block-size: var(--tt-sheet-max-height);
-  padding: var(--tt-space-2) var(--tt-space-3) calc(var(--tt-space-3) + env(safe-area-inset-bottom));
+  padding: var(--tt-space-2) var(--tt-space-3) var(--tt-space-3);
   border-radius: var(--tt-radius-xl) var(--tt-radius-xl) 0 0;
   background: var(--tt-surface-raised);
   color: var(--tt-ink);
@@ -182,6 +182,8 @@ const doneText = computed(() =>
   font-weight: var(--tt-type-heading-m-weight);
 }
 
+/* On a phone the sheet reaches the bottom edge, where the screen corners are rounded: the two
+ * buttons keep out of them. */
 .filter-menu__foot {
   display: flex;
   flex: none;
@@ -189,6 +191,7 @@ const doneText = computed(() =>
   gap: var(--tt-space-2);
   margin-block-start: var(--tt-space-2);
   padding-block-start: var(--tt-space-2);
+  padding-inline: var(--tt-space-2);
   border-block-start: thin solid var(--tt-line-subtle);
 }
 
@@ -281,6 +284,10 @@ const doneText = computed(() =>
   .filter-menu__panel::before,
   .filter-menu__title {
     display: none;
+  }
+
+  .filter-menu__foot {
+    padding-inline: 0;
   }
 }
 
