@@ -244,7 +244,7 @@ watch(() => route.fullPath, close)
   flex-direction: column;
   gap: var(--tt-space-1);
   max-block-size: var(--tt-sheet-max-height);
-  padding: var(--tt-space-4) var(--tt-space-4) calc(var(--tt-space-5) + env(safe-area-inset-bottom));
+  padding: var(--tt-space-4) var(--tt-space-4) var(--tt-space-5);
   overflow-y: auto;
   border-radius: var(--tt-radius-xl) var(--tt-radius-xl) 0 0;
   background: var(--tt-surface-raised);

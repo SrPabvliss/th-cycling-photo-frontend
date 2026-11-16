@@ -87,7 +87,8 @@ const cartProblem = computed(() => loadAlertCopy(cart.error.value, 'tu carrito')
 
 <style scoped>
 /* Sticks to the bottom of the viewport while the gallery scrolls, and takes its own room at the
- * end of it: nothing is hidden behind the bar. */
+ * end of it: nothing is hidden behind the bar. On a phone it reaches the bottom edge, where the
+ * screen corners are rounded: its sides keep the last line out of them. */
 .gallery-cart-bar {
   position: sticky;
   inset-block-end: 0;
@@ -95,8 +96,7 @@ const cartProblem = computed(() => loadAlertCopy(cart.error.value, 'tu carrito')
   display: flex;
   flex-direction: column;
   gap: var(--tt-space-2);
-  padding: calc(var(--tt-space-2) + var(--tt-space-1) / 2) var(--tt-space-4)
-    calc(var(--tt-space-2) + var(--tt-space-1) / 2 + env(safe-area-inset-bottom));
+  padding: calc(var(--tt-space-2) + var(--tt-space-1) / 2) var(--tt-space-5);
   background: var(--tt-surface-raised);
   color: var(--tt-ink);
   box-shadow: var(--tt-shadow-sheet);

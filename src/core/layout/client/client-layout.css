@@ -48,7 +48,7 @@ html[data-tt-area='client'][data-tt-scheme='dark'] {
  * breakpoint is written out: desktop starts at 768px, as in the rest of the app. */
 @media (max-width: 767px) {
   .client-layout[data-tab-bar='true'] {
-    padding-block-end: calc(var(--tt-tabbar-height) + env(safe-area-inset-bottom));
+    padding-block-end: var(--tt-tabbar-height);
   }
 }
 
