@@ -7,6 +7,7 @@ import { registerRouteProgress } from '@/core/navigation/route-progress'
 import { whenTallEnough } from '@/core/navigation/scroll-restore'
 import { registerRouteLoadProblems } from '@/core/navigation/route-load-problem'
 import { registerStaleChunkReload } from '@/core/navigation/stale-chunk-reload'
+import { warmFirstRoute } from '@/core/navigation/warm-first-route'
 import { areaOfRoute, inPanelArea, registerUiArea } from '@/core/theme/area'
 import { standaloneRoutes } from '@/core/views/standalone-routes'
 import { authRoutes } from '@/features/auth/routes'
@@ -91,5 +92,7 @@ registerRouteProgress(router)
 registerAuthGuard(router)
 registerStaleChunkReload(router)
 registerRouteLoadProblems(router)
+// The first screen downloads next to the session check, not after it.
+warmFirstRoute(router, window.location.pathname + window.location.search + window.location.hash)
 
 export default router
