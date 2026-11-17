@@ -10,8 +10,8 @@ de carga (reglas R1 a R10). Sus estilos usan solo los tokens `--tt-*` de awana, 
    contenido, vacío y error con "Reintentar". Un error nunca se pinta como "no hay nada".
 2. **Las consultas de carga van con `silent: true`.** El error se pinta dentro de la pantalla; el
    aviso flotante queda para las acciones (guardar, pagar, eliminar).
-3. **Nada parpadea.** Una carga de menos de 400 ms no muestra esqueleto, y uno que llega a salir se
-   queda al menos 400 ms (`LOADING_SHOW_DELAY_MS`, `LOADING_MIN_VISIBLE_MS`). `LoadBoundary` ya lo
+3. **Nada parpadea.** Una carga de menos de 100 ms no muestra esqueleto, y uno que llega a salir se
+   queda al menos 200 ms (`LOADING_SHOW_DELAY_MS`, `LOADING_MIN_VISIBLE_MS`). `LoadBoundary` ya lo
    hace; fuera de él está `useDelayedFlag`.
 4. **Al refrescar, lo anterior se queda en pantalla.** Cambiar un filtro o una cantidad no vacía la
    zona: se pasa `refreshing` y el contenido se atenúa hasta que llega el dato nuevo. En la consulta
