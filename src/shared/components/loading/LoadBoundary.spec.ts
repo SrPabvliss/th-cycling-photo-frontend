@@ -6,6 +6,7 @@ import { AxiosError } from 'axios'
 const online = ref(true)
 vi.mock('@/core/network/use-online', () => ({ useOnline: () => online }))
 
+import { LOADING_MIN_VISIBLE_MS, LOADING_SHOW_DELAY_MS } from './loading.constants'
 import LoadBoundary from './LoadBoundary.vue'
 
 type Status = 'pending' | 'error' | 'success'
@@ -52,13 +53,13 @@ describe('LoadBoundary', () => {
 
   it('keeps the skeleton for its minimum time when the data lands right after it shows', async () => {
     const wrapper = mountBoundary({ status: 'pending' })
-    await vi.advanceTimersByTimeAsync(400)
+    await vi.advanceTimersByTimeAsync(LOADING_SHOW_DELAY_MS)
 
     await wrapper.setProps({ status: 'success' })
-    await vi.advanceTimersByTimeAsync(100)
+    await vi.advanceTimersByTimeAsync(LOADING_MIN_VISIBLE_MS - 1)
     expect(wrapper.find('[data-test="skeleton"]').exists()).toBe(true)
 
-    await vi.advanceTimersByTimeAsync(300)
+    await vi.advanceTimersByTimeAsync(1)
     expect(wrapper.find('[data-test="skeleton"]').exists()).toBe(false)
     expect(wrapper.find('[data-test="content"]').exists()).toBe(true)
   })

@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
 
-import { contactMailHref, contactWhatsAppHref } from '@/shared/constants/commercial'
+import { contactMailHref } from '@/shared/constants/commercial'
+import { contactWhatsAppHref } from '../../utils/contact-whatsapp'
 import BrandsPageView from './BrandsPageView.vue'
 import { contactLinks, textOf } from './commercial-page-testing'
 
