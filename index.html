@@ -9,6 +9,10 @@
     <meta property="og:title" content="Titan TV" />
     <meta property="og:image" content="/brand/og-image.png" />
     <meta property="og:type" content="website" />
+    <!-- The API and the photo host are other origins: their connections open while the app
+         downloads, not after it starts. No crossorigin: both are asked with credentials. -->
+    <link rel="preconnect" href="%VITE_API_BASE_URL%" />
+    <link rel="preconnect" href="%VITE_CDN_BASE_URL%" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
