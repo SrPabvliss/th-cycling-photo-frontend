@@ -1,5 +1,4 @@
 import { ROUTE_PATHS } from '@/core/navigation/route-paths'
-import { buildWhatsAppUrl } from '@/shared/utils/whatsapp.utils'
 
 // Titan's commercial contact, in one place: the pages for brands and organizers, their house ads
 // and the footer all read it from here.
@@ -28,10 +27,6 @@ export const CONTACT_MESSAGES: Record<CommercialTopic, { subject: string; body: 
     subject: 'Quiero publicar mi evento en Titan TV',
     body: 'Hola, Titan TV. Organizo un evento y quiero publicar y vender sus fotos en la plataforma.\n\nEvento: \nFecha: \nCiudad: \nCorredores esperados: ',
   },
-}
-
-export function contactWhatsAppHref(topic: CommercialTopic): string {
-  return buildWhatsAppUrl(CONTACT_WHATSAPP, CONTACT_MESSAGES[topic].body)
 }
 
 export function contactMailHref(topic: CommercialTopic): string {

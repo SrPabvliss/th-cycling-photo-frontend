@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { contactWhatsAppHref, type CommercialTopic } from '@/shared/constants/commercial'
+import type { CommercialTopic } from '@/shared/constants/commercial'
+import { contactWhatsAppHref } from '../../../utils/contact-whatsapp'
 
 // The main action of a commercial page: a chat with Titan, its message already written.
 const props = defineProps<{ topic: CommercialTopic; label: string }>()
