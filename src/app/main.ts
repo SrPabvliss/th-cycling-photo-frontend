@@ -48,4 +48,14 @@ registerCartLayoutSlots()
 registerNotificationLayoutSlots()
 registerPricingLayoutSlots()
 
-app.mount('#app')
+// The page carries a splash inside #app, and mounting replaces it. The router paints nothing until
+// its first navigation ends (session check, then the screen's code), so mounting right away would
+// swap the splash for a blank page. It mounts when that navigation ends, however it ends: one that
+// fails is reported by the router's own handlers, and they need the app on screen.
+void router
+  .isReady()
+  .catch(() => {})
+  .finally(() => {
+    app.mount('#app')
+    document.documentElement.removeAttribute('data-tt-splash')
+  })
