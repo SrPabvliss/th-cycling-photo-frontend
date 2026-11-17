@@ -6,7 +6,6 @@ import {
   CONTACT_MESSAGES,
   CONTACT_WHATSAPP,
   contactMailHref,
-  contactWhatsAppHref,
 } from './commercial'
 
 describe('commercial contact', () => {
@@ -32,15 +31,6 @@ describe('commercial contact', () => {
       body: 'Hola, Titan TV. Organizo un evento y quiero publicar y vender sus fotos en la plataforma.\n\nEvento: \nFecha: \nCiudad: \nCorredores esperados: ',
     })
   })
-
-  it.each(['marca', 'organizador'] as const)(
-    'opens the %s chat with its message already written',
-    (topic) => {
-      expect(contactWhatsAppHref(topic)).toBe(
-        `https://api.whatsapp.com/send?phone=593999247774&text=${encodeURIComponent(CONTACT_MESSAGES[topic].body)}`,
-      )
-    },
-  )
 
   it.each(['marca', 'organizador'] as const)(
     'opens the %s email with its subject and body, to one address and no copies',

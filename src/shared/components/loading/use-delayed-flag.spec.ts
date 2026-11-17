@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { effectScope, ref } from 'vue'
 
+import { LOADING_MIN_VISIBLE_MS as MIN, LOADING_SHOW_DELAY_MS as DELAY } from './loading.constants'
 import { useDelayedFlag } from './use-delayed-flag'
 
 describe('useDelayedFlag', () => {
@@ -11,7 +12,7 @@ describe('useDelayedFlag', () => {
     const source = ref(true)
     const flag = useDelayedFlag(source)
 
-    vi.advanceTimersByTime(399)
+    vi.advanceTimersByTime(DELAY - 1)
     source.value = false
     vi.advanceTimersByTime(1000)
 
@@ -22,7 +23,7 @@ describe('useDelayedFlag', () => {
     const source = ref(true)
     const flag = useDelayedFlag(source)
 
-    vi.advanceTimersByTime(399)
+    vi.advanceTimersByTime(DELAY - 1)
     expect(flag.value).toBe(false)
 
     vi.advanceTimersByTime(1)
@@ -32,13 +33,13 @@ describe('useDelayedFlag', () => {
   it('stays on for the minimum time once shown', () => {
     const source = ref(true)
     const flag = useDelayedFlag(source)
-    vi.advanceTimersByTime(400)
+    vi.advanceTimersByTime(DELAY)
 
-    vi.advanceTimersByTime(100)
+    vi.advanceTimersByTime(50)
     source.value = false
     expect(flag.value).toBe(true)
 
-    vi.advanceTimersByTime(299)
+    vi.advanceTimersByTime(MIN - 50 - 1)
     expect(flag.value).toBe(true)
 
     vi.advanceTimersByTime(1)
@@ -48,7 +49,7 @@ describe('useDelayedFlag', () => {
   it('turns off right away when the minimum time has already passed', () => {
     const source = ref(true)
     const flag = useDelayedFlag(source)
-    vi.advanceTimersByTime(400 + 400)
+    vi.advanceTimersByTime(DELAY + MIN)
 
     source.value = false
 
@@ -58,10 +59,10 @@ describe('useDelayedFlag', () => {
   it('stays on when the source comes back before the minimum time runs out', () => {
     const source = ref(true)
     const flag = useDelayedFlag(source)
-    vi.advanceTimersByTime(400)
+    vi.advanceTimersByTime(DELAY)
 
     source.value = false
-    vi.advanceTimersByTime(100)
+    vi.advanceTimersByTime(MIN / 2)
     source.value = true
     vi.advanceTimersByTime(1000)
 
