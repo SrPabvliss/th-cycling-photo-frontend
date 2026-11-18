@@ -349,6 +349,12 @@
     grid-area: left;
   }
 
+  /* Stacked, the name shares its line with the thumbnails: it wraps instead of being cut. */
+  .or__customer-text b {
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+
   .or__thumbs {
     grid-area: thumbs;
     justify-self: end;

@@ -9,7 +9,7 @@ export const ORDER_STATUS_CONFIG: Record<OrderStatus, IStatusBadgeConfig> = {
   [ORDER_STATUS.PAYMENT_INFO_SENT]: { label: 'Info de pago enviada', type: 'warning' },
   [ORDER_STATUS.PAID]: { label: 'Pagado', type: 'info' },
   [ORDER_STATUS.DELIVERED]: { label: 'Entregado', type: 'success' },
-  [ORDER_STATUS.GIFTED]: { label: 'Regalada', type: 'default', color: '#7c3aed' },
+  [ORDER_STATUS.GIFTED]: { label: 'Obsequio', type: 'default', color: '#7c3aed' },
   [ORDER_STATUS.CANCELLED]: { label: 'Cancelado', type: 'default' },
 }
 

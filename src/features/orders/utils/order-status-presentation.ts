@@ -20,7 +20,7 @@ const STATUS_BASE: Record<OrderStatus, IStatusBase> = {
   [ORDER_STATUS.PAYMENT_INFO_SENT]: { label: 'Info de pago enviada', tone: 'info', solid: true },
   [ORDER_STATUS.PAID]: { label: 'Pagado', tone: 'paid', solid: true },
   [ORDER_STATUS.DELIVERED]: { label: 'Entregado', tone: 'deli', solid: false },
-  [ORDER_STATUS.GIFTED]: { label: 'Regalada', tone: 'gift', solid: true },
+  [ORDER_STATUS.GIFTED]: { label: 'Obsequio', tone: 'gift', solid: true },
   [ORDER_STATUS.CANCELLED]: { label: 'Cancelado', tone: 'canc', solid: false },
 }
 

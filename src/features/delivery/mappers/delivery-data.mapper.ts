@@ -13,6 +13,7 @@ function toDeliveryPhoto(api: IApiDeliveryPhoto): IDeliveryPhoto {
     downloadUrl: api.downloadUrl,
     fileSize: api.fileSize,
     thumbnailUrl: api.thumbnailUrl ?? null,
+    viewUrl: api.viewUrl ?? api.thumbnailUrl ?? null,
   }
 }
 
@@ -23,6 +24,7 @@ export function toDeliveryData(api: IApiDeliveryData): IDeliveryData {
     status: api.status as DeliveryStatus,
     expiresAt: api.expiresAt ? new Date(api.expiresAt) : null,
     downloadCount: api.downloadCount,
+    invoiced: api.invoiced ?? false,
     photos: api.photos.map(toDeliveryPhoto),
   }
 }

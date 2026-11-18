@@ -13,6 +13,8 @@ export interface IApiDeliveryPhoto {
   fileSize: number
   /** Small image of the photo itself (TIT-116). Lasts an hour; may be missing, null or fail. */
   thumbnailUrl?: string | null
+  /** The photo at screen size, without watermark, to look at it in full screen. Same lifetime. */
+  viewUrl?: string | null
 }
 
 /** API projection from GET /delivery/:token */
@@ -22,6 +24,8 @@ export interface IApiDeliveryData {
   status: string
   expiresAt: string | null
   downloadCount: number
+  /** The order was paid and has an invoice. Optional: older api versions do not send it. */
+  invoiced?: boolean
   photos: IApiDeliveryPhoto[]
 }
 
@@ -31,6 +35,8 @@ export interface IDeliveryPhoto {
   downloadUrl: string
   fileSize: number
   thumbnailUrl: string | null
+  /** What the full-screen viewer shows: the screen-size image, or the thumbnail without it. */
+  viewUrl: string | null
 }
 
 /** Frontend domain type */
@@ -41,5 +47,7 @@ export interface IDeliveryData {
   /** Null when the api does not say when the link ends. */
   expiresAt: Date | null
   downloadCount: number
+  /** The order was paid: its invoice went to the buyer's email. */
+  invoiced: boolean
   photos: IDeliveryPhoto[]
 }

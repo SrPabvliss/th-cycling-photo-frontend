@@ -13,6 +13,7 @@ import type {
   IMyOrderDetail,
 } from '../../../types/responses/my-order.response'
 import PurchasedPhotoTile from '@/shared/downloads/PurchasedPhotoTile.vue'
+import PhotoListViewer from '@/shared/photo-viewer/PhotoListViewer.vue'
 
 /** Download addresses last an hour: older than this, they are asked for again first. */
 const FRESH_FOR_MS = 55 * 60_000
@@ -46,6 +47,23 @@ async function freshFiles(force: boolean): Promise<IApiMyOrderDownloadPhoto[]> {
 
 // A failed refresh keeps the photos already shown: the download that needed it says it failed.
 const hasNothing = computed(() => status.value === 'error' && !files.value)
+
+// Any photo opens in full screen and the rest follow by swiping: the bought ones without
+// watermark, the ones of an order not yet released as the gallery shows them.
+const viewingId = ref<string | null>(null)
+const largeUrl = (photo: IApiMyOrderDownloadPhoto) => photo.viewUrl ?? photo.thumbnailUrl ?? null
+const viewerPhotos = computed(() =>
+  released.value
+    ? (files.value ?? []).flatMap((photo) => {
+        const src = largeUrl(photo)
+        return src ? [{ id: photo.id, src, alt: 'Foto comprada' }] : []
+      })
+    : props.order.photos.map((photo) => ({
+        id: photo.id,
+        src: photo.galleryUrl,
+        alt: 'Foto del pedido',
+      })),
+)
 
 const downloadingId = ref<string | null>(null)
 const downloadFailed = ref(false)
@@ -100,8 +118,10 @@ const downloadAll = useSequentialDownload({
             :thumbnail-url="photo.thumbnailUrl ?? null"
             :filename="photo.filename"
             :can-download="true"
+            :can-view="largeUrl(photo) !== null"
             :busy="downloadingId === photo.id"
             @download="downloadOne(photo.id)"
+            @view="viewingId = photo.id"
           />
         </div>
         <FormAlert
@@ -115,9 +135,18 @@ const downloadAll = useSequentialDownload({
 
     <div v-else class="order-photos__grid">
       <figure v-for="photo in order.photos" :key="photo.id" class="order-photos__preview">
-        <img :src="photo.galleryUrl" alt="Foto del pedido" loading="lazy" decoding="async" />
+        <button
+          type="button"
+          class="order-photos__open"
+          aria-label="Ver foto en grande"
+          @click="viewingId = photo.id"
+        >
+          <img :src="photo.galleryUrl" alt="Foto del pedido" loading="lazy" decoding="async" />
+        </button>
       </figure>
     </div>
+
+    <PhotoListViewer v-model:photo-id="viewingId" :photos="viewerPhotos" />
   </section>
 </template>
 

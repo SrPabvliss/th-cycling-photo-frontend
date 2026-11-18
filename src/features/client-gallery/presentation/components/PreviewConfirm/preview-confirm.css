@@ -87,6 +87,16 @@
   list-style: none;
 }
 
+/* The photo itself opens it in full screen. */
+.preview-confirm__open {
+  display: block;
+  inline-size: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+
 .preview-confirm__thumb img {
   display: block;
   inline-size: 100%;

@@ -50,16 +50,16 @@ export function useOrderActions() {
 
   function handleMarkGift(orderId: string) {
     dialog.create({
-      title: 'Marcar como regalo',
+      title: 'Marcar como obsequio',
       content:
-        '¿Seguro que deseas marcar este pedido como regalo? No se sumará a las ganancias del mes.',
+        '¿Seguro que deseas marcar este pedido como obsequio? No se sumará a las ganancias del mes.',
       icon: () => h(NIcon, { color: '#7c3aed' }, { default: () => h(GiftOutline) }),
-      positiveText: 'Marcar como regalo',
+      positiveText: 'Marcar como obsequio',
       negativeText: 'Cancelar',
       positiveButtonProps: { color: '#7c3aed', textColor: '#ffffff' },
       onPositiveClick: async () => {
         await markGift(orderId)
-        message.success('Pedido marcado como regalo')
+        message.success('Pedido marcado como obsequio')
       },
     })
   }
@@ -79,18 +79,18 @@ export function useOrderActions() {
 
   function handleConvertToGift(order: IConvertibleOrder) {
     dialog.create({
-      title: 'Cambiar a regalo',
+      title: 'Cambiar a obsequio',
       content: withCreditNoteWarning(
         buildConversionMessage('gift', order.subtotal, order.snapCurrency),
         order.invoiceState,
       ),
       icon: () => h(NIcon, { color: '#7c3aed' }, { default: () => h(GiftOutline) }),
-      positiveText: 'Cambiar a regalo',
+      positiveText: 'Cambiar a obsequio',
       negativeText: 'Cancelar',
       positiveButtonProps: { color: '#7c3aed', textColor: '#ffffff' },
       onPositiveClick: async () => {
         await convertToGift(order.id)
-        message.success('Pedido cambiado a regalo')
+        message.success('Pedido cambiado a obsequio')
       },
     })
   }
