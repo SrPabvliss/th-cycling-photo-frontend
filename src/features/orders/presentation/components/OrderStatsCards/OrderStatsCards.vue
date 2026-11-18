@@ -73,7 +73,7 @@ const breakdown = computed<IStatCard[]>(() => [
   {
     key: 'gifted',
     value: props.stats?.giftedCount ?? 0,
-    label: 'Regaladas',
+    label: 'Obsequios',
     variant: 'gift',
   },
 ])
@@ -114,7 +114,7 @@ const segments = computed(() =>
             <p class="stat-card__popover-title">Cómo se calculan los ingresos</p>
             <p class="stat-card__popover-text">
               Suma del subtotal de los pedidos pagados y entregados. No incluye pedidos pendientes,
-              con info enviada, regalados ni cancelados.
+              con info enviada, obsequiados ni cancelados.
             </p>
             <p class="stat-card__popover-hint">
               Al filtrar por un evento se muestran solo sus ingresos.
@@ -143,10 +143,10 @@ const segments = computed(() =>
       :value="formatCount(stats?.awaitingDeliveryCount)"
       :icon="CubeOutline"
       tone="blue"
-      note="Pagados o regalados sin entregar"
+      note="Pagados u obsequiados sin entregar"
     />
     <StatTile
-      label="Regaladas"
+      label="Obsequios"
       :value="formatCount(stats?.giftedCount)"
       :icon="GiftOutline"
       tone="violet"
@@ -177,7 +177,7 @@ const segments = computed(() =>
             <p class="stat-card__popover-title">Cómo se calculan los ingresos</p>
             <p class="stat-card__popover-text">
               Suma del subtotal de los pedidos pagados y entregados. No incluye pedidos pendientes,
-              con info enviada, regalados ni cancelados.
+              con info enviada, obsequiados ni cancelados.
             </p>
             <p class="stat-card__popover-hint">
               Al filtrar por un evento se muestran solo sus ingresos.

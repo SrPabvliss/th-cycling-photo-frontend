@@ -45,6 +45,7 @@ const photos = (count: number) =>
     downloadUrl: `https://storage/${index}?signed`,
     fileSize: 1,
     thumbnailUrl: index === 1 ? null : `https://cdn/t/${index}`,
+    viewUrl: index === 1 ? null : `https://cdn/v/${index}`,
   }))
 const DATA = (count = 3, expiresAt: Date | null = new Date(2026, 10, 30)): IDeliveryData => ({
   token: 't',
@@ -52,6 +53,7 @@ const DATA = (count = 3, expiresAt: Date | null = new Date(2026, 10, 30)): IDeli
   status: 'active',
   expiresAt,
   downloadCount: 0,
+  invoiced: true,
   photos: photos(count),
 })
 

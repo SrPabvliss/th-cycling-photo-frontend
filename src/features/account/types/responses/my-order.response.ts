@@ -60,6 +60,8 @@ export interface IApiMyOrderDownloadPhoto {
   downloadUrl: string
   /** Small image of the photo itself (TIT-116). Lasts an hour; may be null or fail. */
   thumbnailUrl?: string | null
+  /** The photo at screen size, without watermark, to look at it in full screen. Same lifetime. */
+  viewUrl?: string | null
 }
 
 export interface IApiMyOrderDownloads {

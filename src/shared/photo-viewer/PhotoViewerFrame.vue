@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, toRef } from 'vue'
+import { computed, onMounted, onUnmounted, ref, toRef, watch } from 'vue'
 
 import { useDialogFocus } from '@/shared/composables/use-dialog-focus'
 import { useFocusHandOff } from '@/shared/composables/use-focus-hand-off'
 import { useViewerNavigation } from './use-viewer-navigation'
+import { useViewerSwipe } from './use-viewer-swipe'
+import { useViewerZoom } from './use-viewer-zoom'
 
 export interface IViewerFramePhoto {
   id: string
@@ -20,8 +22,13 @@ const props = withDefaults(
     label: string
     hasNextPage?: boolean
     fetchNextPage?: () => Promise<unknown>
+    /**
+     * Opened from the organizer panel, which has none of the client tokens this viewer is drawn
+     * with: it brings its own.
+     */
+    standalone?: boolean
   }>(),
-  { hasNextPage: false, fetchNextPage: async () => {} },
+  { hasNextPage: false, fetchNextPage: async () => {}, standalone: false },
 )
 
 const emit = defineEmits<{
@@ -36,11 +43,42 @@ const currentId = computed<string | null>({
   },
 })
 
-const { hasPrevious, hasNext, previous, next } = useViewerNavigation(
-  toRef(props, 'photos'),
-  currentId,
-  { hasNextPage: toRef(props, 'hasNextPage'), fetchNextPage: () => props.fetchNextPage() },
-)
+const navigation = useViewerNavigation(toRef(props, 'photos'), currentId, {
+  hasNextPage: toRef(props, 'hasNextPage'),
+  fetchNextPage: () => props.fetchNextPage(),
+})
+const { hasPrevious, hasNext } = navigation
+
+// The side the new photo comes in from, so a change reads as a movement and not as a blink.
+const cameFrom = ref<'next' | 'previous' | null>(null)
+function previous() {
+  cameFrom.value = 'previous'
+  navigation.previous()
+}
+function next() {
+  cameFrom.value = 'next'
+  return navigation.next()
+}
+
+const stage = ref<HTMLElement | null>(null)
+// Zoomed in, a finger moves around the photo; back at its size, it moves on to the next one.
+const zoom = useViewerZoom(stage)
+const swipe = useViewerSwipe(stage, {
+  canPrevious: () => hasPrevious.value,
+  canNext: () => hasNext.value,
+  onPrevious: previous,
+  onNext: () => void next(),
+  isZoomed: () => zoom.isZoomed.value || (window.visualViewport?.scale ?? 1) > 1.01,
+})
+// Every photo starts at its own size.
+watch(() => props.photoId, zoom.reset)
+
+const photoStyle = computed(() => {
+  const x = zoom.x.value + swipe.offset.value
+  const y = zoom.y.value
+  if (!x && !y && !zoom.isZoomed.value) return undefined
+  return { transform: `translate(${x}px, ${y}px) scale(${zoom.scale.value})` }
+})
 
 const photo = computed(() => props.photos.find((each) => each.id === props.photoId) ?? null)
 
@@ -77,6 +115,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
     <div
       ref="panel"
       class="photo-viewer"
+      :data-tt-area="standalone ? 'client' : undefined"
       role="dialog"
       aria-modal="true"
       :aria-label="label"
@@ -95,11 +134,19 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
         <span class="photo-viewer__spacer" aria-hidden="true" />
       </div>
 
-      <div class="photo-viewer__stage">
+      <div ref="stage" class="photo-viewer__stage">
         <img
           v-if="photo"
           :key="photo.id"
           class="photo-viewer__photo"
+          :class="{
+            'photo-viewer__photo--dragging': swipe.isDragging.value || zoom.isGesturing.value,
+            'photo-viewer__photo--zoomed': zoom.isZoomed.value,
+            'photo-viewer__photo--from-next': cameFrom === 'next',
+            'photo-viewer__photo--from-previous': cameFrom === 'previous',
+          }"
+          :style="photoStyle"
+          draggable="false"
           :src="photo.src"
           :alt="photo.alt"
           decoding="async"
@@ -195,18 +242,72 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
   align-items: center;
   justify-content: center;
   min-block-size: 0;
+  overflow: hidden;
+  /* Every gesture over the photo is the viewer's: swipe to change it, pinch and double tap to
+     zoom into it. The page behind neither scrolls nor zooms. */
+  touch-action: none;
 }
 
 .photo-viewer__photo {
   max-inline-size: 100%;
   max-block-size: 100%;
   object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  /* Let go short of the mark, the photo goes back to its place. */
+  transition: transform 0.2s ease-out;
 }
 
+.photo-viewer__photo--dragging {
+  transition: none;
+}
+
+.photo-viewer__photo--zoomed {
+  cursor: grab;
+}
+
+.photo-viewer__photo--from-next {
+  animation: photo-viewer-from-next 0.2s ease-out;
+}
+
+.photo-viewer__photo--from-previous {
+  animation: photo-viewer-from-previous 0.2s ease-out;
+}
+
+@keyframes photo-viewer-from-next {
+  from {
+    transform: translateX(12%);
+    opacity: 0.4;
+  }
+}
+
+@keyframes photo-viewer-from-previous {
+  from {
+    transform: translateX(-12%);
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photo-viewer__photo,
+  .photo-viewer__photo--from-next,
+  .photo-viewer__photo--from-previous {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Over a photo of any colour: a dark disc with a light rim, so the arrow never gets lost. */
 .photo-viewer__nav {
   position: absolute;
   inset-block-start: calc(50% - var(--tt-control-m) / 2);
-  background: color-mix(in srgb, var(--tt-on-navy) 14%, transparent);
+  background: color-mix(in srgb, black 55%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--tt-on-navy) 45%, transparent);
+}
+
+.photo-viewer__nav svg {
+  stroke-width: 2.4;
 }
 
 .photo-viewer__nav--previous {
@@ -217,8 +318,9 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
   inset-inline-end: var(--tt-space-2);
 }
 
+/* At the first or the last photo there is nowhere to go: the arrow steps back. */
 .photo-viewer__nav:disabled {
-  opacity: 0.35;
+  opacity: 0.3;
   cursor: default;
 }
 

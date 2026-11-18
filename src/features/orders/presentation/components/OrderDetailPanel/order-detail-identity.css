@@ -18,6 +18,24 @@
   color: #8a5200;
 }
 
+.odp__ident-action {
+  align-self: flex-start;
+  padding: 5px 10px;
+  border: 1px solid #e3c79a;
+  border-radius: 7px;
+  background: #fff;
+  color: #8a5200;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.odp__ident-action:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
 .odp__ident > p {
   margin: 0;
   font-size: 11.5px;

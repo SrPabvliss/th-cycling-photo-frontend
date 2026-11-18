@@ -1,4 +1,4 @@
-import { format, formatDistanceToNow, parse } from 'date-fns'
+import { format, formatDistanceToNow, isSameDay, parse } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 /**
@@ -51,6 +51,14 @@ export function formatDateWithTime(date: Date): string {
  */
 export function formatDateTime(date: Date): string {
   return format(date, 'd MMM, HH:mm', { locale: es })
+}
+
+/**
+ * Formats when something happened, as short as the day allows: "14:32" for today,
+ * "16 nov, 14:32" for any other day.
+ */
+export function formatTimeOrDateTime(date: Date, now: Date = new Date()): string {
+  return isSameDay(date, now) ? format(date, 'HH:mm') : formatDateTime(date)
 }
 
 /**

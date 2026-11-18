@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { NIcon } from 'naive-ui'
 import { ChevronForwardOutline, FlagOutline, CardOutline, StarOutline } from '@vicons/ionicons5'
 
-import { formatRelativeTime, formatDateTime, isRecent } from '@/shared/utils/date.utils'
+import { formatDateTime, isRecent } from '@/shared/utils/date.utils'
 import { formatWhatsAppNumber } from '@/shared/utils/phone.utils'
 import { formatCurrency } from '@/shared/utils/currency.utils'
 import { ORDER_STATUS, type IOrderListItem } from '../../../types/responses/order-list.response'
@@ -172,7 +172,7 @@ function handlePrimaryAction() {
       </span>
       <span class="or__meta-line or__meta-line--payment">
         <NIcon :component="CardOutline" :size="11" />
-        {{ paymentMethodLabel }} · {{ formatRelativeTime(order.createdAt) }}
+        {{ paymentMethodLabel }}
       </span>
     </div>
 

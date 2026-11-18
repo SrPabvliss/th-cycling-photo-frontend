@@ -151,6 +151,22 @@ describe('PhonesSection', () => {
     expect(success).toHaveBeenCalledWith('Teléfono guardado.')
   })
 
+  it('tells the buyer when an order in progress took the new number', async () => {
+    add.mockResolvedValue({ id: 'p3', syncedOrders: 1 })
+    const wrapper = await mountSection()
+
+    await buttonNamed(wrapper, 'Agregar teléfono')!.trigger('click')
+    await flushPromises()
+    await wrapper.get('#telefono-numero').setValue('987654321')
+    await wrapper.get('#telefono-numero').trigger('input')
+    await buttonNamed(wrapper, 'Guardar teléfono')!.trigger('click')
+    await flushPromises()
+
+    expect(success).toHaveBeenCalledWith(
+      'Teléfono guardado. También lo actualizamos en tu pedido en curso.',
+    )
+  })
+
   // H-PE-03: a number already on the list is a "no" with its reason, never "try again".
   it("says the number is already registered, in the server's words", async () => {
     add.mockRejectedValue(

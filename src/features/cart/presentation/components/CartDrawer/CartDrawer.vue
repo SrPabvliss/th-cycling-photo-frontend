@@ -19,6 +19,7 @@ import { formatMoney } from '@/shared/pricing/tier-cards'
 import { usePricingTiersQuery } from '@/shared/pricing/use-pricing-tiers'
 import { useCartStore } from '@/shared/stores/cart.store'
 import { checkoutProblemText } from '@/shared/utils/checkout-error'
+import PhotoListViewer from '@/shared/photo-viewer/PhotoListViewer.vue'
 import { getGalleryUrl } from '@/shared/utils/cdn.utils'
 
 const TITLE_ID = 'cart-drawer-title'
@@ -49,6 +50,18 @@ const priceSheet = usePriceSheet()
 const panel = ref<HTMLElement | null>(null)
 const close = () => cartStore.setDrawerOpen(false)
 
+// A photo of the cart opens in full screen, and swiping goes through the rest of the cart.
+const viewingId = ref<string | null>(null)
+const viewerPhotos = computed(() =>
+  cart.groups.value.flatMap((group) =>
+    group.photos.map((photo) => ({
+      id: photo.id,
+      src: getGalleryUrl(photo.publicSlug),
+      alt: `Foto de ${group.eventName}`,
+    })),
+  ),
+)
+
 // The session closed on a screen that needs it: that screen says so, once. The drawer gets out
 // of the way instead of saying it again on top.
 const isSessionClosed = useSessionClosedScreen()
@@ -56,6 +69,13 @@ watch(isSessionClosed, (closed) => {
   if (closed) close()
 })
 useDialogFocus(panel, () => cartStore.isDrawerOpen, close)
+// The drawer can close under an open photo (the session ended): the photo goes with it.
+watch(
+  () => cartStore.isDrawerOpen,
+  (open) => {
+    if (!open) viewingId.value = null
+  },
+)
 
 // Every event of the cart is priced on its own: each one is a separate order with its own tier.
 const events = computed(() =>
@@ -191,12 +211,19 @@ function explainPrices() {
                   class="cart-drawer__thumb"
                   :class="{ 'cart-drawer__thumb--bought': photo.alreadyPurchased }"
                 >
-                  <img
-                    :src="getGalleryUrl(photo.publicSlug)"
-                    alt="Foto en el carrito"
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  <button
+                    type="button"
+                    class="cart-drawer__open"
+                    aria-label="Ver foto en grande"
+                    @click="viewingId = photo.id"
+                  >
+                    <img
+                      :src="getGalleryUrl(photo.publicSlug)"
+                      alt="Foto en el carrito"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </button>
                   <span v-if="photo.alreadyPurchased" class="cart-drawer__bought">
                     Ya la compraste
                   </span>
@@ -257,6 +284,7 @@ function explainPrices() {
         </LoadBoundary>
       </div>
     </div>
+    <PhotoListViewer v-model:photo-id="viewingId" :photos="viewerPhotos" />
   </Teleport>
 </template>
 
@@ -383,6 +411,16 @@ function explainPrices() {
 
 .cart-drawer__thumb {
   position: relative;
+}
+
+/* The photo itself opens it in full screen. */
+.cart-drawer__open {
+  display: block;
+  inline-size: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
 }
 
 /* A photo of an earlier order: dimmed, with a label along its foot, still with its "Quitar". */

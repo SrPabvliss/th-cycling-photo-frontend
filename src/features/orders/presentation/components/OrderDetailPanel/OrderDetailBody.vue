@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { NIcon } from 'naive-ui'
-import { LogoWhatsapp } from '@vicons/ionicons5'
 
 import { formatCurrency } from '@/shared/utils/currency.utils'
-import { formatDateTime, formatRelativeTime } from '@/shared/utils/date.utils'
-import { formatWhatsAppNumber } from '@/shared/utils/phone.utils'
+import { formatDateTime } from '@/shared/utils/date.utils'
 import { ORDER_STATUS } from '../../../types/responses/order-list.response'
 import type { IOrderDetail } from '../../../types/responses/order-detail.response'
 import { getOrderStatusPresentation } from '../../../utils/order-status-presentation'
@@ -27,6 +24,7 @@ import OrderInvoiceSection from './OrderInvoiceSection.vue'
 import OrderDetailNotice from './OrderDetailNotice.vue'
 import OrderDetailIdentity from './OrderDetailIdentity.vue'
 import OrderDetailActions from './OrderDetailActions.vue'
+import OrderContactPhone from './OrderContactPhone.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -53,10 +51,6 @@ const statusPresentation = computed(() =>
 
 const avatarInitials = computed(() => getOrderAvatarInitials(props.order.userName))
 
-const formattedContactPhone = computed(() =>
-  props.order.snapWhatsapp ? formatWhatsAppNumber(props.order.snapWhatsapp) : null,
-)
-
 const showInternalNote = computed(() => shouldShowInternalNote(props.order))
 
 const paymentMethodLabel = computed(() => getPaymentMethodLabel(props.order.paymentMethod))
@@ -70,10 +64,7 @@ const paymentMethodLabel = computed(() => getPaymentMethodLabel(props.order.paym
           <span class="odp__avatar">{{ avatarInitials }}</span>
           <div class="odp__hero-identity">
             <b>{{ order.userName }}</b>
-            <i>
-              <NIcon v-if="formattedContactPhone" :component="LogoWhatsapp" :size="12" />
-              {{ formattedContactPhone ?? 'sin WhatsApp registrado' }}
-            </i>
+            <OrderContactPhone :order="order" />
           </div>
         </div>
         <div class="odp__hero-r">
@@ -180,7 +171,7 @@ const paymentMethodLabel = computed(() => getPaymentMethodLabel(props.order.paym
           <div>
             <dt>Pedido</dt>
             <dd>
-              {{ formatDateTime(order.createdAt) }} · {{ formatRelativeTime(order.createdAt) }}
+              {{ formatDateTime(order.createdAt) }}
             </dd>
           </div>
           <div>
@@ -194,7 +185,7 @@ const paymentMethodLabel = computed(() => getPaymentMethodLabel(props.order.paym
                 order.paidAt
                   ? formatDateTime(order.paidAt)
                   : order.status === ORDER_STATUS.GIFTED
-                    ? 'no aplica · regalada'
+                    ? 'no aplica · obsequio'
                     : '—'
               }}
             </dd>

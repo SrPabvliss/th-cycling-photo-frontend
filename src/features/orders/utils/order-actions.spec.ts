@@ -48,6 +48,6 @@ describe('resolveOrderActions', () => {
       { status: ORDER_STATUS.PAID, deliveredAt: null },
       can(ADMIN),
     ).find((action) => action.id === 'to_gift')
-    expect(toGift?.label).toBe('Cambiar a regalo')
+    expect(toGift?.label).toBe('Cambiar a obsequio')
   })
 })

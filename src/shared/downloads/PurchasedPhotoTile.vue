@@ -2,15 +2,21 @@
 import { ref, watch } from 'vue'
 
 // One bought photo: its thumbnail (never the full file), or a placeholder with its name.
-const props = defineProps<{
-  thumbnailUrl: string | null
-  filename: string
-  canDownload: boolean
-  busy: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    thumbnailUrl: string | null
+    filename: string
+    canDownload: boolean
+    busy: boolean
+    /** The photo can be opened in full screen: its image becomes the button that does it. */
+    canView?: boolean
+  }>(),
+  { canView: false },
+)
 
 const emit = defineEmits<{
   download: []
+  view: []
 }>()
 
 const failed = ref(false)
@@ -22,8 +28,24 @@ watch(
 
 <template>
   <figure class="purchased-tile">
+    <button
+      v-if="thumbnailUrl && !failed && canView"
+      type="button"
+      class="purchased-tile__open"
+      aria-label="Ver foto en grande"
+      @click="emit('view')"
+    >
+      <img
+        class="purchased-tile__image"
+        :src="thumbnailUrl"
+        alt="Foto comprada"
+        loading="lazy"
+        decoding="async"
+        @error="failed = true"
+      />
+    </button>
     <img
-      v-if="thumbnailUrl && !failed"
+      v-else-if="thumbnailUrl && !failed"
       class="purchased-tile__image"
       :src="thumbnailUrl"
       alt="Foto comprada"
@@ -71,6 +93,16 @@ watch(
   inline-size: 100%;
   block-size: 100%;
   object-fit: cover;
+}
+
+.purchased-tile__open {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
 }
 
 .purchased-tile__placeholder {

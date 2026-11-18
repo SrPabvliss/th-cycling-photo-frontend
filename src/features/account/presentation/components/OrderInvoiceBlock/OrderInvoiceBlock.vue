@@ -41,6 +41,9 @@ const isBusy = (file: 'pdf' | 'xml') => props.busyKey === `${current.value?.id}:
     </div>
     <strong v-if="billing">{{ billing.legalName }}</strong>
     <span v-if="current" class="invoice-block__line">N.º {{ current.number }}</span>
+    <span class="invoice-block__line"
+      >También la enviamos a {{ billing?.email ?? 'tu correo' }}.</span
+    >
     <div v-if="current?.downloadable" class="invoice-block__actions">
       <NButton
         :loading="isBusy('pdf')"

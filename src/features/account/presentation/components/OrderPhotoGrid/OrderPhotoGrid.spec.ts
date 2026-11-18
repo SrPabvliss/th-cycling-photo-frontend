@@ -106,7 +106,26 @@ describe('OrderPhotoGrid', () => {
       'https://cdn/gallery/a.jpg',
       'https://cdn/gallery/b.jpg',
     ])
-    expect(wrapper.find('button').exists()).toBe(false)
+    // The only thing a photo offers is to be looked at in full screen.
+    expect(wrapper.findAll('button').map((button) => button.attributes('aria-label'))).toEqual([
+      'Ver foto en grande',
+      'Ver foto en grande',
+    ])
+  })
+
+  it('opens a photo in full screen and moves on to the next one', async () => {
+    const wrapper = await mountGrid(order('confirming', false))
+
+    await wrapper.findAll('button[aria-label="Ver foto en grande"]')[0]!.trigger('click')
+    const viewer = document.body.querySelector('[role="dialog"]')!
+    expect(viewer.querySelector('img')!.getAttribute('src')).toBe('https://cdn/gallery/a.jpg')
+    expect(viewer.querySelector('[data-test="viewer-count"]')!.textContent).toContain('1 de 2')
+
+    viewer.querySelector<HTMLButtonElement>('button[aria-label="Foto siguiente"]')!.click()
+    await flushPromises()
+    expect(document.body.querySelector('[role="dialog"] img')!.getAttribute('src')).toBe(
+      'https://cdn/gallery/b.jpg',
+    )
   })
 
   it('downloads one photo with the address it has while it is fresh', async () => {
