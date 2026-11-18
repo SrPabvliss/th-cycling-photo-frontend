@@ -66,6 +66,12 @@ const chosen = computed(() =>
   props.preview.photos.filter((photo) => props.selection.isSelected(photo.id)),
 )
 const count = computed(() => chosen.value.length)
+
+// A chosen photo opens in full screen, to check the order before confirming it.
+const viewingId = ref<string | null>(null)
+const viewerPhotos = computed(() =>
+  chosen.value.map((photo) => ({ id: photo.id, src: photo.url, alt: 'Foto con marca de agua' })),
+)
 const { data: pricing } = usePricingTiersQuery()
 const quote = computed(() => (pricing.value ? quotePhotos(pricing.value.tiers, count.value) : null))
 const money = (amount: number) => formatMoney(amount, pricing.value?.currency ?? '')
@@ -200,9 +206,17 @@ async function confirm() {
         <h2 class="preview-confirm__event">{{ preview.eventName }}</h2>
         <ul class="preview-confirm__thumbs">
           <li v-for="photo in chosen" :key="photo.id" class="preview-confirm__thumb">
-            <img :src="photo.url" alt="Foto del pedido" loading="lazy" decoding="async" />
+            <button
+              type="button"
+              class="preview-confirm__open"
+              aria-label="Ver foto en grande"
+              @click="viewingId = photo.id"
+            >
+              <img :src="photo.url" alt="Foto del pedido" loading="lazy" decoding="async" />
+            </button>
           </li>
         </ul>
+        <PhotoListViewer v-model:photo-id="viewingId" :photos="viewerPhotos" />
         <div v-if="quote" class="preview-confirm__price">
           <div class="preview-confirm__row">
             <span class="preview-confirm__muted">Precio por foto</span>

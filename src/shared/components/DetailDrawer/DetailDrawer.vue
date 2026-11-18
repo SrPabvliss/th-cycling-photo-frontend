@@ -18,8 +18,12 @@ const emit = defineEmits<{
   close: []
 }>()
 
+// A dialog opened from the drawer (a photo in full screen, a form in a modal) takes Escape for
+// itself: closing it must not take the drawer along.
+const hasDialogOnTop = () => document.querySelector('[aria-modal="true"]') !== null
+
 useEventListener(document, 'keydown', (event: KeyboardEvent) => {
-  if (props.show && event.key === 'Escape') emit('close')
+  if (props.show && event.key === 'Escape' && !hasDialogOnTop()) emit('close')
 })
 </script>
 

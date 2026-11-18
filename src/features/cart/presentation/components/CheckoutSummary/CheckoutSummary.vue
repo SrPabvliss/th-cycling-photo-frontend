@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 import { usePriceSheet } from '@/features/pricing/composables/use-price-sheet'
 import { useCartActions } from '@/shared/cart'
@@ -7,6 +7,7 @@ import { quotePhotos, sortTiers } from '@/shared/pricing/quote'
 import { formatMoney } from '@/shared/pricing/tier-cards'
 import { nextTierText } from '@/shared/pricing/tier-text'
 import { usePricingTiersQuery } from '@/shared/pricing/use-pricing-tiers'
+import PhotoListViewer from '@/shared/photo-viewer/PhotoListViewer.vue'
 import type { ICartGroup } from '@/shared/types/cart.types'
 import { getGalleryUrl } from '@/shared/utils/cdn.utils'
 
@@ -21,6 +22,16 @@ const priceSheet = usePriceSheet()
 const { data: pricing } = usePricingTiersQuery()
 
 const count = computed(() => props.group.photos.length)
+
+// A photo of the order opens in full screen, and swiping goes through the rest of the order.
+const viewingId = ref<string | null>(null)
+const viewerPhotos = computed(() =>
+  props.group.photos.map((photo) => ({
+    id: photo.id,
+    src: getGalleryUrl(photo.publicSlug),
+    alt: 'Foto del pedido',
+  })),
+)
 const quote = computed(() => (pricing.value ? quotePhotos(pricing.value.tiers, count.value) : null))
 const money = (amount: number) => formatMoney(amount, pricing.value?.currency ?? '')
 
@@ -40,12 +51,19 @@ const nextTier = computed(() =>
         class="order-summary__thumb"
         :class="{ 'order-summary__thumb--bought': photo.alreadyPurchased }"
       >
-        <img
-          :src="getGalleryUrl(photo.publicSlug)"
-          alt="Foto del pedido"
-          loading="lazy"
-          decoding="async"
-        />
+        <button
+          type="button"
+          class="order-summary__open"
+          aria-label="Ver foto en grande"
+          @click="viewingId = photo.id"
+        >
+          <img
+            :src="getGalleryUrl(photo.publicSlug)"
+            alt="Foto del pedido"
+            loading="lazy"
+            decoding="async"
+          />
+        </button>
         <span v-if="photo.alreadyPurchased" class="order-summary__bought">Ya la compraste</span>
         <button
           type="button"
@@ -63,6 +81,8 @@ const nextTier = computed(() =>
         </RouterLink>
       </li>
     </ul>
+
+    <PhotoListViewer v-model:photo-id="viewingId" :photos="viewerPhotos" />
 
     <p v-if="nextTier" class="order-summary__nudge">
       {{ nextTier }}.
@@ -113,6 +133,16 @@ const nextTier = computed(() =>
 
 .order-summary__thumb {
   position: relative;
+}
+
+/* The photo itself opens it in full screen. */
+.order-summary__open {
+  display: block;
+  inline-size: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
 }
 
 .order-summary__thumb img,

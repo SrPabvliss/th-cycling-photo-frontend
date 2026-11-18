@@ -127,68 +127,14 @@
   opacity: 1;
 }
 
-/* Preview overlay */
-.od-preview-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: rgba(0, 0, 0, 0.85);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  cursor: pointer;
-}
-
-.od-preview-close {
-  position: absolute;
-  top: 16px;
-  right: 20px;
-  background: none;
-  border: none;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 32px;
-  cursor: pointer;
-  line-height: 1;
-  transition: color 0.15s;
-}
-
-.od-preview-close:hover {
-  color: #fff;
-}
-
-.od-preview-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 200px;
-  min-height: 200px;
-}
-
-.od-preview-img {
-  max-width: 90vw;
-  max-height: 80vh;
-  object-fit: contain;
-  border-radius: 8px;
-  cursor: default;
-  transition: opacity 0.2s;
-}
-
-.od-preview-img--loading {
-  width: 0;
-  height: 0;
-  opacity: 0;
-}
-
-.od-preview-filename {
+/* The file name in the foot of the full-screen viewer: which photo of the order is on screen. */
+.od-viewer-filename {
+  flex: none;
+  max-inline-size: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 12px;
   font-family: monospace;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-@media (max-width: 768px) {
-  .od-preview-container {
-    min-width: 0;
-  }
+  color: rgba(255, 255, 255, 0.7);
 }

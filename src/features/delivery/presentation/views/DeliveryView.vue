@@ -12,6 +12,7 @@ import FormAlert from '@/shared/components/form/FormAlert/FormAlert.vue'
 import { ErrorState, TtSkeleton, useLoadPhase } from '@/shared/components/loading'
 import DownloadAllButton from '@/shared/downloads/DownloadAllButton.vue'
 import PurchasedPhotoTile from '@/shared/downloads/PurchasedPhotoTile.vue'
+import PhotoListViewer from '@/shared/photo-viewer/PhotoListViewer.vue'
 import { downloadFile } from '@/shared/downloads/download-file'
 import { useSequentialDownload } from '@/shared/downloads/use-sequential-download'
 import { eventDateLabel } from '@/shared/public-events'
@@ -50,6 +51,14 @@ const refreshProblem = computed(() => {
 })
 
 const count = computed(() => delivery.value?.photos.length ?? 0)
+
+// Any photo opens in full screen, without watermark, and the rest follow by swiping.
+const viewingId = ref<string | null>(null)
+const viewerPhotos = computed(() =>
+  (delivery.value?.photos ?? []).flatMap((photo) =>
+    photo.viewUrl ? [{ id: photo.id, src: photo.viewUrl, alt: 'Foto comprada' }] : [],
+  ),
+)
 const dayOf = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 const endsOn = computed(() => {
@@ -201,10 +210,13 @@ watch(online, (isOnline) => {
           :thumbnail-url="photo.thumbnailUrl"
           :filename="photo.filename"
           :can-download="true"
+          :can-view="photo.viewUrl !== null"
           :busy="downloadingId === photo.id"
           @download="downloadOne(photo.id)"
+          @view="viewingId = photo.id"
         />
       </div>
+      <PhotoListViewer v-model:photo-id="viewingId" :photos="viewerPhotos" />
       <FormAlert
         v-if="singleFailed"
         tone="warn"
@@ -212,6 +224,11 @@ watch(online, (isOnline) => {
       />
 
       <DownloadAllButton :label="allLabel" :download="downloadAll" />
+
+      <p v-if="delivery.invoiced" class="delivery__hint" data-test="invoice-reminder">
+        Tu factura llegó al correo de tus datos de facturación. Si no la ves, revisa la carpeta de
+        spam.
+      </p>
 
       <p class="delivery__hint">
         ¿Quieres tenerlas siempre a mano?

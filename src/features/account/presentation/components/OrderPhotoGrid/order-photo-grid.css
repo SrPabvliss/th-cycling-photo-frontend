@@ -22,6 +22,16 @@
   background: var(--tt-surface-sunken);
 }
 
+.order-photos__open {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+
 .order-photos__preview img {
   display: block;
   inline-size: 100%;
