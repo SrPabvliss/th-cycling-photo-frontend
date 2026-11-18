@@ -106,6 +106,12 @@ async function save() {
     return
   }
   problem.value = null
+  // Orders in progress that took the new primary number: the buyer is told, so they know the
+  // organizer will write to the right one.
+  let syncedOrders = 0
+  const count = (saved: { syncedOrders?: number } | undefined) => {
+    syncedOrders += saved?.syncedOrders ?? 0
+  }
   try {
     const phone = editing.value
     if (phone) {
@@ -119,23 +125,30 @@ async function save() {
         phone,
       )
       if (Object.keys(payload).length > 0) {
-        await updatePhone.mutateAsync({ phoneId: phone.id, payload })
+        count(await updatePhone.mutateAsync({ phoneId: phone.id, payload }))
       }
-      if (makePrimary.value && !phone.isPrimary) await setPrimary.mutateAsync(phone.id)
+      if (makePrimary.value && !phone.isPrimary) count(await setPrimary.mutateAsync(phone.id))
     } else {
       const added = await addPhone.mutateAsync({
         phoneNumber: number.value,
         label: label.value.trim() || undefined,
         isWhatsapp: isWhatsapp.value,
       })
-      if (makePrimary.value && added?.id) await setPrimary.mutateAsync(added.id)
+      count(added)
+      if (makePrimary.value && added?.id) count(await setPrimary.mutateAsync(added.id))
     }
   } catch (error) {
     problem.value = duplicateProblem(error) ?? generalProblem(error)
     return
   }
   close()
-  message.success('Teléfono guardado.')
+  message.success(
+    syncedOrders === 0
+      ? 'Teléfono guardado.'
+      : syncedOrders === 1
+        ? 'Teléfono guardado. También lo actualizamos en tu pedido en curso.'
+        : 'Teléfono guardado. También lo actualizamos en tus pedidos en curso.',
+  )
 }
 
 // A number already on the list: a "no" with its reason, in the server's words (already in the

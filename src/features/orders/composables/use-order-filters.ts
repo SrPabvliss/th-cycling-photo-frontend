@@ -16,7 +16,7 @@ export const ORDER_TAB_LABELS: Record<OrderTab, string> = {
   payment_info_sent: 'Info enviada',
   paid: 'Pagados',
   delivered: 'Entregados',
-  gifted: 'Regaladas',
+  gifted: 'Obsequios',
   cancelled: 'Cancelados',
 }
 

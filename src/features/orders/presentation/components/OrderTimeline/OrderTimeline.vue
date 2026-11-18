@@ -51,7 +51,7 @@ const steps = computed<IStep[]>(() => {
     { key: 'info', label: 'Info', date: o.notifiedAt, reached: infoReached, isSkip: false },
     {
       key: 'paid',
-      label: gift ? 'Regalada' : 'Pago',
+      label: gift ? 'Obsequio' : 'Pago',
       date: o.paidAt,
       reached: paidReached,
       isSkip: gift,

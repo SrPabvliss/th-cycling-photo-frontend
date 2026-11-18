@@ -153,6 +153,7 @@ export const API_ROUTES = {
     GET_BY_ID: (id: string) => `${ORDERS_BASE}/${id}`,
     STATS: `${ORDERS_BASE}/stats`,
     NOTIFY_PAYMENT_INFO: (id: string) => `${ORDERS_BASE}/${id}/notify-payment-info`,
+    CONTACT_PHONE: (id: string) => `${ORDERS_BASE}/${id}/contact-phone`,
     CONFIRM_PAYMENT: (id: string) => `${ORDERS_BASE}/${id}/confirm-payment`,
     GIFT: (id: string) => `${ORDERS_BASE}/${id}/gift`,
     CONVERT_TO_SALE: (id: string) => `${ORDERS_BASE}/${id}/convert-to-sale`,

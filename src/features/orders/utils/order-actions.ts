@@ -33,9 +33,9 @@ const ACTION_LABELS: Record<OrderActionId, string> = {
   confirm: 'Confirmar pago',
   deliver: 'Entregar fotos',
   regenerate: 'Regenerar enlace',
-  gift: 'Marcar como regalada',
+  gift: 'Marcar como obsequio',
   to_sale: 'Cambiar a venta',
-  to_gift: 'Cambiar a regalo',
+  to_gift: 'Cambiar a obsequio',
   cancel: 'Cancelar pedido',
 }
 

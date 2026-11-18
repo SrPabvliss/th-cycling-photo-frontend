@@ -1,4 +1,5 @@
 import type { Component } from 'vue'
+import { formatWhatsAppNumber } from '@/shared/utils/phone.utils'
 import {
   BanOutline,
   CheckmarkCircleOutline,
@@ -51,7 +52,7 @@ export function buildOrderDetailNotice(
     return {
       tone: 'blue',
       icon: GiftOutline,
-      title: 'Regalada y ya entregada. Este pedido está terminado.',
+      title: 'Obsequio ya entregado. Este pedido está terminado.',
       body: `No entra en ingresos y ya no se puede cancelar: la entrega está hecha. ${correction}`,
     }
   }
@@ -60,7 +61,7 @@ export function buildOrderDetailNotice(
     return {
       tone: 'amber',
       icon: GiftOutline,
-      title: 'Regalada, pero las fotos siguen sin entregar.',
+      title: 'Obsequio, pero las fotos siguen sin entregar.',
       body: 'No hay nada que cobrar; falta el paso de entrega para cerrarla.',
     }
   }
@@ -87,11 +88,34 @@ export function buildOrderDetailNotice(
 }
 
 export function getOrderIdentityDiffs(order: IOrderDetail): IOrderIdentityDiff[] {
+  const diffs: IOrderIdentityDiff[] = []
+
   const snapName = [order.snapFirstName, order.snapLastName].filter(Boolean).join(' ').trim()
   const liveName = order.userName.trim()
-  return snapName && liveName && snapName !== liveName
-    ? [{ label: 'Nombre', before: snapName, after: liveName }]
-    : []
+  if (snapName && liveName && snapName !== liveName) {
+    diffs.push({ label: 'Nombre', before: snapName, after: liveName })
+  }
+
+  if (hasOrderPhoneDrifted(order)) {
+    diffs.push({
+      label: 'Teléfono',
+      before: order.snapWhatsapp ? formatWhatsAppNumber(order.snapWhatsapp) : 'sin número',
+      after: formatWhatsAppNumber(order.customerPrimaryPhone ?? ''),
+    })
+  }
+
+  return diffs
+}
+
+/**
+ * The account has a phone and the order was frozen with another one, or with none. An order in
+ * progress follows the account by itself; this is left for the ones placed before that, and for
+ * a correction made on the order alone.
+ */
+export function hasOrderPhoneDrifted(
+  order: Pick<IOrderDetail, 'snapWhatsapp' | 'customerPrimaryPhone'>,
+): boolean {
+  return !!order.customerPrimaryPhone && order.customerPrimaryPhone !== order.snapWhatsapp
 }
 
 export function getPaymentMethodLabel(paymentMethod: string | null): string {

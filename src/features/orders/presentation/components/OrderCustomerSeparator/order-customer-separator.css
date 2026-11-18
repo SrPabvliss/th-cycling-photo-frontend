@@ -48,6 +48,27 @@
   text-overflow: ellipsis;
 }
 
+/* On a phone the tags left the name a few pixels and it was cut to two letters. The name keeps
+   the whole line next to the avatar, wrapping by words if it is long, and the tags go below. */
+@media (max-width: 768px) {
+  .ocs {
+    flex-wrap: wrap;
+  }
+
+  .ocs__identity {
+    flex-basis: calc(100% - 51px);
+  }
+
+  .ocs__name {
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+
+  .ocs__right {
+    margin-left: 51px;
+  }
+}
+
 .ocs__sub {
   font-style: normal;
   font-size: 12px;

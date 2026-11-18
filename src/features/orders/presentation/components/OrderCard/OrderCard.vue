@@ -17,7 +17,7 @@ import {
 
 import { PERMISSIONS } from '@/core/auth/permissions'
 import { usePermissions } from '@/core/auth/use-permissions'
-import { formatRelativeTime, isRecent } from '@/shared/utils/date.utils'
+import { formatTimeOrDateTime, isRecent } from '@/shared/utils/date.utils'
 import { formatCurrency } from '@/shared/utils/currency.utils'
 import { ORDER_STATUS, type IOrderListItem } from '../../../types/responses/order-list.response'
 import { ORDER_STATUS_CONFIG, PAYMENT_METHOD_LABELS } from '../../../constants/status-config'
@@ -141,7 +141,7 @@ const timelineSteps = computed<ITimelineStep[]>(() => {
   return [
     { key: 'created', label: 'Creado', reached: true },
     { key: 'info', label: 'Info pago', reached: infoReached },
-    { key: 'paid', label: isGift ? 'Regalo' : 'Pagado', reached: paidOrGiftReached },
+    { key: 'paid', label: isGift ? 'Obsequio' : 'Pagado', reached: paidOrGiftReached },
     { key: 'delivered', label: 'Entregado', reached: deliveredReached },
   ]
 })
@@ -172,7 +172,7 @@ const paymentMethodLabel = computed(() =>
           <span>{{ groupPosition }} de {{ groupTotal }}</span>
         </span>
         <span v-if="isNew" class="oc__new-badge">Nuevo</span>
-        <span class="oc__header-time">{{ formatRelativeTime(order.createdAt) }}</span>
+        <span class="oc__header-time">{{ formatTimeOrDateTime(order.createdAt) }}</span>
       </div>
     </header>
 
@@ -251,8 +251,8 @@ const paymentMethodLabel = computed(() =>
         <button
           v-if="has(PERMISSIONS.ORDER_GIFT)"
           class="oc__icon-btn oc__icon-btn--gift"
-          title="Enviar como regalo"
-          aria-label="Enviar como regalo"
+          title="Marcar como obsequio"
+          aria-label="Marcar como obsequio"
           @click.stop="emit('markGift', order.id)"
         >
           <NIcon :component="GiftOutline" :size="19" />
