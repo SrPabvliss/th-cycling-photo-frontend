@@ -13,6 +13,7 @@ import ProfileForm from '@/features/account/presentation/components/ProfileForm/
 import PhoneList from '@/features/account/presentation/components/PhoneList/PhoneList.vue'
 import EmailSection from '@/features/account/presentation/components/EmailSection/EmailSection.vue'
 import PasswordForm from '@/features/account/presentation/components/PasswordForm/PasswordForm.vue'
+import CommunityEmailsSwitch from '@/features/account/presentation/components/CommunityEmailsSwitch/CommunityEmailsSwitch.vue'
 import BrandSection from '@/features/tenant-profile/presentation/sections/BrandSection.vue'
 import ContactSection from '@/features/tenant-profile/presentation/sections/ContactSection.vue'
 import PayoutSection from '@/features/tenant-profile/presentation/sections/PayoutSection.vue'
@@ -141,6 +142,7 @@ function onSelectPending(item: IProfilePendingItem) {
             </NTag>
           </template>
           <EmailSection />
+          <CommunityEmailsSwitch class="profile-organizer-desktop__community" />
         </ProfileBlockCard>
 
         <ProfileBlockCard icon="lock" title="Contraseña">

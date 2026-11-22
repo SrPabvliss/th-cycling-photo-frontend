@@ -9,4 +9,15 @@ describe('account routes', () => {
 
     expect((profile.meta?.shell as { tab?: string } | undefined)?.tab).toBeUndefined()
   })
+
+  // Opened from an email, maybe on a device without a session.
+  it('opens the unsubscribe link of the emails without a session', () => {
+    const unsubscribe = accountRoutes.find(
+      (route) => route.name === ACCOUNT_ROUTE_NAMES.EMAIL_UNSUBSCRIBE,
+    )!
+
+    expect(unsubscribe.path).toBe('/email/unsubscribe')
+    expect(unsubscribe.meta?.public).toBe(true)
+    expect(unsubscribe.meta?.requiresAuth).toBeUndefined()
+  })
 })

@@ -108,3 +108,9 @@
   padding: 0 14px 16px;
   background: var(--tt-surface);
 }
+
+.profile-organizer-mobile__community {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--tt-line, var(--tt-neutral-light));
+}

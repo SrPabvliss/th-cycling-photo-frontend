@@ -18,6 +18,7 @@ const BUYERS_BASE = '/buyers'
 const ORGANIZERS_BASE = '/organizers'
 const CONTRACTS_BASE = '/contracts'
 const TENANTS_BASE = '/tenants'
+const MAIL_BASE = '/mail'
 
 export const API_ROUTES = {
   AUTH: {
@@ -31,6 +32,7 @@ export const API_ROUTES = {
     RESET_PASSWORD: `${AUTH_BASE}/reset-password`,
     VALIDATE_RESET_TOKEN: `${AUTH_BASE}/reset-password/validate`,
     CONSENTS: `${AUTH_BASE}/consents`,
+    CONSENTS_REVOKE: `${AUTH_BASE}/consents/revoke`,
     CHANGE_PASSWORD: `${AUTH_BASE}/change-password`,
     EMAIL_CHANGE: `${AUTH_BASE}/email-change`,
     EMAIL_VERIFICATION: {
@@ -210,6 +212,11 @@ export const API_ROUTES = {
     REMOVE_ITEM: (photoId: string) => `/cart/items/${photoId}`,
     MERGE: '/cart/merge',
     CHECKOUT: '/cart/checkout',
+  },
+  MAIL: {
+    BASE: MAIL_BASE,
+    /** Public: the token of the email is the only credential. */
+    UNSUBSCRIBE: `${MAIL_BASE}/unsubscribe`,
   },
   DELIVERY_PUBLIC: {
     BASE: DELIVERY_PUBLIC_BASE,

@@ -1,6 +1,7 @@
 export const CONSENT_TYPE_LABELS: Record<string, string> = {
   terms: 'Términos',
   privacy: 'Privacidad',
+  community_emails: 'Correos de fechas especiales',
 }
 
 export const BUYER_DETAIL_FALLBACKS = {

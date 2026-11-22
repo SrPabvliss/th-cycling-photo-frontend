@@ -210,6 +210,48 @@ describe('sign up', () => {
     expect(register).toHaveBeenCalledWith(expect.objectContaining({ guardianConsent: true }))
   })
 
+  it('offers the community emails apart from the terms, unchecked, and sends nothing unasked', async () => {
+    register.mockResolvedValue({ firstName: 'Ana' })
+    const { wrapper } = await mountView()
+
+    const box = byId(wrapper, 'reg-community')
+    expect((box.element as HTMLInputElement).checked).toBe(false)
+    expect(box.element.closest('label')?.textContent).toContain(
+      'Quiero recibir los correos de fechas especiales de Titan TV',
+    )
+    await fill(wrapper)
+    await send(wrapper)
+
+    expect(register).toHaveBeenCalledTimes(1)
+    expect(register.mock.calls[0]![0].communityEmails).toBeUndefined()
+  })
+
+  it('asks for the community emails when the box is ticked', async () => {
+    register.mockResolvedValue({ firstName: 'Ana' })
+    const { wrapper } = await mountView()
+
+    await fill(wrapper)
+    await byId(wrapper, 'reg-community').setValue(true)
+    await send(wrapper)
+
+    expect(register).toHaveBeenCalledWith(
+      expect.objectContaining({ acceptedTerms: true, communityEmails: true }),
+    )
+  })
+
+  it('does not offer the community emails to a minor, even if ticked before', async () => {
+    register.mockResolvedValue({ firstName: 'Ana' })
+    const { wrapper } = await mountView()
+
+    await byId(wrapper, 'reg-community').setValue(true)
+    await fill(wrapper, { 'reg-by': MINOR_YEAR })
+
+    expect(wrapper.find('#reg-community').exists()).toBe(false)
+    await byId(wrapper, 'reg-guardian').setValue(true)
+    await send(wrapper)
+    expect(register.mock.calls[0]![0].communityEmails).toBeUndefined()
+  })
+
   it('creates the account, sends the code and opens the confirmation, keeping the way back', async () => {
     register.mockResolvedValue({ firstName: 'Ana' })
     sendCode.mockResolvedValue(undefined)

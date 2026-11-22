@@ -16,5 +16,7 @@ export function toCurrentUser(api: IApiCurrentUser): ICurrentUser {
     tenantName: api.tenantName ?? null,
     emailVerified: api.emailVerified ?? false,
     pendingPrompts: api.pendingPrompts ?? [],
+    communityEmails: api.communityEmails ?? false,
+    communityEmailsAvailable: api.communityEmailsAvailable ?? false,
   }
 }

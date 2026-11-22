@@ -130,3 +130,15 @@
 .register-form__phone :deep(.iti input[aria-invalid='true']) {
   border-color: var(--tt-danger-ink);
 }
+
+.register-form__check-note {
+  display: block;
+  margin-top: 2px;
+  font-size: 12.5px;
+  line-height: 18px;
+  color: var(--tt-ink-muted, var(--tt-neutral-mid));
+}
+
+.register-form__check-note a {
+  color: var(--tt-primary);
+}

@@ -19,6 +19,8 @@ export interface IRegisterFormData {
   gender: Gender | null
   acceptedTerms: boolean
   guardianConsent: boolean
+  /** Optional and separate from the terms: birthday and holiday greetings by email. */
+  communityEmails: boolean
 }
 
 export const REGISTER_FORM_DEFAULTS: IRegisterFormData = {
@@ -37,6 +39,7 @@ export const REGISTER_FORM_DEFAULTS: IRegisterFormData = {
   gender: null,
   acceptedTerms: false,
   guardianConsent: false,
+  communityEmails: false,
 }
 
 /** Field-level validators for individual form.Field bindings */

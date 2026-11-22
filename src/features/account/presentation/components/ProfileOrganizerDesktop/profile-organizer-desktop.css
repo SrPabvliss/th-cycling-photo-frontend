@@ -42,3 +42,9 @@
   min-width: 24px;
   text-align: center;
 }
+
+.profile-organizer-desktop__community {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--tt-line, var(--tt-neutral-light));
+}
