@@ -1,0 +1,109 @@
+.community-emails-prompt :deep(.n-card-header__main) {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.community-emails-prompt__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.community-emails-prompt__illustrations {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0 8px;
+}
+
+.community-emails-prompt__illustration {
+  width: 96px;
+  height: auto;
+}
+
+.community-emails-prompt__illustration + .community-emails-prompt__illustration {
+  margin-left: -18px;
+}
+
+.community-emails-prompt__title {
+  margin: 0 0 6px;
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: 700;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.community-emails-prompt__note {
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  line-height: 18px;
+  color: var(--tt-ink-muted, var(--tt-neutral-mid));
+  text-align: center;
+}
+
+.community-emails-prompt__note a {
+  color: var(--tt-primary);
+}
+
+.community-emails-prompt__text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--tt-ink, var(--tt-neutral-dark));
+  text-align: center;
+}
+
+.community-emails-prompt__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 520px) {
+  .community-emails-prompt :deep(.n-card__content),
+  .community-emails-prompt :deep(.n-card__footer),
+  .community-emails-prompt :deep(.n-card-header) {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .community-emails-prompt__actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .community-emails-prompt__actions .n-button {
+    width: 100%;
+  }
+}
+
+/* In the client area the prompt looks like the client's own dialogs (ConfirmDialog); the panel
+ * keeps the rules above. The whole selector goes inside :global(): Vue drops whatever follows a
+ * :global() in a scoped style, and the card is teleported without this component's scope. */
+:global([data-tt-area='client'] .community-emails-prompt) {
+  border-radius: var(--tt-radius-l);
+  box-shadow: var(--tt-shadow-pop);
+  font-family: var(--tt-font-sans);
+}
+
+:global([data-tt-area='client'] .community-emails-prompt__title) {
+  font-size: var(--tt-type-heading-m-size);
+  line-height: var(--tt-type-heading-m-line);
+  font-weight: var(--tt-type-heading-m-weight);
+}
+
+:global([data-tt-area='client'] .community-emails-prompt__text) {
+  color: var(--tt-ink);
+  font-size: var(--tt-type-body-s-size);
+  line-height: var(--tt-type-body-s-line);
+  font-weight: var(--tt-type-body-s-weight);
+}
+
+:global([data-tt-area='client'] .community-emails-prompt__actions) {
+  flex-direction: column-reverse;
+  gap: var(--tt-space-2);
+}
+
+:global([data-tt-area='client'] .community-emails-prompt__actions .n-button) {
+  inline-size: 100%;
+}

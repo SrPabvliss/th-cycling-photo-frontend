@@ -61,10 +61,13 @@ const SECTION_STUBS = {
   AccountEmailSection: { template: '<div data-test="body-correo" />' },
   PasswordSection: { template: '<div data-test="body-clave" />' },
   BillingSection: { template: '<div data-test="body-fact" />' },
+  CommunityEmailsSwitch: { template: '<div data-test="body-comunidad" />' },
   ProfileContent: { template: '<div data-test="organizer" />' },
 }
 
 const mounted: { unmount(): void }[] = []
+const community = { communityEmails: false, communityEmailsAvailable: false }
+
 async function mountView(path = '/account/profile', permissions = ['cart.checkout']) {
   useSessionStore().setSession(
     'token',
@@ -76,6 +79,7 @@ async function mountView(path = '/account/profile', permissions = ['cart.checkou
       role: 'customer',
       permissions,
       emailVerified: false,
+      ...community,
     } as never),
   )
   const router = createRouter({
@@ -105,6 +109,7 @@ describe('ProfileView (buyer)', () => {
     setActivePinia(createPinia())
     localStorage.clear()
     Object.assign(state, { status: 'success', accounts: 2 })
+    Object.assign(community, { communityEmails: false, communityEmailsAvailable: false })
   })
   afterEach(() => {
     while (mounted.length) mounted.pop()!.unmount()
@@ -128,6 +133,32 @@ describe('ProfileView (buyer)', () => {
     expect(titles[4]).toContain('2 guardados')
     expect(wrapper.findAll('[aria-expanded="true"]')).toHaveLength(0)
     expect(wrapper.findAll('button').some((each) => each.text() === 'Cerrar sesión')).toBe(true)
+  })
+
+  it('offers the community emails after the email when the api offers them', async () => {
+    community.communityEmailsAvailable = true
+    const { wrapper } = await mountView()
+
+    const titles = wrapper.findAll('button[aria-expanded]').map((each) => each.text())
+    expect(titles[2]).toContain('Correo')
+    expect(titles[3]).toContain('Correos de fechas especiales')
+    expect(titles[3]).toContain('Desactivados')
+    await head(wrapper, 'Correos de fechas especiales').trigger('click')
+    await flushPromises()
+    expect(wrapper.find('[data-test="body-comunidad"]').exists()).toBe(true)
+  })
+
+  it('says when the community emails are on', async () => {
+    Object.assign(community, { communityEmails: true, communityEmailsAvailable: true })
+    const { wrapper } = await mountView()
+
+    expect(head(wrapper, 'Correos de fechas especiales').text()).toContain('Activados')
+  })
+
+  it('does not offer the community emails to a minor', async () => {
+    const { wrapper } = await mountView()
+
+    expect(wrapper.text()).not.toContain('Correos de fechas especiales')
   })
 
   it('opens one section at a time and keeps it in the address', async () => {

@@ -10,9 +10,19 @@ export const ACCOUNT_ROUTE_NAMES = {
   VERIFY_EMAIL: ROUTE_NAMES.ACCOUNT_VERIFY_EMAIL,
   ORDERS: ROUTE_NAMES.ACCOUNT_ORDERS,
   ORDER_DETAIL: ROUTE_NAMES.ACCOUNT_ORDER_DETAIL,
+  EMAIL_UNSUBSCRIBE: ROUTE_NAMES.ACCOUNT_EMAIL_UNSUBSCRIBE,
 } as const
 
+export const EMAIL_UNSUBSCRIBE_PATH = ROUTE_PATHS.EMAIL_UNSUBSCRIBE
+
 export const accountRoutes: RouteRecordRaw[] = [
+  {
+    path: EMAIL_UNSUBSCRIBE_PATH,
+    name: ACCOUNT_ROUTE_NAMES.EMAIL_UNSUBSCRIBE,
+    component: () => import('./presentation/views/EmailUnsubscribeView.vue'),
+    // Opened from an email: the token of the link is the credential, not a session.
+    meta: { public: true, shell: { footer: false } },
+  },
   {
     path: `${ACCOUNT_PATH}/profile`,
     name: ACCOUNT_ROUTE_NAMES.PROFILE,

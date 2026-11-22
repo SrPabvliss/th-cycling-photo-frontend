@@ -6,6 +6,7 @@ import RouteProgressBar from '@/core/navigation/RouteProgressBar.vue'
 import ConsentReacceptModal from '@/features/auth/presentation/components/ConsentReacceptModal/ConsentReacceptModal.vue'
 import VerifyEmailPrompt from '@/features/account/presentation/components/VerifyEmailPrompt/VerifyEmailPrompt.vue'
 import PersonalProfilePrompt from '@/features/account/presentation/components/PersonalProfilePrompt/PersonalProfilePrompt.vue'
+import CommunityEmailsPrompt from '@/features/account/presentation/components/CommunityEmailsPrompt/CommunityEmailsPrompt.vue'
 import NotificationSocketProvider from '@/features/notifications/presentation/components/NotificationSocketProvider/NotificationSocketProvider.vue'
 import { naiveConfig } from '@/core/theme/naive-theme'
 import { MESSAGE_CONTAINER_STYLE } from '@/core/ui/discrete-api'
@@ -27,6 +28,7 @@ import { MESSAGE_CONTAINER_STYLE } from '@/core/ui/discrete-api'
           <ConsentReacceptModal />
           <VerifyEmailPrompt />
           <PersonalProfilePrompt />
+          <CommunityEmailsPrompt />
         </ErrorBoundary>
       </NDialogProvider>
     </NMessageProvider>

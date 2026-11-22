@@ -15,6 +15,10 @@ export interface IApiCurrentUser {
   tenantName?: string | null
   emailVerified?: boolean
   pendingPrompts?: string[]
+  /** The community_emails consent is active. */
+  communityEmails?: boolean
+  /** Community emails can be offered (false for minors by birth date). */
+  communityEmailsAvailable?: boolean
 }
 
 export interface ICurrentUser {
@@ -32,4 +36,6 @@ export interface ICurrentUser {
   tenantName: string | null
   emailVerified: boolean
   pendingPrompts: string[]
+  communityEmails: boolean
+  communityEmailsAvailable: boolean
 }

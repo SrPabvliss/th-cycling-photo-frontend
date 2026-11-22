@@ -13,4 +13,6 @@ export interface IRegisterRequest {
   gender?: Gender
   acceptedTerms?: boolean
   guardianConsent?: boolean
+  /** Records the community_emails consent. Never sent for a minor. */
+  communityEmails?: boolean
 }

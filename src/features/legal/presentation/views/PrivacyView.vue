@@ -158,6 +158,13 @@ import { LEGAL_PATHS } from '../../routes'
             <td>Cumplir obligaciones tributarias y contables</td>
             <td>Obligación legal</td>
           </tr>
+          <tr>
+            <td>
+              Enviarte correos de fechas especiales, como tu cumpleaños o las fiestas de fin de año,
+              si los activas
+            </td>
+            <td>Consentimiento, opcional y separado de esta política</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -167,6 +174,26 @@ import { LEGAL_PATHS } from '../../routes'
       decisiones automatizadas que produzcan efectos jurídicos sobre ti y nunca vendemos tu
       información a terceros.
     </p>
+
+    <h3 id="fechas-especiales">Correos de fechas especiales (opcional)</h3>
+
+    <p>
+      Si los activas, te escribimos por correo en fechas especiales para la comunidad, como tu
+      cumpleaños o las fiestas de fin de año. No incluyen publicidad ni ofertas.
+    </p>
+    <ul>
+      <li><strong>Datos que usamos:</strong> tu nombre, tu correo y tu fecha de nacimiento.</li>
+      <li>
+        <strong>Base legal:</strong> tu consentimiento. Es opcional y separado de esta política:
+        puedes usar Titan TV sin activarlos, y no los ofrecemos a menores de edad.
+      </li>
+      <li>
+        <strong>Cómo dejar de recibirlos:</strong> con el interruptor «Correos de fechas especiales»
+        de tu cuenta, con el enlace que va en cada correo o escribiéndonos a
+        <a href="mailto:info@titantv.com.ec">info@titantv.com.ec</a>. Puedes hacerlo cuando quieras
+        y no afecta a tus pedidos.
+      </li>
+    </ul>
 
     <h2>5. Comunicaciones por WhatsApp</h2>
 

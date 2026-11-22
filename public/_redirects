@@ -4,5 +4,6 @@
 /terminos /terms 301
 /orders/:id /orders?order=:id 301
 /checkout /gallery 302
+/correos/baja /email/unsubscribe 301
 
 /* /index.html 200
