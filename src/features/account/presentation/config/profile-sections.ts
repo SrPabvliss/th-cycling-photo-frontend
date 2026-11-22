@@ -2,10 +2,7 @@ import ProfileForm from '@/features/account/presentation/components/ProfileForm/
 import PhoneList from '@/features/account/presentation/components/PhoneList/PhoneList.vue'
 import EmailSection from '@/features/account/presentation/components/EmailSection/EmailSection.vue'
 import PasswordForm from '@/features/account/presentation/components/PasswordForm/PasswordForm.vue'
-import type {
-  ProfileBlockIconName,
-  ProfileSectionDef,
-} from '../../types/profile-section.types'
+import type { ProfileBlockIconName, ProfileSectionDef } from '../../types/profile-section.types'
 
 export type { ProfileSectionDef, ProfileBlockIconName }
 

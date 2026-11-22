@@ -5,6 +5,8 @@ export const ROUTE_PATHS = {
   FORGOT_PASSWORD: '/forgot-password',
   RESET_PASSWORD: '/reset-password',
   ACCOUNT: '/account',
+  /** Link of every community email (`?t=<token>`): public, no session needed. */
+  EMAIL_UNSUBSCRIBE: '/email/unsubscribe',
   BUSINESS_PROFILE: '/business-profile',
   BUYERS: '/buyers',
   CHECKOUT: '/checkout',

@@ -91,6 +91,8 @@ const isMinorRider = computed(() => isMinor(birthYear.value, birthMonth.value, b
 
 watch(isMinorRider, (minor) => {
   if (!minor) form.setFieldValue('guardianConsent', false)
+  // Community emails are not offered to minors: a box ticked before the date changed goes too.
+  else form.setFieldValue('communityEmails', false)
 })
 
 const {
@@ -565,6 +567,28 @@ const online = useOnline()
             {{ errorFor('acceptedTerms', field) }}
           </em>
         </div>
+      </template>
+    </form.Field>
+
+    <form.Field v-if="!isMinorRider" name="communityEmails">
+      <template #default="{ field }">
+        <label class="register-form__check">
+          <input
+            id="reg-community"
+            type="checkbox"
+            :checked="field.state.value"
+            @change="change(field, 'communityEmails', ($event.target as HTMLInputElement).checked)"
+          />
+          <span>
+            Quiero recibir los correos de fechas especiales de Titan TV.
+            <small class="register-form__check-note">
+              Opcional. Lo desactivas cuando quieras.
+              <RouterLink :to="`${LEGAL_PATHS.PRIVACY}#fechas-especiales`" target="_blank">
+                Cómo usamos tus datos
+              </RouterLink>
+            </small>
+          </span>
+        </label>
       </template>
     </form.Field>
 

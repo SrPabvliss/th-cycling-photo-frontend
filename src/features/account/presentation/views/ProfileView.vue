@@ -12,6 +12,7 @@ import { ErrorState, TtSkeleton, useLoadPhase } from '@/shared/components/loadin
 import { useMyBillingAccountsQuery } from '../../composables/queries/use-my-billing-accounts'
 import { useMyProfileQuery } from '../../composables/queries/use-my-profile'
 import BillingSection from '../components/BillingSection/BillingSection.vue'
+import CommunityEmailsSwitch from '../components/CommunityEmailsSwitch/CommunityEmailsSwitch.vue'
 import AccountEmailSection from '../components/AccountEmailSection/AccountEmailSection.vue'
 import PasswordSection from '../components/PasswordSection/PasswordSection.vue'
 import PersonalDataSection from '../components/PersonalDataSection/PersonalDataSection.vue'
@@ -20,8 +21,15 @@ import ProfileHeader from '../components/ProfileHeader/ProfileHeader.vue'
 import ProfileSection from '../components/ProfileSection/ProfileSection.vue'
 import ProfileContent from './ProfileContent.vue'
 
-type SectionKey = 'datos' | 'tels' | 'correo' | 'clave' | 'fact'
-const SECTION_KEYS: readonly SectionKey[] = ['datos', 'tels', 'correo', 'clave', 'fact']
+type SectionKey = 'datos' | 'tels' | 'correo' | 'comunidad' | 'clave' | 'fact'
+const SECTION_KEYS: readonly SectionKey[] = [
+  'datos',
+  'tels',
+  'correo',
+  'comunidad',
+  'clave',
+  'fact',
+]
 const SKELETON_ROWS = 5
 
 const route = useRoute()
@@ -58,6 +66,11 @@ const fullName = computed(() =>
   [profile.value?.firstName, profile.value?.lastName].filter(Boolean).join(' ').trim(),
 )
 const emailVerified = computed(() => session.currentUser?.emailVerified ?? false)
+const communityEmails = computed(() => session.currentUser?.communityEmails ?? false)
+// Not offered to minors (the api says so); one who has them on can still turn them off.
+const showCommunityEmails = computed(
+  () => (session.currentUser?.communityEmailsAvailable ?? false) || communityEmails.value,
+)
 const phoneCount = computed(() => profile.value?.phones.length ?? 0)
 
 const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`
@@ -146,6 +159,18 @@ const billingMeta = computed(() => {
           @update:open="setOpen('correo', $event)"
         >
           <AccountEmailSection />
+        </ProfileSection>
+        <ProfileSection
+          v-if="showCommunityEmails"
+          id="comunidad"
+          title="Correos de fechas especiales"
+          icon="mail"
+          :meta="communityEmails ? 'Activados' : 'Desactivados'"
+          :meta-tone="communityEmails ? 'ok' : 'muted'"
+          :open="openSection === 'comunidad'"
+          @update:open="setOpen('comunidad', $event)"
+        >
+          <CommunityEmailsSwitch />
         </ProfileSection>
         <ProfileSection
           id="clave"

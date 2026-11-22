@@ -10,6 +10,7 @@ export const ROUTE_NAMES = {
   ACCOUNT_VERIFY_EMAIL: 'account-verify-email',
   ACCOUNT_ORDERS: 'account-orders',
   ACCOUNT_ORDER_DETAIL: 'account-order-detail',
+  ACCOUNT_EMAIL_UNSUBSCRIBE: 'account-email-unsubscribe',
 
   // Buyers
   BUYERS_LIST: 'buyers-list',
